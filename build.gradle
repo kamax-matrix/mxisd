@@ -1,0 +1,63 @@
+/*
+ * mxisd - Matrix Identity Server Daemon
+ * Copyright (C) 2017 Maxime Dor
+ *
+ * https://max.kamax.io/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.4.3.RELEASE'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // We are a groovy project
+    compile 'org.codehaus.groovy:groovy-all:2.4.7'
+
+    // Easy file management
+    compile 'commons-io:commons-io:2.5'
+
+    // Spring Boot - standalone app
+    compile 'org.springframework.boot:spring-boot-starter-web:1.4.3.RELEASE'
+
+    // ed25519 handling
+    compile 'net.i2p.crypto:eddsa:0.1.0'
+
+    // LDAP connector
+    compile 'org.apache.directory.api:api-all:1.0.0-RC2'
+
+    testCompile 'junit:junit:4.12'
+}
+
+springBoot {
+    executable = true
+
+    embeddedLaunchScriptProperties = [
+            confFolder: "/etc/default"
+    ]
+}

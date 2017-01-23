@@ -1,0 +1,11 @@
+[Unit]
+Description=mxisd
+After=syslog.target
+
+[Service]
+User=mxisd
+ExecStart=/usr/bin/mxisd --spring.config.location=/etc/mxis/ --spring.config.name=mxisd
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

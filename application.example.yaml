@@ -1,0 +1,15 @@
+server:
+  port: 8090
+  name: 'example.org'
+
+key:
+  path: '/var/tmp/mxis-signing.key'
+
+ldap:
+  host: 'localhost'
+  port: 389
+  baseDn: 'CN=Users,DC=example,DC=org'
+  query: '(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))'
+  attribute: 'pager'
+  bindDn: 'CN=Identity Server,CN=Users,DC=example,DC=org'
+  bindPassword: 'password'
