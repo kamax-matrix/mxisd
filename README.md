@@ -1,3 +1,5 @@
+![Travis-CI build status](https://travis-ci.org/kamax-io/mxisd.svg?branch=master)
+
 # Introduction
 mxisd is an implementation of the Matrix Identity Server which aims to provide an alternative
 to [sydent](https://github.com/matrix-org/sydent) and an external validation implementation of the
