@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller
+package io.kamax.mxisd.controller.v1
 
 import groovy.json.JsonOutput
 import io.kamax.mxisd.config.LdapConfig

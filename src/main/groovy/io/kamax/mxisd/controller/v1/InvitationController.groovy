@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller
+package io.kamax.mxisd.controller.v1
 
 import io.kamax.mxisd.exception.NotImplementedException
 import org.springframework.web.bind.annotation.RequestMapping

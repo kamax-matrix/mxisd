@@ -18,43 +18,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller
+package io.kamax.mxisd.controller.v1
 
-import groovy.json.JsonOutput
-import io.kamax.mxisd.exception.BadRequestException
 import io.kamax.mxisd.exception.NotImplementedException
-import io.kamax.mxisd.key.KeyManager
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET
+import static org.springframework.web.bind.annotation.RequestMethod.POST
 
 @RestController
-class KeyController {
+class SessionController {
 
-    @Autowired
-    private KeyManager keyMgr
-
-    @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/{keyType}:{keyId}", method = GET)
-    String getKey(@PathVariable String keyType, @PathVariable int keyId) {
-        if (!"ed25519".contentEquals(keyType)) {
-            throw new BadRequestException("Invalid algorithm: " + keyType)
-        }
-
-        return JsonOutput.toJson([
-                public_key: keyMgr.getPublicKeyBase64(keyId)
-        ])
-    }
-
-    @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/ephemeral/isvalid", method = GET)
-    String checkEphemeralKeyValidity() {
+    @RequestMapping(value = "/_matrix/identity/api/v1/validate/email/requestToken", method = POST)
+    String init() {
         throw new NotImplementedException()
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/isvalid", method = GET)
-    String checkKeyValidity() {
+    @RequestMapping(value = "/_matrix/identity/api/v1/validate/email/submitToken", method = [GET, POST])
+    String validate() {
+        throw new NotImplementedException()
+    }
+
+    @RequestMapping(value = "/_matrix/identity/api/v1/3pid/getValidated3pid", method = POST)
+    String check() {
+        throw new NotImplementedException()
+    }
+
+    @RequestMapping(value = "/_matrix/identity/api/v1/3pid/bind", method = POST)
+    String bind() {
         throw new NotImplementedException()
     }
 
