@@ -5,7 +5,9 @@ mxisd is an implementation of the Matrix Identity Server which aims to provide a
 to [sydent](https://github.com/matrix-org/sydent) and an external validation implementation of the
 [Identity Service API](http://matrix.org/docs/spec/identity_service/unstable.html).
 
-mxisd is currently in read-only mode with a LDAP backend, allowing to lookup the Matrix ID from an arbitrary attribute.
+mxisd is currently in read-only mode with the following lookup strategy:
+- LDAP backend: lookup the Matrix ID from an configurable attribute.
+- Root Matrix Identity servers: If no hit in LDAP, proxy the request to the root servers.
 
 # Quick start
 ## Requirements
