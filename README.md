@@ -5,9 +5,9 @@ mxisd is an implementation of the Matrix Identity Server which aims to provide a
 to [sydent](https://github.com/matrix-org/sydent) and an external validation implementation of the
 [Identity Service API](http://matrix.org/docs/spec/identity_service/unstable.html).
 
-mxisd is currently in read-only mode with the following lookup strategy:
-- LDAP backend: lookup the Matrix ID from an configurable attribute.
-- Root Matrix Identity servers: If no hit in LDAP, proxy the request to the root servers.
+mxisd is currently in read-only mode with the following lookup strategies in priority order:
+- LDAP: lookup the Matrix ID from an configurable attribute.
+- Forwarder: Proxy the request to other identity servers (`matrix.org` and `vector.im` currently hardcoded).
 
 # Quick start
 ## Requirements
@@ -23,14 +23,23 @@ cd mxisd
 ## Configure
 1. Create a new local config: `cp application.example.yaml application.yaml`
 - Edit `application.yaml` to your needs - at least provide the LDAP attributes
-- Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (@johndoe:example.org)
+- Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. @johndoe:example.org)
 
 ## Run
-Start the server in foreground with configuration location info `./build/libs/mxisd --spring.config.location=../../`
+Start the server in foreground:
+```
+./gradlew bootRun
+```
 
-You should see a public key with `curl http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519%3A0`
+Ensure the signing key is available:
+```
+curl http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519:0
+```
 
-You should see some JSON data with `curl http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=johndoe@example.org`
+Validate your LDAP config and binding info (replace the e-mail):
+```
+curl http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=johndoe@example.org
+```
 
 If you plan on testing the integration with a homeserver, you will need to run an HTTPS reverse proxy in front of it
 as the homeserver implementation seems to require a HTTPS connection to an ID server.
@@ -48,4 +57,5 @@ as the homeserver implementation seems to require a HTTPS connection to an ID se
 
 # TODO
 - Deb package
+- Docker container
 - Auto-discovery of matrix ids based on server name and username-like attribute
