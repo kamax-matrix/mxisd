@@ -5,8 +5,13 @@ mxisd is an implementation of the Matrix Identity Server which aims to provide a
 to [sydent](https://github.com/matrix-org/sydent) and an external validation implementation of the
 [Identity Service API](http://matrix.org/docs/spec/identity_service/unstable.html).
 
-mxisd is currently in read-only mode with the following lookup strategies in priority order:
+mxisd is currently in read-only mode and use a priority lookup strategy with several providers.
+
+Given the 3PID `john.doe@example.org`, the following would be performed in priority order until a mapping is found:
 - LDAP: lookup the Matrix ID from an configurable attribute.
+- DNS: lookup another Identity Server using the domain part of an e-mail and:
+  - Look for a SRV record under `_identity._matrix._tcp.example.org`
+  - Lookup using the base domain name `example.org`
 - Forwarder: Proxy the request to other identity servers (`matrix.org` and `vector.im` currently hardcoded).
 
 # Quick start
@@ -23,7 +28,7 @@ cd mxisd
 ## Configure
 1. Create a new local config: `cp application.example.yaml application.yaml`
 - Edit `application.yaml` to your needs - at least provide the LDAP attributes
-- Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. @johndoe:example.org)
+- Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. `@john.doe:example.org`)
 
 ## Run
 Start the server in foreground:
@@ -38,7 +43,7 @@ curl http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519:0
 
 Validate your LDAP config and binding info (replace the e-mail):
 ```
-curl http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=johndoe@example.org
+curl "http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=john.doe@example.org"
 ```
 
 If you plan on testing the integration with a homeserver, you will need to run an HTTPS reverse proxy in front of it
@@ -58,4 +63,3 @@ as the homeserver implementation seems to require a HTTPS connection to an ID se
 # TODO
 - Deb package
 - Docker container
-- Auto-discovery of matrix ids based on server name and username-like attribute
