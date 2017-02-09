@@ -50,7 +50,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
         log.info("Domain name for {}: {}", threePid, domain)
 
         log.info("Performing SRV lookup")
-        String lookupDns = "_identity._matrix._tcp." + domain
+        String lookupDns = "_matrix-identity._tcp." + domain
         log.info("Lookup name: {}", lookupDns)
 
         SRVRecord[] records = (SRVRecord[]) new Lookup(lookupDns, Type.SRV).run()
