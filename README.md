@@ -8,7 +8,7 @@ to [sydent](https://github.com/matrix-org/sydent) and an external validation imp
 mxisd is currently in read-only mode and use a priority lookup strategy with several providers.
 
 Given the 3PID `john.doe@example.org`, the following would be performed in priority order until a mapping is found:
-- LDAP: lookup the Matrix ID from an configurable attribute.
+- LDAP: lookup the Matrix ID from a configurable attribute.
 - DNS: lookup another Identity Server using the domain part of an e-mail and:
   - Look for a SRV record under `_identity._matrix._tcp.example.org`
   - Lookup using the base domain name `example.org`
