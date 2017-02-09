@@ -66,7 +66,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
 
             for (SRVRecord record : records) {
                 log.info("Found SRV record: {}", record.toString())
-                String baseUrl = (record.getPort() != 80 ? "https://" : "http://") + record.getTarget().toString(true)
+                String baseUrl = "https://${record.getTarget().toString(true)}:${record.getPort()}"
                 Optional<?> answer = find(baseUrl, type, threePid)
                 if (answer.isPresent()) {
                     return answer
