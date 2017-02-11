@@ -42,7 +42,7 @@ class ServerConfig implements InitializingBean {
     @Override
     void afterPropertiesSet() throws Exception {
         if (StringUtils.isBlank(getName())) {
-            throw new RuntimeException("Server name must be configured!")
+            throw new RuntimeException("Server name must be configured. Use the same realm as your Homeserver")
         }
     }
 

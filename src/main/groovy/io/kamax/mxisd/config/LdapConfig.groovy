@@ -31,6 +31,7 @@ class LdapConfig {
     private int port
     private String baseDn
     private String query
+    private String type
     private String attribute
     private String bindDn
     private String bindPassword
@@ -65,6 +66,14 @@ class LdapConfig {
 
     void setQuery(String query) {
         this.query = query
+    }
+
+    String getType() {
+        return type
+    }
+
+    void setType(String type) {
+        this.type = type
     }
 
     String getAttribute() {

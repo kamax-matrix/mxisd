@@ -22,6 +22,8 @@ package io.kamax.mxisd.lookup
 
 import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.LdapConfig
+import io.kamax.mxisd.config.ServerConfig
+import org.apache.commons.lang.StringUtils
 import org.apache.directory.api.ldap.model.cursor.EntryCursor
 import org.apache.directory.api.ldap.model.entry.Attribute
 import org.apache.directory.api.ldap.model.message.SearchScope
@@ -29,13 +31,20 @@ import org.apache.directory.ldap.client.api.LdapConnection
 import org.apache.directory.ldap.client.api.LdapNetworkConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class LdapProvider implements ThreePidProvider {
+class LdapProvider implements ThreePidProvider, InitializingBean {
+
+    public static final String UID = "uid"
+    public static final String MATRIX_ID = "mxid"
 
     private Logger log = LoggerFactory.getLogger(LdapProvider.class)
+
+    @Autowired
+    private ServerConfig srvCfg
 
     @Autowired
     private LdapConfig ldapCfg
@@ -43,6 +52,13 @@ class LdapProvider implements ThreePidProvider {
     @Override
     int getPriority() {
         return 20
+    }
+
+    @Override
+    void afterPropertiesSet() throws Exception {
+        if (!Arrays.asList(UID, MATRIX_ID).contains(ldapCfg.getType())) {
+            throw new IllegalArgumentException(ldapCfg.getType() + " is not a valid LDAP lookup type")
+        }
     }
 
     @Override
@@ -59,10 +75,30 @@ class LdapProvider implements ThreePidProvider {
                 if (cursor.next()) {
                     Attribute attribute = cursor.get().get(ldapCfg.getAttribute())
                     if (attribute != null) {
+                        String data = attribute.get().toString()
+                        if (data.length() < 1) {
+                            log.warn("Bind was found but value is empty")
+                            return Optional.empty()
+                        }
+
+                        StringBuilder matrixId = new StringBuilder()
+                        // TODO Should we turn this block into a map of functions?
+                        if (StringUtils.equals("uid", ldapCfg.getType())) {
+                            matrixId.append("@").append(data).append(":").append(srvCfg.getName())
+                        }
+                        if (StringUtils.equals("mxid", ldapCfg.getType())) {
+                            matrixId.append(data)
+                        }
+
+                        if (matrixId.length() < 1) {
+                            log.warn("Bind was found but type ${ldapCfg.getType()} is not supported")
+                            return Optional.empty()
+                        }
+
                         return Optional.of([
                                 address   : threePid,
                                 medium    : type,
-                                mxid      : attribute.get().toString(),
+                                mxid      : matrixId.toString(),
                                 not_before: 0,
                                 not_after : 9223372036854775807,
                                 ts        : 0
@@ -76,7 +112,9 @@ class LdapProvider implements ThreePidProvider {
             conn.close()
         }
 
+        log.info("No match found")
         return Optional.empty()
     }
+
 
 }

@@ -1,15 +1,46 @@
 server:
+
+  # Indicate on which port the Identity Server will listen. This is an unencrypted port.
+  # HTTPS can be configured using Tomcat configuration properties.
   port: 8090
+
+  # Realm under which this Identity Server is authoritative, e.g. domain name in e-mails.
+  # This is used in some recursive lookups to avoid endless loops and avoid bothering other Identity Servers.
   name: 'example.org'
 
+
 key:
+
+  # Where the Identity Server signing key will be stored.
+  #
+  # /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+  # /!\  CHANGE THIS TO A MORE PERMANENT LOCATION!  /!\
+  # /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
   path: '/var/tmp/mxis-signing.key'
+
 
 ldap:
   host: 'localhost'
   port: 389
+  bindDn: 'CN=Matrix Identity Server,CN=Users,DC=example,DC=org'
+  bindPassword: 'password'
   baseDn: 'CN=Users,DC=example,DC=org'
   query: '(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))'
-  attribute: 'pager'
-  bindDn: 'CN=Identity Server,CN=Users,DC=example,DC=org'
-  bindPassword: 'password'
+
+  # How should we resolve the Matrix ID in case of a match using the attribute.
+  #
+  # The following type are supported:
+  # - uid : the attribute only contains the UID part of the Matrix ID. e.g. 'john.doe' in @john.doe:example.org
+  # - mxid : the attribute contains the full Matrix ID - e.g. '@john.doe:example.org'
+  type: 'uid'
+
+  # The attribute containing the binding itself. This value will be used differently depending on the type.
+  #
+  # Typical values:
+  # - For type 'uid':
+  #   - Samba/AD: sAMAccountName
+  #   - LDAP: If someone knows the most appropriate value, please open an issue
+  #
+  # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute but
+  #   shouldn't be used in infrastructures.
+  attribute: 'sAMAccountName'
