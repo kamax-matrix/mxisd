@@ -21,21 +21,18 @@
 package io.kamax.mxisd.lookup
 
 import io.kamax.mxisd.api.ThreePidType
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class PriorityLookupStrategy implements LookupStrategy {
+class PriorityLookupStrategy implements LookupStrategy, InitializingBean {
 
     @Autowired
     private List<ThreePidProvider> providers
 
     @Override
-    Optional<?> find(ThreePidType type, String threePid) {
-        if (ThreePidType.email != type) {
-            throw new IllegalArgumentException("${type} is currently not supported")
-        }
-
+    void afterPropertiesSet() throws Exception {
         providers.sort(new Comparator<ThreePidProvider>() {
 
             @Override
@@ -44,6 +41,13 @@ class PriorityLookupStrategy implements LookupStrategy {
             }
 
         })
+    }
+
+    @Override
+    Optional<?> find(ThreePidType type, String threePid) {
+        if (ThreePidType.email != type) {
+            throw new IllegalArgumentException("${type} is currently not supported")
+        }
 
         for (ThreePidProvider provider : providers) {
             Optional<?> lookupDataOpt = provider.find(type, threePid)
