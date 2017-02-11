@@ -21,8 +21,11 @@
 package io.kamax.mxisd.lookup
 
 import io.kamax.mxisd.api.ThreePidType
+import io.kamax.mxisd.config.ServerConfig
+import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.xbill.DNS.Lookup
 import org.xbill.DNS.SRVRecord
@@ -32,6 +35,9 @@ import org.xbill.DNS.Type
 class DnsLookupProvider extends RemoteIdentityServerProvider {
 
     private Logger log = LoggerFactory.getLogger(DnsLookupProvider.class)
+
+    @Autowired
+    private ServerConfig srvCfg;
 
     @Override
     int getPriority() {
@@ -48,6 +54,10 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
 
         String domain = threePid.substring(threePid.lastIndexOf("@") + 1)
         log.info("Domain name for {}: {}", threePid, domain)
+        if (StringUtils.equals(srvCfg.getName(), domain)) {
+            log.warn("We are authoritative for ${domain}, no remote lookup - is your server.name configured properly?")
+            return Optional.empty()
+        }
 
         log.info("Performing SRV lookup")
         String lookupDns = "_matrix-identity._tcp." + domain

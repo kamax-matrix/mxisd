@@ -27,7 +27,8 @@ cd mxisd
 
 ## Configure
 1. Create a new local config: `cp application.example.yaml application.yaml`
-- Edit `application.yaml` to your needs - at least provide the LDAP attributes
+- Set the `server.name` value to the domain value used in your Home Server configuration
+- Provide the LDAP attributes you want to use for lookup
 - Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. `@john.doe:example.org`)
 
 ## Run

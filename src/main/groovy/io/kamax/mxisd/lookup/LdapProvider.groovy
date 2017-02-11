@@ -27,11 +27,15 @@ import org.apache.directory.api.ldap.model.entry.Attribute
 import org.apache.directory.api.ldap.model.message.SearchScope
 import org.apache.directory.ldap.client.api.LdapConnection
 import org.apache.directory.ldap.client.api.LdapNetworkConnection
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 class LdapProvider implements ThreePidProvider {
+
+    private Logger log = LoggerFactory.getLogger(LdapProvider.class)
 
     @Autowired
     private LdapConfig ldapCfg
@@ -43,6 +47,8 @@ class LdapProvider implements ThreePidProvider {
 
     @Override
     Optional<?> find(ThreePidType type, String threePid) {
+        log.info("Performing LDAP lookup ${threePid} of type ${type}")
+
         LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort())
         try {
             conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())

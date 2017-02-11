@@ -21,6 +21,8 @@
 package io.kamax.mxisd.lookup
 
 import io.kamax.mxisd.api.ThreePidType
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -28,11 +30,15 @@ import org.springframework.stereotype.Component
 @Component
 class PriorityLookupStrategy implements LookupStrategy, InitializingBean {
 
+    private Logger log = LoggerFactory.getLogger(PriorityLookupStrategy.class)
+
     @Autowired
     private List<ThreePidProvider> providers
 
     @Override
     void afterPropertiesSet() throws Exception {
+        log.info("Found ${providers.size()} providers")
+
         providers.sort(new Comparator<ThreePidProvider>() {
 
             @Override
