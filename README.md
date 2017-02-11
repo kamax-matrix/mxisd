@@ -50,13 +50,15 @@ If you plan on testing the integration with a homeserver, you will need to run a
 as the homeserver implementation seems to require a HTTPS connection to an ID server.
 
 # Install
+Run all the following commands as `root` or via `sudo`:
 1. Create a dedicated user: `useradd -r mxisd`
 - Create config directory: `mkdir /etc/mxis`
 - Change user ownership of `/etc/mxis` to dedicated user: `chown mxisd /etc/mxis`
-- Copy `./build/libs/mxisd` to `/usr/bin/mxisd`: `sudo cp ./build/libs/mxisd /usr/bin/mxisd`
+- Copy `<repo root>/build/libs/mxisd` to `/usr/bin/mxisd`: `cp ./build/libs/mxisd /usr/bin/mxisd`
+- Make it executable: `chmod a+x /usr/bin/mxisd`
 - Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
 - Configure `/etc/mxis/mxisd.yaml` with production value - key.path being the most important - `/etc/mxis/signing.key` is recommended
-- Copy `main/systemd/mxisd.service` to `/etc/systemd/system/` and edit as needed
+- Copy `<repo root>/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit as needed
 - Enable service: `systemctl enable mxisd`
 - Start service: `systemctl start mxisd`
 
