@@ -37,7 +37,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
     private Logger log = LoggerFactory.getLogger(DnsLookupProvider.class)
 
     @Autowired
-    private ServerConfig srvCfg;
+    private ServerConfig srvCfg
 
     @Override
     int getPriority() {
