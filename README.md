@@ -7,12 +7,14 @@ to [sydent](https://github.com/matrix-org/sydent) and an external validation imp
 
 mxisd is currently in read-only mode and use a priority lookup strategy with several providers.
 
-Given the 3PID `john.doe@example.org`, the following would be performed in priority order until a mapping is found:
-- LDAP: lookup the Matrix ID from a configurable attribute.
+Given the 3PID `john.doe@example.org`, the following could be performed until a mapping is found:
+- LDAP: lookup the Matrix ID (partial or complete) from a configurable attribute.
 - DNS: lookup another Identity Server using the domain part of an e-mail and:
   - Look for a SRV record under `_matrix-identity._tcp.example.org`
   - Lookup using the base domain name `example.org`
-- Forwarder: Proxy the request to other identity servers (`matrix.org` and `vector.im` currently hardcoded).
+- Forwarder: Proxy the request to other configurable identity servers.
+
+The lookup strategy will use a priority order and a configurable recursive/local type of request.
 
 # Quick start
 ## Requirements
@@ -48,18 +50,20 @@ curl "http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=
 ```
 
 If you plan on testing the integration with a homeserver, you will need to run an HTTPS reverse proxy in front of it
-as the homeserver implementation seems to require a HTTPS connection to an ID server.
+as the reference Home Server implementation [synapse](https://github.com/matrix-org/synapse) requires a HTTPS connection
+to an ID server.
 
 # Install
-Run all the following commands as `root` or via `sudo`:
+Run all the following commands as `root` or using `sudo`
+
 1. Create a dedicated user: `useradd -r mxisd`
 - Create config directory: `mkdir /etc/mxis`
 - Change user ownership of `/etc/mxis` to dedicated user: `chown mxisd /etc/mxis`
 - Copy `<repo root>/build/libs/mxisd` to `/usr/bin/mxisd`: `cp ./build/libs/mxisd /usr/bin/mxisd`
 - Make it executable: `chmod a+x /usr/bin/mxisd`
 - Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
-- Configure `/etc/mxis/mxisd.yaml` with production value - key.path being the most important - `/etc/mxis/signing.key` is recommended
-- Copy `<repo root>/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit as needed
+- Configure `/etc/mxis/mxisd.yaml` with production value, `key.path` being the most important - `/etc/mxis/mxisd-signing.key` is recommended
+- Copy `<repo root>/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
 - Enable service: `systemctl enable mxisd`
 - Start service: `systemctl start mxisd`
 
