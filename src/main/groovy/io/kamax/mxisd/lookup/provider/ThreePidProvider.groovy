@@ -18,12 +18,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup
+package io.kamax.mxisd.lookup.provider
 
-import io.kamax.mxisd.api.ThreePidType
+import io.kamax.mxisd.lookup.LookupRequest
 
-interface LookupStrategy {
+interface ThreePidProvider {
 
-    Optional<?> find(ThreePidType type, String threePid)
+    boolean isLocal()
+
+    /**
+     * Higher has more priority
+     */
+    int getPriority() // Should not be here but let's KISS for now
+
+    Optional<?> find(LookupRequest request)
 
 }

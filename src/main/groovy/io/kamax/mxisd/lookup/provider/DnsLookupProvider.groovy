@@ -18,10 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup
+package io.kamax.mxisd.lookup.provider
 
 import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.ServerConfig
+import io.kamax.mxisd.lookup.LookupRequest
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,15 +46,15 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
     }
 
     @Override
-    Optional<?> find(ThreePidType type, String threePid) {
-        log.info("Performing DNS lookup for {}", threePid)
-        if (ThreePidType.email != type) {
-            log.info("Skipping unsupported type {} for {}", type, threePid)
+    Optional<?> find(LookupRequest request) {
+        log.info("Performing DNS lookup for {}", request.getThreePid())
+        if (ThreePidType.email != request.getType()) {
+            log.info("Skipping unsupported type {} for {}", request.getType(), request.getThreePid())
             return Optional.empty()
         }
 
-        String domain = threePid.substring(threePid.lastIndexOf("@") + 1)
-        log.info("Domain name for {}: {}", threePid, domain)
+        String domain = request.getThreePid().substring(request.getThreePid().lastIndexOf("@") + 1)
+        log.info("Domain name for {}: {}", request.getThreePid(), domain)
         if (StringUtils.equals(srvCfg.getName(), domain)) {
             log.warn("We are authoritative for ${domain}, no remote lookup - is your server.name configured properly?")
             return Optional.empty()
@@ -77,7 +78,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
             for (SRVRecord record : records) {
                 log.info("Found SRV record: {}", record.toString())
                 String baseUrl = "https://${record.getTarget().toString(true)}:${record.getPort()}"
-                Optional<?> answer = find(baseUrl, type, threePid)
+                Optional<?> answer = find(baseUrl, request.getType(), request.getThreePid())
                 if (answer.isPresent()) {
                     return answer
                 } else {
@@ -90,7 +91,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
 
         log.info("Performing basic lookup using domain name {}", domain)
         String baseUrl = "https://" + domain
-        return find(baseUrl, type, threePid)
+        return find(baseUrl, request.getType(), request.getThreePid())
     }
 
 }

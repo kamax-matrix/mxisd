@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup
+package io.kamax.mxisd.lookup.provider
 
-import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.LdapConfig
 import io.kamax.mxisd.config.ServerConfig
+import io.kamax.mxisd.lookup.LookupRequest
 import org.apache.commons.lang.StringUtils
 import org.apache.directory.api.ldap.model.cursor.EntryCursor
 import org.apache.directory.api.ldap.model.entry.Attribute
@@ -50,11 +50,6 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
     private LdapConfig ldapCfg
 
     @Override
-    int getPriority() {
-        return 20
-    }
-
-    @Override
     void afterPropertiesSet() throws Exception {
         if (!Arrays.asList(UID, MATRIX_ID).contains(ldapCfg.getType())) {
             throw new IllegalArgumentException(ldapCfg.getType() + " is not a valid LDAP lookup type")
@@ -62,14 +57,24 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
     }
 
     @Override
-    Optional<?> find(ThreePidType type, String threePid) {
-        log.info("Performing LDAP lookup ${threePid} of type ${type}")
+    boolean isLocal() {
+        return true
+    }
+
+    @Override
+    int getPriority() {
+        return 20
+    }
+
+    @Override
+    Optional<?> find(LookupRequest request) {
+        log.info("Performing LDAP lookup ${request.getThreePid()} of type ${request.getType()}")
 
         LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort())
         try {
             conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
 
-            String searchQuery = ldapCfg.getQuery().replaceAll("%3pid", threePid)
+            String searchQuery = ldapCfg.getQuery().replaceAll("%3pid", request.getThreePid())
             EntryCursor cursor = conn.search(ldapCfg.getBaseDn(), searchQuery, SearchScope.SUBTREE, ldapCfg.getAttribute())
             try {
                 if (cursor.next()) {
@@ -96,8 +101,8 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
                         }
 
                         return Optional.of([
-                                address   : threePid,
-                                medium    : type,
+                                address   : request.getThreePid(),
+                                medium    : request.getType(),
                                 mxid      : matrixId.toString(),
                                 not_before: 0,
                                 not_after : 9223372036854775807,

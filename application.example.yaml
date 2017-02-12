@@ -1,12 +1,17 @@
 server:
 
-  # Indicate on which port the Identity Server will listen. This is an unencrypted port.
+  # Indicate on which port the Identity Server will listen.
+  #
+  # This is be default an unencrypted port.
   # HTTPS can be configured using Tomcat configuration properties.
   port: 8090
 
-  # Realm under which this Identity Server is authoritative, e.g. domain name in e-mails.
-  # This is used in some recursive lookups to avoid endless loops and avoid bothering other Identity Servers.
+  # Realm under which this Identity Server is authoritative.
+  #
+  # This is used to avoid unnecessary connections and endless recursive lookup.
+  # e.g. domain name in e-mails.
   name: 'example.org'
+
 
 
 key:
@@ -17,6 +22,34 @@ key:
   # /!\  CHANGE THIS TO A MORE PERMANENT LOCATION!  /!\
   # /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
   path: '/var/tmp/mxis-signing.key'
+
+
+
+# This element contains all the configuration item for lookup strategies
+lookup:
+
+  # Configuration items for recursion-type of lookup
+  #
+  # Lookup access are divided into two types:
+  # - Local
+  # - Remote
+  #
+  # This is similar to DNS lookup and recursion and is therefore prone to the same vulnerabilities.
+  # By default, only non-public hosts are allowed to perform recursive lookup.
+  # This will also prevent basic endless loops where:
+  # host A ask host B, which in turn is configured to ask host B, etc.
+  recursive:
+
+    # Enable recursive lookup globally
+    enabled: true
+
+    # Whitelist of CIDR that will trigger a recursive lookup
+    allowedCidr:
+      - '127.0.0.0/8'
+      - '10.0.0.0/8'
+      - '172.16.0.0/16'
+      - '192.168.0.0/16'
+
 
 
 ldap:
@@ -44,3 +77,15 @@ ldap:
   # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute but
   #   shouldn't be used in infrastructures.
   attribute: 'sAMAccountName'
+
+
+
+forward:
+
+  # List of forwarders to use to try to match a 3PID.
+  #
+  # Each server will be tried in the given order, going to the next if no binding was found or an error occurred.
+  # There are the current root Identity Servers of the Matrix network.
+  servers:
+    - "https://matrix.org"
+    - "https://vector.im"

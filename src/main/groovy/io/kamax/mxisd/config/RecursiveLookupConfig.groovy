@@ -18,31 +18,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup
+package io.kamax.mxisd.config
 
-import io.kamax.mxisd.api.ThreePidType
-import org.springframework.stereotype.Component
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation.Configuration
 
-@Component
-class RootProvider extends RemoteIdentityServerProvider {
+@Configuration
+@ConfigurationProperties(prefix = "lookup.recursive")
+class RecursiveLookupConfig {
 
-    private List<String> roots = Arrays.asList("https://matrix.org", "https://vector.im")
+    private boolean enabled
+    private List<String> allowedCidr
 
-    @Override
-    int getPriority() {
-        return 0
+    boolean isEnabled() {
+        return enabled
     }
 
-    @Override
-    Optional<?> find(ThreePidType type, String threePid) {
-        for (String root : roots) {
-            Optional<?> answer = find(root, type, threePid)
-            if (answer.isPresent()) {
-                return answer
-            }
-        }
+    void setEnabled(boolean enabled) {
+        this.enabled = enabled
+    }
 
-        return Optional.empty()
+    List<String> getAllowedCidr() {
+        return allowedCidr
+    }
+
+    void setAllowedCidr(List<String> allowedCidr) {
+        this.allowedCidr = allowedCidr
     }
 
 }

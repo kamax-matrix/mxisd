@@ -18,17 +18,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup
+package io.kamax.mxisd.config
 
-import io.kamax.mxisd.api.ThreePidType
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation.Configuration
 
-interface ThreePidProvider {
+@Configuration
+@ConfigurationProperties(prefix = "forward")
+class ForwardConfig {
 
-    /**
-     * Higher has more priority
-     */
-    int getPriority() // Should not be here but let's KISS for now
+    private List<String> servers
 
-    Optional<?> find(ThreePidType type, String threePid)
+    List<String> getServers() {
+        return servers
+    }
+
+    void setServers(List<String> servers) {
+        this.servers = servers
+    }
 
 }

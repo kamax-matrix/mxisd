@@ -18,9 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup
+package io.kamax.mxisd.lookup.strategy
 
 import io.kamax.mxisd.api.ThreePidType
+import io.kamax.mxisd.config.RecursiveLookupConfig
+import io.kamax.mxisd.lookup.LookupRequest
+import io.kamax.mxisd.lookup.provider.ThreePidProvider
+import org.apache.commons.net.util.SubnetUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
@@ -28,12 +32,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class PriorityLookupStrategy implements LookupStrategy, InitializingBean {
+class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBean {
 
-    private Logger log = LoggerFactory.getLogger(PriorityLookupStrategy.class)
+    private Logger log = LoggerFactory.getLogger(RecursivePriorityLookupStrategy.class)
+
+    @Autowired
+    private RecursiveLookupConfig recursiveCfg
 
     @Autowired
     private List<ThreePidProvider> providers
+
+    private List<SubnetUtils.SubnetInfo> allowedCidr = new ArrayList<>()
 
     @Override
     void afterPropertiesSet() throws Exception {
@@ -47,18 +56,37 @@ class PriorityLookupStrategy implements LookupStrategy, InitializingBean {
             }
 
         })
+
+        log.info("Recursive lookup enabled: {}", recursiveCfg.isEnabled())
+        for (String cidr : recursiveCfg.getAllowedCidr()) {
+            log.info("{} is allowed for recursion", cidr)
+            allowedCidr.add(new SubnetUtils(cidr).getInfo())
+        }
     }
 
     @Override
-    Optional<?> find(ThreePidType type, String threePid) {
-        if (ThreePidType.email != type) {
-            throw new IllegalArgumentException("${type} is currently not supported")
+    Optional<?> find(LookupRequest request) {
+        if (ThreePidType.email != request.getType()) {
+            throw new IllegalArgumentException("${request.getType()} is currently not supported")
         }
 
+        boolean canRecurse = false
+        if (recursiveCfg.isEnabled()) {
+            for (SubnetUtils.SubnetInfo cidr : allowedCidr) {
+                if (cidr.isInRange(request.getRequester())) {
+                    canRecurse = true
+                    break
+                }
+            }
+        }
+        log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse)
+
         for (ThreePidProvider provider : providers) {
-            Optional<?> lookupDataOpt = provider.find(type, threePid)
-            if (lookupDataOpt.isPresent()) {
-                return lookupDataOpt
+            if (provider.isLocal() || canRecurse) {
+                Optional<?> lookupDataOpt = provider.find(request)
+                if (lookupDataOpt.isPresent()) {
+                    return lookupDataOpt
+                }
             }
         }
 

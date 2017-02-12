@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup
+package io.kamax.mxisd.lookup.provider
 
 import groovy.json.JsonException
 import groovy.json.JsonSlurper
@@ -29,7 +29,13 @@ import org.slf4j.LoggerFactory
 abstract class RemoteIdentityServerProvider implements ThreePidProvider {
 
     private Logger log = LoggerFactory.getLogger(RemoteIdentityServerProvider.class)
+
     private JsonSlurper json = new JsonSlurper()
+
+    @Override
+    boolean isLocal() {
+        return false
+    }
 
     Optional<?> find(String remote, ThreePidType type, String threePid) {
         log.info("Looking up {} 3PID {} using {}", type, threePid, remote)
@@ -40,7 +46,8 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
 
         try {
             def output = json.parseText(rootSrvConn.getInputStream().getText())
-            if (output['address'] != null) {
+            if (output['address']) {
+                log.info("Found 3PID mapping: {}", output)
                 return Optional.of(output)
             }
 
