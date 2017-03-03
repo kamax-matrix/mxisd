@@ -36,19 +36,22 @@ lookup:
   #
   # This is similar to DNS lookup and recursion and is therefore prone to the same vulnerabilities.
   # By default, only non-public hosts are allowed to perform recursive lookup.
-  # This will also prevent basic endless loops where:
-  # host A ask host B, which in turn is configured to ask host B, etc.
+  #
+  # This will also prevent very basic endless loops where host A ask host B, which in turn is configured to ask host A,
+  # which would then ask host B again, etc.
   recursive:
 
     # Enable recursive lookup globally
     enabled: true
 
-    # Whitelist of CIDR that will trigger a recursive lookup
+    # Whitelist of CIDR that will trigger a recursive lookup.
+    # The default list includes all private IPv4 address and the IPv6 loopback.
     allowedCidr:
       - '127.0.0.0/8'
       - '10.0.0.0/8'
       - '172.16.0.0/12'
       - '192.168.0.0/16'
+      - '::1/128'
 
 
 

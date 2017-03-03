@@ -20,11 +20,11 @@
 
 package io.kamax.mxisd.lookup.strategy
 
+import edazdarevic.commons.net.CIDRUtils
 import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.RecursiveLookupConfig
 import io.kamax.mxisd.lookup.LookupRequest
 import io.kamax.mxisd.lookup.provider.ThreePidProvider
-import org.apache.commons.net.util.SubnetUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
@@ -42,7 +42,7 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     @Autowired
     private List<ThreePidProvider> providers
 
-    private List<SubnetUtils.SubnetInfo> allowedCidr = new ArrayList<>()
+    private List<CIDRUtils> allowedCidr = new ArrayList<>()
 
     @Override
     void afterPropertiesSet() throws Exception {
@@ -60,7 +60,7 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         log.info("Recursive lookup enabled: {}", recursiveCfg.isEnabled())
         for (String cidr : recursiveCfg.getAllowedCidr()) {
             log.info("{} is allowed for recursion", cidr)
-            allowedCidr.add(new SubnetUtils(cidr).getInfo())
+            allowedCidr.add(new CIDRUtils(cidr))
         }
     }
 
@@ -72,10 +72,14 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
 
         boolean canRecurse = false
         if (recursiveCfg.isEnabled()) {
-            for (SubnetUtils.SubnetInfo cidr : allowedCidr) {
+            log.debug("Checking {} CIDRs for recursion", allowedCidr.size())
+            for (CIDRUtils cidr : allowedCidr) {
                 if (cidr.isInRange(request.getRequester())) {
+                    log.debug("{} is in range {}, allowing recursion", request.getRequester(), cidr.getNetworkAddress())
                     canRecurse = true
                     break
+                } else {
+                    log.debug("{} is not in range {}", request.getRequester(), cidr.getNetworkAddress())
                 }
             }
         }

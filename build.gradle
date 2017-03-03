@@ -54,9 +54,6 @@ dependencies {
     // DNS lookups
     compile 'dnsjava:dnsjava:2.1.8'
 
-    // Network utilities for recursive host check
-    compile 'commons-net:commons-net:3.5'
-
     testCompile 'junit:junit:4.12'
 }
 
