@@ -77,8 +77,8 @@ ldap:
   #   - Samba/AD: sAMAccountName
   #   - LDAP: If someone knows the most appropriate value, please open an issue
   #
-  # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute but
-  #   shouldn't be used in infrastructures.
+  # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute and
+  #   are typically not used.
   attribute: 'sAMAccountName'
 
 
@@ -88,7 +88,7 @@ forward:
   # List of forwarders to use to try to match a 3PID.
   #
   # Each server will be tried in the given order, going to the next if no binding was found or an error occurred.
-  # There are the current root Identity Servers of the Matrix network.
+  # These are the current root Identity Servers of the Matrix network.
   servers:
     - "https://matrix.org"
     - "https://vector.im"
