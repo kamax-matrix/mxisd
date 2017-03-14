@@ -41,7 +41,6 @@ import java.nio.file.Paths
 import java.security.KeyPair
 import java.security.MessageDigest
 import java.security.PrivateKey
-import java.security.PublicKey
 
 @Component
 class KeyManager implements InitializingBean {
@@ -92,8 +91,8 @@ class KeyManager implements InitializingBean {
         return getKeys(index).getPrivate()
     }
 
-    PublicKey getPublicKey(int index) {
-        return getKeys(index).getPublic()
+    EdDSAPublicKey getPublicKey(int index) {
+        return (EdDSAPublicKey) getKeys(index).getPublic()
     }
 
     EdDSAParameterSpec getSpecs() {
@@ -101,7 +100,7 @@ class KeyManager implements InitializingBean {
     }
 
     String getPublicKeyBase64(int index) {
-        return Base64.getEncoder().encodeToString(getPublicKey(index).getEncoded())
+        return Base64.getEncoder().encodeToString(getPublicKey(index).getAbyte())
     }
 
 }
