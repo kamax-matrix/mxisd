@@ -71,6 +71,9 @@ After [building](#build) the software, run all the following commands as `root` 
 - Enable service: `systemctl enable mxisd`
 - Start service: `systemctl start mxisd`
 
+# Integration
+- [synapse](https://github.com/kamax-io/mxisd/wiki/Synapse-Integration)
+
 # TODO
 - Deb package
 - Docker container
