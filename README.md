@@ -58,7 +58,7 @@ as the reference Home Server implementation [synapse](https://github.com/matrix-
 to an ID server.
 
 # Install
-Run all the following commands as `root` or using `sudo`
+After [building](#build) the software, run all the following commands as `root` or using `sudo`
 
 1. Create a dedicated user: `useradd -r mxisd`
 - Create config directory: `mkdir /etc/mxis`
