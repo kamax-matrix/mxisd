@@ -63,7 +63,7 @@ After [building](#build) the software, run all the following commands as `root` 
 1. Create a dedicated user: `useradd -r mxisd`
 - Create config directory: `mkdir /etc/mxis`
 - Change user ownership of `/etc/mxis` to dedicated user: `chown mxisd /etc/mxis`
-- Copy `<repo root>/build/libs/mxisd` to `/usr/bin/mxisd`: `cp ./build/libs/mxisd /usr/bin/mxisd`
+- Copy `<repo root>/build/libs/mxisd.jar` to `/usr/bin/mxisd`: `cp ./build/libs/mxisd.jar /usr/bin/mxisd`
 - Make it executable: `chmod a+x /usr/bin/mxisd`
 - Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
 - Configure `/etc/mxis/mxisd.yaml` with production value, `key.path` being the most important - `/etc/mxis/mxisd-signing.key` is recommended
