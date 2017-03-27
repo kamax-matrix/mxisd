@@ -5,12 +5,19 @@ mxisd is an implementation of the Matrix Identity Server which aims to provide a
 to [sydent](https://github.com/matrix-org/sydent) and an external validation implementation of the
 [Identity Service API](http://matrix.org/docs/spec/identity_service/unstable.html).
 
+# Scope
+mxisd is a read-only Identity Server for corporate environments.  
+It provides a cascading lookup using LDAP then other identity servers, including the central Matrix servers.
+
 ## Contact
 If you need help, want to report a bug or just say hi, you can reach us at [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io)
 
 For more high-level discussion about the Identity Server architecture/API, go to [#matrix-identity:matrix.org](https://matrix.to/#/#matrix-identity:matrix.org)
 
 ## How does it work
+Default Lookup strategy will use a priority order and a configurable recursive/local type of request.
+
+### E-mail
 Given the 3PID `john.doe@example.org`, the following could be performed until a mapping is found:
 - LDAP: lookup the Matrix ID (partial or complete) from a configurable attribute.
 - DNS: lookup another Identity Server using the domain part of an e-mail and:
@@ -18,7 +25,8 @@ Given the 3PID `john.doe@example.org`, the following could be performed until a 
   - Lookup using the base domain name `example.org`
 - Forwarder: Proxy the request to other configurable identity servers.
 
-The lookup strategy will use a priority order and a configurable recursive/local type of request.
+### Phone number
+To be implemented once a formal spec is written by the Matrix people.
 
 # Quick start
 ## Requirements
