@@ -41,9 +41,9 @@ cd mxisd
 
 ## Configure
 1. Create a new local config: `cp application.example.yaml application.yaml`
-- Set the `server.name` value to the domain value used in your Home Server configuration
-- Provide the LDAP attributes you want to use for lookup
-- Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. `@john.doe:example.org`)
+2. Set the `server.name` value to the domain value used in your Home Server configuration
+3. Provide the LDAP attributes you want to use for lookup
+4. Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. `@john.doe:example.org`)
 
 ## Run
 Start the server in foreground:
@@ -69,15 +69,15 @@ to an ID server.
 After [building](#build) the software, run all the following commands as `root` or using `sudo`
 
 1. Create a dedicated user: `useradd -r mxisd`
-- Create config directory: `mkdir /etc/mxis`
-- Change user ownership of `/etc/mxis` to dedicated user: `chown mxisd /etc/mxis`
-- Copy `<repo root>/build/libs/mxisd.jar` to `/usr/bin/mxisd`: `cp ./build/libs/mxisd.jar /usr/bin/mxisd`
-- Make it executable: `chmod a+x /usr/bin/mxisd`
-- Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
-- Configure `/etc/mxis/mxisd.yaml` with production value, `key.path` being the most important - `/etc/mxis/mxisd-signing.key` is recommended
-- Copy `<repo root>/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
-- Enable service: `systemctl enable mxisd`
-- Start service: `systemctl start mxisd`
+2. Create config directory: `mkdir /etc/mxis`
+3. Change user ownership of `/etc/mxis` to dedicated user: `chown mxisd /etc/mxis`
+4. Copy `<repo root>/build/libs/mxisd.jar` to `/usr/bin/mxisd`: `cp ./build/libs/mxisd.jar /usr/bin/mxisd`
+5. Make it executable: `chmod a+x /usr/bin/mxisd`
+6. Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
+7. Configure `/etc/mxis/mxisd.yaml` with production value, `key.path` being the most important - `/etc/mxis/mxisd-signing.key` is recommended
+8. Copy `<repo root>/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
+9. Enable service: `systemctl enable mxisd`
+10. Start service: `systemctl start mxisd`
 
 # Integration
 - [synapse](https://github.com/kamax-io/mxisd/wiki/Synapse-Integration)
