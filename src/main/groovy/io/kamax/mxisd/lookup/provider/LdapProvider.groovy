@@ -88,10 +88,10 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
 
                         StringBuilder matrixId = new StringBuilder()
                         // TODO Should we turn this block into a map of functions?
-                        if (StringUtils.equals("uid", ldapCfg.getType())) {
+                        if (StringUtils.equals(UID, ldapCfg.getType())) {
                             matrixId.append("@").append(data).append(":").append(srvCfg.getName())
                         }
-                        if (StringUtils.equals("mxid", ldapCfg.getType())) {
+                        if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
                             matrixId.append(data)
                         }
 
