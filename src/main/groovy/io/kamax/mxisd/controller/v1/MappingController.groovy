@@ -20,7 +20,9 @@
 
 package io.kamax.mxisd.controller.v1
 
+import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+import groovy.json.JsonBuilder
 import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.lookup.LookupRequest
 import io.kamax.mxisd.lookup.strategy.LookupStrategy
@@ -30,12 +32,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+
+
 
 import javax.servlet.http.HttpServletRequest
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET
+import static org.springframework.web.bind.annotation.RequestMethod.POST
 
 @RestController
 class MappingController {
@@ -73,6 +79,47 @@ class MappingController {
         }
 
         return JsonOutput.toJson(lookup)
+    }
+
+    @RequestMapping(value = "/_matrix/identity/api/v1/bulk_lookup", method = POST)
+    String bulk_lookup(HttpServletRequest request, @RequestBody String post) {
+        def slurper = new JsonSlurper()
+        def jsn = slurper.parseText(post)
+
+        String remote = StringUtils.defaultIfBlank(request.getHeader("X-FORWARDED-FOR"), request.getRemoteAddr())
+        log.info("Got bulk_lookup request from {}", remote)
+
+        def tpids = []
+
+        for (List<String> threepid : jsn.threepids) {
+            log.info("Request type: {} value: {}", threepid.get(0), threepid.get(1))
+            ThreePidType type = ThreePidType.valueOf(threepid.get(0))
+            LookupRequest lookupRequest = new LookupRequest()
+            lookupRequest.setRequester(remote)
+            lookupRequest.setType(type)
+            lookupRequest.setThreePid(threepid.get(1))
+
+            Optional<?> lookupOpt = strategy.find(lookupRequest)
+            if (!lookupOpt.isPresent()) {
+                log.info("No mapping was found")
+            }
+            else
+            {
+                def lookup = lookupOpt.get()
+                log.info("Mapping found {}", lookup)
+                tpids.add([lookup['medium'],lookup['address'],lookup['mxid']])
+            }
+
+        }
+
+        def sign = signMgr.signMessage(JsonOutput.toJson(tpids))
+
+        def build = new JsonBuilder()
+        build{
+            threepids(tpids)
+        }
+
+        return JsonOutput.toJson(build.content)
     }
 
 }
