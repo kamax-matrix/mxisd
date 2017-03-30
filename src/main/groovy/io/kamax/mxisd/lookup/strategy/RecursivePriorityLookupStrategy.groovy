@@ -21,7 +21,6 @@
 package io.kamax.mxisd.lookup.strategy
 
 import edazdarevic.commons.net.CIDRUtils
-import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.RecursiveLookupConfig
 import io.kamax.mxisd.lookup.LookupRequest
 import io.kamax.mxisd.lookup.provider.ThreePidProvider
@@ -66,10 +65,6 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
 
     @Override
     Optional<?> find(LookupRequest request) {
-        if (ThreePidType.email != request.getType()) {
-            throw new IllegalArgumentException("${request.getType()} is currently not supported")
-        }
-
         boolean canRecurse = false
         if (recursiveCfg.isEnabled()) {
             log.debug("Checking {} CIDRs for recursion", allowedCidr.size())
@@ -83,6 +78,7 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
                 }
             }
         }
+
         log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse)
 
         for (ThreePidProvider provider : providers) {
