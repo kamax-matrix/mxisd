@@ -68,55 +68,64 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
 
     @Override
     Optional<?> find(LookupRequest request) {
-        log.info("Performing LDAP lookup ${request.getThreePid()} of type ${request.getType()}")
 
-        LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort())
-        try {
-            conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
+        for (String regx : ldapCfg.getLocalMailDomains()) {
+            /* LDAP search only for local mail domains will speedup process */
+            if (request.getThreePid().matches(".*@"+regx)){
+                log.info("Performing LDAP lookup ${request.getThreePid()} of type ${request.getType()} its our mail domain")
 
-            String searchQuery = ldapCfg.getQuery().replaceAll("%3pid", request.getThreePid())
-            EntryCursor cursor = conn.search(ldapCfg.getBaseDn(), searchQuery, SearchScope.SUBTREE, ldapCfg.getAttribute())
-            try {
-                if (cursor.next()) {
-                    Attribute attribute = cursor.get().get(ldapCfg.getAttribute())
-                    if (attribute != null) {
-                        String data = attribute.get().toString()
-                        if (data.length() < 1) {
-                            log.warn("Bind was found but value is empty")
-                            return Optional.empty()
+                LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort())
+                try {
+                    conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
+
+                    String searchQuery = ldapCfg.getQuery().replaceAll("%3pid", request.getThreePid())
+                    EntryCursor cursor = conn.search(ldapCfg.getBaseDn(), searchQuery, SearchScope.SUBTREE, ldapCfg.getAttribute())
+                    try {
+                        if (cursor.next()) {
+                            Attribute attribute = cursor.get().get(ldapCfg.getAttribute())
+                            if (attribute != null) {
+                                String data = attribute.get().toString()
+                                if (data.length() < 1) {
+                                    log.warn("Bind was found but value is empty")
+                                    return Optional.empty()
+                                }
+
+                                StringBuilder matrixId = new StringBuilder()
+                                // TODO Should we turn this block into a map of functions?
+                                if (StringUtils.equals("uid", ldapCfg.getType())) {
+                                    matrixId.append("@").append(data).append(":").append(srvCfg.getName())
+                                }
+                                if (StringUtils.equals("mxid", ldapCfg.getType())) {
+                                    matrixId.append(data)
+                                }
+
+                                if (matrixId.length() < 1) {
+                                    log.warn("Bind was found but type ${ldapCfg.getType()} is not supported")
+                                    return Optional.empty()
+                                }
+
+                                return Optional.of([
+                                        address   : request.getThreePid(),
+                                        medium    : request.getType(),
+                                        mxid      : matrixId.toString(),
+                                        not_before: 0,
+                                        not_after : 9223372036854775807,
+                                        ts        : 0
+                                ])
+                            }
                         }
-
-                        StringBuilder matrixId = new StringBuilder()
-                        // TODO Should we turn this block into a map of functions?
-                        if (StringUtils.equals(UID, ldapCfg.getType())) {
-                            matrixId.append("@").append(data).append(":").append(srvCfg.getName())
-                        }
-                        if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
-                            matrixId.append(data)
-                        }
-
-                        if (matrixId.length() < 1) {
-                            log.warn("Bind was found but type ${ldapCfg.getType()} is not supported")
-                            return Optional.empty()
-                        }
-
-                        return Optional.of([
-                                address   : request.getThreePid(),
-                                medium    : request.getType(),
-                                mxid      : matrixId.toString(),
-                                not_before: 0,
-                                not_after : 9223372036854775807,
-                                ts        : 0
-                        ])
+                    } finally {
+                        cursor.close()
                     }
+                } finally {
+                    conn.close()
                 }
-            } finally {
-                cursor.close()
             }
-        } finally {
-            conn.close()
+            else
+            {
+                log.info("Skip LDAP lookup ${request.getThreePid()} of type ${request.getType()} because of foreign mail domain")
+            }
         }
-
         log.info("No match found")
         return Optional.empty()
     }

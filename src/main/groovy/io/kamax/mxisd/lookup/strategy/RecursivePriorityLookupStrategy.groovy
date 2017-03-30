@@ -67,7 +67,9 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     @Override
     Optional<?> find(LookupRequest request) {
         if (ThreePidType.email != request.getType()) {
-            throw new IllegalArgumentException("${request.getType()} is currently not supported")
+            /* throw new IllegalArgumentException("${request.getType()} is currently not supported") */
+            /* Not to break bulk_lookup */
+            return Optional.empty()
         }
 
         boolean canRecurse = false

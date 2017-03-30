@@ -35,6 +35,7 @@ class LdapConfig {
     private String attribute
     private String bindDn
     private String bindPassword
+    private List<String> localMailDomains
 
     String getHost() {
         return host
@@ -99,5 +100,14 @@ class LdapConfig {
     void setBindPassword(String bindPassword) {
         this.bindPassword = bindPassword
     }
+
+    List<String> getLocalMailDomains() {
+        return localMailDomains
+    }
+
+    void setLocalMailDomains(List<String> localMailDomains) {
+        this.localMailDomains = localMailDomains
+    }
+
 
 }
