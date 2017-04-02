@@ -61,7 +61,6 @@ ldap:
   bindDn: 'CN=Matrix Identity Server,CN=Users,DC=example,DC=org'
   bindPassword: 'password'
   baseDn: 'CN=Users,DC=example,DC=org'
-  query: '(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))'
 
   # How should we resolve the Matrix ID in case of a match using the attribute.
   #
@@ -80,6 +79,17 @@ ldap:
   # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute and
   #   are typically not used.
   attribute: 'sAMAccountName'
+
+  # Configure each 3PID type with a dedicated query.
+  mappings:
+    email: "(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))"
+
+    # Phone numbers query.
+    #
+    # Phone numbers use the MSISDN format: https://en.wikipedia.org/wiki/MSISDN
+    # This format does not include international prefix (+ or 00) and therefore has to be put in the query.
+    # Adapt this to your needs for each attribute.
+    msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherMobile=+3pid)(otherHomePhone=+%3pid)(otherTelephone=+%3pid))"
 
 
 

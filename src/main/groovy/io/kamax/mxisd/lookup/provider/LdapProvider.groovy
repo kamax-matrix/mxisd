@@ -31,12 +31,11 @@ import org.apache.directory.ldap.client.api.LdapConnection
 import org.apache.directory.ldap.client.api.LdapNetworkConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class LdapProvider implements ThreePidProvider, InitializingBean {
+class LdapProvider implements ThreePidProvider {
 
     public static final String UID = "uid"
     public static final String MATRIX_ID = "mxid"
@@ -48,13 +47,6 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
 
     @Autowired
     private LdapConfig ldapCfg
-
-    @Override
-    void afterPropertiesSet() throws Exception {
-        if (!Arrays.asList(UID, MATRIX_ID).contains(ldapCfg.getType())) {
-            throw new IllegalArgumentException(ldapCfg.getType() + " is not a valid LDAP lookup type")
-        }
-    }
 
     @Override
     boolean isLocal() {
@@ -74,7 +66,13 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
         try {
             conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
 
-            String searchQuery = ldapCfg.getQuery().replaceAll("%3pid", request.getThreePid())
+            Optional<String> queryOpt = ldapCfg.getMapping(request.getType())
+            if (!queryOpt.isPresent()) {
+                log.warn("{} is not a supported 3PID type for LDAP lookup", request.getType())
+                return Optional.empty()
+            }
+
+            String searchQuery = queryOpt.get().replaceAll("%3pid", request.getThreePid())
             EntryCursor cursor = conn.search(ldapCfg.getBaseDn(), searchQuery, SearchScope.SUBTREE, ldapCfg.getAttribute())
             try {
                 if (cursor.next()) {
@@ -90,16 +88,14 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
                         // TODO Should we turn this block into a map of functions?
                         if (StringUtils.equals(UID, ldapCfg.getType())) {
                             matrixId.append("@").append(data).append(":").append(srvCfg.getName())
-                        }
-                        if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
+                        } else if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
                             matrixId.append(data)
-                        }
-
-                        if (matrixId.length() < 1) {
+                        } else {
                             log.warn("Bind was found but type ${ldapCfg.getType()} is not supported")
                             return Optional.empty()
                         }
 
+                        log.info("Found a match in LDAP")
                         return Optional.of([
                                 address   : request.getThreePid(),
                                 medium    : request.getType(),
@@ -120,6 +116,5 @@ class LdapProvider implements ThreePidProvider, InitializingBean {
         log.info("No match found")
         return Optional.empty()
     }
-
 
 }

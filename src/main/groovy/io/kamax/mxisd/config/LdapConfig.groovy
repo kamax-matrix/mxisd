@@ -20,21 +20,27 @@
 
 package io.kamax.mxisd.config
 
+import io.kamax.mxisd.api.ThreePidType
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 @ConfigurationProperties(prefix = "ldap")
-class LdapConfig {
+class LdapConfig implements InitializingBean {
+
+    private Logger log = LoggerFactory.getLogger(LdapConfig.class)
 
     private String host
     private int port
     private String baseDn
-    private String query
     private String type
     private String attribute
     private String bindDn
     private String bindPassword
+    private Map<ThreePidType, String> mappings
 
     String getHost() {
         return host
@@ -58,14 +64,6 @@ class LdapConfig {
 
     void setBaseDn(String baseDn) {
         this.baseDn = baseDn
-    }
-
-    String getQuery() {
-        return query
-    }
-
-    void setQuery(String query) {
-        this.query = query
     }
 
     String getType() {
@@ -100,4 +98,24 @@ class LdapConfig {
         this.bindPassword = bindPassword
     }
 
+    Map<ThreePidType, String> getMappings() {
+        return mappings
+    }
+
+    void setMappings(Map<ThreePidType, String> mappings) {
+        this.mappings = mappings
+    }
+
+    Optional<String> getMapping(ThreePidType type) {
+        if (mappings == null) {
+            return Optional.empty()
+        }
+
+        return Optional.ofNullable(mappings.get(type))
+    }
+
+    @Override
+    void afterPropertiesSet() throws Exception {
+        log.info("Matrix ID type: {}", getType())
+    }
 }
