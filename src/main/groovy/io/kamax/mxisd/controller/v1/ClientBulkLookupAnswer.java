@@ -18,38 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup
+package io.kamax.mxisd.controller.v1;
 
-import io.kamax.mxisd.api.ThreePidType
+import io.kamax.mxisd.lookup.ThreePidMapping;
 
-class LookupRequest {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
-    private String requester
-    private ThreePidType type
-    private String threePid
+public class ClientBulkLookupAnswer {
 
-    String getRequester() {
-        return requester
+    private List<List<String>> threepids = new ArrayList<>();
+
+    public void addAll(Collection<ThreePidMapping> mappings) {
+        for (ThreePidMapping mapping : mappings) {
+            threepids.add(Arrays.asList(mapping.getMedium(), mapping.getValue(), mapping.getMxid()));
+        }
     }
 
-    void setRequester(String requester) {
-        this.requester = requester
-    }
-
-    ThreePidType getType() {
-        return type
-    }
-
-    void setType(ThreePidType type) {
-        this.type = type
-    }
-
-    String getThreePid() {
-        return threePid
-    }
-
-    void setThreePid(String threePid) {
-        this.threePid = threePid
+    public List<List<String>> getThreepids() {
+        return threepids;
     }
 
 }

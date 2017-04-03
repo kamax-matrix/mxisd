@@ -21,8 +21,11 @@
 package io.kamax.mxisd.controller.v1
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import io.kamax.mxisd.api.ThreePidType
-import io.kamax.mxisd.lookup.LookupRequest
+import io.kamax.mxisd.lookup.BulkLookupRequest
+import io.kamax.mxisd.lookup.SingleLookupRequest
+import io.kamax.mxisd.lookup.ThreePidMapping
 import io.kamax.mxisd.lookup.strategy.LookupStrategy
 import io.kamax.mxisd.signature.SignatureManager
 import org.apache.commons.lang.StringUtils
@@ -36,11 +39,13 @@ import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET
+import static org.springframework.web.bind.annotation.RequestMethod.POST
 
 @RestController
 class MappingController {
 
     private Logger log = LoggerFactory.getLogger(MappingController.class)
+    private JsonSlurper json = new JsonSlurper()
 
     @Autowired
     private LookupStrategy strategy
@@ -55,7 +60,7 @@ class MappingController {
 
         ThreePidType type = ThreePidType.valueOf(medium)
 
-        LookupRequest lookupRequest = new LookupRequest()
+        SingleLookupRequest lookupRequest = new SingleLookupRequest()
         lookupRequest.setRequester(remote)
         lookupRequest.setType(type)
         lookupRequest.setThreePid(address)
@@ -73,6 +78,29 @@ class MappingController {
         }
 
         return JsonOutput.toJson(lookup)
+    }
+
+    @RequestMapping(value = "/_matrix/identity/api/v1/bulk_lookup", method = POST)
+    String bulkLookup(HttpServletRequest request) {
+        String remote = StringUtils.defaultIfBlank(request.getHeader("X-FORWARDED-FOR"), request.getRemoteAddr())
+        log.info("Got request from {}", remote)
+
+        BulkLookupRequest lookupRequest = new BulkLookupRequest()
+        lookupRequest.setRequester(remote)
+
+        ClientBulkLookupRequest input = (ClientBulkLookupRequest) json.parseText(request.getInputStream().getText())
+        List<ThreePidMapping> mappings = new ArrayList<>()
+        for (List<String> mappingRaw : input.getThreepids()) {
+            ThreePidMapping mapping = new ThreePidMapping()
+            mapping.setMedium(mappingRaw.get(0))
+            mapping.setValue(mappingRaw.get(1))
+            mappings.add(mapping)
+        }
+        lookupRequest.setMappings(mappings)
+
+        ClientBulkLookupAnswer answer = new ClientBulkLookupAnswer()
+        answer.addAll(strategy.find(lookupRequest))
+        return JsonOutput.toJson(answer)
     }
 
 }

@@ -22,7 +22,8 @@ package io.kamax.mxisd.lookup.provider
 
 import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.ServerConfig
-import io.kamax.mxisd.lookup.LookupRequest
+import io.kamax.mxisd.lookup.SingleLookupRequest
+import io.kamax.mxisd.lookup.ThreePidMapping
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,7 +47,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
     }
 
     @Override
-    Optional<?> find(LookupRequest request) {
+    Optional<?> find(SingleLookupRequest request) {
         log.info("Performing DNS lookup for {}", request.getThreePid())
         if (ThreePidType.email != request.getType()) {
             log.info("Skipping unsupported type {} for {}", request.getType(), request.getThreePid())
@@ -92,6 +93,15 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
         log.info("Performing basic lookup using domain name {}", domain)
         String baseUrl = "https://" + domain
         return find(baseUrl, request.getType(), request.getThreePid())
+    }
+
+    @Override
+    List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
+        List<ThreePidMapping> mappingsFound = new ArrayList<>()
+
+        // TODO
+
+        return mappingsFound
     }
 
 }

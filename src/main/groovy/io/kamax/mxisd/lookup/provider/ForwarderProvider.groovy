@@ -21,7 +21,8 @@
 package io.kamax.mxisd.lookup.provider
 
 import io.kamax.mxisd.config.ForwardConfig
-import io.kamax.mxisd.lookup.LookupRequest
+import io.kamax.mxisd.lookup.SingleLookupRequest
+import io.kamax.mxisd.lookup.ThreePidMapping
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -37,7 +38,7 @@ class ForwarderProvider extends RemoteIdentityServerProvider {
     }
 
     @Override
-    Optional<?> find(LookupRequest request) {
+    Optional<?> find(SingleLookupRequest request) {
         for (String root : cfg.getServers()) {
             Optional<?> answer = find(root, request.getType(), request.getThreePid())
             if (answer.isPresent()) {
@@ -46,6 +47,15 @@ class ForwarderProvider extends RemoteIdentityServerProvider {
         }
 
         return Optional.empty()
+    }
+
+    @Override
+    List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
+        List<ThreePidMapping> mappingsFound = new ArrayList<>()
+
+        // TODO
+
+        return mappingsFound
     }
 
 }

@@ -22,7 +22,10 @@ package io.kamax.mxisd.lookup.strategy
 
 import edazdarevic.commons.net.CIDRUtils
 import io.kamax.mxisd.config.RecursiveLookupConfig
-import io.kamax.mxisd.lookup.LookupRequest
+import io.kamax.mxisd.lookup.ALookupRequest
+import io.kamax.mxisd.lookup.BulkLookupRequest
+import io.kamax.mxisd.lookup.SingleLookupRequest
+import io.kamax.mxisd.lookup.ThreePidMapping
 import io.kamax.mxisd.lookup.provider.ThreePidProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -63,8 +66,9 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         }
     }
 
-    @Override
-    Optional<?> find(LookupRequest request) {
+    List<ThreePidProvider> listUsableProviders(ALookupRequest request) {
+        List<ThreePidProvider> usableProviders = new ArrayList<>()
+
         boolean canRecurse = false
         if (recursiveCfg.isEnabled()) {
             log.debug("Checking {} CIDRs for recursion", allowedCidr.size())
@@ -80,17 +84,44 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         }
 
         log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse)
-
         for (ThreePidProvider provider : providers) {
             if (provider.isLocal() || canRecurse) {
-                Optional<?> lookupDataOpt = provider.find(request)
-                if (lookupDataOpt.isPresent()) {
-                    return lookupDataOpt
-                }
+                usableProviders.add(provider)
+            }
+        }
+
+        return usableProviders
+    }
+
+    @Override
+    Optional<?> find(SingleLookupRequest request) {
+        for (ThreePidProvider provider : listUsableProviders(request)) {
+            Optional<?> lookupDataOpt = provider.find(request)
+            if (lookupDataOpt.isPresent()) {
+                return lookupDataOpt
             }
         }
 
         return Optional.empty()
+    }
+
+    @Override
+    List<ThreePidMapping> find(BulkLookupRequest request) {
+        List<ThreePidMapping> mapToDo = new ArrayList<>(request.getMappings())
+        List<ThreePidMapping> mapFoundAll = new ArrayList<>()
+
+        for (ThreePidProvider provider : listUsableProviders(request)) {
+            if (mapToDo.isEmpty()) {
+                log.info("No more mappings to lookup")
+                break
+            }
+
+            List<ThreePidMapping> mapFound = provider.populate(mapToDo)
+            mapFoundAll.addAll(mapFound)
+            mapToDo.removeAll(mapFound)
+        }
+
+        return mapFoundAll;
     }
 
 }

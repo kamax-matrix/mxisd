@@ -23,6 +23,7 @@ package io.kamax.mxisd.lookup.provider
 import groovy.json.JsonException
 import groovy.json.JsonSlurper
 import io.kamax.mxisd.api.ThreePidType
+import io.kamax.mxisd.lookup.ThreePidMapping
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -60,6 +61,14 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
             log.warn("Invalid JSON answer from {}", remote)
             return Optional.empty()
         }
+    }
+
+    List<ThreePidMapping> find(String remote, List<ThreePidMapping> mappings) {
+        List<ThreePidMapping> mappingsFound = new ArrayList<>()
+
+        // TODO
+
+        return mappingsFound
     }
 
 }
