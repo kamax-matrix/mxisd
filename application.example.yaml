@@ -89,7 +89,7 @@ ldap:
     # Phone numbers use the MSISDN format: https://en.wikipedia.org/wiki/MSISDN
     # This format does not include international prefix (+ or 00) and therefore has to be put in the query.
     # Adapt this to your needs for each attribute.
-    msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherMobile=+3pid)(otherHomePhone=+%3pid)(otherTelephone=+%3pid))"
+    msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid)(otherTelephone=+%3pid))"
 
 
 
