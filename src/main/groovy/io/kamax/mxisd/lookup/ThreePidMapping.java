@@ -20,6 +20,8 @@
 
 package io.kamax.mxisd.lookup;
 
+import groovy.json.JsonOutput;
+
 public class ThreePidMapping {
 
     private String medium;
@@ -50,4 +52,26 @@ public class ThreePidMapping {
         this.mxid = mxid;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ThreePidMapping that = (ThreePidMapping) o;
+
+        if (medium != null ? !medium.equals(that.medium) : that.medium != null) return false;
+        return value != null ? value.equals(that.value) : that.value == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = medium != null ? medium.hashCode() : 0;
+        result = 31 * result + (value != null ? value.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return JsonOutput.toJson(this);
+    }
 }

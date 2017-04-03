@@ -23,11 +23,15 @@ package io.kamax.mxisd.lookup.provider
 import io.kamax.mxisd.config.ForwardConfig
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 class ForwarderProvider extends RemoteIdentityServerProvider {
+
+    private Logger log = LoggerFactory.getLogger(ForwarderProvider.class)
 
     @Autowired
     private ForwardConfig cfg
@@ -51,11 +55,19 @@ class ForwarderProvider extends RemoteIdentityServerProvider {
 
     @Override
     List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
-        List<ThreePidMapping> mappingsFound = new ArrayList<>()
+        List<ThreePidMapping> mappingsToDo = new ArrayList<>(mappings)
+        List<ThreePidMapping> mappingsFoundGlobal = new ArrayList<>()
 
-        // TODO
+        for (String root : cfg.getServers()) {
+            log.info("{} mappings remaining: {}", mappingsToDo.size(), mappingsToDo)
+            log.info("Querying {}", root)
+            List<ThreePidMapping> mappingsFound = find(root, mappingsToDo)
+            log.info("{} returned {} mappings", root, mappingsFound.size())
+            mappingsFoundGlobal.addAll(mappingsFound)
+            mappingsToDo.removeAll(mappingsFound)
+        }
 
-        return mappingsFound
+        return mappingsFoundGlobal
     }
 
 }

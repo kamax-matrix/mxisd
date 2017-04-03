@@ -20,9 +20,11 @@
 
 package io.kamax.mxisd.controller.v1
 
+import io.kamax.mxisd.lookup.ThreePidMapping
+
 class ClientBulkLookupRequest {
 
-    private List<List<String>> threepids
+    private List<List<String>> threepids = new ArrayList<>()
 
     List<List<String>> getThreepids() {
         return threepids
@@ -30,6 +32,15 @@ class ClientBulkLookupRequest {
 
     void setThreepids(List<List<String>> threepids) {
         this.threepids = threepids
+    }
+
+    void setMappings(List<ThreePidMapping> mappings) {
+        for (ThreePidMapping mapping : mappings) {
+            List<String> threepid = new ArrayList<>()
+            threepid.add(mapping.getMedium())
+            threepid.add(mapping.getValue())
+            threepids.add(threepid)
+        }
     }
 
 }

@@ -114,14 +114,18 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
             if (mapToDo.isEmpty()) {
                 log.info("No more mappings to lookup")
                 break
+            } else {
+                log.info("{} mappings remaining overall", mapToDo.size())
             }
 
+            log.info("Using provider {} for remaining mappings", provider.getClass().getSimpleName())
             List<ThreePidMapping> mapFound = provider.populate(mapToDo)
+            log.info("Provider {} returned {} mappings", provider.getClass().getSimpleName(), mapFound.size())
             mapFoundAll.addAll(mapFound)
             mapToDo.removeAll(mapFound)
         }
 
-        return mapFoundAll;
+        return mapFoundAll
     }
 
 }
