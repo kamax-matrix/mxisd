@@ -21,12 +21,25 @@
 package io.kamax.mxisd.lookup.provider
 
 import groovy.json.JsonException
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.kamax.mxisd.api.ThreePidType
+import io.kamax.mxisd.controller.v1.ClientBulkLookupRequest
+import io.kamax.mxisd.lookup.ThreePidMapping
+import org.apache.http.HttpEntity
+import org.apache.http.HttpResponse
+import org.apache.http.client.HttpClient
+import org.apache.http.client.entity.EntityBuilder
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.ContentType
+import org.apache.http.impl.client.HttpClients
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 abstract class RemoteIdentityServerProvider implements ThreePidProvider {
+
+    public static final String THREEPID_TEST_MEDIUM = "email"
+    public static final String THREEPID_TEST_ADDRESS = "john.doe@example.org"
 
     private Logger log = LoggerFactory.getLogger(RemoteIdentityServerProvider.class)
 
@@ -35,6 +48,50 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
     @Override
     boolean isLocal() {
         return false
+    }
+
+    boolean isUsableIdentityServer(String remote) {
+        try {
+            HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
+                    "${remote}/_matrix/identity/api/v1/lookup?medium=${THREEPID_TEST_MEDIUM}&address=${THREEPID_TEST_ADDRESS}"
+            ).openConnection()
+            // TODO turn this into a configuration property
+            rootSrvConn.setConnectTimeout(2000)
+
+            if (rootSrvConn.getResponseCode() != 200) {
+                return false
+            }
+
+            def output = json.parseText(rootSrvConn.getInputStream().getText())
+            if (output['address']) {
+                return false
+            }
+
+            return true
+        } catch (IOException | JsonException e) {
+            log.info("{} is not a usable Identity Server: {}", remote, e.getMessage())
+            return false
+        }
+    }
+
+    Optional<ThreePidMapping> performLookup(String remote, String medium, String address) throws IOException, JsonException {
+        HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
+                "${remote}/_matrix/identity/api/v1/lookup?medium=${medium}&address=${address}"
+        ).openConnection()
+
+        def output = json.parseText(rootSrvConn.getInputStream().getText())
+        if (output['address']) {
+            log.info("Found 3PID mapping: {}", output)
+
+            ThreePidMapping mapping = new ThreePidMapping()
+            mapping.setMedium(output['medium'].toString())
+            mapping.setValue(output['address'].toString())
+            mapping.setMxid(output['mxid'].toString())
+            return Optional.of(mapping)
+        }
+
+        log.info("Empty 3PID mapping from {}", remote)
+        return Optional.empty()
     }
 
     Optional<?> find(String remote, ThreePidType type, String threePid) {
@@ -59,6 +116,53 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
         } catch (JsonException e) {
             log.warn("Invalid JSON answer from {}", remote)
             return Optional.empty()
+        }
+    }
+
+    List<ThreePidMapping> find(String remote, List<ThreePidMapping> mappings) {
+        List<ThreePidMapping> mappingsFound = new ArrayList<>()
+
+        ClientBulkLookupRequest mappingRequest = new ClientBulkLookupRequest()
+        mappingRequest.setMappings(mappings)
+
+        String url = "${remote}/_matrix/identity/api/v1/bulk_lookup"
+        HttpClient client = HttpClients.createDefault()
+        try {
+            HttpPost request = new HttpPost(url)
+            request.setEntity(
+                    EntityBuilder.create()
+                            .setText(JsonOutput.toJson(mappingRequest))
+                            .setContentType(ContentType.APPLICATION_JSON)
+                            .build()
+            )
+
+            HttpResponse response = client.execute(request)
+            try {
+                if (response.getStatusLine().getStatusCode() != 200) {
+                    log.info("Could not perform lookup at {} due to HTTP return code: {}", url, response.getStatusLine().getStatusCode())
+                    return mappingsFound
+                }
+
+                HttpEntity entity = response.getEntity()
+                if (entity != null) {
+                    ClientBulkLookupRequest input = (ClientBulkLookupRequest) json.parseText(entity.getContent().getText())
+                    for (List<String> mappingRaw : input.getThreepids()) {
+                        ThreePidMapping mapping = new ThreePidMapping()
+                        mapping.setMedium(mappingRaw.get(0))
+                        mapping.setValue(mappingRaw.get(1))
+                        mapping.setMxid(mappingRaw.get(2))
+                        mappingsFound.add(mapping)
+                    }
+                } else {
+                    log.info("HTTP response from {} was empty", remote)
+                }
+
+                return mappingsFound
+            } finally {
+                response.close()
+            }
+        } finally {
+            client.close()
         }
     }
 

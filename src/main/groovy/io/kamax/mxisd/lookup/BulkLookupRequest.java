@@ -18,16 +18,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup.strategy
+package io.kamax.mxisd.lookup;
 
-import io.kamax.mxisd.lookup.BulkLookupRequest
-import io.kamax.mxisd.lookup.SingleLookupRequest
-import io.kamax.mxisd.lookup.ThreePidMapping
+import java.util.List;
 
-interface LookupStrategy {
+public class BulkLookupRequest extends ALookupRequest {
 
-    Optional<?> find(SingleLookupRequest request)
+    private List<ThreePidMapping> mappings;
 
-    List<ThreePidMapping> find(BulkLookupRequest requests)
+    public List<ThreePidMapping> getMappings() {
+        return mappings;
+    }
+
+    public void setMappings(List<ThreePidMapping> mappings) {
+        this.mappings = mappings;
+    }
 
 }

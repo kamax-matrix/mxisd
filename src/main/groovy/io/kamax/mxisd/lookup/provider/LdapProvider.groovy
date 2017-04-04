@@ -20,9 +20,11 @@
 
 package io.kamax.mxisd.lookup.provider
 
+import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.LdapConfig
 import io.kamax.mxisd.config.ServerConfig
-import io.kamax.mxisd.lookup.LookupRequest
+import io.kamax.mxisd.lookup.SingleLookupRequest
+import io.kamax.mxisd.lookup.ThreePidMapping
 import org.apache.commons.lang.StringUtils
 import org.apache.directory.api.ldap.model.cursor.EntryCursor
 import org.apache.directory.api.ldap.model.entry.Attribute
@@ -58,56 +60,65 @@ class LdapProvider implements ThreePidProvider {
         return 20
     }
 
+    Optional<String> lookup(LdapConnection conn, ThreePidType medium, String value) {
+        Optional<String> queryOpt = ldapCfg.getMapping(medium)
+        if (!queryOpt.isPresent()) {
+            log.warn("{} is not a supported 3PID type for LDAP lookup", medium)
+            return Optional.empty()
+        }
+
+        String searchQuery = queryOpt.get().replaceAll("%3pid", value)
+        EntryCursor cursor = conn.search(ldapCfg.getBaseDn(), searchQuery, SearchScope.SUBTREE, ldapCfg.getAttribute())
+        try {
+            if (cursor.next()) {
+                Attribute attribute = cursor.get().get(ldapCfg.getAttribute())
+                if (attribute != null) {
+                    String data = attribute.get().toString()
+                    if (data.length() < 1) {
+                        log.warn("Bind was found but value is empty")
+                        return Optional.empty()
+                    }
+
+                    StringBuilder matrixId = new StringBuilder()
+                    // TODO Should we turn this block into a map of functions?
+                    if (StringUtils.equals(UID, ldapCfg.getType())) {
+                        matrixId.append("@").append(data).append(":").append(srvCfg.getName())
+                    } else if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
+                        matrixId.append(data)
+                    } else {
+                        log.warn("Bind was found but type ${ldapCfg.getType()} is not supported")
+                        return Optional.empty()
+                    }
+
+                    log.info("Found a match in LDAP")
+                    return Optional.of(matrixId.toString())
+                }
+            }
+        } finally {
+            cursor.close()
+        }
+
+        return Optional.empty()
+    }
+
     @Override
-    Optional<?> find(LookupRequest request) {
+    Optional<?> find(SingleLookupRequest request) {
         log.info("Performing LDAP lookup ${request.getThreePid()} of type ${request.getType()}")
 
         LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort())
         try {
             conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
 
-            Optional<String> queryOpt = ldapCfg.getMapping(request.getType())
-            if (!queryOpt.isPresent()) {
-                log.warn("{} is not a supported 3PID type for LDAP lookup", request.getType())
-                return Optional.empty()
-            }
-
-            String searchQuery = queryOpt.get().replaceAll("%3pid", request.getThreePid())
-            EntryCursor cursor = conn.search(ldapCfg.getBaseDn(), searchQuery, SearchScope.SUBTREE, ldapCfg.getAttribute())
-            try {
-                if (cursor.next()) {
-                    Attribute attribute = cursor.get().get(ldapCfg.getAttribute())
-                    if (attribute != null) {
-                        String data = attribute.get().toString()
-                        if (data.length() < 1) {
-                            log.warn("Bind was found but value is empty")
-                            return Optional.empty()
-                        }
-
-                        StringBuilder matrixId = new StringBuilder()
-                        // TODO Should we turn this block into a map of functions?
-                        if (StringUtils.equals(UID, ldapCfg.getType())) {
-                            matrixId.append("@").append(data).append(":").append(srvCfg.getName())
-                        } else if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
-                            matrixId.append(data)
-                        } else {
-                            log.warn("Bind was found but type ${ldapCfg.getType()} is not supported")
-                            return Optional.empty()
-                        }
-
-                        log.info("Found a match in LDAP")
-                        return Optional.of([
-                                address   : request.getThreePid(),
-                                medium    : request.getType(),
-                                mxid      : matrixId.toString(),
-                                not_before: 0,
-                                not_after : 9223372036854775807,
-                                ts        : 0
-                        ])
-                    }
-                }
-            } finally {
-                cursor.close()
+            Optional<String> mxid = lookup(conn, request.getType(), request.getThreePid())
+            if (mxid.isPresent()) {
+                return Optional.of([
+                        address   : request.getThreePid(),
+                        medium    : request.getType(),
+                        mxid      : mxid.get(),
+                        not_before: 0,
+                        not_after : 9223372036854775807,
+                        ts        : 0
+                ])
             }
         } finally {
             conn.close()
@@ -115,6 +126,34 @@ class LdapProvider implements ThreePidProvider {
 
         log.info("No match found")
         return Optional.empty()
+    }
+
+    @Override
+    List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
+        log.info("Looking up {} mappings", mappings.size())
+        List<ThreePidMapping> mappingsFound = new ArrayList<>()
+
+        LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort())
+        try {
+            conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
+
+            for (ThreePidMapping mapping : mappings) {
+                try {
+                    ThreePidType type = ThreePidType.valueOf(mapping.getMedium())
+                    Optional<String> mxid = lookup(conn, type, mapping.getValue())
+                    if (mxid.isPresent()) {
+                        mapping.setMxid(mxid.get())
+                        mappingsFound.add(mapping)
+                    }
+                } catch (IllegalArgumentException e) {
+                    log.warn("{} is not a supported 3PID type for LDAP lookup", mapping.getMedium())
+                }
+            }
+        } finally {
+            conn.close()
+        }
+
+        return mappingsFound
     }
 
 }

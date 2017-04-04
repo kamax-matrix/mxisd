@@ -54,6 +54,9 @@ dependencies {
     // DNS lookups
     compile 'dnsjava:dnsjava:2.1.8'
 
+    // HTTP connections
+    compile 'org.apache.httpcomponents:httpclient:4.5.3'
+
     testCompile 'junit:junit:4.12'
 }
 

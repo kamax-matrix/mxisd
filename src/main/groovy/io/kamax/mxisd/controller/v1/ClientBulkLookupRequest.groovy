@@ -18,16 +18,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup.strategy
+package io.kamax.mxisd.controller.v1
 
-import io.kamax.mxisd.lookup.BulkLookupRequest
-import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 
-interface LookupStrategy {
+class ClientBulkLookupRequest {
 
-    Optional<?> find(SingleLookupRequest request)
+    private List<List<String>> threepids = new ArrayList<>()
 
-    List<ThreePidMapping> find(BulkLookupRequest requests)
+    List<List<String>> getThreepids() {
+        return threepids
+    }
+
+    void setThreepids(List<List<String>> threepids) {
+        this.threepids = threepids
+    }
+
+    void setMappings(List<ThreePidMapping> mappings) {
+        for (ThreePidMapping mapping : mappings) {
+            List<String> threepid = new ArrayList<>()
+            threepid.add(mapping.getMedium())
+            threepid.add(mapping.getValue())
+            threepids.add(threepid)
+        }
+    }
 
 }
