@@ -33,6 +33,8 @@ import org.xbill.DNS.Lookup
 import org.xbill.DNS.SRVRecord
 import org.xbill.DNS.Type
 
+import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.RecursiveTask
 import java.util.function.Function
 
 @Component
@@ -129,7 +131,6 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
 
     @Override
     List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
-        List<ThreePidMapping> mappingsFound = new ArrayList<>()
         Map<String, List<ThreePidMapping>> domains = new HashMap<>()
 
         for (ThreePidMapping mapping : mappings) {
@@ -157,20 +158,59 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
         }
 
         log.info("Looking mappings across {} domains", domains.keySet().size())
-        for (String domain : domains.keySet()) {
+        ForkJoinPool pool = new ForkJoinPool()
+        RecursiveTask<List<ThreePidMapping>> task = new RecursiveTask<List<ThreePidMapping>>() {
+
+            @Override
+            protected List<ThreePidMapping> compute() {
+                List<ThreePidMapping> mappingsFound = new ArrayList<>()
+                List<DomainBulkLookupTask> tasks = new ArrayList<>()
+
+                for (String domain : domains.keySet()) {
+                    DomainBulkLookupTask domainTask = new DomainBulkLookupTask(domain, domains.get(domain))
+                    domainTask.fork()
+                    tasks.add(domainTask)
+                }
+
+                for (DomainBulkLookupTask task : tasks) {
+                    mappingsFound.addAll(task.join())
+                }
+
+                return mappingsFound
+            }
+        }
+        pool.submit(task)
+        pool.shutdown()
+
+        List<ThreePidMapping> mappingsFound = task.join()
+        log.info("Found {} mappings overall", mappingsFound.size())
+        return mappingsFound
+    }
+
+    private class DomainBulkLookupTask extends RecursiveTask<List<ThreePidMapping>> {
+
+        private String domain
+        private List<ThreePidMapping> mappings
+
+        DomainBulkLookupTask(String domain, List<ThreePidMapping> mappings) {
+            this.domain = domain
+            this.mappings = mappings
+        }
+
+        @Override
+        protected List<ThreePidMapping> compute() {
+            List<ThreePidMapping> domainMappings = new ArrayList<>()
+
             Optional<String> baseUrl = findIdentityServerForDomain(domain)
             if (!baseUrl.isPresent()) {
                 log.info("No usable Identity server for domain {}", domain)
-                continue
+            } else {
+                domainMappings.addAll(find(baseUrl.get(), mappings))
+                log.info("Found {} mappings in domain {}", domainMappings.size(), domain)
             }
 
-            List<ThreePidMapping> domainMappings = find(baseUrl.get(), domains.get(domain))
-            log.info("Found {} mappings in domain {}", domainMappings.size(), domain)
-            mappingsFound.addAll(domainMappings)
+            return domainMappings
         }
-
-        log.info("Found {} mappings overall", mappingsFound.size())
-        return mappingsFound
     }
 
 }

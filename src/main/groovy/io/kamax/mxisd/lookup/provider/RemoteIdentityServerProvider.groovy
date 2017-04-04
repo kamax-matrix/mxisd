@@ -55,6 +55,8 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
             HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
                     "${remote}/_matrix/identity/api/v1/lookup?medium=${THREEPID_TEST_MEDIUM}&address=${THREEPID_TEST_ADDRESS}"
             ).openConnection()
+            // TODO turn this into a configuration property
+            rootSrvConn.setConnectTimeout(2000)
 
             if (rootSrvConn.getResponseCode() != 200) {
                 return false
