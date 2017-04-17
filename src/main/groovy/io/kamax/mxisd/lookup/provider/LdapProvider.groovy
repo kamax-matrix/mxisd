@@ -26,6 +26,7 @@ import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import org.apache.commons.lang.StringUtils
+import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException
 import org.apache.directory.api.ldap.model.cursor.EntryCursor
 import org.apache.directory.api.ldap.model.entry.Attribute
 import org.apache.directory.api.ldap.model.message.SearchScope
@@ -94,6 +95,8 @@ class LdapProvider implements ThreePidProvider {
                     return Optional.of(matrixId.toString())
                 }
             }
+        } catch (CursorLdapReferralException e) {
+            log.warn("3PID {} is only available via referral, skipping", value)
         } finally {
             cursor.close()
         }
