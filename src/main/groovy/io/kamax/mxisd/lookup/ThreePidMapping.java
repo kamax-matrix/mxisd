@@ -74,4 +74,5 @@ public class ThreePidMapping {
     public String toString() {
         return JsonOutput.toJson(this);
     }
+
 }

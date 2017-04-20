@@ -23,7 +23,6 @@ package io.kamax.mxisd.lookup.provider
 import groovy.json.JsonException
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.controller.v1.ClientBulkLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import org.apache.http.HttpEntity
@@ -94,7 +93,7 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
         return Optional.empty()
     }
 
-    Optional<?> find(String remote, ThreePidType type, String threePid) {
+    Optional<?> find(String remote, String type, String threePid) {
         log.info("Looking up {} 3PID {} using {}", type, threePid, remote)
 
         HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(

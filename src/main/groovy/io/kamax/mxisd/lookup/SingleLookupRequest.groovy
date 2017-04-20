@@ -20,18 +20,16 @@
 
 package io.kamax.mxisd.lookup
 
-import io.kamax.mxisd.api.ThreePidType
-
 class SingleLookupRequest extends ALookupRequest {
 
-    private ThreePidType type
+    private String type
     private String threePid
 
-    ThreePidType getType() {
+    String getType() {
         return type
     }
 
-    void setType(ThreePidType type) {
+    void setType(String type) {
         this.type = type
     }
 

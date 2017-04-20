@@ -22,7 +22,6 @@ package io.kamax.mxisd.controller.v1
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.lookup.BulkLookupRequest
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
@@ -58,11 +57,9 @@ class MappingController {
         String remote = StringUtils.defaultIfBlank(request.getHeader("X-FORWARDED-FOR"), request.getRemoteAddr())
         log.info("Got request from {}", remote)
 
-        ThreePidType type = ThreePidType.valueOf(medium)
-
         SingleLookupRequest lookupRequest = new SingleLookupRequest()
         lookupRequest.setRequester(remote)
-        lookupRequest.setType(type)
+        lookupRequest.setType(medium)
         lookupRequest.setThreePid(address)
 
         Optional<?> lookupOpt = strategy.find(lookupRequest)

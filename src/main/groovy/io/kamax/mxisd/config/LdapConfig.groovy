@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.config
 
-import io.kamax.mxisd.api.ThreePidType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
@@ -40,7 +39,7 @@ class LdapConfig implements InitializingBean {
     private String attribute
     private String bindDn
     private String bindPassword
-    private Map<ThreePidType, String> mappings
+    private Map<String, String> mappings
 
     String getHost() {
         return host
@@ -98,15 +97,15 @@ class LdapConfig implements InitializingBean {
         this.bindPassword = bindPassword
     }
 
-    Map<ThreePidType, String> getMappings() {
+    Map<String, String> getMappings() {
         return mappings
     }
 
-    void setMappings(Map<ThreePidType, String> mappings) {
+    void setMappings(Map<String, String> mappings) {
         this.mappings = mappings
     }
 
-    Optional<String> getMapping(ThreePidType type) {
+    Optional<String> getMapping(String type) {
         if (mappings == null) {
             return Optional.empty()
         }
@@ -118,4 +117,5 @@ class LdapConfig implements InitializingBean {
     void afterPropertiesSet() throws Exception {
         log.info("Matrix ID type: {}", getType())
     }
+
 }

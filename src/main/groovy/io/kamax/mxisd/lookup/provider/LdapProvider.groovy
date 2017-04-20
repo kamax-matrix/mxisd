@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.lookup.provider
 
-import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.LdapConfig
 import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.lookup.SingleLookupRequest
@@ -61,7 +60,7 @@ class LdapProvider implements ThreePidProvider {
         return 20
     }
 
-    Optional<String> lookup(LdapConnection conn, ThreePidType medium, String value) {
+    Optional<String> lookup(LdapConnection conn, String medium, String value) {
         Optional<String> queryOpt = ldapCfg.getMapping(medium)
         if (!queryOpt.isPresent()) {
             log.warn("{} is not a supported 3PID type for LDAP lookup", medium)
@@ -142,8 +141,7 @@ class LdapProvider implements ThreePidProvider {
 
             for (ThreePidMapping mapping : mappings) {
                 try {
-                    ThreePidType type = ThreePidType.valueOf(mapping.getMedium())
-                    Optional<String> mxid = lookup(conn, type, mapping.getValue())
+                    Optional<String> mxid = lookup(conn, mapping.getMedium(), mapping.getValue())
                     if (mxid.isPresent()) {
                         mapping.setMxid(mxid.get())
                         mappingsFound.add(mapping)

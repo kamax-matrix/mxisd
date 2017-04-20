@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.lookup.provider
 
-import io.kamax.mxisd.api.ThreePidType
 import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
@@ -112,11 +111,12 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
 
     @Override
     Optional<?> find(SingleLookupRequest request) {
-        log.info("Performing DNS lookup for {}", request.getThreePid())
-        if (ThreePidType.email != request.getType()) {
+        if (!StringUtils.equals("email", request.getType())) { // TODO use enum
             log.info("Skipping unsupported type {} for {}", request.getType(), request.getThreePid())
             return Optional.empty()
         }
+
+        log.info("Performing DNS lookup for {}", request.getThreePid())
 
         String domain = request.getThreePid().substring(request.getThreePid().lastIndexOf("@") + 1)
         log.info("Domain name for {}: {}", request.getThreePid(), domain)
@@ -134,7 +134,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
         Map<String, List<ThreePidMapping>> domains = new HashMap<>()
 
         for (ThreePidMapping mapping : mappings) {
-            if (!StringUtils.equals(mapping.getMedium(), ThreePidType.email.toString())) {
+            if (!StringUtils.equals("email", mapping.getMedium())) {
                 log.info("Skipping unsupported type {} for {}", mapping.getMedium(), mapping.getValue())
                 continue
             }
