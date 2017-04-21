@@ -123,7 +123,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
         Optional<String> baseUrl = findIdentityServerForDomain(domain)
 
         if (baseUrl.isPresent()) {
-            return performLookup(baseUrl.get(), request.getType().toString(), request.getThreePid())
+            return find(baseUrl.get(), request.getType().toString(), request.getThreePid())
         }
 
         return Optional.empty()

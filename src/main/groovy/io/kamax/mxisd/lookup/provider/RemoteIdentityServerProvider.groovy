@@ -73,26 +73,6 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
         }
     }
 
-    Optional<ThreePidMapping> performLookup(String remote, String medium, String address) throws IOException, JsonException {
-        HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
-                "${remote}/_matrix/identity/api/v1/lookup?medium=${medium}&address=${address}"
-        ).openConnection()
-
-        def output = json.parseText(rootSrvConn.getInputStream().getText())
-        if (output['address']) {
-            log.info("Found 3PID mapping: {}", output)
-
-            ThreePidMapping mapping = new ThreePidMapping()
-            mapping.setMedium(output['medium'].toString())
-            mapping.setValue(output['address'].toString())
-            mapping.setMxid(output['mxid'].toString())
-            return Optional.of(mapping)
-        }
-
-        log.info("Empty 3PID mapping from {}", remote)
-        return Optional.empty()
-    }
-
     Optional<?> find(String remote, String type, String threePid) {
         log.info("Looking up {} 3PID {} using {}", type, threePid, remote)
 
