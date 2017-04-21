@@ -21,8 +21,12 @@
 package io.kamax.mxisd.controller.v1
 
 import io.kamax.mxisd.exception.NotImplementedException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
+import javax.servlet.http.HttpServletRequest
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET
 import static org.springframework.web.bind.annotation.RequestMethod.POST
@@ -30,23 +34,33 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST
 @RestController
 class SessionController {
 
+    private Logger log = LoggerFactory.getLogger(SessionController.class)
+
     @RequestMapping(value = "/_matrix/identity/api/v1/validate/email/requestToken", method = POST)
-    String init() {
+    String init(HttpServletRequest request) {
+        log.error("{} was requested but not implemented", request.getRequestURL())
+
         throw new NotImplementedException()
     }
 
     @RequestMapping(value = "/_matrix/identity/api/v1/validate/email/submitToken", method = [GET, POST])
-    String validate() {
+    String validate(HttpServletRequest request) {
+        log.error("{} was requested but not implemented", request.getRequestURL())
+
         throw new NotImplementedException()
     }
 
     @RequestMapping(value = "/_matrix/identity/api/v1/3pid/getValidated3pid", method = POST)
-    String check() {
+    String check(HttpServletRequest request) {
+        log.error("{} was requested but not implemented", request.getRequestURL())
+
         throw new NotImplementedException()
     }
 
     @RequestMapping(value = "/_matrix/identity/api/v1/3pid/bind", method = POST)
-    String bind() {
+    String bind(HttpServletRequest request) {
+        log.error("{} was requested but not implemented", request.getRequestURL())
+
         throw new NotImplementedException()
     }
 

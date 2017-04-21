@@ -24,15 +24,21 @@ import groovy.json.JsonOutput
 import io.kamax.mxisd.exception.BadRequestException
 import io.kamax.mxisd.exception.NotImplementedException
 import io.kamax.mxisd.key.KeyManager
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+import javax.servlet.http.HttpServletRequest
+
 import static org.springframework.web.bind.annotation.RequestMethod.GET
 
 @RestController
 class KeyController {
+
+    private Logger log = LoggerFactory.getLogger(KeyController.class)
 
     @Autowired
     private KeyManager keyMgr
@@ -49,12 +55,16 @@ class KeyController {
     }
 
     @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/ephemeral/isvalid", method = GET)
-    String checkEphemeralKeyValidity() {
+    String checkEphemeralKeyValidity(HttpServletRequest request) {
+        log.error("{} was requested but not implemented", request.getRequestURL())
+
         throw new NotImplementedException()
     }
 
     @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/isvalid", method = GET)
-    String checkKeyValidity() {
+    String checkKeyValidity(HttpServletRequest request) {
+        log.error("{} was requested but not implemented", request.getRequestURL())
+
         throw new NotImplementedException()
     }
 

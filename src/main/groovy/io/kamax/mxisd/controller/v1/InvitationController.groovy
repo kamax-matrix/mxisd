@@ -21,16 +21,24 @@
 package io.kamax.mxisd.controller.v1
 
 import io.kamax.mxisd.exception.NotImplementedException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+
+import javax.servlet.http.HttpServletRequest
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 
 @RestController
 class InvitationController {
 
+    private Logger log = LoggerFactory.getLogger(InvitationController.class)
+
     @RequestMapping(value = "/_matrix/identity/api/v1/store-invite", method = POST)
-    String store() {
+    String store(HttpServletRequest request) {
+        log.error("{} was requested but not implemented", request.getRequestURL())
+
         throw new NotImplementedException()
     }
 
