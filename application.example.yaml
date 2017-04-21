@@ -73,12 +73,12 @@ ldap:
   #
   # Typical values:
   # - For type 'uid':
-  #   - Samba/AD: sAMAccountName
+  #   - Samba/AD: userPrincipalName
   #   - LDAP: If someone knows the most appropriate value, please open an issue
   #
   # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute and
   #   are typically not used.
-  attribute: 'sAMAccountName'
+  attribute: 'userPrincipalName'
 
   # Configure each 3PID type with a dedicated query.
   mappings:
@@ -89,7 +89,7 @@ ldap:
     # Phone numbers use the MSISDN format: https://en.wikipedia.org/wiki/MSISDN
     # This format does not include international prefix (+ or 00) and therefore has to be put in the query.
     # Adapt this to your needs for each attribute.
-    msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid)(otherTelephone=+%3pid))"
+    msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
 
 
 
