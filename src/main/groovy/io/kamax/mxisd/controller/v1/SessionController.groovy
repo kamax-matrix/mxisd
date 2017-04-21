@@ -36,14 +36,14 @@ class SessionController {
 
     private Logger log = LoggerFactory.getLogger(SessionController.class)
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/validate/email/requestToken", method = POST)
+    @RequestMapping(value = "/_matrix/identity/api/v1/validate/{medium}/requestToken", method = POST)
     String init(HttpServletRequest request) {
         log.error("{} was requested but not implemented", request.getRequestURL())
 
         throw new NotImplementedException()
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/validate/email/submitToken", method = [GET, POST])
+    @RequestMapping(value = "/_matrix/identity/api/v1/validate/{medium}/submitToken", method = [GET, POST])
     String validate(HttpServletRequest request) {
         log.error("{} was requested but not implemented", request.getRequestURL())
 
