@@ -72,12 +72,9 @@ ldap:
   # The attribute containing the binding itself. This value will be used differently depending on the type.
   #
   # Typical values:
-  # - For type 'uid':
-  #   - Samba/AD: userPrincipalName
-  #   - LDAP: If someone knows the most appropriate value, please open an issue
-  #
+  # - For type 'uid': userPrincipalName
   # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute and
-  #   are typically not used.
+  #   is typically not used.
   attribute: 'userPrincipalName'
 
   # Configure each 3PID type with a dedicated query.
