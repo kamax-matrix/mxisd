@@ -38,9 +38,9 @@ import java.util.concurrent.RecursiveTask
 import java.util.function.Function
 
 @Component
-class DnsLookupFetcher implements IThreePidProvider {
+class DnsLookupProvider implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(DnsLookupFetcher.class)
+    private Logger log = LoggerFactory.getLogger(DnsLookupProvider.class)
 
     @Autowired
     private ServerConfig srvCfg

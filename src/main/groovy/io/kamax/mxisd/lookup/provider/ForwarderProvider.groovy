@@ -30,9 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class ForwarderFetcher implements IThreePidProvider {
+class ForwarderProvider implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(ForwarderFetcher.class)
+    private Logger log = LoggerFactory.getLogger(ForwarderProvider.class)
 
     @Autowired
     private ForwardConfig cfg
