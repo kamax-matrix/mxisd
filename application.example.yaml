@@ -56,6 +56,10 @@ lookup:
     # In case no binding is found, query an application server which implements the single lookup end-point
     # to return bridge virtual user that would allow the user to be contacted directly by the said bridge.
     #
+    # If a binding is returned, the application server is not expected to sign the message as it is not meant to be
+    # reachable from the outside.
+    # If a signature is provided, it will be discarded/replaced by this IS implementation (to be implemented).
+    #
     # IMPORTANT: This bypass the regular Invite system of the Homeserver. It will be up to the Application Server
     # to handle such invite. Also, if the bridged user were to actually join Matrix later, or if a 3PID binding is found
     # room rights and history would not be transferred, as it would appear as a regular Matrix user to the Homeserver.

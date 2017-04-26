@@ -37,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class LdapProvider implements ThreePidProvider {
+class LdapProvider implements IThreePidProvider {
 
     public static final String UID = "uid"
     public static final String MATRIX_ID = "mxid"

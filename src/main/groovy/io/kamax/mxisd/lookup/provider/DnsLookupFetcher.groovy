@@ -23,6 +23,7 @@ package io.kamax.mxisd.lookup.provider
 import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
+import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,12 +38,20 @@ import java.util.concurrent.RecursiveTask
 import java.util.function.Function
 
 @Component
-class DnsLookupProvider extends RemoteIdentityServerProvider {
+class DnsLookupFetcher implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(DnsLookupProvider.class)
+    private Logger log = LoggerFactory.getLogger(DnsLookupFetcher.class)
 
     @Autowired
     private ServerConfig srvCfg
+
+    @Autowired
+    private IRemoteIdentityServerFetcher fetcher
+
+    @Override
+    boolean isLocal() {
+        return false
+    }
 
     @Override
     int getPriority() {
@@ -87,7 +96,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
             for (SRVRecord record : records) {
                 log.info("Found SRV record: {}", record.toString())
                 String baseUrl = "https://${record.getTarget().toString(true)}:${record.getPort()}"
-                if (isUsableIdentityServer(baseUrl)) {
+                if (fetcher.isUsable(baseUrl)) {
                     log.info("Found Identity Server for domain {} at {}", domain, baseUrl)
                     return Optional.of(baseUrl)
                 } else {
@@ -100,7 +109,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
 
         log.info("Performing basic lookup using domain name {}", domain)
         String baseUrl = "https://" + domain
-        if (isUsableIdentityServer(baseUrl)) {
+        if (fetcher.isUsable(baseUrl)) {
             log.info("Found Identity Server for domain {} at {}", domain, baseUrl)
             return Optional.of(baseUrl)
         } else {
@@ -123,7 +132,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
         Optional<String> baseUrl = findIdentityServerForDomain(domain)
 
         if (baseUrl.isPresent()) {
-            return find(baseUrl.get(), request.getType().toString(), request.getThreePid())
+            return fetcher.find(baseUrl.get(), request.getType().toString(), request.getThreePid())
         }
 
         return Optional.empty()
@@ -205,7 +214,7 @@ class DnsLookupProvider extends RemoteIdentityServerProvider {
             if (!baseUrl.isPresent()) {
                 log.info("No usable Identity server for domain {}", domain)
             } else {
-                domainMappings.addAll(find(baseUrl.get(), mappings))
+                domainMappings.addAll(fetcher.find(baseUrl.get(), mappings))
                 log.info("Found {} mappings in domain {}", domainMappings.size(), domain)
             }
 
