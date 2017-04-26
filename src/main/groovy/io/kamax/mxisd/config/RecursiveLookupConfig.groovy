@@ -29,6 +29,7 @@ class RecursiveLookupConfig {
 
     private boolean enabled
     private List<String> allowedCidr
+    private RecursiveLookupBridgeConfig bridge
 
     boolean isEnabled() {
         return enabled
@@ -44,6 +45,14 @@ class RecursiveLookupConfig {
 
     void setAllowedCidr(List<String> allowedCidr) {
         this.allowedCidr = allowedCidr
+    }
+
+    RecursiveLookupBridgeConfig getBridge() {
+        return bridge
+    }
+
+    void setBridge(RecursiveLookupBridgeConfig bridge) {
+        this.bridge = bridge
     }
 
 }

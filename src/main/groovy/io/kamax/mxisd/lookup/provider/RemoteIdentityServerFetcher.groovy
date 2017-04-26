@@ -25,6 +25,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.kamax.mxisd.controller.v1.ClientBulkLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
+import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
@@ -34,22 +35,24 @@ import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.HttpClients
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
-abstract class RemoteIdentityServerProvider implements ThreePidProvider {
+@Component
+@Scope("prototype")
+@Lazy
+public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher {
 
     public static final String THREEPID_TEST_MEDIUM = "email"
     public static final String THREEPID_TEST_ADDRESS = "john.doe@example.org"
 
-    private Logger log = LoggerFactory.getLogger(RemoteIdentityServerProvider.class)
+    private Logger log = LoggerFactory.getLogger(RemoteIdentityServerFetcher.class)
 
     private JsonSlurper json = new JsonSlurper()
 
     @Override
-    boolean isLocal() {
-        return false
-    }
-
-    boolean isUsableIdentityServer(String remote) {
+    boolean isUsable(String remote) {
         try {
             HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
                     "${remote}/_matrix/identity/api/v1/lookup?medium=${THREEPID_TEST_MEDIUM}&address=${THREEPID_TEST_ADDRESS}"
@@ -73,6 +76,7 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
         }
     }
 
+    @Override
     Optional<?> find(String remote, String type, String threePid) {
         log.info("Looking up {} 3PID {} using {}", type, threePid, remote)
 
@@ -98,6 +102,7 @@ abstract class RemoteIdentityServerProvider implements ThreePidProvider {
         }
     }
 
+    @Override
     List<ThreePidMapping> find(String remote, List<ThreePidMapping> mappings) {
         List<ThreePidMapping> mappingsFound = new ArrayList<>()
 

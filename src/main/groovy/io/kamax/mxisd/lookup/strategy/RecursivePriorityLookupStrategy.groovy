@@ -26,7 +26,8 @@ import io.kamax.mxisd.lookup.ALookupRequest
 import io.kamax.mxisd.lookup.BulkLookupRequest
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
-import io.kamax.mxisd.lookup.provider.ThreePidProvider
+import io.kamax.mxisd.lookup.fetcher.IBridgeFetcher
+import io.kamax.mxisd.lookup.provider.IThreePidProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
@@ -42,7 +43,10 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     private RecursiveLookupConfig recursiveCfg
 
     @Autowired
-    private List<ThreePidProvider> providers
+    private List<IThreePidProvider> providers
+
+    @Autowired
+    private IBridgeFetcher bridge
 
     private List<CIDRUtils> allowedCidr = new ArrayList<>()
 
@@ -50,10 +54,10 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     void afterPropertiesSet() throws Exception {
         log.info("Found ${providers.size()} providers")
 
-        providers.sort(new Comparator<ThreePidProvider>() {
+        providers.sort(new Comparator<IThreePidProvider>() {
 
             @Override
-            int compare(ThreePidProvider o1, ThreePidProvider o2) {
+            int compare(IThreePidProvider o1, IThreePidProvider o2) {
                 return Integer.compare(o2.getPriority(), o1.getPriority())
             }
 
@@ -66,25 +70,32 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         }
     }
 
-    List<ThreePidProvider> listUsableProviders(ALookupRequest request) {
-        List<ThreePidProvider> usableProviders = new ArrayList<>()
-
+    boolean isAllowedForRecursive(String source) {
         boolean canRecurse = false
+
         if (recursiveCfg.isEnabled()) {
             log.debug("Checking {} CIDRs for recursion", allowedCidr.size())
             for (CIDRUtils cidr : allowedCidr) {
-                if (cidr.isInRange(request.getRequester())) {
-                    log.debug("{} is in range {}, allowing recursion", request.getRequester(), cidr.getNetworkAddress())
+                if (cidr.isInRange(source)) {
+                    log.debug("{} is in range {}, allowing recursion", source, cidr.getNetworkAddress())
                     canRecurse = true
                     break
                 } else {
-                    log.debug("{} is not in range {}", request.getRequester(), cidr.getNetworkAddress())
+                    log.debug("{} is not in range {}", source, cidr.getNetworkAddress())
                 }
             }
         }
 
+        return canRecurse
+    }
+
+    List<IThreePidProvider> listUsableProviders(ALookupRequest request) {
+        List<IThreePidProvider> usableProviders = new ArrayList<>()
+
+        boolean canRecurse = isAllowedForRecursive(request.getRequester())
+
         log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse)
-        for (ThreePidProvider provider : providers) {
+        for (IThreePidProvider provider : providers) {
             if (provider.isLocal() || canRecurse) {
                 usableProviders.add(provider)
             }
@@ -95,11 +106,16 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
 
     @Override
     Optional<?> find(SingleLookupRequest request) {
-        for (ThreePidProvider provider : listUsableProviders(request)) {
+        for (IThreePidProvider provider : listUsableProviders(request)) {
             Optional<?> lookupDataOpt = provider.find(request)
             if (lookupDataOpt.isPresent()) {
                 return lookupDataOpt
             }
+        }
+
+        if (recursiveCfg.getBridge().getEnabled() && (!recursiveCfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))) {
+            log.info("Using bridge failover for lookup")
+            return bridge.find(request)
         }
 
         return Optional.empty()
@@ -110,7 +126,7 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         List<ThreePidMapping> mapToDo = new ArrayList<>(request.getMappings())
         List<ThreePidMapping> mapFoundAll = new ArrayList<>()
 
-        for (ThreePidProvider provider : listUsableProviders(request)) {
+        for (IThreePidProvider provider : listUsableProviders(request)) {
             if (mapToDo.isEmpty()) {
                 log.info("No more mappings to lookup")
                 break

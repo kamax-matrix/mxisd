@@ -18,22 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup.provider
+package io.kamax.mxisd.lookup.fetcher
 
-import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 
-interface ThreePidProvider {
+interface IRemoteIdentityServerFetcher {
 
-    boolean isLocal()
+    boolean isUsable(String remote)
 
-    /**
-     * Higher has more priority
-     */
-    int getPriority() // Should not be here but let's KISS for now
+    Optional<?> find(String remote, String type, String threePid)
 
-    Optional<?> find(SingleLookupRequest request)
-
-    List<ThreePidMapping> populate(List<ThreePidMapping> mappings)
+    List<ThreePidMapping> find(String remote, List<ThreePidMapping> mappings)
 
 }
