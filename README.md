@@ -86,6 +86,8 @@ After [building](#build) the software, run all the following commands as `root` 
 # Integration
 - [synapse](https://github.com/kamax-io/mxisd/wiki/Synapse-Integration)
 
+# Docker
+- https://github.com/doofy/mxisd-docker
+
 # TODO
 - Deb package
-- Docker container
