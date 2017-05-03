@@ -25,6 +25,8 @@ import io.kamax.mxisd.lookup.ThreePidMapping
 
 interface IThreePidProvider {
 
+    boolean isEnabled()
+
     boolean isLocal()
 
     /**

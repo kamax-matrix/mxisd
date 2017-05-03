@@ -51,6 +51,11 @@ class LdapProvider implements IThreePidProvider {
     private LdapConfig ldapCfg
 
     @Override
+    boolean isEnabled() {
+        return ldapCfg.getEnabled()
+    }
+
+    @Override
     boolean isLocal() {
         return true
     }

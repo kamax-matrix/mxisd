@@ -32,6 +32,7 @@ class LdapConfig implements InitializingBean {
 
     private Logger log = LoggerFactory.getLogger(LdapConfig.class)
 
+    private boolean enabled;
     private String host
     private int port
     private String baseDn
@@ -40,6 +41,14 @@ class LdapConfig implements InitializingBean {
     private String bindDn
     private String bindPassword
     private Map<String, String> mappings
+
+    boolean getEnabled() {
+        return enabled
+    }
+
+    void setEnabled(boolean enabled) {
+        this.enabled = enabled
+    }
 
     String getHost() {
         return host

@@ -49,6 +49,11 @@ class DnsLookupProvider implements IThreePidProvider {
     private IRemoteIdentityServerFetcher fetcher
 
     @Override
+    boolean isEnabled() {
+        return true
+    }
+
+    @Override
     boolean isLocal() {
         return false
     }

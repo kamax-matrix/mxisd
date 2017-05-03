@@ -96,7 +96,7 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
 
         log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse)
         for (IThreePidProvider provider : providers) {
-            if (provider.isLocal() || canRecurse) {
+            if (provider.isEnabled() && (provider.isLocal() || canRecurse)) {
                 usableProviders.add(provider)
             }
         }
