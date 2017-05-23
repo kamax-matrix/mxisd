@@ -27,7 +27,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.4.3.RELEASE'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
     }
 }
 
@@ -43,7 +43,7 @@ dependencies {
     compile 'commons-io:commons-io:2.5'
 
     // Spring Boot - standalone app
-    compile 'org.springframework.boot:spring-boot-starter-web:1.4.3.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE'
 
     // ed25519 handling
     compile 'net.i2p.crypto:eddsa:0.1.0'
