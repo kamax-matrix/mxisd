@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException
 import org.apache.directory.api.ldap.model.cursor.EntryCursor
 import org.apache.directory.api.ldap.model.entry.Attribute
+import org.apache.directory.api.ldap.model.entry.Entry
 import org.apache.directory.api.ldap.model.message.SearchScope
 import org.apache.directory.ldap.client.api.LdapConnection
 import org.apache.directory.ldap.client.api.LdapNetworkConnection
@@ -75,29 +76,35 @@ class LdapProvider implements IThreePidProvider {
         String searchQuery = queryOpt.get().replaceAll("%3pid", value)
         EntryCursor cursor = conn.search(ldapCfg.getBaseDn(), searchQuery, SearchScope.SUBTREE, ldapCfg.getAttribute())
         try {
-            if (cursor.next()) {
-                Attribute attribute = cursor.get().get(ldapCfg.getAttribute())
-                if (attribute != null) {
-                    String data = attribute.get().toString()
-                    if (data.length() < 1) {
-                        log.warn("Bind was found but value is empty")
-                        return Optional.empty()
-                    }
+            while (cursor.next()) {
+                Entry entry = cursor.get()
+                log.info("Found possible match, DN: {}", entry.getDn().getName())
 
-                    StringBuilder matrixId = new StringBuilder()
-                    // TODO Should we turn this block into a map of functions?
-                    if (StringUtils.equals(UID, ldapCfg.getType())) {
-                        matrixId.append("@").append(data).append(":").append(srvCfg.getName())
-                    } else if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
-                        matrixId.append(data)
-                    } else {
-                        log.warn("Bind was found but type ${ldapCfg.getType()} is not supported")
-                        return Optional.empty()
-                    }
-
-                    log.info("Found a match in LDAP")
-                    return Optional.of(matrixId.toString())
+                Attribute attribute = entry.get(ldapCfg.getAttribute())
+                if (attribute == null) {
+                    log.info("DN {}: no attribute {}, skpping", ldapCfg.getAttribute())
+                    continue
                 }
+
+                String data = attribute.get().toString()
+                if (data.length() < 1) {
+                    log.info("DN {}: empty attribute {}, skipping", ldapCfg.getAttribute())
+                    continue
+                }
+
+                StringBuilder matrixId = new StringBuilder()
+                // TODO Should we turn this block into a map of functions?
+                if (StringUtils.equals(UID, ldapCfg.getType())) {
+                    matrixId.append("@").append(data).append(":").append(srvCfg.getName())
+                } else if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
+                    matrixId.append(data)
+                } else {
+                    log.warn("Bind was found but type {} is not supported", ldapCfg.getType())
+                    continue
+                }
+
+                log.info("DN {} is a valid match", entry.getDn().getName())
+                return Optional.of(matrixId.toString())
             }
         } catch (CursorLdapReferralException e) {
             log.warn("3PID {} is only available via referral, skipping", value)
