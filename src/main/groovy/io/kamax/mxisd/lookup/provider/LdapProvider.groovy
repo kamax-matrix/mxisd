@@ -69,7 +69,7 @@ class LdapProvider implements IThreePidProvider {
     Optional<String> lookup(LdapConnection conn, String medium, String value) {
         Optional<String> queryOpt = ldapCfg.getMapping(medium)
         if (!queryOpt.isPresent()) {
-            log.warn("{} is not a supported 3PID type for LDAP lookup", medium)
+            log.warn("{} is not a configured 3PID type for LDAP lookup", medium)
             return Optional.empty()
         }
 
