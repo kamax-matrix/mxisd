@@ -32,7 +32,8 @@ class LdapConfig implements InitializingBean {
 
     private Logger log = LoggerFactory.getLogger(LdapConfig.class)
 
-    private boolean enabled;
+    private boolean enabled
+    private boolean tls
     private String host
     private int port
     private String baseDn
@@ -48,6 +49,14 @@ class LdapConfig implements InitializingBean {
 
     void setEnabled(boolean enabled) {
         this.enabled = enabled
+    }
+
+    boolean getTls() {
+        return tls
+    }
+
+    void setTls(boolean tls) {
+        this.tls = tls
     }
 
     String getHost() {

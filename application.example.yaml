@@ -98,6 +98,7 @@ lookup:
 
 ldap:
   enabled: true
+  tls: false
   host: 'localhost'
   port: 389
   bindDn: 'CN=Matrix Identity Server,CN=Users,DC=example,DC=org'

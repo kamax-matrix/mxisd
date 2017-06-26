@@ -119,7 +119,7 @@ class LdapProvider implements IThreePidProvider {
     Optional<?> find(SingleLookupRequest request) {
         log.info("Performing LDAP lookup ${request.getThreePid()} of type ${request.getType()}")
 
-        LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort())
+        LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort(), ldapCfg.getTls())
         try {
             conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
 
