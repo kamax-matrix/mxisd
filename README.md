@@ -79,7 +79,7 @@ After [building](#build) the software, run all the following commands as `root` 
 5. Make it executable: `chmod a+x /usr/bin/mxisd`
 6. Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
 7. Configure `/etc/mxis/mxisd.yaml` with production value, `key.path` being the most important - `/etc/mxis/mxisd-signing.key` is recommended
-8. Copy `<repo root>/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
+8. Copy `<repo root>/src/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
 9. Enable service: `systemctl enable mxisd`
 10. Start service: `systemctl start mxisd`
 
