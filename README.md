@@ -71,17 +71,35 @@ See the [Integration section](https://github.com/kamax-io/mxisd#integration) for
 
 # Install
 After [building](#build) the software, run all the following commands as `root` or using `sudo`
+1. Prepare files and directories:
+```
+# Create a dedicated user
+useradd -r mxisd
 
-1. Create a dedicated user: `useradd -r mxisd`
-2. Create config directory: `mkdir /etc/mxis`
-3. Change user ownership of `/etc/mxis` to dedicated user: `chown mxisd /etc/mxis`
-4. Copy `<repo root>/build/libs/mxisd.jar` to `/usr/bin/mxisd`: `cp ./build/libs/mxisd.jar /usr/bin/mxisd`
-5. Make it executable: `chmod a+x /usr/bin/mxisd`
-6. Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
-7. Configure `/etc/mxis/mxisd.yaml` with production value, `key.path` being the most important - `/etc/mxis/mxisd-signing.key` is recommended
-8. Copy `<repo root>/src/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
-9. Enable service: `systemctl enable mxisd`
-10. Start service: `systemctl start mxisd`
+# Create config directory
+mkdir /etc/mxis
+
+# Change user ownership of /etc/mxis to dedicated user
+chown mxisd /etc/mxis
+
+# Copy <repo root>/build/libs/mxisd.jar to /usr/bin/mxisd
+cp ./build/libs/mxisd.jar /usr/bin/mxisd
+
+# Make it executable
+chmod a+x /usr/bin/mxisd
+```
+
+2. Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
+3. Configure `/etc/mxis/mxisd.yaml` with production value, `key.path` being the most important - `/etc/mxis/mxisd-signing.key` is recommended
+4. Copy `<repo root>/src/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
+5. Manage service for auto-startup
+```
+# Enable service
+systemctl enable mxisd
+
+# Start service
+systemctl start mxisd
+```
 
 # Integration
 - [synapse](https://github.com/kamax-io/mxisd/wiki/Synapse-Integration)
