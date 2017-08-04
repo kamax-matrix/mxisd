@@ -114,8 +114,10 @@ ldap:
 
   # The attribute containing the binding itself. This value will be used differently depending on the type.
   #
+  # /!\ This should match the synapse LDAP Authenticator 'uid' configuration /!\
+  #
   # Typical values:
-  # - For type 'uid': userPrincipalName
+  # - For type 'uid': 'userPrincipalName' or 'uid' or 'saMAccountName'
   # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute and
   #   is typically not used.
   attribute: 'userPrincipalName'
