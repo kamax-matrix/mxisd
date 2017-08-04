@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.config
 
+import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
@@ -133,7 +134,23 @@ class LdapConfig implements InitializingBean {
 
     @Override
     void afterPropertiesSet() throws Exception {
+        log.info("LDAP enabled: {}", getEnabled())
+
+        if (!getEnabled()) {
+            return
+        }
+
         log.info("Matrix ID type: {}", getType())
+        log.info("LDAP Host: {}", getHost())
+        log.info("LDAP Bind DN: {}", getBindDn())
+        log.info("LDAP Attribute: {}", getAttribute())
+
+        if (StringUtils.isBlank(getHost())) {
+            throw new IllegalStateException("LDAP Host must be configured!")
+        }
+        if (StringUtils.isBlank(getAttribute())) {
+            throw new IllegalStateException("LDAP attribute must be configured!")
+        }
     }
 
 }
