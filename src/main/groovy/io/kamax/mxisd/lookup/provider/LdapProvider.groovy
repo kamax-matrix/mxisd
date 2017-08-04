@@ -82,7 +82,7 @@ class LdapProvider implements IThreePidProvider {
 
                 Attribute attribute = entry.get(ldapCfg.getAttribute())
                 if (attribute == null) {
-                    log.info("DN {}: no attribute {}, skpping", ldapCfg.getAttribute())
+                    log.info("DN {}: no attribute {}, skpping", entry.getDn(), ldapCfg.getAttribute())
                     continue
                 }
 
