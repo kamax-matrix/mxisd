@@ -1,24 +1,28 @@
-![Travis-CI build status](https://travis-ci.org/kamax-io/mxisd.svg?branch=master)
+mxisd
+-----
+![Travis-CI build status](https://travis-ci.org/kamax-io/mxisd.svg?branch=master)  
 
-# Introduction
-mxisd is an implementation of the Matrix Identity Server which aims to provide an alternative
-to [sydent](https://github.com/matrix-org/sydent) and an external validation implementation of the
-[Identity Service API](http://matrix.org/docs/spec/identity_service/unstable.html).
+[Overview](#overview) | [Lookup process](#lookup-process) | [Packages](#packages) | [From source](#from-source) | [Integration](#integration) | [Support](#support)
 
-# Scope
-mxisd is a federated Matrix Identity Server following a cascading lookup model, using LDAP then other identity servers, including the central Matrix servers.
+# Overview
+mxisd is an implementation of the [Matrix Identity Service specification](https://matrix.org/docs/spec/identity_service/unstable.html) 
+which provides an alternative to the vector.im and matrix.org Identity servers.
 
-mxisd is currently read-only, implementation to bind 3PID will follow shortly.
+mxisd is federated and uses a cascading lookup model which performs lookup from a more authoritative to a less authoritative source, usually doing:
+- Local identity stores: LDAP, etc.
+- Federated identity stores: another Identity Server in charge of a specific domain, if applicable
+- Configured identity stores: another Identiy Server specifically configured, if part of some sort of group trust
+- Root identity store: vector.im/matrix.org central Identity Server
 
-## Contact
-If you need help, want to report a bug or just say hi, you can reach us at [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io)
+mxisd only aims to support workflow that does NOT break federation or basic lookup process of the Matrix ecosystem.
 
-For more high-level discussion about the Identity Server architecture/API, go to [#matrix-identity:matrix.org](https://matrix.to/#/#matrix-identity:matrix.org)
+**NOTE:** mxisd is **NOT** an authenticator module for homeservers. Identity servers are opaque public directories for those who publish their data on it.  
+For more details, please read the [Identity Service specification](https://matrix.org/docs/spec/identity_service/unstable.html).
 
-## How does it work
+# Lookup Process
 Default Lookup strategy will use a priority order and a configurable recursive/local type of request.
 
-### E-mail
+## E-mail
 Given the 3PID `john.doe@example.org`, the following will be performed until a mapping is found:
 - LDAP: lookup the Matrix ID (partial or complete) from a configurable attribute using a dedicated query.
 - DNS: lookup another Identity Server using the domain part of an e-mail and:
@@ -26,12 +30,23 @@ Given the 3PID `john.doe@example.org`, the following will be performed until a m
   - Lookup using the base domain name `example.org`
 - Forwarder: Proxy the request to other configurable identity servers.
 
-### Phone number
+## Phone number
 Given the phone number `+123456789`, the following lookup logic will be performed:
 - LDAP: lookup the Matrix ID (partial or complete) from a configurable attribute using a dedicated query.
 - Forwarder: Proxy the request to other configurable identity servers.
 
-# Quick start
+# Packages
+## Native installer
+See releases for native installers of supported systems.  
+If none is available, please use other packages or build from source.
+
+## Docker
+- https://github.com/doofy/mxisd-docker
+
+## Debian
+TODO
+
+# From Source
 ## Requirements
 - JDK 1.8
 
@@ -48,7 +63,7 @@ cd mxisd
 3. Provide the LDAP attributes you want to use for lookup
 4. Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. `@john.doe:example.org`)
 
-## Run
+## Test build and configuration
 Start the server in foreground:
 ```
 ./gradlew bootRun
@@ -69,7 +84,7 @@ as the reference Home Server implementation [synapse](https://github.com/matrix-
 to an ID server.  
 See the [Integration section](https://github.com/kamax-io/mxisd#integration) for more details.
 
-# Install
+## Install
 After [building](#build) the software, run all the following commands as `root` or using `sudo`
 1. Prepare files and directories:
 ```
@@ -104,8 +119,11 @@ systemctl start mxisd
 # Integration
 - [synapse](https://github.com/kamax-io/mxisd/wiki/Synapse-Integration)
 
-# Docker
-- https://github.com/doofy/mxisd-docker
+# Support
+## Community
+If you need help, want to report a bug or just say hi, you can reach us on Matrix at [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io)  
+For more high-level discussion about the Identity Server architecture/API, go to [#matrix-identity:matrix.org](https://matrix.to/#/#matrix-identity:matrix.org)
 
-# TODO
-- Deb package
+## Professional
+If you would prefer professional support/custom development for mxisd and/or for Matrix in general, including other open source technologies/products, 
+please visit [our website](https://www.kamax.io/) to get in touch with us and get a quote.
