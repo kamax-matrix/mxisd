@@ -60,6 +60,9 @@ dependencies {
     // JSON
     compile 'com.google.code.gson:gson:2.8.1'
 
+    // Phone numbers validation
+    compile 'com.googlecode.libphonenumber:libphonenumber:8.7.1'
+
     testCompile 'junit:junit:4.12'
 }
 

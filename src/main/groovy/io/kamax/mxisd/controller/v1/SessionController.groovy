@@ -25,7 +25,6 @@ import com.google.gson.JsonObject
 import io.kamax.mxisd.controller.v1.io.SessionEmailTokenRequestJson
 import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson
 import io.kamax.mxisd.exception.BadRequestException
-import io.kamax.mxisd.exception.NotImplementedException
 import io.kamax.mxisd.lookup.ThreePid
 import io.kamax.mxisd.mapping.MappingManager
 import org.apache.commons.io.IOUtils
@@ -79,10 +78,14 @@ class SessionController {
     }
 
     @RequestMapping(value = "/_matrix/identity/api/v1/validate/{medium}/submitToken")
-    String validate(HttpServletRequest request) {
+    String validate(HttpServletRequest request,
+                    @RequestParam String sid,
+                    @RequestParam("client_secret") String secret, @RequestParam String token) {
         log.info("Requested: {}?{}", request.getRequestURL(), request.getQueryString())
 
-        throw new NotImplementedException()
+        mgr.validate(sid, secret, token)
+
+        return "{}"
     }
 
     @RequestMapping(value = "/_matrix/identity/api/v1/3pid/getValidated3pid")
@@ -123,7 +126,7 @@ class SessionController {
         } catch (BadRequestException e) {
             log.info("requested session was not validated")
 
-            obj = new JsonObject()
+            JsonObject obj = new JsonObject()
             obj.addProperty("errcode", "M_SESSION_NOT_VALIDATED")
             obj.addProperty("error", e.getMessage())
             response.setStatus(HttpStatus.SC_BAD_REQUEST)

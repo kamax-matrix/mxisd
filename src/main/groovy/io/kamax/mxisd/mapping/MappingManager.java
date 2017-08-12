@@ -60,6 +60,18 @@ public class MappingManager {
         return sid;
     }
 
+    public void validate(String sid, String secret, String token) {
+        Session s = sessions.get(sid);
+        if (s == null || !StringUtils.equals(s.secret, secret)) {
+            throw new BadRequestException("sid or secret are not valid");
+        }
+
+        // TODO actually check token
+
+        s.isValidated = true;
+        s.validationTimestamp = Instant.now();
+    }
+
     public Optional<ThreePid> getValidated(String sid, String secret) {
         Session s = sessions.get(sid);
         if (s != null && StringUtils.equals(s.secret, secret)) {
