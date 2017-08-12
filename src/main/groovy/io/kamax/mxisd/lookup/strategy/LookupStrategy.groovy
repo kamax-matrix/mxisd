@@ -23,8 +23,11 @@ package io.kamax.mxisd.lookup.strategy
 import io.kamax.mxisd.lookup.BulkLookupRequest
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
+import io.kamax.mxisd.lookup.provider.IThreePidProvider
 
 interface LookupStrategy {
+
+    List<IThreePidProvider> getLocalProviders()
 
     Optional<?> find(SingleLookupRequest request)
 

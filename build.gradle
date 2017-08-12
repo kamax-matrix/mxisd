@@ -57,6 +57,9 @@ dependencies {
     // HTTP connections
     compile 'org.apache.httpcomponents:httpclient:4.5.3'
 
+    // JSON
+    compile 'com.google.code.gson:gson:2.8.1'
+
     testCompile 'junit:junit:4.12'
 }
 

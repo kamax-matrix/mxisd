@@ -34,6 +34,9 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import java.util.function.Predicate
+import java.util.stream.Collectors
+
 @Component
 class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBean {
 
@@ -102,6 +105,16 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         }
 
         return usableProviders
+    }
+
+    @Override
+    List<IThreePidProvider> getLocalProviders() {
+        return providers.stream().filter(new Predicate<IThreePidProvider>() {
+            @Override
+            boolean test(IThreePidProvider iThreePidProvider) {
+                return iThreePidProvider.isEnabled() && iThreePidProvider.isLocal()
+            }
+        }).collect(Collectors.toList())
     }
 
     @Override
