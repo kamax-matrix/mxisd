@@ -1,9 +1,10 @@
-# Gradle-related local directories
-/.gradle
-/build
+# Build directories
+.gradle/
+build/
+out/
 
-# Devs editor of choice config
-/.idea
+# IDEs directories
+.idea/
 
 # Local dev config
-/application.yaml
+application.yaml
