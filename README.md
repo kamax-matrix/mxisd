@@ -2,7 +2,7 @@ mxisd
 -----
 ![Travis-CI build status](https://travis-ci.org/kamax-io/mxisd.svg?branch=master)  
 
-[Overview](#overview) | [Lookup process](#lookup-process) | [Packages](#packages) | [From source](#from-source) | [Integration](#integration) | [Support](#support)
+[Overview](#overview) | [Lookup process](#lookup-process) | [Packages](#packages) | [From source](#from-source) | [Network Discovery](#network-discovery) | [Integration](#integration) | [Support](#support)
 
 # Overview
 mxisd is an implementation of the [Matrix Identity Service specification](https://matrix.org/docs/spec/identity_service/unstable.html) 
@@ -116,8 +116,19 @@ systemctl enable mxisd
 systemctl start mxisd
 ```
 
+# Network Discovery
+To allow other federated Identity Server to reach yours, configure the following DNS SRV entry (adapt to your values):
+```
+_matrix-identity._tcp.example.com. 3600 IN SRV 10 0 443 matrix.example.com.
+```
+This would only apply for 3PID that are DNS-based, like e-mails. For anything else, like phone numbers, no federation is currently possible.  
+
+The port must be HTTPS capable. Typically, the port `8090` of mxisd should be behind a reverse proxy which does HTTPS.
+See the [integration section](#integration) for more details.
+
 # Integration
-- [synapse](https://github.com/kamax-io/mxisd/wiki/Synapse-Integration)
+- [HTTPS and Reverse proxy](https://github.com/kamax-io/mxisd/wiki/HTTPS)
+- [synapse](https://github.com/kamax-io/mxisd/wiki/Homeserver-Integration)
 
 # Support
 ## Community
