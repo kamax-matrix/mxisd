@@ -20,9 +20,22 @@
 
 package io.kamax.mxisd.lookup;
 
+import java.util.List;
+
 public abstract class ALookupRequest {
 
+    private String id;
     private String requester;
+    private boolean isRecursive;
+    private List<String> recurseHosts;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getRequester() {
         return requester;
@@ -30,6 +43,22 @@ public abstract class ALookupRequest {
 
     public void setRequester(String requester) {
         this.requester = requester;
+    }
+
+    public boolean isRecursive() {
+        return isRecursive;
+    }
+
+    public void setRecursive(boolean recursive) {
+        isRecursive = recursive;
+    }
+
+    public List<String> getRecurseHosts() {
+        return recurseHosts;
+    }
+
+    public void setRecurseHosts(List<String> recurseHosts) {
+        this.recurseHosts = recurseHosts;
     }
 
 }
