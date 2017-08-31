@@ -32,6 +32,7 @@ buildscript {
 }
 
 repositories {
+    maven { url "https://kamax.io/maven/releases/" }
     mavenCentral()
 }
 
@@ -44,6 +45,9 @@ dependencies {
 
     // Spring Boot - standalone app
     compile 'org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE'
+
+    // Matrix Java SDK
+    compile 'io.kamax:matrix-java-sdk:0.0.1'
 
     // ed25519 handling
     compile 'net.i2p.crypto:eddsa:0.1.0'
@@ -62,6 +66,9 @@ dependencies {
 
     // Phone numbers validation
     compile 'com.googlecode.libphonenumber:libphonenumber:8.7.1'
+
+    // Google Firebase Authentication backend
+    compile 'com.google.firebase:firebase-admin:5.3.0'
 
     testCompile 'junit:junit:4.12'
 }
