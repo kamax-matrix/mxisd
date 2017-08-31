@@ -1,9 +1,10 @@
 package io.kamax.mxisd.config;
 
-import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
+import io.kamax.mxisd.GlobalProvider;
 import io.kamax.mxisd.auth.provider.GoogleFirebaseAuthenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,9 @@ import javax.annotation.PostConstruct;
 public class FirebaseConfig {
 
     private Logger log = LoggerFactory.getLogger(FirebaseConfig.class);
+
+    @Autowired
+    private ServerConfig srvCfg;
 
     private boolean enabled;
     private String credentials;
@@ -52,14 +56,16 @@ public class FirebaseConfig {
             log.info("Credentials: {}", getCredentials());
             log.info("Database: {}", getDatabase());
         }
+
+
     }
 
     @Bean
-    public AuthenticatorProvider getProvider() {
+    public GlobalProvider getProvider() {
         if (!enabled) {
             return new GoogleFirebaseAuthenticator(false);
+        } else {
+            return new GoogleFirebaseAuthenticator(credentials, database, srvCfg.getName());
         }
-
-        return new GoogleFirebaseAuthenticator(credentials, database);
     }
 }
