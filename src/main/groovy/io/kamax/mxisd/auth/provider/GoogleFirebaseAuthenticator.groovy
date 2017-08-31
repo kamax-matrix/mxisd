@@ -4,10 +4,8 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.*
 import com.google.firebase.internal.NonNull
-import com.google.firebase.tasks.OnCompleteListener
 import com.google.firebase.tasks.OnFailureListener
 import com.google.firebase.tasks.OnSuccessListener
-import com.google.firebase.tasks.Task
 import io.kamax.matrix.MatrixID
 import io.kamax.matrix.ThreePidMedium
 import io.kamax.mxisd.GlobalProvider
@@ -101,35 +99,32 @@ public class GoogleFirebaseAuthenticator implements GlobalProvider {
         OnSuccessListener<UserRecord> success = new OnSuccessListener<UserRecord>() {
             @Override
             void onSuccess(UserRecord result) {
+                log.info("Found 3PID match for {}:{} - UID is {}", medium, address, result.getUid())
                 r = result;
+                l.countDown()
             }
         };
 
         OnFailureListener failure = new OnFailureListener() {
             @Override
             void onFailure(@NonNull Exception e) {
+                log.info("No 3PID match for {}:{} - {}", medium, address, e.getMessage())
                 r = null;
-            }
-        };
-
-        OnCompleteListener<UserRecord> complete = new OnCompleteListener<UserRecord>() {
-            @Override
-            void onComplete(@NonNull Task<UserRecord> task) {
-                l.countDown();
+                l.countDown()
             }
         };
 
         if (ThreePidMedium.Email.is(medium)) {
+            log.info("Performing E-mail 3PID lookup for {}", address)
             fbAuth.getUserByEmail(address)
                     .addOnSuccessListener(success)
-                    .addOnFailureListener(failure)
-                    .addOnCompleteListener(complete);
+                    .addOnFailureListener(failure);
             waitOnLatch(l);
         } else if (ThreePidMedium.PhoneNumber.is(medium)) {
+            log.info("Performing msisdn 3PID lookup for {}", address)
             fbAuth.getUserByPhoneNumber(address)
                     .addOnSuccessListener(success)
-                    .addOnFailureListener(failure)
-                    .addOnCompleteListener(complete);
+                    .addOnFailureListener(failure);
             waitOnLatch(l);
         } else {
             log.info("{} is not a supported 3PID medium", medium);
@@ -203,6 +198,7 @@ public class GoogleFirebaseAuthenticator implements GlobalProvider {
 
                 log.info("{} was successfully authenticated", id);
                 result.success(id, token.getName());
+                l.countDown()
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -215,10 +211,6 @@ public class GoogleFirebaseAuthenticator implements GlobalProvider {
                 }
 
                 result.failure();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<FirebaseToken>() {
-            @Override
-            void onComplete(@NonNull Task<FirebaseToken> task) {
                 l.countDown()
             }
         });
