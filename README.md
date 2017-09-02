@@ -64,9 +64,9 @@ cd mxisd
 4. Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. `@john.doe:example.org`)
 
 ## Test build and configuration
-Start the server in foreground:
+Start the server in foreground to validate the build:
 ```
-./gradlew bootRun
+./build/libs/mxisd.jar
 ```
 
 Ensure the signing key is available:
@@ -91,21 +91,28 @@ After [building](#build) the software, run all the following commands as `root` 
 # Create a dedicated user
 useradd -r mxisd
 
-# Create config directory
-mkdir /etc/mxis
+# Create bin directory
+mkdir /opt/mxisd
 
-# Change user ownership of /etc/mxis to dedicated user
-chown mxisd /etc/mxis
+# Create config directory and set ownership
+mkdir /etc/mxisd
+chown mxisd /etc/mxisd
 
-# Copy <repo root>/build/libs/mxisd.jar to /usr/bin/mxisd
-cp ./build/libs/mxisd.jar /usr/bin/mxisd
+# Create data directory and set ownership
+mkdir /var/opt/mxisd
+chown mxisd /var/opt/mxisd
 
-# Make it executable
-chmod a+x /usr/bin/mxisd
+# Copy <repo root>/build/libs/mxisd.jar to bin directory
+cp ./build/libs/mxisd.jar /opt/mxisd/
+chown mxisd /opt/mxisd/mxisd.jar
+chmod a+x /opt/mxisd/mxisd.jar
+
+# Create symlink for easy exec
+ln -s /opt/mxisd/mxisd.jar /usr/bin/mxisd
 ```
 
-2. Copy (or create a new) `./application.yaml` to `/etc/mxis/mxisd.yaml`
-3. Configure `/etc/mxis/mxisd.yaml` with production value, `key.path` being the most important - `/etc/mxis/mxisd-signing.key` is recommended
+2. Copy the config file created earlier `./application.yaml` to `/etc/mxisd/mxisd.yaml`
+3. Configure `/etc/mxisd/mxisd.yaml` with production value, `key.path` being the most important - `/var/opt/mxisd/signing.key` is recommended
 4. Copy `<repo root>/src/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
 5. Manage service for auto-startup
 ```
