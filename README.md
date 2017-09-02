@@ -42,9 +42,13 @@ If none is available, please use other packages or build from source.
 
 ## Docker
 ### From source
+Build the image:
 ```
 docker build -t your-org/mxisd:$(git describe --tags --always --dirty) .
-docker run -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -t your-org/mxisd:$(git describe --tags --always --dirty)
+```
+You can run a container of the given image and test it with the following command (adapt volumes host paths):
+```
+docker run -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -p 8090:8090 -t your-org/mxisd:$(git describe --tags --always --dirty)
 ```
 
 ## Debian
