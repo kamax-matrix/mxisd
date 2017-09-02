@@ -66,7 +66,7 @@ cd mxisd
 ## Test build and configuration
 Start the server in foreground to validate the build:
 ```
-./build/libs/mxisd.jar
+java -jar build/libs/mxisd.jar
 ```
 
 Ensure the signing key is available:
