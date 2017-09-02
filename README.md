@@ -121,7 +121,7 @@ ln -s /opt/mxisd/mxisd.jar /usr/bin/mxisd
 
 2. Copy the config file created earlier `./application.yaml` to `/etc/mxisd/mxisd.yaml`
 3. Configure `/etc/mxisd/mxisd.yaml` with production value, `key.path` being the most important - `/var/opt/mxisd/signing.key` is recommended
-4. Copy `<repo root>/src/main/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
+4. Copy `<repo root>/src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
 5. Manage service for auto-startup
 ```
 # Enable service
