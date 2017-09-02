@@ -41,7 +41,11 @@ See releases for native installers of supported systems.
 If none is available, please use other packages or build from source.
 
 ## Docker
-- https://github.com/doofy/mxisd-docker
+### From source
+```
+docker build -t your-org/mxisd:$(git describe --tags --always --dirty) .
+docker run -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -t your-org/mxisd:$(git describe --tags --always --dirty)
+```
 
 ## Debian
 TODO
