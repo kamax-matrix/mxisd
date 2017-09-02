@@ -6,7 +6,6 @@ import com.google.firebase.auth.*
 import com.google.firebase.internal.NonNull
 import com.google.firebase.tasks.OnFailureListener
 import com.google.firebase.tasks.OnSuccessListener
-import io.kamax.matrix.MatrixID
 import io.kamax.matrix.ThreePidMedium
 import io.kamax.mxisd.GlobalProvider
 import io.kamax.mxisd.auth.UserAuthResult
@@ -141,7 +140,7 @@ public class GoogleFirebaseAuthenticator implements GlobalProvider {
             return [
                     address   : request.getThreePid(),
                     medium    : request.getType(),
-                    mxid      : new MatrixID(urOpt.get().getUid(), domain).getId(),
+                    mxid      : "@${urOpt.get().getUid()}:${domain}",
                     not_before: 0,
                     not_after : 9223372036854775807,
                     ts        : 0
@@ -162,7 +161,7 @@ public class GoogleFirebaseAuthenticator implements GlobalProvider {
                     ThreePidMapping result = new ThreePidMapping();
                     result.setMedium(o.getMedium())
                     result.setValue(o.getValue())
-                    result.setMxid(new MatrixID(urOpt.get().getUid(), domain).getId())
+                    result.setMxid("@${urOpt.get().getUid()}:${domain}")
                     results.add(result)
                 }
             }
