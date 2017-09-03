@@ -40,6 +40,11 @@ See [releases]((https://github.com/kamax-io/mxisd/releases)) for native installe
 If none is available, please use other packages or build from source.
 
 ## Docker
+```
+docker pull kamax/mxisd
+```
+
+For more info, see [the public repository](https://hub.docker.com/r/kamax/mxisd/)
 ### From source
 [Build mxisd](#build) then build the docker image:
 ```
