@@ -1,3 +1,5 @@
+import java.util.regex.Pattern
+
 /*
  * mxisd - Matrix Identity Server Daemon
  * Copyright (C) 2017 Maxime Dor
@@ -20,6 +22,34 @@
 
 apply plugin: 'groovy'
 apply plugin: 'org.springframework.boot'
+
+def confFileName = "application.example.yaml"
+def distDir = "${project.buildDir}/dist"
+
+def debBinPath = "/usr/lib/mxisd"
+def debConfPath = "/etc/mxisd"
+def debDataPath = "/var/lib/mxisd"
+def debSystemdPath = "/etc/systemd/system"
+
+def debConfFileName = "mxisd-sample.yaml"
+
+def debBuildBasePath = "${project.buildDir}/tmp/debian"
+def debBuildDebianPath = "${debBuildBasePath}/DEBIAN"
+def debBuildBinPath = "${debBuildBasePath}${debBinPath}"
+def debBuildConfPath = "${debBuildBasePath}${debConfPath}"
+def debBuildDataPath = "${debBuildBasePath}${debDataPath}"
+def debBuildSystemdPath = "${debBuildBasePath}${debSystemdPath}"
+
+String gitVersion() {
+    def versionPattern = Pattern.compile("v(\\d+\\.)?(\\d+\\.)?(\\d+)(-.*)?")
+    ByteArrayOutputStream out = new ByteArrayOutputStream()
+    exec {
+        commandLine = [ 'git', 'describe', '--always', '--dirty' ]
+        standardOutput = out
+    }
+    def v = out.toString().replace(System.lineSeparator(), '')
+    return versionPattern.matcher(v).matches() ? v.substring(1) : v
+}
 
 buildscript {
     repositories {
@@ -72,4 +102,83 @@ springBoot {
     embeddedLaunchScriptProperties = [
             confFolder: "/etc/default"
     ]
+}
+
+task buildDeb(dependsOn: build) {
+    doLast {
+        def v = gitVersion()
+        println "Version for package: ${v}"
+        mkdir distDir
+        mkdir debBuildBasePath
+        mkdir "${debBuildBasePath}/DEBIAN"
+        mkdir debBuildBinPath
+        mkdir debBuildConfPath
+        mkdir debBuildDataPath
+        mkdir debBuildSystemdPath
+
+        copy {
+            from "${project.buildDir}/libs/mxisd.jar"
+            into debBuildBinPath
+        }
+
+        ant.chmod(
+            file: "${debBuildBinPath}/mxisd.jar",
+            perm: 'a+x'
+        )
+
+        copy {
+            from(project.file(confFileName)) {
+                rename confFileName, debConfFileName
+            }
+            into debBuildConfPath
+        }
+
+        ant.replace(
+            file: "${debBuildConfPath}/${debConfFileName}",
+            token: '%SIGNING_KEYS_PATH%',
+            value: "${debDataPath}/signing.key"
+        )
+
+        copy {
+            from project.file('src/debian')
+            into debBuildDebianPath
+        }
+
+        ant.replace(
+            file: "${debBuildDebianPath}/control",
+            token: 'Version: 0',
+            value: "Version: ${v}"
+        )
+
+        ant.replace(
+            file: "${debBuildDebianPath}/postinst",
+            token: '%DEB_DATA_DIR%',
+            value: debDataPath
+        )
+
+        ant.chmod(
+            file: "${debBuildDebianPath}/postinst",
+            perm: 'a+x'
+        )
+
+        ant.chmod(
+            file: "${debBuildDebianPath}/prerm",
+            perm: 'a+x'
+        )
+
+        copy {
+            from "${project.file('src/systemd/mxisd.service')}"
+            into debBuildSystemdPath
+        }
+
+        exec {
+            commandLine(
+                'fakeroot',
+                'dpkg-deb',
+                '-b',
+                debBuildBasePath,
+                "${project.buildDir}/dist"
+            )
+        }
+    }
 }

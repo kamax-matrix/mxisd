@@ -6,7 +6,7 @@ server:
   # HTTPS can be configured using Tomcat configuration properties.
   port: 8090
 
-  # Realm under which this Identity Server is authoritative.
+  # Realm under which this Identity Server is authoritative, required.
   #
   # This is used to avoid unnecessary connections and endless recursive lookup.
   # e.g. domain name in e-mails.
@@ -16,12 +16,14 @@ server:
 
 key:
 
-  # Where the Identity Server signing key will be stored.
+  # Absolute path for the Identity Server signing key, required.
+  # During testing, /var/tmp/mxisd.key is a possible value
   #
-  # /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
-  # /!\  CHANGE THIS TO A MORE PERMANENT LOCATION!  /!\
-  # /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
-  path: '/var/tmp/mxis-signing.key'
+  # For production, use a stable location like:
+  #   - /var/opt/mxisd/sign.key
+  #   - /var/local/mxisd/sign.key
+  #   - /var/lib/mxisd/sign.key
+  path: '%SIGNING_KEYS_PATH%'
 
 
 
@@ -97,7 +99,7 @@ lookup:
 
 
 ldap:
-  enabled: true
+  enabled: false
   tls: false
   host: 'localhost'
   port: 389

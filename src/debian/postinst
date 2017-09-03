@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+# Add service account
+useradd -r mxisd || true
+
+# Set permissions for data directory
+chown -R mxisd:mxisd %DEB_DATA_DIR%
+
+# Create symlink to mxusd
+ln -sfT /usr/lib/mxisd/mxisd.jar /usr/bin/mxisd
+
+# Enable systemd service
+systemctl enable mxisd.service

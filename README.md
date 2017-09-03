@@ -36,8 +36,7 @@ Given the phone number `+123456789`, the following lookup logic will be performe
 - Forwarder: Proxy the request to other configurable identity servers.
 
 # Packages
-## Native installer
-See releases for native installers of supported systems.  
+See [releases]((https://github.com/kamax-io/mxisd/releases)) for native installers of supported systems.  
 If none is available, please use other packages or build from source.
 
 ## Docker
@@ -52,7 +51,20 @@ docker run -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -p 8090:8
 ```
 
 ## Debian
-TODO
+### Download
+See the [releases section](https://github.com/kamax-io/mxisd/releases).
+
+### From source
+Requirements:
+- fakeroot
+- dpkg-deb
+
+Run:
+```
+./gradlew buildDeb 
+```
+
+You will find the debian package in `build/dist`
 
 # From Source
 ## Requirements
@@ -68,8 +80,9 @@ cd mxisd
 ## Configure
 1. Create a new local config: `cp application.example.yaml application.yaml`
 2. Set the `server.name` value to the domain value used in your Home Server configuration
-3. Provide the LDAP attributes you want to use for lookup
-4. Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. `@john.doe:example.org`)
+3. Set an absolute location for the signing keys using `key.path`
+4. Provide the LDAP attributes you want to use for lookup, if you want to use one
+5. Edit an entity in your LDAP database and set the configure attribute with a Matrix ID (e.g. `@john.doe:example.org`)
 
 ## Test build and configuration
 Start the server in foreground to validate the build:

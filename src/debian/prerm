@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Stop running instance if needed
+systemctl stop mxisd.service
+
+# Disable service if exists
+systemctl disable mxisd.service
+
+# remove symlink
+rm /usr/bin/mxisd
