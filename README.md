@@ -41,7 +41,7 @@ If none is available, please use other packages or build from source.
 
 ## Docker
 ### From source
-Build the image:
+[Build mxisd](#build) then build the docker image:
 ```
 docker build -t your-org/mxisd:$(git describe --tags --always --dirty) .
 ```
