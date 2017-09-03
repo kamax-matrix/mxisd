@@ -22,6 +22,7 @@ package io.kamax.mxisd.controller.v1
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import io.kamax.mxisd.lookup.ALookupRequest
 import io.kamax.mxisd.lookup.BulkLookupRequest
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
@@ -52,15 +53,23 @@ class MappingController {
     @Autowired
     private SignatureManager signMgr
 
+    private void setRequesterInfo(ALookupRequest lookupReq, HttpServletRequest req) {
+        lookupReq.setRequester(req.getRemoteAddr())
+        String xff = req.getHeader("X-FORWARDED-FOR")
+        lookupReq.setRecursive(StringUtils.isNotBlank(xff))
+        if (lookupReq.isRecursive()) {
+            lookupReq.setRecurseHosts(Arrays.asList(xff.split(",")))
+        }
+    }
+
     @RequestMapping(value = "/_matrix/identity/api/v1/lookup", method = GET)
     String lookup(HttpServletRequest request, @RequestParam String medium, @RequestParam String address) {
-        String remote = StringUtils.defaultIfBlank(request.getHeader("X-FORWARDED-FOR"), request.getRemoteAddr())
-        log.info("Got request from {}", remote)
-
         SingleLookupRequest lookupRequest = new SingleLookupRequest()
-        lookupRequest.setRequester(remote)
+        setRequesterInfo(lookupRequest, request)
         lookupRequest.setType(medium)
         lookupRequest.setThreePid(address)
+
+        log.info("Got request from {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.isRecursive())
 
         Optional<?> lookupOpt = strategy.find(lookupRequest)
         if (!lookupOpt.isPresent()) {
@@ -79,11 +88,9 @@ class MappingController {
 
     @RequestMapping(value = "/_matrix/identity/api/v1/bulk_lookup", method = POST)
     String bulkLookup(HttpServletRequest request) {
-        String remote = StringUtils.defaultIfBlank(request.getHeader("X-FORWARDED-FOR"), request.getRemoteAddr())
-        log.info("Got request from {}", remote)
-
         BulkLookupRequest lookupRequest = new BulkLookupRequest()
-        lookupRequest.setRequester(remote)
+        setRequesterInfo(lookupRequest, request)
+        log.info("Got request from {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.isRecursive())
 
         ClientBulkLookupRequest input = (ClientBulkLookupRequest) json.parseText(request.getInputStream().getText())
         List<ThreePidMapping> mappings = new ArrayList<>()
