@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration
 @ConfigurationProperties(prefix = "forward")
 class ForwardConfig {
 
-    private List<String> servers
+    private List<String> servers = new ArrayList<>()
 
     List<String> getServers() {
         return servers

@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.config
 
+import io.kamax.mxisd.exception.ConfigurationException
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -42,7 +43,7 @@ class KeyConfig implements InitializingBean {
     @Override
     void afterPropertiesSet() throws Exception {
         if (StringUtils.isBlank(getPath())) {
-            throw new RuntimeException("Key path must be configured!")
+            throw new ConfigurationException("key.path")
         }
     }
 

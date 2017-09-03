@@ -15,7 +15,7 @@ class RecursiveLookupBridgeConfig implements InitializingBean {
     private boolean enabled
     private boolean recursiveOnly
     private String server
-    private Map<String, String> mappings
+    private Map<String, String> mappings = new HashMap<>()
 
     boolean getEnabled() {
         return enabled
@@ -51,10 +51,13 @@ class RecursiveLookupBridgeConfig implements InitializingBean {
 
     @Override
     void afterPropertiesSet() throws Exception {
+        log.info("--- Bridge integration lookups config ---")
         log.info("Enabled: {}", getEnabled())
-        log.info("Recursive only: {}", getRecursiveOnly())
-        log.info("Server: {}", getServer())
-        log.info("Mappings: {}", mappings.size())
+        if (getEnabled()) {
+            log.info("Recursive only: {}", getRecursiveOnly())
+            log.info("Fallback Server: {}", getServer())
+            log.info("Mappings: {}", mappings.size())
+        }
     }
 
 }
