@@ -101,7 +101,7 @@ lookup:
 ldap:
 
   # Global enable/disable switch
-  enabled: true
+  enabled: false
 
   # Connection configuration to the LDAP server
   connection:
