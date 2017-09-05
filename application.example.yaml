@@ -99,41 +99,85 @@ lookup:
 
 
 ldap:
-  enabled: false
-  tls: false
-  host: 'localhost'
-  port: 389
-  bindDn: 'CN=Matrix Identity Server,CN=Users,DC=example,DC=org'
-  bindPassword: 'password'
-  baseDn: 'CN=Users,DC=example,DC=org'
 
-  # How should we resolve the Matrix ID in case of a match using the attribute.
+  # Global enable/disable switch
+  enabled: true
+
+  # Connection configuration to the LDAP server
+  connection:
+
+    # If the connection should be secure
+    tls: false
+
+    # Host to connect to
+    host: 'localhost'
+
+    # Port to connect to
+    port: 389
+
+    # Bind DN to use when performing lookups
+    bindDn: 'CN=Matrix Identity Server,CN=Users,DC=example,DC=org'
+
+    # Bind password to use
+    bindPassword: 'password'
+
+    # Base DN used in all queries
+    baseDn: 'CN=Users,DC=example,DC=org'
+
+  # How to map Matrix attributes with LDAP attributes when performing lookup/auth
+  attributes:
+
+    # The username/login that will be looked up or used to build Matrix IDs
+    uid:
+
+      # How should we resolve the Matrix ID in case of a match using the attribute.
+      #
+      # The following type are supported:
+      # - uid : the attribute only contains the UID part of the Matrix ID. e.g. 'john.doe' in @john.doe:example.org
+      # - mxid : the attribute contains the full Matrix ID - e.g. '@john.doe:example.org'
+      type: 'uid'
+
+      # The attribute containing the binding itself. This value will be used differently depending on the type.
+      #
+      # /!\ This should match the synapse LDAP Authenticator 'uid' configuration /!\
+      #
+      # Typical values:
+      # - For type 'uid': 'userPrincipalName' or 'uid' or 'saMAccountName'
+      # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute and
+      #   is typically not used.
+      value: 'userPrincipalName'
+
+    # The display name of the user
+    name: 'displayName'
+
+  # Configuration section relating the authentication of users performed via LDAP.
   #
-  # The following type are supported:
-  # - uid : the attribute only contains the UID part of the Matrix ID. e.g. 'john.doe' in @john.doe:example.org
-  # - mxid : the attribute contains the full Matrix ID - e.g. '@john.doe:example.org'
-  type: 'uid'
+  # This can be done using the REST Auth module for synapse and pointing it to the identity server.
+  # See https://github.com/maxidor/matrix-synapse-rest-auth
+  auth:
 
-  # The attribute containing the binding itself. This value will be used differently depending on the type.
-  #
-  # /!\ This should match the synapse LDAP Authenticator 'uid' configuration /!\
-  #
-  # Typical values:
-  # - For type 'uid': 'userPrincipalName' or 'uid' or 'saMAccountName'
-  # - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute and
-  #   is typically not used.
-  attribute: 'userPrincipalName'
-
-  # Configure each 3PID type with a dedicated query.
-  mappings:
-    email: "(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))"
-
-    # Phone numbers query.
+    # What to filter potential users by, typically by using a dedicated group.
+    # If this value is not set, login check will be performed for all entities within the LDAP
     #
-    # Phone numbers use the MSISDN format: https://en.wikipedia.org/wiki/MSISDN
-    # This format does not include international prefix (+ or 00) and therefore has to be put in the query.
-    # Adapt this to your needs for each attribute.
-    msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
+    # Example: (memberOf=CN=Matrix Users,CN=Users,DC=example,DC=org)
+    #
+    # /!\ Currently NOT supported due to a possible bug in LDAP library /!\
+    filter: ''
+
+  # Configuration section relating to identity lookups
+  identity:
+
+    # Configure each 3PID type with a dedicated query.
+    medium:
+      # E-mail query
+      email: "(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))"
+
+      # Phone numbers query
+      #
+      # Phone numbers use the MSISDN format: https://en.wikipedia.org/wiki/MSISDN
+      # This format does not include international prefix (+ or 00) and therefore has to be put in the query.
+      # Adapt this to your needs for each attribute.
+      msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
 
 
 

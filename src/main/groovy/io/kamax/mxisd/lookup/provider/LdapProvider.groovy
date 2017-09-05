@@ -20,8 +20,8 @@
 
 package io.kamax.mxisd.lookup.provider
 
-import io.kamax.mxisd.config.LdapConfig
 import io.kamax.mxisd.config.ServerConfig
+import io.kamax.mxisd.config.ldap.LdapConfig
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import org.apache.commons.lang.StringUtils
@@ -53,7 +53,19 @@ class LdapProvider implements IThreePidProvider {
 
     @Override
     boolean isEnabled() {
-        return ldapCfg.getEnabled()
+        return ldapCfg.isEnabled()
+    }
+
+    private LdapConnection getConn() {
+        return new LdapNetworkConnection(ldapCfg.getConn().getHost(), ldapCfg.getConn().getPort(), ldapCfg.getConn().isTls())
+    }
+
+    private void bind(LdapConnection conn) {
+        conn.bind(ldapCfg.getConn().getBindDn(), ldapCfg.getConn().getBindPassword())
+    }
+
+    private String getUidAttribute() {
+        return ldapCfg.getAttribute().getUid().getValue();
     }
 
     @Override
@@ -67,20 +79,22 @@ class LdapProvider implements IThreePidProvider {
     }
 
     Optional<String> lookup(LdapConnection conn, String medium, String value) {
-        Optional<String> queryOpt = ldapCfg.getMapping(medium)
+        String uidAttribute = getUidAttribute()
+
+        Optional<String> queryOpt = ldapCfg.getIdentity().getQuery(medium)
         if (!queryOpt.isPresent()) {
             log.warn("{} is not a configured 3PID type for LDAP lookup", medium)
             return Optional.empty()
         }
 
         String searchQuery = queryOpt.get().replaceAll("%3pid", value)
-        EntryCursor cursor = conn.search(ldapCfg.getBaseDn(), searchQuery, SearchScope.SUBTREE, ldapCfg.getAttribute())
+        EntryCursor cursor = conn.search(ldapCfg.getConn().getBaseDn(), searchQuery, SearchScope.SUBTREE, uidAttribute)
         try {
             while (cursor.next()) {
                 Entry entry = cursor.get()
                 log.info("Found possible match, DN: {}", entry.getDn().getName())
 
-                Attribute attribute = entry.get(ldapCfg.getAttribute())
+                Attribute attribute = entry.get(uidAttribute)
                 if (attribute == null) {
                     log.info("DN {}: no attribute {}, skpping", entry.getDn(), ldapCfg.getAttribute())
                     continue
@@ -94,12 +108,13 @@ class LdapProvider implements IThreePidProvider {
 
                 StringBuilder matrixId = new StringBuilder()
                 // TODO Should we turn this block into a map of functions?
-                if (StringUtils.equals(UID, ldapCfg.getType())) {
+                String uidType = ldapCfg.getAttribute().getUid().getType()
+                if (StringUtils.equals(UID, uidType)) {
                     matrixId.append("@").append(data).append(":").append(srvCfg.getName())
-                } else if (StringUtils.equals(MATRIX_ID, ldapCfg.getType())) {
+                } else if (StringUtils.equals(MATRIX_ID, uidType)) {
                     matrixId.append(data)
                 } else {
-                    log.warn("Bind was found but type {} is not supported", ldapCfg.getType())
+                    log.warn("Bind was found but type {} is not supported", uidType)
                     continue
                 }
 
@@ -119,9 +134,9 @@ class LdapProvider implements IThreePidProvider {
     Optional<?> find(SingleLookupRequest request) {
         log.info("Performing LDAP lookup ${request.getThreePid()} of type ${request.getType()}")
 
-        LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort(), ldapCfg.getTls())
+        LdapConnection conn = getConn()
         try {
-            conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
+            bind(conn)
 
             Optional<String> mxid = lookup(conn, request.getType(), request.getThreePid())
             if (mxid.isPresent()) {
@@ -147,9 +162,9 @@ class LdapProvider implements IThreePidProvider {
         log.info("Looking up {} mappings", mappings.size())
         List<ThreePidMapping> mappingsFound = new ArrayList<>()
 
-        LdapConnection conn = new LdapNetworkConnection(ldapCfg.getHost(), ldapCfg.getPort())
+        LdapConnection conn = getConn()
         try {
-            conn.bind(ldapCfg.getBindDn(), ldapCfg.getBindPassword())
+            bind(conn)
 
             for (ThreePidMapping mapping : mappings) {
                 try {
