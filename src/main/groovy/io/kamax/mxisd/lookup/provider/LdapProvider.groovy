@@ -20,8 +20,6 @@
 
 package io.kamax.mxisd.lookup.provider
 
-import io.kamax.mxisd.auth.UserAuthResult
-import io.kamax.mxisd.auth.provider.AuthenticatorProvider
 import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.config.ldap.LdapConfig
 import io.kamax.mxisd.lookup.SingleLookupRequest
@@ -40,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class LdapProvider implements IThreePidProvider, AuthenticatorProvider {
+class LdapProvider implements IThreePidProvider {
 
     public static final String UID = "uid"
     public static final String MATRIX_ID = "mxid"
@@ -66,17 +64,8 @@ class LdapProvider implements IThreePidProvider, AuthenticatorProvider {
         conn.bind(ldapCfg.getConn().getBindDn(), ldapCfg.getConn().getBindPassword())
     }
 
-    @Override
-    UserAuthResult authenticate(String id, String password) {
-        LdapConnection conn = getConn()
-        try {
-            bind(conn)
-
-            // TODO finish this
-            return new UserAuthResult().failure()
-        } finally {
-            conn.close()
-        }
+    private String getUidAttribute() {
+        return ldapCfg.getAttribute().getUid().getValue();
     }
 
     @Override
@@ -90,7 +79,7 @@ class LdapProvider implements IThreePidProvider, AuthenticatorProvider {
     }
 
     Optional<String> lookup(LdapConnection conn, String medium, String value) {
-        String uidAttribute = ldapCfg.getAttribute().getUid().getValue()
+        String uidAttribute = getUidAttribute()
 
         Optional<String> queryOpt = ldapCfg.getIdentity().getQuery(medium)
         if (!queryOpt.isPresent()) {

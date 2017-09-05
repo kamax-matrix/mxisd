@@ -47,7 +47,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE'
 
     // Matrix Java SDK
-    compile 'io.kamax:matrix-java-sdk:0.0.1'
+    compile 'io.kamax:matrix-java-sdk:0.0.2'
 
     // ed25519 handling
     compile 'net.i2p.crypto:eddsa:0.1.0'

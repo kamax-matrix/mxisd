@@ -158,6 +158,8 @@ ldap:
     # If this value is not set, login check will be performed for all entities within the LDAP
     #
     # Example: (memberOf=CN=Matrix Users,CN=Users,DC=example,DC=org)
+    #
+    # /!\ Currently NOT supported due to a possible bug in LDAP library /!\
     filter: ''
 
   # Configuration section relating to identity lookups

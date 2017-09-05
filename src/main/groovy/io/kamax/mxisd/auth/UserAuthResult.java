@@ -14,10 +14,12 @@ public class UserAuthResult {
         return this;
     }
 
-    public void success(String mxid, String displayName) {
+    public UserAuthResult success(String mxid, String displayName) {
         setSuccess(true);
         setMxid(mxid);
         setDisplayName(displayName);
+
+        return this;
     }
 
     public boolean isSuccess() {
