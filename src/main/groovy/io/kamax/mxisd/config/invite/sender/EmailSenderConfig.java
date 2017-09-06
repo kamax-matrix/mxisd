@@ -111,15 +111,6 @@ public class EmailSenderConfig {
 
     @PostConstruct
     private void postConstruct() {
-        if (StringUtils.isBlank(getContentPath())) {
-            throw new ConfigurationException("invite.sender.email.contentPath");
-        }
-
-        File cp = new File(getContentPath()).getAbsoluteFile();
-        if (!cp.exists() || !cp.isFile() || !cp.canRead()) {
-            throw new ConfigurationException("invite.sender.email.contentPath", getContentPath() + " does not exist, is not a file or cannot be read");
-        }
-
         log.info("--- E-mail Invite Sender config ---");
         log.info("Host: {}", getHost());
         log.info("Port: {}", getPort());
@@ -127,7 +118,16 @@ public class EmailSenderConfig {
         log.info("Login: {}", getLogin());
         log.info("Has password: {}", StringUtils.isBlank(getPassword()));
         log.info("E-mail: {}", getEmail());
-        log.info("Content path: {}", cp.getAbsolutePath());
+        if (StringUtils.isBlank(getContentPath())) {
+            log.warn("invite.sender.contentPath is empty! Will not send invites");
+        } else {
+            File cp = new File(getContentPath()).getAbsoluteFile();
+            if (!cp.exists() || !cp.isFile() || !cp.canRead()) {
+                throw new ConfigurationException("invite.sender.email.contentPath", getContentPath() + " does not exist, is not a file or cannot be read");
+            } else {
+                log.info("Content path: {}", cp.getAbsolutePath());
+            }
+        }
     }
 
 }

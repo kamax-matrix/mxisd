@@ -21,6 +21,7 @@
 package io.kamax.mxisd.config.ldap
 
 import groovy.json.JsonOutput
+import io.kamax.mxisd.lookup.provider.LdapProvider
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -110,6 +111,10 @@ class LdapConfig {
             throw new IllegalStateException("Attribute UID value cannot be empty")
         }
 
+        String uidType = attribute.getUid().getType();
+        if (!StringUtils.equals(LdapProvider.UID, uidType) && !StringUtils.equals(LdapProvider.MATRIX_ID, uidType)) {
+            throw new IllegalArgumentException("Unsupported LDAP UID type: " + uidType)
+        }
 
         log.info("Conn: {}", JsonOutput.toJson(conn))
         log.info("Host: {}", conn.getHost())
