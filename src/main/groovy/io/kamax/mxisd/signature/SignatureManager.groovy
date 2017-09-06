@@ -23,6 +23,7 @@ package io.kamax.mxisd.signature
 import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.key.KeyManager
 import net.i2p.crypto.eddsa.EdDSAEngine
+import org.json.JSONObject
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -49,6 +50,18 @@ class SignatureManager implements InitializingBean {
                         "ed25519:${keyMgr.getCurrentIndex()}": sign
                 ]
         ]
+    }
+
+    JSONObject signMessageJson(String message) {
+        byte[] signRaw = signEngine.signOneShot(message.getBytes())
+        String sign = Base64.getEncoder().encodeToString(signRaw)
+
+        JSONObject keySignature = new JSONObject()
+        keySignature.put("ed25519:${keyMgr.getCurrentIndex()}", sign)
+        JSONObject signature = new JSONObject()
+        signature.put("${srvCfg.getName()}", keySignature)
+
+        return signature
     }
 
     @Override

@@ -22,6 +22,7 @@ package io.kamax.mxisd.controller.v1
 
 import com.google.gson.Gson
 import io.kamax.matrix.MatrixID
+import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.controller.v1.io.ThreePidInviteReplyIO
 import io.kamax.mxisd.invitation.IThreePidInvite
 import io.kamax.mxisd.invitation.IThreePidInviteReply
@@ -50,6 +51,9 @@ class InvitationController {
     @Autowired
     private KeyManager keyMgr
 
+    @Autowired
+    private ServerConfig srvCfg
+
     private Gson gson = new Gson()
 
     @RequestMapping(value = "/_matrix/identity/api/v1/store-invite", method = POST)
@@ -62,7 +66,7 @@ class InvitationController {
         IThreePidInvite invite = new ThreePidInvite(new MatrixID(sender), medium, address, roomId)
         IThreePidInviteReply reply = mgr.storeInvite(invite)
 
-        return gson.toJson(new ThreePidInviteReplyIO(reply, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex())))
+        return gson.toJson(new ThreePidInviteReplyIO(reply, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex()), srvCfg.getPublicUrl()))
     }
 
 }

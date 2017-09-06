@@ -24,11 +24,13 @@ import groovy.json.JsonOutput
 import io.kamax.mxisd.exception.BadRequestException
 import io.kamax.mxisd.exception.NotImplementedException
 import io.kamax.mxisd.key.KeyManager
+import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 import javax.servlet.http.HttpServletRequest
@@ -49,6 +51,7 @@ class KeyController {
             throw new BadRequestException("Invalid algorithm: " + keyType)
         }
 
+        log.info("Key {}:{} was requested", keyType, keyId)
         return JsonOutput.toJson([
                 public_key: keyMgr.getPublicKeyBase64(keyId)
         ])
@@ -62,10 +65,14 @@ class KeyController {
     }
 
     @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/isvalid", method = GET)
-    String checkKeyValidity(HttpServletRequest request) {
-        log.error("{} was requested but not implemented", request.getRequestURL())
+    String checkKeyValidity(HttpServletRequest request, @RequestParam("public_key") String pubKey) {
+        log.info("Validating public key {}", pubKey)
 
-        throw new NotImplementedException()
+        // TODO do in manager
+        boolean valid = StringUtils.equals(pubKey, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex()))
+        return JsonOutput.toJson(
+                valid: valid
+        )
     }
 
 }

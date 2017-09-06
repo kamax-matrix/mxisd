@@ -12,17 +12,14 @@ import io.kamax.mxisd.signature.SignatureManager;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +35,6 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,40 +60,12 @@ public class InvitationManager {
     private void postConstruct() {
         gson = new Gson();
 
+        // FIXME export such madness into matrix-java-sdk with a nice wrapper to talk to a homeserver
         try {
-            HttpClientBuilder b = HttpClientBuilder.create();
-
-            // setup a Trust Strategy that allows all certificates.
-            //
-            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-                    return true;
-                }
-            }).build();
-            b.setSslcontext(sslContext);
-
-            // don't check Hostnames, either.
-            //      -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
-            HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-            // here's the special part:
-            //      -- need to create an SSL Socket Factory, to use our weakened "trust strategy";
-            //      -- and create a Registry, to register it.
-            //
+            SSLContext sslContext = SSLContextBuilder.create().loadTrustMaterial(new TrustSelfSignedStrategy()).build();
+            HostnameVerifier hostnameVerifier = new NoopHostnameVerifier();
             SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                    .register("https", sslSocketFactory)
-                    .build();
-
-            // now, we create connection-manager using our Registry.
-            //      -- allows multi-threaded use
-            PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-            b.setConnectionManager(connMgr);
-
-            // finally, build the HttpClient;
-            //      -- done!
-            client = b.build();
+            client = HttpClients.custom().setSSLSocketFactory(sslSocketFactory).build();
         } catch (Exception e) {
             // FIXME do better...
             throw new RuntimeException(e);
@@ -196,31 +163,52 @@ public class InvitationManager {
         if (!hsUrlOpt.isPresent()) {
             log.warn("No HS found for domain {} - ignoring publishing", domain);
         } else {
-            HttpPost req = new HttpPost(hsUrlOpt.get() + "/_matrix/federation/v1/3pid/onbind");
-            JSONObject obj = new JSONObject(); // TODO use Gson instead
-            obj.put("mxisd", threePid.getMxid());
-            obj.put("token", reply.getToken());
-            String mapping = gson.toJson(signMgr.signMessage(obj.toString())); // FIXME we shouldn't need to be doign this
+            // TODO this is needed as this will block if called during authentication cycle due to synapse implementation
+            new Thread(() -> { // FIXME need to make this retryable and within a general background working pool
+                HttpPost req = new HttpPost(hsUrlOpt.get() + "/_matrix/federation/v1/3pid/onbind");
+                // Expected body: https://matrix.to/#/!HUeDbmFUsWAhxHHvFG:matrix.org/$150469846739DCLWc:matrix.trancendances.fr
+                JSONObject obj = new JSONObject(); // TODO use Gson instead
+                obj.put("mxid", threePid.getMxid());
+                obj.put("token", reply.getToken());
+                obj.put("signatures", signMgr.signMessageJson(obj.toString()));
 
-            JSONObject content = new JSONObject(); // TODO use Gson instead
-            content.put("invites", Collections.singletonList(mapping));
-            content.put("medium", threePid.getMedium());
-            content.put("address", threePid.getValue());
-            content.put("mxid", threePid.getMxid());
+                JSONObject objUp = new JSONObject();
+                objUp.put("mxid", threePid.getMxid());
+                objUp.put("medium", threePid.getMedium());
+                objUp.put("address", threePid.getValue());
+                objUp.put("sender", reply.getInvite().getSender().getId());
+                objUp.put("room_id", reply.getInvite().getRoomId());
+                objUp.put("signed", obj);
 
-            StringEntity entity = new StringEntity(content.toString(), StandardCharsets.UTF_8);
-            entity.setContentType("application/json");
-            req.setEntity(entity);
-            try {
-                log.info("Posting onBind event to {}", req.getURI());
-                CloseableHttpResponse response = client.execute(req);
-                response.close();
-            } catch (IOException e) {
-                log.warn("Unable to tell HS {} about invite being mapped", domain, e);
-            }
+                String mapping = gson.toJson(objUp); // FIXME we shouldn't need to be doign this
+
+                JSONObject content = new JSONObject(); // TODO use Gson instead
+                JSONArray invites = new JSONArray();
+                invites.put(objUp);
+                content.put("invites", invites);
+                content.put("medium", threePid.getMedium());
+                content.put("address", threePid.getValue());
+                content.put("mxid", threePid.getMxid());
+
+                content.put("signatures", signMgr.signMessageJson(content.toString()));
+
+                log.info("Will send following JSON to {}: {}", domain, content.toString());
+                StringEntity entity = new StringEntity(content.toString(), StandardCharsets.UTF_8);
+                entity.setContentType("application/json");
+                req.setEntity(entity);
+                try {
+                    log.info("Posting onBind event to {}", req.getURI());
+                    CloseableHttpResponse response = client.execute(req);
+                    log.info("Answer code: {}", response.getStatusLine().getStatusCode());
+                    response.close();
+                } catch (IOException e) {
+                    log.warn("Unable to tell HS {} about invite being mapped", domain, e);
+                }
+                invitations.remove(key);
+            }).start();
         }
 
-        invitations.remove(key);
+
     }
 
 }

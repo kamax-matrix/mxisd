@@ -12,6 +12,12 @@ server:
   # e.g. domain name in e-mails.
   name: 'example.org'
 
+  # Public URL to reach this identity server
+  #
+  # This is used with 3PID invites in room and other Homeserver key verification workflow.
+  # If left unconfigured, it will be generated from the server name
+  # publicUrl: 'https://example.org'
+
 
 
 key:
