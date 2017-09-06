@@ -22,6 +22,8 @@ package io.kamax.mxisd.invitation;
 
 import io.kamax.matrix._MatrixID;
 
+import java.util.Map;
+
 public interface IThreePidInvite {
 
     _MatrixID getSender();
@@ -31,5 +33,7 @@ public interface IThreePidInvite {
     String getAddress();
 
     String getRoomId();
+
+    Map<String, String> getProperties();
 
 }

@@ -22,18 +22,28 @@ package io.kamax.mxisd.invitation;
 
 import io.kamax.matrix._MatrixID;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ThreePidInvite implements IThreePidInvite {
 
     private _MatrixID sender;
     private String medium;
     private String address;
     private String roomId;
+    private Map<String, String> properties;
 
     public ThreePidInvite(_MatrixID sender, String medium, String address, String roomId) {
         this.sender = sender;
         this.medium = medium;
         this.address = address;
         this.roomId = roomId;
+        this.properties = new HashMap<>();
+    }
+
+    public ThreePidInvite(_MatrixID sender, String medium, String address, String roomId, Map<String, String> properties) {
+        this(sender, medium, address, roomId);
+        this.properties = properties;
     }
 
     @Override
@@ -54,6 +64,11 @@ public class ThreePidInvite implements IThreePidInvite {
     @Override
     public String getRoomId() {
         return roomId;
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        return properties;
     }
 
 }

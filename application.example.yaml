@@ -234,5 +234,9 @@ invite:
       # The display name used in the e-mail
       name: "Matrix Identity"
 
-      # The MIME content to send
+      # The MIME content to send, UTF-8 expected
+      #
+      # The following placeholders are possible:
+      # - %SENDER_DISPLAY_NAME%
+      # - %ROOM_NAME%
       contentPath: "/absolute/path/to/file"

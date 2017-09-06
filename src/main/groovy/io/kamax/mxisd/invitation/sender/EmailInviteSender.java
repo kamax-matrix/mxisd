@@ -25,6 +25,7 @@ import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.invite.sender.EmailSenderConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -75,11 +77,16 @@ public class EmailInviteSender implements IInviteSender {
         }
 
         try {
-            MimeMessage msg = new MimeMessage(session, new FileInputStream(cfg.getContentPath()));
-            msg.setHeader("X-Mailer", "mxisd");
+            String templateBody = IOUtils.toString(new FileInputStream(cfg.getContentPath()), StandardCharsets.UTF_8);
+            templateBody =
+                    templateBody.replace("%SENDER_DISPLAY_NAME%", invite.getInvite().getProperties().get("sender_display_name"))
+                            .replace("%ROOM_NAME%", invite.getInvite().getProperties().get("room_name"));
+
+            MimeMessage msg = new MimeMessage(session, IOUtils.toInputStream(templateBody, StandardCharsets.UTF_8));
+            msg.setHeader("X-Mailer", "mxisd"); // TODO set version
             msg.setSentDate(new Date());
-            msg.setRecipients(Message.RecipientType.TO, invite.getInvite().getAddress());
             msg.setFrom(sender);
+            msg.setRecipients(Message.RecipientType.TO, invite.getInvite().getAddress());
 
             log.info("Sending invite to {} via SMTP using {}:{}", invite.getInvite().getAddress(), cfg.getHost(), cfg.getPort());
             SMTPTransport transport = (SMTPTransport) session.getTransport("smtp");

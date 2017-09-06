@@ -29,6 +29,7 @@ import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.signature.SignatureManager;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -184,7 +185,8 @@ public class InvitationManager {
             log.warn("No HS found for domain {} - ignoring publishing", domain);
         } else {
             // TODO this is needed as this will block if called during authentication cycle due to synapse implementation
-            new Thread(() -> { // FIXME need to make this retryable and within a general background working pool
+
+            new Thread(() -> { // FIXME need to make this retry-able and within a general background working pool
                 HttpPost req = new HttpPost(hsUrlOpt.get() + "/_matrix/federation/v1/3pid/onbind");
                 // Expected body: https://matrix.to/#/!HUeDbmFUsWAhxHHvFG:matrix.org/$150469846739DCLWc:matrix.trancendances.fr
                 JSONObject obj = new JSONObject(); // TODO use Gson instead
@@ -200,7 +202,7 @@ public class InvitationManager {
                 objUp.put("room_id", reply.getInvite().getRoomId());
                 objUp.put("signed", obj);
 
-                String mapping = gson.toJson(objUp); // FIXME we shouldn't need to be doign this
+                String mapping = gson.toJson(objUp); // FIXME we shouldn't need to be doing this
 
                 JSONObject content = new JSONObject(); // TODO use Gson instead
                 JSONArray invites = new JSONArray();
@@ -212,14 +214,17 @@ public class InvitationManager {
 
                 content.put("signatures", signMgr.signMessageJson(content.toString()));
 
-                log.info("Will send following JSON to {}: {}", domain, content.toString());
                 StringEntity entity = new StringEntity(content.toString(), StandardCharsets.UTF_8);
                 entity.setContentType("application/json");
                 req.setEntity(entity);
                 try {
                     log.info("Posting onBind event to {}", req.getURI());
                     CloseableHttpResponse response = client.execute(req);
-                    log.info("Answer code: {}", response.getStatusLine().getStatusCode());
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    log.info("Answer code: {}", statusCode);
+                    if (statusCode >= 400) {
+                        log.warn("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
+                    }
                     response.close();
                 } catch (IOException e) {
                     log.warn("Unable to tell HS {} about invite being mapped", domain, e);
