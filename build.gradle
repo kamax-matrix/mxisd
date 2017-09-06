@@ -97,6 +97,10 @@ dependencies {
     // Phone numbers validation
     compile 'com.googlecode.libphonenumber:libphonenumber:8.7.1'
 
+    // E-mail sending
+    compile 'com.sun.mail:javax.mail:1.5.6'
+    compile 'javax.mail:javax.mail-api:1.5.6'
+
     // Google Firebase Authentication backend
     compile 'com.google.firebase:firebase-admin:5.3.0'
 

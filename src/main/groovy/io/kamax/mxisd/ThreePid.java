@@ -1,17 +1,14 @@
-package io.kamax.mxisd.lookup;
+package io.kamax.mxisd;
 
-import java.time.Instant;
-
+// FIXME this should be in matrix-java-sdk
 public class ThreePid {
 
     private String medium;
     private String address;
-    private Instant validation;
 
-    public ThreePid(String medium, String address, Instant validation) {
+    public ThreePid(String medium, String address) {
         this.medium = medium;
         this.address = address;
-        this.validation = validation;
     }
 
     public String getMedium() {
@@ -20,10 +17,6 @@ public class ThreePid {
 
     public String getAddress() {
         return address;
-    }
-
-    public Instant getValidation() {
-        return validation;
     }
 
 }

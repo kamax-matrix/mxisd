@@ -25,7 +25,7 @@ import com.google.gson.JsonObject
 import io.kamax.mxisd.controller.v1.io.SessionEmailTokenRequestJson
 import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson
 import io.kamax.mxisd.exception.BadRequestException
-import io.kamax.mxisd.lookup.ThreePid
+import io.kamax.mxisd.lookup.ThreePidValidation
 import io.kamax.mxisd.mapping.MappingManager
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.StringUtils
@@ -93,10 +93,10 @@ class SessionController {
                  @RequestParam String sid, @RequestParam("client_secret") String secret) {
         log.info("Requested: {}?{}", request.getRequestURL(), request.getQueryString())
 
-        Optional<ThreePid> result = mgr.getValidated(sid, secret)
+        Optional<ThreePidValidation> result = mgr.getValidated(sid, secret)
         if (result.isPresent()) {
             log.info("requested session was validated")
-            ThreePid pid = result.get()
+            ThreePidValidation pid = result.get()
 
             JsonObject obj = new JsonObject()
             obj.addProperty("medium", pid.getMedium())

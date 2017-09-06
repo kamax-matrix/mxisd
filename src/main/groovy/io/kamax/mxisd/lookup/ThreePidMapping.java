@@ -28,6 +28,16 @@ public class ThreePidMapping {
     private String value;
     private String mxid;
 
+    public ThreePidMapping() {
+        // stub
+    }
+
+    public ThreePidMapping(String medium, String value, String mxid) {
+        setMedium(medium);
+        setValue(value);
+        setMxid(mxid);
+    }
+
     public String getMedium() {
         return medium;
     }

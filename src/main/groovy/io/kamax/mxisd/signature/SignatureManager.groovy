@@ -40,6 +40,7 @@ class SignatureManager implements InitializingBean {
 
     private EdDSAEngine signEngine
 
+    // FIXME we need to return a proper object, or a string with the signature and all?
     Map<?, ?> signMessage(String message) {
         byte[] signRaw = signEngine.signOneShot(message.getBytes())
         String sign = Base64.getEncoder().encodeToString(signRaw)

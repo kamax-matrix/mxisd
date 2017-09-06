@@ -8,7 +8,11 @@ public class ConfigurationFailureAnalyzer extends AbstractFailureAnalyzer<Config
 
     @Override
     protected FailureAnalysis analyze(Throwable rootFailure, ConfigurationException cause) {
-        return new FailureAnalysis(cause.getMessage(), "Double check the key value", cause);
+        String message = cause.getMessage();
+        if (cause.getDetailedMessage().isPresent()) {
+            message += " - " + cause.getDetailedMessage().get();
+        }
+        return new FailureAnalysis(message, "Double check the key value", cause);
     }
 
 }

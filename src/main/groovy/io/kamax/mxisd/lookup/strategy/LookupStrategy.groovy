@@ -31,6 +31,8 @@ interface LookupStrategy {
 
     Optional<?> find(SingleLookupRequest request)
 
+    Optional<?> findRecursive(SingleLookupRequest request)
+
     List<ThreePidMapping> find(BulkLookupRequest requests)
 
 }

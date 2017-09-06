@@ -93,13 +93,17 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     }
 
     List<IThreePidProvider> listUsableProviders(ALookupRequest request) {
+        return listUsableProviders(request, false);
+    }
+
+    List<IThreePidProvider> listUsableProviders(ALookupRequest request, boolean forceRecursive) {
         List<IThreePidProvider> usableProviders = new ArrayList<>()
 
         boolean canRecurse = isAllowedForRecursive(request.getRequester())
 
         log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse)
         for (IThreePidProvider provider : providers) {
-            if (provider.isEnabled() && (provider.isLocal() || canRecurse)) {
+            if (provider.isEnabled() && (provider.isLocal() || canRecurse || forceRecursive)) {
                 usableProviders.add(provider)
             }
         }
@@ -117,9 +121,8 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         }).collect(Collectors.toList())
     }
 
-    @Override
-    Optional<?> find(SingleLookupRequest request) {
-        for (IThreePidProvider provider : listUsableProviders(request)) {
+    Optional<?> find(SingleLookupRequest request, boolean forceRecursive) {
+        for (IThreePidProvider provider : listUsableProviders(request, forceRecursive)) {
             Optional<?> lookupDataOpt = provider.find(request)
             if (lookupDataOpt.isPresent()) {
                 return lookupDataOpt
@@ -132,6 +135,16 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         }
 
         return Optional.empty()
+    }
+
+    @Override
+    Optional<?> find(SingleLookupRequest request) {
+        return find(request, false)
+    }
+
+    @Override
+    Optional<?> findRecursive(SingleLookupRequest request) {
+        return find(request, true)
     }
 
     @Override

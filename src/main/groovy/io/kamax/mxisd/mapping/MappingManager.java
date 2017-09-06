@@ -1,7 +1,7 @@
 package io.kamax.mxisd.mapping;
 
 import io.kamax.mxisd.exception.BadRequestException;
-import io.kamax.mxisd.lookup.ThreePid;
+import io.kamax.mxisd.lookup.ThreePidValidation;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +72,10 @@ public class MappingManager {
         s.validationTimestamp = Instant.now();
     }
 
-    public Optional<ThreePid> getValidated(String sid, String secret) {
+    public Optional<ThreePidValidation> getValidated(String sid, String secret) {
         Session s = sessions.get(sid);
         if (s != null && StringUtils.equals(s.secret, secret)) {
-            return Optional.of(new ThreePid(s.medium, s.address, s.validationTimestamp));
+            return Optional.of(new ThreePidValidation(s.medium, s.address, s.validationTimestamp));
         }
 
         return Optional.empty();

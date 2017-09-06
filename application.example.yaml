@@ -190,3 +190,43 @@ forward:
   servers:
     - "https://matrix.org"
     - "https://vector.im"
+
+
+
+# Configure the invite components
+invite:
+
+  # Configure invite senders for the various 3PID type
+  sender:
+
+    # E-mail invite sender
+    email:
+
+      # SMTP host
+      host: "smtp.kamax.io"
+
+      # SMTP port
+      port: 587
+
+      # TLS mode for the connection.
+      #
+      # Possible values:
+      #  0    Disable TLS entirely
+      #  1    Enable TLS if supported by server
+      #  2    Force TLS and fail if not available
+      tls: 1
+
+      # Login for SMTP
+      login: "matrix-identity@example.org"
+
+      # Password for the account
+      password: "ThePassword"
+
+      # The e-mail to send as. If empty, will be the same as login
+      email: "matrix-identity@example.org"
+
+      # The display name used in the e-mail
+      name: "Matrix Identity"
+
+      # The MIME content to send
+      contentPath: "/absolute/path/to/file"

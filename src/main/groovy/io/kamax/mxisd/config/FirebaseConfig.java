@@ -1,7 +1,10 @@
 package io.kamax.mxisd.config;
 
-import io.kamax.mxisd.GlobalProvider;
+import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.GoogleFirebaseAuthenticator;
+import io.kamax.mxisd.invitation.InvitationManager;
+import io.kamax.mxisd.lookup.provider.GoogleFirebaseProvider;
+import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,9 @@ public class FirebaseConfig {
 
     @Autowired
     private ServerConfig srvCfg;
+
+    @Autowired
+    private InvitationManager invMgr;
 
     private boolean enabled;
     private String credentials;
@@ -56,16 +62,24 @@ public class FirebaseConfig {
             log.info("Credentials: {}", getCredentials());
             log.info("Database: {}", getDatabase());
         }
-
-
     }
 
     @Bean
-    public GlobalProvider getProvider() {
+    public AuthenticatorProvider getAuthProvider() {
         if (!enabled) {
-            return new GoogleFirebaseAuthenticator(false);
+            return new GoogleFirebaseAuthenticator(invMgr, false);
         } else {
-            return new GoogleFirebaseAuthenticator(credentials, database, srvCfg.getName());
+            return new GoogleFirebaseAuthenticator(invMgr, credentials, database, srvCfg.getName());
         }
     }
+
+    @Bean
+    public IThreePidProvider getLookupProvider() {
+        if (!enabled) {
+            return new GoogleFirebaseProvider(false);
+        } else {
+            return new GoogleFirebaseProvider(credentials, database, srvCfg.getName());
+        }
+    }
+
 }

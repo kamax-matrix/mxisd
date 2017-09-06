@@ -20,10 +20,19 @@
 
 package io.kamax.mxisd.controller.v1
 
-import io.kamax.mxisd.exception.NotImplementedException
+import com.google.gson.Gson
+import io.kamax.matrix.MatrixID
+import io.kamax.mxisd.controller.v1.io.ThreePidInviteReplyIO
+import io.kamax.mxisd.invitation.IThreePidInvite
+import io.kamax.mxisd.invitation.IThreePidInviteReply
+import io.kamax.mxisd.invitation.InvitationManager
+import io.kamax.mxisd.invitation.ThreePidInvite
+import io.kamax.mxisd.key.KeyManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 import javax.servlet.http.HttpServletRequest
@@ -35,11 +44,25 @@ class InvitationController {
 
     private Logger log = LoggerFactory.getLogger(InvitationController.class)
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/store-invite", method = POST)
-    String store(HttpServletRequest request) {
-        log.error("{} was requested but not implemented", request.getRequestURL())
+    @Autowired
+    private InvitationManager mgr
 
-        throw new NotImplementedException()
+    @Autowired
+    private KeyManager keyMgr
+
+    private Gson gson = new Gson()
+
+    @RequestMapping(value = "/_matrix/identity/api/v1/store-invite", method = POST)
+    String store(
+            HttpServletRequest request,
+            @RequestParam String sender,
+            @RequestParam String medium,
+            @RequestParam String address,
+            @RequestParam("room_id") String roomId) {
+        IThreePidInvite invite = new ThreePidInvite(new MatrixID(sender), medium, address, roomId)
+        IThreePidInviteReply reply = mgr.storeInvite(invite)
+
+        return gson.toJson(new ThreePidInviteReplyIO(reply, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex())))
     }
 
 }
