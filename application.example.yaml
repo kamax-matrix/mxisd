@@ -209,7 +209,7 @@ invite:
     email:
 
       # SMTP host
-      host: "smtp.kamax.io"
+      host: "smtp.example.org"
 
       # SMTP port
       port: 587
