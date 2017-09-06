@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.config.invite.sender;
 
-import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,10 +121,9 @@ public class EmailSenderConfig {
             log.warn("invite.sender.contentPath is empty! Will not send invites");
         } else {
             File cp = new File(getContentPath()).getAbsoluteFile();
+            log.info("Content path: {}", cp.getAbsolutePath());
             if (!cp.exists() || !cp.isFile() || !cp.canRead()) {
-                throw new ConfigurationException("invite.sender.email.contentPath", getContentPath() + " does not exist, is not a file or cannot be read");
-            } else {
-                log.info("Content path: {}", cp.getAbsolutePath());
+                log.warn(getContentPath() + " does not exist, is not a file or cannot be read");
             }
         }
     }
