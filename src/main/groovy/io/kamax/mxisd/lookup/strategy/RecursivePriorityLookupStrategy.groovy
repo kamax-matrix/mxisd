@@ -129,7 +129,11 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
             }
         }
 
-        if (recursiveCfg.getBridge().getEnabled() && (!recursiveCfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))) {
+        if (
+        recursiveCfg.getBridge() != null &&
+                recursiveCfg.getBridge().getEnabled() &&
+                (!recursiveCfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))
+        ) {
             log.info("Using bridge failover for lookup")
             return bridge.find(request)
         }
