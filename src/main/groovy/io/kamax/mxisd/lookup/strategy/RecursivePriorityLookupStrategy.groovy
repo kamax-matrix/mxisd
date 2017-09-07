@@ -99,7 +99,7 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     List<IThreePidProvider> listUsableProviders(ALookupRequest request, boolean forceRecursive) {
         List<IThreePidProvider> usableProviders = new ArrayList<>()
 
-        boolean canRecurse = isAllowedForRecursive(request.getRequester())
+        boolean canRecurse = forceRecursive || isAllowedForRecursive(request.getRequester())
 
         log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse)
         for (IThreePidProvider provider : providers) {
