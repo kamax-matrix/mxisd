@@ -131,7 +131,7 @@ ldap:
     baseDn: 'CN=Users,DC=example,DC=org'
 
   # How to map Matrix attributes with LDAP attributes when performing lookup/auth
-  attributes:
+  attribute:
 
     # The username/login that will be looked up or used to build Matrix IDs
     uid:
