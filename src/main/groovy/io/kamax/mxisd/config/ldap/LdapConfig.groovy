@@ -116,7 +116,6 @@ class LdapConfig {
             throw new IllegalArgumentException("Unsupported LDAP UID type: " + uidType)
         }
 
-        log.info("Conn: {}", JsonOutput.toJson(conn))
         log.info("Host: {}", conn.getHost())
         log.info("Port: {}", conn.getPort())
         log.info("Bind DN: {}", conn.getBindDn())
