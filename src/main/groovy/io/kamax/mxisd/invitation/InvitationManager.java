@@ -137,7 +137,7 @@ public class InvitationManager {
 
         ThreePid pid = new ThreePid(invitation.getMedium(), invitation.getAddress());
 
-        log.info("Storing invite for {}:{} from {} in room {}", pid.getMedium(), pid.getAddress(), invitation.getSender(), invitation.getRoomId());
+        log.info("Handling invite for {}:{} from {} in room {}", pid.getMedium(), pid.getAddress(), invitation.getSender(), invitation.getRoomId());
         if (invitations.containsKey(pid)) {
             log.info("Invite is already pending for {}:{}, returning data", pid.getMedium(), pid.getAddress());
             return invitations.get(pid);

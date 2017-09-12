@@ -42,7 +42,7 @@ public class EmailSenderConfig {
     private String password;
     private String email;
     private String name;
-    private String contentPath;
+    private String template;
 
     public String getHost() {
         return host;
@@ -100,12 +100,12 @@ public class EmailSenderConfig {
         this.name = name;
     }
 
-    public String getContentPath() {
-        return contentPath;
+    public String getTemplate() {
+        return template;
     }
 
-    public void setContentPath(String contentPath) {
-        this.contentPath = contentPath;
+    public void setTemplate(String template) {
+        this.template = template;
     }
 
     @PostConstruct
@@ -117,14 +117,18 @@ public class EmailSenderConfig {
         log.info("Login: {}", getLogin());
         log.info("Has password: {}", StringUtils.isBlank(getPassword()));
         log.info("E-mail: {}", getEmail());
-        if (StringUtils.isBlank(getContentPath())) {
-            log.warn("invite.sender.contentPath is empty! Will not send invites");
-        } else {
-            File cp = new File(getContentPath()).getAbsoluteFile();
-            log.info("Content path: {}", cp.getAbsolutePath());
-            if (!cp.exists() || !cp.isFile() || !cp.canRead()) {
-                log.warn(getContentPath() + " does not exist, is not a file or cannot be read");
+        if (!StringUtils.startsWith(getTemplate(), "classpath:")) {
+            if (StringUtils.isBlank(getTemplate())) {
+                log.warn("invite.sender.template is empty! Will not send invites");
+            } else {
+                File cp = new File(getTemplate()).getAbsoluteFile();
+                log.info("Template: {}", cp.getAbsolutePath());
+                if (!cp.exists() || !cp.isFile() || !cp.canRead()) {
+                    log.warn(getTemplate() + " does not exist, is not a file or cannot be read");
+                }
             }
+        } else {
+            log.info("Template: Built-in");
         }
     }
 

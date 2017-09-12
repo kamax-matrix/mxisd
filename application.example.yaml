@@ -234,9 +234,25 @@ invite:
       # The display name used in the e-mail
       name: "Matrix Identity"
 
-      # The MIME content to send, UTF-8 expected
+      # The E-mail template to use.
+      #
+      # The template is expected to be a full e-mail body, including client headers, using MIME and UTF-8 encoding.
+      # The following headers will be set by mxisd directly and should not be present in the template:
+      # - From
+      # - To
+      # - Date
+      # - Message-Id
+      # - X-Mailer
       #
       # The following placeholders are possible:
-      # - %SENDER_DISPLAY_NAME%
-      # - %ROOM_NAME%
-      contentPath: "/absolute/path/to/file"
+      # - %DOMAIN%                Domain name as per server.name config item
+      # - %DOMAIN_PRETTY%         Word capitalize version of the domain. e.g. example.org -> Example.org
+      # - %FROM_EMAIL%            Value of this section's email config item
+      # - %FROM_NAME%             Value of this section's name config item
+      # - %SENDER_ID%             Matrix ID of the invitation sender
+      # - %SENDER_NAME%           Display name of the invitation sender, empty if not available
+      # - %SENDER_NAME_OR_ID%     Value of %SENDER_NAME% or, if empty, value of %SENDER_ID%
+      # - %ROOM_ID%               ID of the room where the invitation took place
+      # - %ROOM_NAME%             Name of the room, empty if not available
+      # - %ROOM_NAME_OR_ID%       Value of %ROOM_NAME% or, if empty, value of %ROOM_ID%
+      template: "/absolute/path/to/file"
