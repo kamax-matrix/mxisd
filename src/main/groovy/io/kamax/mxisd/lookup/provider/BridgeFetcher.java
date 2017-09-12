@@ -21,6 +21,7 @@
 package io.kamax.mxisd.lookup.provider;
 
 import io.kamax.mxisd.config.RecursiveLookupBridgeConfig;
+import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.fetcher.IBridgeFetcher;
@@ -46,16 +47,16 @@ public class BridgeFetcher implements IBridgeFetcher {
     private RemoteIdentityServerFetcher fetcher;
 
     @Override
-    public Optional<?> find(SingleLookupRequest request) {
+    public Optional<SingleLookupReply> find(SingleLookupRequest request) {
         Optional<String> mediumUrl = Optional.ofNullable(cfg.getMappings().get(request.getType()));
         if (mediumUrl.isPresent() && !StringUtils.isBlank(mediumUrl.get())) {
             log.info("Using specific medium bridge lookup URL {}", mediumUrl.get());
 
-            return fetcher.find(mediumUrl.get(), request.getType(), request.getThreePid());
+            return fetcher.find(mediumUrl.get(), request);
         } else if (!StringUtils.isBlank(cfg.getServer())) {
             log.info("Using generic bridge lookup URL {}", cfg.getServer());
 
-            return fetcher.find(cfg.getServer(), request.getType(), request.getThreePid());
+            return fetcher.find(cfg.getServer(), request);
         } else {
             log.info("No bridge lookup URL found/configured, skipping");
 

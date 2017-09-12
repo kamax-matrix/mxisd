@@ -22,10 +22,7 @@ package io.kamax.mxisd.lookup.strategy
 
 import edazdarevic.commons.net.CIDRUtils
 import io.kamax.mxisd.config.RecursiveLookupConfig
-import io.kamax.mxisd.lookup.ALookupRequest
-import io.kamax.mxisd.lookup.BulkLookupRequest
-import io.kamax.mxisd.lookup.SingleLookupRequest
-import io.kamax.mxisd.lookup.ThreePidMapping
+import io.kamax.mxisd.lookup.*
 import io.kamax.mxisd.lookup.fetcher.IBridgeFetcher
 import io.kamax.mxisd.lookup.provider.IThreePidProvider
 import org.slf4j.Logger
@@ -122,7 +119,7 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     }
 
     @Override
-    Optional<?> find(String medium, String address, boolean recursive) {
+    Optional<SingleLookupReply> find(String medium, String address, boolean recursive) {
         SingleLookupRequest req = new SingleLookupRequest();
         req.setType(medium)
         req.setThreePid(address)
@@ -130,9 +127,9 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         return find(req, recursive)
     }
 
-    Optional<?> find(SingleLookupRequest request, boolean forceRecursive) {
+    Optional<SingleLookupReply> find(SingleLookupRequest request, boolean forceRecursive) {
         for (IThreePidProvider provider : listUsableProviders(request, forceRecursive)) {
-            Optional<?> lookupDataOpt = provider.find(request)
+            Optional<SingleLookupReply> lookupDataOpt = provider.find(request)
             if (lookupDataOpt.isPresent()) {
                 return lookupDataOpt
             }
@@ -151,12 +148,12 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     }
 
     @Override
-    Optional<?> find(SingleLookupRequest request) {
+    Optional<SingleLookupReply> find(SingleLookupRequest request) {
         return find(request, false)
     }
 
     @Override
-    Optional<?> findRecursive(SingleLookupRequest request) {
+    Optional<SingleLookupReply> findRecursive(SingleLookupRequest request) {
         return find(request, true)
     }
 

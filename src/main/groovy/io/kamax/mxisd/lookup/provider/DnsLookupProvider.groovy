@@ -21,6 +21,7 @@
 package io.kamax.mxisd.lookup.provider
 
 import io.kamax.mxisd.config.ServerConfig
+import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher
@@ -124,7 +125,7 @@ class DnsLookupProvider implements IThreePidProvider {
     }
 
     @Override
-    Optional<?> find(SingleLookupRequest request) {
+    Optional<SingleLookupReply> find(SingleLookupRequest request) {
         if (!StringUtils.equals("email", request.getType())) { // TODO use enum
             log.info("Skipping unsupported type {} for {}", request.getType(), request.getThreePid())
             return Optional.empty()
@@ -137,7 +138,7 @@ class DnsLookupProvider implements IThreePidProvider {
         Optional<String> baseUrl = findIdentityServerForDomain(domain)
 
         if (baseUrl.isPresent()) {
-            return fetcher.find(baseUrl.get(), request.getType().toString(), request.getThreePid())
+            return fetcher.find(baseUrl.get(), request)
         }
 
         return Optional.empty()

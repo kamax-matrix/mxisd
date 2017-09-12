@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.lookup.provider
 
+import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 
@@ -34,7 +35,7 @@ interface IThreePidProvider {
      */
     int getPriority() // Should not be here but let's KISS for now
 
-    Optional<?> find(SingleLookupRequest request)
+    Optional<SingleLookupReply> find(SingleLookupRequest request)
 
     List<ThreePidMapping> populate(List<ThreePidMapping> mappings)
 

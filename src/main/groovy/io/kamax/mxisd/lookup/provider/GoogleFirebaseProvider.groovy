@@ -30,6 +30,7 @@ import com.google.firebase.internal.NonNull
 import com.google.firebase.tasks.OnFailureListener
 import com.google.firebase.tasks.OnSuccessListener
 import io.kamax.matrix.ThreePidMedium
+import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import org.apache.commons.lang.StringUtils
@@ -86,6 +87,10 @@ public class GoogleFirebaseProvider implements IThreePidProvider {
                 .setCredential(getCreds(credsPath))
                 .setDatabaseUrl(db)
                 .build();
+    }
+
+    private String getMxid(UserRecord record) {
+        return "@${record.getUid()}:${domain}";
     }
 
     @Override
@@ -154,20 +159,13 @@ public class GoogleFirebaseProvider implements IThreePidProvider {
     }
 
     @Override
-    public Optional<?> find(SingleLookupRequest request) {
+    public Optional<SingleLookupReply> find(SingleLookupRequest request) {
         Optional<UserRecord> urOpt = findInternal(request.getType(), request.getThreePid())
         if (urOpt.isPresent()) {
-            return [
-                    address   : request.getThreePid(),
-                    medium    : request.getType(),
-                    mxid      : "@${urOpt.get().getUid()}:${domain}",
-                    not_before: 0,
-                    not_after : 9223372036854775807,
-                    ts        : 0
-            ]
-        } else {
-            return Optional.empty();
+            return Optional.of(new SingleLookupReply(request, getMxid(urOpt.get())));
         }
+
+        return Optional.empty();
     }
 
     @Override
@@ -181,7 +179,7 @@ public class GoogleFirebaseProvider implements IThreePidProvider {
                     ThreePidMapping result = new ThreePidMapping();
                     result.setMedium(o.getMedium())
                     result.setValue(o.getValue())
-                    result.setMxid("@${urOpt.get().getUid()}:${domain}")
+                    result.setMxid(getMxid(urOpt.get()))
                     results.add(result)
                 }
             }

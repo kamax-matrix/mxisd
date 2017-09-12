@@ -24,6 +24,8 @@ import groovy.json.JsonException
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.kamax.mxisd.controller.v1.ClientBulkLookupRequest
+import io.kamax.mxisd.lookup.SingleLookupReply
+import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher
 import org.apache.http.HttpEntity
@@ -77,24 +79,26 @@ public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher
     }
 
     @Override
-    Optional<?> find(String remote, String type, String threePid) {
-        log.info("Looking up {} 3PID {} using {}", type, threePid, remote)
+    Optional<SingleLookupReply> find(String remote, SingleLookupRequest request) {
+        log.info("Looking up {} 3PID {} using {}", request.getType(), request.getThreePid(), remote)
 
         HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
-                "${remote}/_matrix/identity/api/v1/lookup?medium=${type}&address=${threePid}"
+                "${remote}/_matrix/identity/api/v1/lookup?medium=${request.getType()}&address=${request.getThreePid()}"
         ).openConnection()
 
         try {
-            def output = json.parseText(rootSrvConn.getInputStream().getText())
+            String outputRaw = rootSrvConn.getInputStream().getText()
+            def output = json.parseText(outputRaw)
             if (output['address']) {
                 log.info("Found 3PID mapping: {}", output)
-                return Optional.of(output)
+
+                return Optional.of(SingleLookupReply.fromRecursive(request, outputRaw))
             }
 
             log.info("Empty 3PID mapping from {}", remote)
             return Optional.empty()
         } catch (IOException e) {
-            log.warn("Error looking up 3PID mapping {}: {}", threePid, e.getMessage())
+            log.warn("Error looking up 3PID mapping {}: {}", request.getThreePid(), e.getMessage())
             return Optional.empty()
         } catch (JsonException e) {
             log.warn("Invalid JSON answer from {}", remote)

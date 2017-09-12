@@ -57,6 +57,8 @@ public class AuthManager {
                     invMgr.publishMappingIfInvited(new ThreePidMapping(pid, result.getMxid()));
                 }
 
+                invMgr.lookupMappingsForInvites();
+
                 return result;
             }
         }

@@ -22,6 +22,7 @@ package io.kamax.mxisd.lookup.provider
 
 import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.config.ldap.LdapConfig
+import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import org.apache.commons.lang.StringUtils
@@ -131,7 +132,7 @@ class LdapProvider implements IThreePidProvider {
     }
 
     @Override
-    Optional<?> find(SingleLookupRequest request) {
+    Optional<SingleLookupReply> find(SingleLookupRequest request) {
         log.info("Performing LDAP lookup ${request.getThreePid()} of type ${request.getType()}")
 
         LdapConnection conn = getConn()
@@ -140,14 +141,7 @@ class LdapProvider implements IThreePidProvider {
 
             Optional<String> mxid = lookup(conn, request.getType(), request.getThreePid())
             if (mxid.isPresent()) {
-                return Optional.of([
-                        address   : request.getThreePid(),
-                        medium    : request.getType(),
-                        mxid      : mxid.get(),
-                        not_before: 0,
-                        not_after : 9223372036854775807,
-                        ts        : 0
-                ])
+                return Optional.of(new SingleLookupReply(request, mxid.get()));
             }
         } finally {
             conn.close()
