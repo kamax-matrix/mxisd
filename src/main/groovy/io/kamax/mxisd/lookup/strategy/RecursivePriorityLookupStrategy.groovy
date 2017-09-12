@@ -130,7 +130,6 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         return find(req, recursive)
     }
 
-    @Override
     Optional<?> find(SingleLookupRequest request, boolean forceRecursive) {
         for (IThreePidProvider provider : listUsableProviders(request, forceRecursive)) {
             Optional<?> lookupDataOpt = provider.find(request)
