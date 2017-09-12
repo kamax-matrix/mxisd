@@ -79,6 +79,7 @@ public class InvitationManager {
 
     private CloseableHttpClient client;
     private Gson gson;
+    private Timer refreshTimer;
 
     @PostConstruct
     private void postConstruct() {
@@ -94,6 +95,18 @@ public class InvitationManager {
             // FIXME do better...
             throw new RuntimeException(e);
         }
+
+        refreshTimer = new Timer();
+        refreshTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    lookupMappingsForInvites();
+                } catch (Throwable t) {
+                    log.error("Error when running background mapping refresh", t);
+                }
+            }
+        }, 5000L, TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES)); // FIXME make configurable
     }
 
     @PreDestroy
