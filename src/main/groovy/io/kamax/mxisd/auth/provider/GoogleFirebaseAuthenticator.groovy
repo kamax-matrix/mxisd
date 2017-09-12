@@ -22,17 +22,12 @@ package io.kamax.mxisd.auth.provider
 
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseCredential
-import com.google.firebase.auth.FirebaseCredentials
-import com.google.firebase.auth.FirebaseToken
+import com.google.firebase.auth.*
 import com.google.firebase.internal.NonNull
 import com.google.firebase.tasks.OnFailureListener
 import com.google.firebase.tasks.OnSuccessListener
 import io.kamax.matrix.ThreePidMedium
 import io.kamax.mxisd.auth.UserAuthResult
-import io.kamax.mxisd.invitation.InvitationManager
-import io.kamax.mxisd.lookup.ThreePidMapping
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,25 +41,31 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
 
     private Logger log = LoggerFactory.getLogger(GoogleFirebaseAuthenticator.class);
 
-    private static final Pattern matrixIdLaxPattern = Pattern.compile("@(.*):(.+)");
+    private static final Pattern matrixIdLaxPattern = Pattern.compile("@(.*):(.+)"); // FIXME use matrix-java-sdk
 
     private boolean isEnabled;
     private String domain;
     private FirebaseApp fbApp;
     private FirebaseAuth fbAuth;
 
-    private InvitationManager invMgr;
-
-    public GoogleFirebaseAuthenticator(InvitationManager invMgr, boolean isEnabled) {
-        this.isEnabled = isEnabled;
-        this.invMgr = invMgr;
+    private void waitOnLatch(UserAuthResult result, CountDownLatch l, long timeout, TimeUnit unit, String purpose) {
+        try {
+            l.await(timeout, unit);
+        } catch (InterruptedException e) {
+            log.warn("Interrupted while waiting for " + purpose);
+            result.failure();
+        }
     }
 
-    public GoogleFirebaseAuthenticator(InvitationManager invMgr, String credsPath, String db, String domain) {
-        this(invMgr, true);
+    public GoogleFirebaseAuthenticator(boolean isEnabled) {
+        this.isEnabled = isEnabled;
+    }
+
+    public GoogleFirebaseAuthenticator(String credsPath, String db, String domain) {
+        this(true);
         this.domain = domain;
         try {
-            fbApp = FirebaseApp.initializeApp(getOpts(credsPath, db));
+            fbApp = FirebaseApp.initializeApp(getOpts(credsPath, db), "AuthenticationProvider");
             fbAuth = FirebaseAuth.getInstance(fbApp);
 
             log.info("Google Firebase Authentication is ready");
@@ -130,14 +131,42 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
                     if (!StringUtils.equals(localpart, token.getUid())) {
                         log.info("Failture to authenticate {}: Matrix ID localpart '{}' does not match Firebase UID '{}'", id, localpart, token.getUid());
                         result.failure();
+                        return;
                     }
 
                     log.info("{} was successfully authenticated", id);
                     result.success(id, token.getName());
 
-                    if (StringUtils.isNotBlank(token.getEmail())) {
-                        invMgr.publishMappingIfInvited(new ThreePidMapping(ThreePidMedium.Email.getId(), token.getEmail(), id))
-                    }
+                    log.info("Fetching profile for {}", id);
+                    CountDownLatch userRecordLatch = new CountDownLatch(1);
+                    fbAuth.getUser(token.getUid()).addOnSuccessListener(new OnSuccessListener<UserRecord>() {
+                        @Override
+                        void onSuccess(UserRecord user) {
+                            try {
+                                if (StringUtils.isNotBlank(user.getEmail())) {
+                                    result.withThreePid(ThreePidMedium.Email, user.getEmail());
+                                }
+
+                                if (StringUtils.isNotBlank(user.getPhoneNumber())) {
+                                    result.withThreePid(ThreePidMedium.PhoneNumber, user.getPhoneNumber());
+                                }
+                            } finally {
+                                userRecordLatch.countDown();
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        void onFailure(@NonNull Exception e) {
+                            try {
+                                log.warn("Unable to fetch Firebase user profile for {}", id);
+                                result.failure();
+                            } finally {
+                                userRecordLatch.countDown();
+                            }
+                        }
+                    });
+
+                    waitOnLatch(result, userRecordLatch, 30, TimeUnit.SECONDS, "Firebase user profile");
                 } finally {
                     l.countDown()
                 }
@@ -160,13 +189,7 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
             }
         });
 
-        try {
-            l.await(30, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            log.warn("Interrupted while waiting for Firebase auth check");
-            result.failure();
-        }
-
+        waitOnLatch(result, l, 30, TimeUnit.SECONDS, "Firebase auth check");
         return result;
     }
 

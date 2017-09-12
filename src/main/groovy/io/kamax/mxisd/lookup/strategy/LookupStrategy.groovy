@@ -29,6 +29,8 @@ interface LookupStrategy {
 
     List<IThreePidProvider> getLocalProviders()
 
+    Optional<?> find(String medium, String address, boolean recursive)
+
     Optional<?> find(SingleLookupRequest request)
 
     Optional<?> findRecursive(SingleLookupRequest request)

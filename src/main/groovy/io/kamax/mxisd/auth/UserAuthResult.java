@@ -20,11 +20,19 @@
 
 package io.kamax.mxisd.auth;
 
+import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.ThreePid;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class UserAuthResult {
 
     private boolean success;
     private String mxid;
     private String displayName;
+    private List<ThreePid> threePids = new ArrayList<>();
 
     public UserAuthResult failure() {
         success = false;
@@ -64,6 +72,20 @@ public class UserAuthResult {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public UserAuthResult withThreePid(ThreePidMedium medium, String address) {
+        return withThreePid(medium.getId(), address);
+    }
+
+    public UserAuthResult withThreePid(String medium, String address) {
+        threePids.add(new ThreePid(medium, address));
+
+        return this;
+    }
+
+    public List<ThreePid> getThreePids() {
+        return Collections.unmodifiableList(threePids);
     }
 
 }

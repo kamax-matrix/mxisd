@@ -39,4 +39,9 @@ public class ThreePid {
         return address;
     }
 
+    @Override
+    public String toString() {
+        return getMedium() + ":" + getAddress();
+    }
+
 }

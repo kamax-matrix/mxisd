@@ -22,7 +22,6 @@ package io.kamax.mxisd.config;
 
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.GoogleFirebaseAuthenticator;
-import io.kamax.mxisd.invitation.InvitationManager;
 import io.kamax.mxisd.lookup.provider.GoogleFirebaseProvider;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import org.slf4j.Logger;
@@ -42,9 +41,6 @@ public class FirebaseConfig {
 
     @Autowired
     private ServerConfig srvCfg;
-
-    @Autowired
-    private InvitationManager invMgr;
 
     private boolean enabled;
     private String credentials;
@@ -87,9 +83,9 @@ public class FirebaseConfig {
     @Bean
     public AuthenticatorProvider getAuthProvider() {
         if (!enabled) {
-            return new GoogleFirebaseAuthenticator(invMgr, false);
+            return new GoogleFirebaseAuthenticator(false);
         } else {
-            return new GoogleFirebaseAuthenticator(invMgr, credentials, database, srvCfg.getName());
+            return new GoogleFirebaseAuthenticator(credentials, database, srvCfg.getName());
         }
     }
 

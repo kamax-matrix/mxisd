@@ -25,7 +25,6 @@ import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
 import io.kamax.mxisd.invitation.sender.IInviteSender;
-import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.signature.SignatureManager;
@@ -99,7 +98,7 @@ public class InvitationManager {
 
     // TODO use caching mechanism
     // TODO export in matrix-java-sdk
-    Optional<String> findHomeserverForDomain(String domain) {
+    String findHomeserverForDomain(String domain) {
         log.debug("Performing SRV lookup for {}", domain);
         String lookupDns = getSrvRecordName(domain);
         log.info("Lookup name: {}", lookupDns);
@@ -110,7 +109,7 @@ public class InvitationManager {
                 Arrays.sort(records, Comparator.comparingInt(SRVRecord::getPriority));
                 for (SRVRecord record : records) {
                     log.info("Found SRV record: {}", record.toString());
-                    return Optional.of("https://" + record.getTarget().toString(true) + ":" + record.getPort());
+                    return "https://" + record.getTarget().toString(true) + ":" + record.getPort();
                 }
             } else {
                 log.info("No SRV record for {}", lookupDns);
@@ -120,7 +119,7 @@ public class InvitationManager {
         }
 
         log.info("Performing basic lookup using domain name {}", domain);
-        return Optional.of("https://" + domain + ":8448");
+        return "https://" + domain + ":8448";
     }
 
     @Autowired
@@ -143,13 +142,7 @@ public class InvitationManager {
             return invitations.get(pid);
         }
 
-        SingleLookupRequest request = new SingleLookupRequest();
-        request.setType(invitation.getMedium());
-        request.setThreePid(invitation.getAddress());
-        request.setRecursive(true);
-        request.setRequester("Internal");
-
-        Optional<?> result = lookupMgr.findRecursive(request);
+        Optional<?> result = lookupMgr.find(invitation.getMedium(), invitation.getAddress(), true);
         if (result.isPresent()) {
             log.info("Mapping for {}:{} already exists, refusing to store invite", pid.getMedium(), pid.getAddress());
             throw new MappingAlreadyExistsException();
@@ -180,60 +173,52 @@ public class InvitationManager {
         log.info("{}:{} has an invite pending, publishing mapping", threePid.getMedium(), threePid.getValue());
         String domain = reply.getInvite().getSender().getDomain();
         log.info("Discovering HS for domain {}", domain);
-        Optional<String> hsUrlOpt = findHomeserverForDomain(domain);
-        if (!hsUrlOpt.isPresent()) {
-            log.warn("No HS found for domain {} - ignoring publishing", domain);
-        } else {
-            // TODO this is needed as this will block if called during authentication cycle due to synapse implementation
+        String hsUrlOpt = findHomeserverForDomain(domain);
 
-            new Thread(() -> { // FIXME need to make this retry-able and within a general background working pool
-                HttpPost req = new HttpPost(hsUrlOpt.get() + "/_matrix/federation/v1/3pid/onbind");
-                // Expected body: https://matrix.to/#/!HUeDbmFUsWAhxHHvFG:matrix.org/$150469846739DCLWc:matrix.trancendances.fr
-                JSONObject obj = new JSONObject(); // TODO use Gson instead
-                obj.put("mxid", threePid.getMxid());
-                obj.put("token", reply.getToken());
-                obj.put("signatures", signMgr.signMessageJson(obj.toString()));
+        // TODO this is needed as this will block if called during authentication cycle due to synapse implementation
+        new Thread(() -> { // FIXME need to make this retry-able and within a general background working pool
+            HttpPost req = new HttpPost(hsUrlOpt + "/_matrix/federation/v1/3pid/onbind");
+            // Expected body: https://matrix.to/#/!HUeDbmFUsWAhxHHvFG:matrix.org/$150469846739DCLWc:matrix.trancendances.fr
+            JSONObject obj = new JSONObject(); // TODO use Gson instead
+            obj.put("mxid", threePid.getMxid());
+            obj.put("token", reply.getToken());
+            obj.put("signatures", signMgr.signMessageJson(obj.toString()));
 
-                JSONObject objUp = new JSONObject();
-                objUp.put("mxid", threePid.getMxid());
-                objUp.put("medium", threePid.getMedium());
-                objUp.put("address", threePid.getValue());
-                objUp.put("sender", reply.getInvite().getSender().getId());
-                objUp.put("room_id", reply.getInvite().getRoomId());
-                objUp.put("signed", obj);
+            JSONObject objUp = new JSONObject();
+            objUp.put("mxid", threePid.getMxid());
+            objUp.put("medium", threePid.getMedium());
+            objUp.put("address", threePid.getValue());
+            objUp.put("sender", reply.getInvite().getSender().getId());
+            objUp.put("room_id", reply.getInvite().getRoomId());
+            objUp.put("signed", obj);
 
-                String mapping = gson.toJson(objUp); // FIXME we shouldn't need to be doing this
+            JSONObject content = new JSONObject(); // TODO use Gson instead
+            JSONArray invites = new JSONArray();
+            invites.put(objUp);
+            content.put("invites", invites);
+            content.put("medium", threePid.getMedium());
+            content.put("address", threePid.getValue());
+            content.put("mxid", threePid.getMxid());
 
-                JSONObject content = new JSONObject(); // TODO use Gson instead
-                JSONArray invites = new JSONArray();
-                invites.put(objUp);
-                content.put("invites", invites);
-                content.put("medium", threePid.getMedium());
-                content.put("address", threePid.getValue());
-                content.put("mxid", threePid.getMxid());
+            content.put("signatures", signMgr.signMessageJson(content.toString()));
 
-                content.put("signatures", signMgr.signMessageJson(content.toString()));
-
-                StringEntity entity = new StringEntity(content.toString(), StandardCharsets.UTF_8);
-                entity.setContentType("application/json");
-                req.setEntity(entity);
-                try {
-                    log.info("Posting onBind event to {}", req.getURI());
-                    CloseableHttpResponse response = client.execute(req);
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    log.info("Answer code: {}", statusCode);
-                    if (statusCode >= 400) {
-                        log.warn("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
-                    }
-                    response.close();
-                } catch (IOException e) {
-                    log.warn("Unable to tell HS {} about invite being mapped", domain, e);
+            StringEntity entity = new StringEntity(content.toString(), StandardCharsets.UTF_8);
+            entity.setContentType("application/json");
+            req.setEntity(entity);
+            try {
+                log.info("Posting onBind event to {}", req.getURI());
+                CloseableHttpResponse response = client.execute(req);
+                int statusCode = response.getStatusLine().getStatusCode();
+                log.info("Answer code: {}", statusCode);
+                if (statusCode >= 400) {
+                    log.warn("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
                 }
-                invitations.remove(key);
-            }).start();
-        }
-
-
+                response.close();
+            } catch (IOException e) {
+                log.warn("Unable to tell HS {} about invite being mapped", domain, e);
+            }
+            invitations.remove(key);
+        }).start();
     }
 
 }

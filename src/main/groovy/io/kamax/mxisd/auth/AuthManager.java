@@ -20,7 +20,10 @@
 
 package io.kamax.mxisd.auth;
 
+import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
+import io.kamax.mxisd.invitation.InvitationManager;
+import io.kamax.mxisd.lookup.ThreePidMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,9 @@ public class AuthManager {
     @Autowired
     private List<AuthenticatorProvider> providers = new ArrayList<>();
 
+    @Autowired
+    private InvitationManager invMgr;
+
     public UserAuthResult authenticate(String id, String password) {
         for (AuthenticatorProvider provider : providers) {
             if (!provider.isEnabled()) {
@@ -45,6 +51,12 @@ public class AuthManager {
 
             UserAuthResult result = provider.authenticate(id, password);
             if (result.isSuccess()) {
+                log.info("{} was authenticated by {}, publishing 3PID mappings, if any", id, provider.getClass().getSimpleName());
+                for (ThreePid pid : result.getThreePids()) {
+                    log.info("Processing {} for {}", pid, id);
+                    invMgr.publishMappingIfInvited(new ThreePidMapping(pid, result.getMxid()));
+                }
+
                 return result;
             }
         }

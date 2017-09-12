@@ -60,7 +60,7 @@ public class GoogleFirebaseProvider implements IThreePidProvider {
         this(true);
         this.domain = domain;
         try {
-            fbApp = FirebaseApp.initializeApp(getOpts(credsPath, db));
+            fbApp = FirebaseApp.initializeApp(getOpts(credsPath, db), "ThreePidProvider");
             fbAuth = FirebaseAuth.getInstance(fbApp);
 
             log.info("Google Firebase Authentication is ready");

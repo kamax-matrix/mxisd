@@ -21,6 +21,7 @@
 package io.kamax.mxisd.lookup;
 
 import groovy.json.JsonOutput;
+import io.kamax.mxisd.ThreePid;
 
 public class ThreePidMapping {
 
@@ -30,6 +31,10 @@ public class ThreePidMapping {
 
     public ThreePidMapping() {
         // stub
+    }
+
+    public ThreePidMapping(ThreePid threePid, String mxid) {
+        this(threePid.getMedium(), threePid.getAddress(), mxid);
     }
 
     public ThreePidMapping(String medium, String value, String mxid) {
