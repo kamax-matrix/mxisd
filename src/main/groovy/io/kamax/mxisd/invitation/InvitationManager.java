@@ -280,7 +280,6 @@ public class InvitationManager {
             try {
                 log.info("Searching for mapping created since invite {} was created", getId(reply));
                 Optional<SingleLookupReply> result = lookupMgr.find(reply.getInvite().getMedium(), reply.getInvite().getAddress(), true);
-                log.info("Result: {}", result);
                 if (result.isPresent()) {
                     SingleLookupReply lookup = result.get();
                     log.info("Found mapping for pending invite {}", getId(reply));
