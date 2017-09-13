@@ -41,6 +41,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -92,7 +93,10 @@ public class EmailInviteSender implements IInviteSender {
             String roomName = invite.getInvite().getProperties().getOrDefault("room_name", "");
             String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
 
-            String templateBody = IOUtils.toString(app.getResource(cfg.getTemplate()).getInputStream(), StandardCharsets.UTF_8);
+            String templateBody = IOUtils.toString(
+                    StringUtils.startsWith(cfg.getTemplate(), "classpath:") ?
+                            app.getResource(cfg.getTemplate()).getInputStream() : new FileInputStream(cfg.getTemplate()),
+                    StandardCharsets.UTF_8);
             templateBody = templateBody.replace("%DOMAIN%", srvCfg.getName());
             templateBody = templateBody.replace("%DOMAIN_PRETTY%", domainPretty);
             templateBody = templateBody.replace("%FROM_EMAIL%", cfg.getEmail());
