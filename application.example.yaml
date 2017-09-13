@@ -252,6 +252,8 @@ invite:
       # - %SENDER_ID%             Matrix ID of the invitation sender
       # - %SENDER_NAME%           Display name of the invitation sender, empty if not available
       # - %SENDER_NAME_OR_ID%     Value of %SENDER_NAME% or, if empty, value of %SENDER_ID%
+      # - %INVITE_MEDIUM%         Medium of the invite (e.g. email, msisdn)
+      # - %INVITE_ADDRESS%        Address used to invite
       # - %ROOM_ID%               ID of the room where the invitation took place
       # - %ROOM_NAME%             Name of the room, empty if not available
       # - %ROOM_NAME_OR_ID%       Value of %ROOM_NAME% or, if empty, value of %ROOM_ID%

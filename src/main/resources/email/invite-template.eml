@@ -12,6 +12,9 @@ Hi,
 %SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on
 Matrix. To join the conversation, register an account on http://%DOMAIN%
 
+You can also register an account on a public server, like Matrix.org, by going to
+https://riot.im/app/#/register?%INVITE_MEDIUM%=%INVITE_ADDRESS%
+
 
 About Matrix:
 
@@ -68,6 +71,9 @@ pre, code {
 
 <p>%SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on
 Matrix. To join the conversation, register an account on <a href="http://%DOMAIN%">%DOMAIN%</a>.</p>
+
+<p>You can also register an account on a public server, like Matrix.org, by following
+<a href="https://riot.im/app/#/register?%INVITE_MEDIUM%=%INVITE_ADDRESS%">this link</a>.</p>
 
 <br>
 <p>About Matrix:</p>

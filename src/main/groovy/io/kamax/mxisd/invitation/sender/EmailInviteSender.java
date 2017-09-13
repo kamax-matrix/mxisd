@@ -104,6 +104,8 @@ public class EmailInviteSender implements IInviteSender {
             templateBody = templateBody.replace("%SENDER_ID%", invite.getInvite().getSender().getId());
             templateBody = templateBody.replace("%SENDER_NAME%", senderName);
             templateBody = templateBody.replace("%SENDER_NAME_OR_ID%", senderNameOrId);
+            templateBody = templateBody.replace("%INVITE_MEDIUM%", invite.getInvite().getMedium());
+            templateBody = templateBody.replace("%INVITE_ADDRESS%", invite.getInvite().getAddress());
             templateBody = templateBody.replace("%ROOM_ID%", invite.getInvite().getRoomId());
             templateBody = templateBody.replace("%ROOM_NAME%", roomName);
             templateBody = templateBody.replace("%ROOM_NAME_OR_ID%", roomNameOrId);
