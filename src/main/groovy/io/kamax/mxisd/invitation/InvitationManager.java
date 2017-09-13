@@ -46,10 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
+import org.xbill.DNS.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -130,10 +127,19 @@ public class InvitationManager {
         log.info("Lookup name: {}", lookupDns);
 
         try {
-            SRVRecord[] records = (SRVRecord[]) new Lookup(lookupDns, Type.SRV).run();
-            if (records != null) {
-                Arrays.sort(records, Comparator.comparingInt(SRVRecord::getPriority));
-                for (SRVRecord record : records) {
+            List<SRVRecord> srvRecords = new ArrayList<>();
+            Record[] rawRecords = new Lookup(lookupDns, Type.SRV).run();
+            if (rawRecords != null && rawRecords.length > 0) {
+                for (Record record : rawRecords) {
+                    if (Type.SRV == record.getType()) {
+                        srvRecords.add((SRVRecord) record);
+                    } else {
+                        log.info("Got non-SRV record: {}", record.toString());
+                    }
+                }
+
+                srvRecords.sort(Comparator.comparingInt(SRVRecord::getPriority));
+                for (SRVRecord record : srvRecords) {
                     log.info("Found SRV record: {}", record.toString());
                     return "https://" + record.getTarget().toString(true) + ":" + record.getPort();
                 }
