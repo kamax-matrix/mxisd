@@ -65,6 +65,8 @@ class MappingController {
         if (lookupReq.isRecursive()) {
             lookupReq.setRecurseHosts(Arrays.asList(xff.split(",")))
         }
+
+        lookupReq.setUserAgent(req.getHeader("USER-AGENT"))
     }
 
     @RequestMapping(value = "/lookup", method = GET)
@@ -74,7 +76,7 @@ class MappingController {
         lookupRequest.setType(medium)
         lookupRequest.setThreePid(address)
 
-        log.info("Got request from {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.isRecursive())
+        log.info("Got single lookup request from {} with client {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.getUserAgent(), lookupRequest.isRecursive())
 
         Optional<SingleLookupReply> lookupOpt = strategy.find(lookupRequest)
         if (!lookupOpt.isPresent()) {
@@ -99,7 +101,7 @@ class MappingController {
     String bulkLookup(HttpServletRequest request) {
         BulkLookupRequest lookupRequest = new BulkLookupRequest()
         setRequesterInfo(lookupRequest, request)
-        log.info("Got request from {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.isRecursive())
+        log.info("Got single lookup request from {} with client {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.getUserAgent(), lookupRequest.isRecursive())
 
         ClientBulkLookupRequest input = (ClientBulkLookupRequest) json.parseText(request.getInputStream().getText())
         List<ThreePidMapping> mappings = new ArrayList<>()
