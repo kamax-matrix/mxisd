@@ -20,6 +20,8 @@
 
 package io.kamax.mxisd.controller.v1;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
 import org.apache.commons.lang.StringUtils;
@@ -39,8 +41,13 @@ public class DefaultExceptionHandler {
 
     private Logger log = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
+    private static Gson gson = new Gson();
+
     static String handle(String erroCode, String error) {
-        return "{\"errcode\":\"" + erroCode + "\",\"error\":\"" + error + "\"}";
+        JsonObject obj = new JsonObject();
+        obj.addProperty("errcode", erroCode);
+        obj.addProperty("error", error);
+        return gson.toJson(obj);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
