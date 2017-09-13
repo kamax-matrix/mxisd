@@ -28,16 +28,16 @@ import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.*
 
 import javax.servlet.http.HttpServletRequest
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET
 
 @RestController
+@CrossOrigin
+@RequestMapping(path = "/_matrix/identity/api/v1", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 class KeyController {
 
     private Logger log = LoggerFactory.getLogger(KeyController.class)
@@ -45,7 +45,7 @@ class KeyController {
     @Autowired
     private KeyManager keyMgr
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/{keyType}:{keyId}", method = GET)
+    @RequestMapping(value = "/pubkey/{keyType}:{keyId}", method = GET)
     String getKey(@PathVariable String keyType, @PathVariable int keyId) {
         if (!"ed25519".contentEquals(keyType)) {
             throw new BadRequestException("Invalid algorithm: " + keyType)
@@ -57,14 +57,14 @@ class KeyController {
         ])
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/ephemeral/isvalid", method = GET)
+    @RequestMapping(value = "/pubkey/ephemeral/isvalid", method = GET)
     String checkEphemeralKeyValidity(HttpServletRequest request) {
         log.error("{} was requested but not implemented", request.getRequestURL())
 
         throw new NotImplementedException()
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/pubkey/isvalid", method = GET)
+    @RequestMapping(value = "/pubkey/isvalid", method = GET)
     String checkKeyValidity(HttpServletRequest request, @RequestParam("public_key") String pubKey) {
         log.info("Validating public key {}", pubKey)
 

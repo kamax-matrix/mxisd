@@ -32,6 +32,8 @@ import io.kamax.mxisd.key.KeyManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -41,6 +43,8 @@ import javax.servlet.http.HttpServletRequest
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 
 @RestController
+@CrossOrigin
+@RequestMapping(path = "/_matrix/identity/api/v1", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 class InvitationController {
 
     private Logger log = LoggerFactory.getLogger(InvitationController.class)
@@ -56,7 +60,7 @@ class InvitationController {
 
     private Gson gson = new Gson()
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/store-invite", method = POST)
+    @RequestMapping(value = "/store-invite", method = POST)
     String store(
             HttpServletRequest request,
             @RequestParam String sender,
