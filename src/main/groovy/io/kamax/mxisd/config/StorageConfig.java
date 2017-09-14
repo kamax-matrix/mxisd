@@ -18,40 +18,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.invitation;
+package io.kamax.mxisd.config;
 
-public class ThreePidInviteReply implements IThreePidInviteReply {
+import io.kamax.mxisd.exception.ConfigurationException;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-    private String id;
-    private IThreePidInvite invite;
-    private String token;
-    private String displayName;
+import javax.annotation.PostConstruct;
 
-    public ThreePidInviteReply(String id, IThreePidInvite invite, String token, String displayName) {
-        this.id = id;
-        this.invite = invite;
-        this.token = token;
-        this.displayName = displayName;
+@Configuration
+@ConfigurationProperties("storage")
+public class StorageConfig {
+
+    private String backend;
+
+    public String getBackend() {
+        return backend;
     }
 
-    @Override
-    public String getId() {
-        return id;
+    public void setBackend(String backend) {
+        this.backend = backend;
     }
 
-    @Override
-    public IThreePidInvite getInvite() {
-        return invite;
-    }
-
-    @Override
-    public String getToken() {
-        return token;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
+    @PostConstruct
+    private void postConstruct() {
+        if (StringUtils.isBlank(getBackend())) {
+            throw new ConfigurationException("storage.backend");
+        }
     }
 
 }

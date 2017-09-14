@@ -18,40 +18,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.invitation;
+package io.kamax.mxisd.config;
 
-public class ThreePidInviteReply implements IThreePidInviteReply {
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-    private String id;
-    private IThreePidInvite invite;
-    private String token;
-    private String displayName;
+@Configuration
+@ConfigurationProperties("storage.provider.sqlite")
+public class SQLiteStorageConfig {
 
-    public ThreePidInviteReply(String id, IThreePidInvite invite, String token, String displayName) {
-        this.id = id;
-        this.invite = invite;
-        this.token = token;
-        this.displayName = displayName;
+    private String database;
+
+    public String getDatabase() {
+        return database;
     }
 
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public IThreePidInvite getInvite() {
-        return invite;
-    }
-
-    @Override
-    public String getToken() {
-        return token;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
+    public void setDatabase(String database) {
+        this.database = database;
     }
 
 }

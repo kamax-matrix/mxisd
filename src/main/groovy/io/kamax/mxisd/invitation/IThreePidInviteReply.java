@@ -22,6 +22,8 @@ package io.kamax.mxisd.invitation;
 
 public interface IThreePidInviteReply {
 
+    String getId();
+
     IThreePidInvite getInvite();
 
     String getToken();

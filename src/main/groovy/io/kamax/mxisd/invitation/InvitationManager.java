@@ -21,7 +21,7 @@
 package io.kamax.mxisd.invitation;
 
 import com.google.gson.Gson;
-import io.kamax.matrix.ThreePid;
+import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
 import io.kamax.mxisd.invitation.sender.IInviteSender;
@@ -29,8 +29,11 @@ import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.signature.SignatureManager;
+import io.kamax.mxisd.storage.IStorage;
+import io.kamax.mxisd.storage.ormlite.ThreePidInviteIO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -64,7 +67,10 @@ public class InvitationManager {
 
     private Logger log = LoggerFactory.getLogger(InvitationManager.class);
 
-    private Map<ThreePid, IThreePidInviteReply> invitations = new ConcurrentHashMap<>();
+    private Map<String, IThreePidInviteReply> invitations = new ConcurrentHashMap<>();
+
+    @Autowired
+    private IStorage storage;
 
     @Autowired
     private LookupStrategy lookupMgr;
@@ -78,9 +84,29 @@ public class InvitationManager {
     private Gson gson;
     private Timer refreshTimer;
 
+    private String getId(IThreePidInvite invite) {
+        return invite.getSender().getDomain() + invite.getMedium() + invite.getAddress();
+    }
+
     @PostConstruct
     private void postConstruct() {
         gson = new Gson();
+
+        log.info("Loading saved invites");
+        Collection<ThreePidInviteIO> ioList = storage.getInvites();
+        ioList.forEach(io -> {
+            log.info("Processing invite {}", gson.toJson(io));
+            ThreePidInvite invite = new ThreePidInvite(
+                    new MatrixID(io.getSender()),
+                    io.getMedium(),
+                    io.getAddress(),
+                    io.getRoomId(),
+                    io.getProperties()
+            );
+
+            ThreePidInviteReply reply = new ThreePidInviteReply(getId(invite), invite, io.getToken(), "");
+            invitations.put(reply.getId(), reply);
+        });
 
         // FIXME export such madness into matrix-java-sdk with a nice wrapper to talk to a homeserver
         try {
@@ -93,6 +119,7 @@ public class InvitationManager {
             throw new RuntimeException(e);
         }
 
+        log.info("Setting up invitation mapping refresh timer");
         refreshTimer = new Timer();
         refreshTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -166,30 +193,31 @@ public class InvitationManager {
             throw new BadRequestException("Medium type " + invitation.getMedium() + " is not supported");
         }
 
-        ThreePid pid = new ThreePid(invitation.getMedium(), invitation.getAddress());
-
-        log.info("Handling invite for {}:{} from {} in room {}", pid.getMedium(), pid.getAddress(), invitation.getSender(), invitation.getRoomId());
-        if (invitations.containsKey(pid)) {
-            log.info("Invite is already pending for {}:{}, returning data", pid.getMedium(), pid.getAddress());
-            return invitations.get(pid);
+        String invId = getId(invitation);
+        log.info("Handling invite for {}:{} from {} in room {}", invitation.getMedium(), invitation.getAddress(), invitation.getSender(), invitation.getRoomId());
+        if (invitations.containsKey(invId)) { // FIXME we need to lookup using the HS domain too!!
+            log.info("Invite is already pending for {}:{}, returning data", invitation.getMedium(), invitation.getAddress());
+            return invitations.get(invId);
         }
 
         Optional<?> result = lookupMgr.find(invitation.getMedium(), invitation.getAddress(), true);
         if (result.isPresent()) {
-            log.info("Mapping for {}:{} already exists, refusing to store invite", pid.getMedium(), pid.getAddress());
+            log.info("Mapping for {}:{} already exists, refusing to store invite", invitation.getMedium(), invitation.getAddress());
             throw new MappingAlreadyExistsException();
         }
 
         String token = RandomStringUtils.randomAlphanumeric(64);
         String displayName = invitation.getAddress().substring(0, 3) + "...";
 
-        IThreePidInviteReply reply = new ThreePidInviteReply(invitation, token, displayName);
+        IThreePidInviteReply reply = new ThreePidInviteReply(invId, invitation, token, displayName);
 
-        log.info("Performing invite to {}:{}", pid.getMedium(), pid.getAddress());
+        log.info("Performing invite to {}:{}", invitation.getMedium(), invitation.getAddress());
         sender.send(reply);
 
-        invitations.put(pid, reply);
-        log.info("A new invite has been created for {}:{}", pid.getMedium(), pid.getAddress());
+        log.info("Storing invite under ID {}", invId);
+        storage.insertInvite(reply);
+        invitations.put(invId, reply);
+        log.info("A new invite has been created for {}:{} on HS {}", invitation.getMedium(), invitation.getAddress(), invitation.getSender().getDomain());
 
         return reply;
     }
@@ -203,13 +231,12 @@ public class InvitationManager {
     }
 
     public void publishMappingIfInvited(ThreePidMapping threePid) {
-        ThreePid key = new ThreePid(threePid.getMedium(), threePid.getValue());
-        IThreePidInviteReply reply = invitations.get(key);
-        if (reply == null) {
-            log.info("{}:{} does not have a pending invite, no mapping to publish", threePid.getMedium(), threePid.getValue());
-        } else {
-            log.info("{}:{} has an invite pending, publishing mapping", threePid.getMedium(), threePid.getValue());
-            publishMapping(reply, threePid.getMxid());
+        log.info("Looking up possible pending invites for {}:{}", threePid.getMedium(), threePid.getValue());
+        for (IThreePidInviteReply reply : invitations.values()) {
+            if (StringUtils.equals(reply.getInvite().getMedium(), threePid.getMedium()) && StringUtils.equals(reply.getInvite().getAddress(), threePid.getValue())) {
+                log.info("{}:{} has an invite pending on HS {}, publishing mapping", threePid.getMedium(), threePid.getValue(), reply.getInvite().getSender().getDomain());
+                publishMapping(reply, threePid.getMxid());
+            }
         }
     }
 
@@ -255,15 +282,17 @@ public class InvitationManager {
                 CloseableHttpResponse response = client.execute(req);
                 int statusCode = response.getStatusLine().getStatusCode();
                 log.info("Answer code: {}", statusCode);
-                if (statusCode >= 400) {
+                if (statusCode >= 300) {
                     log.warn("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
+                } else {
+                    invitations.remove(getId(reply));
+                    storage.deleteInvite(reply.getId());
+                    log.info("Removed invite from internal store");
                 }
                 response.close();
             } catch (IOException e) {
                 log.warn("Unable to tell HS {} about invite being mapped", domain, e);
             }
-            invitations.remove(new ThreePid(medium, address));
-            log.info("Removed invite from internal store");
         }).start();
     }
 

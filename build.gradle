@@ -104,6 +104,12 @@ dependencies {
     // Google Firebase Authentication backend
     compile 'com.google.firebase:firebase-admin:5.3.0'
 
+    // ORMLite
+    compile 'com.j256.ormlite:ormlite-jdbc:5.0'
+
+    // SQLite
+    compile 'org.xerial:sqlite-jdbc:3.20.0'
+
     testCompile 'junit:junit:4.12'
 }
 
@@ -159,6 +165,12 @@ task buildDeb(dependsOn: build) {
             file: "${debBuildConfPath}/${debConfFileName}",
             token: '%SIGNING_KEYS_PATH%',
             value: "${debDataPath}/signing.key"
+        )
+
+        ant.replaceregexp(
+                file: "${debBuildConfPath}/${debConfFileName}",
+                match: "#?database:\\s*'%SQLITE_DATABASE_PATH%'",
+                replace: "database: '${debDataPath}/mxisd.db'"
         )
 
         copy {

@@ -40,3 +40,6 @@ invite:
       tls: 1
       name: "mxisd Identity Server"
       template: "classpath:email/invite-template.eml"
+
+storage:
+  backend: 'sqlite'

@@ -8,3 +8,6 @@ out/
 
 # Local dev config
 /application.yaml
+
+# Local dev storage
+/mxisd.db

@@ -18,40 +18,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.invitation;
+package io.kamax.mxisd.storage;
 
-public class ThreePidInviteReply implements IThreePidInviteReply {
+import io.kamax.mxisd.invitation.IThreePidInviteReply;
+import io.kamax.mxisd.storage.ormlite.ThreePidInviteIO;
 
-    private String id;
-    private IThreePidInvite invite;
-    private String token;
-    private String displayName;
+import java.util.Collection;
 
-    public ThreePidInviteReply(String id, IThreePidInvite invite, String token, String displayName) {
-        this.id = id;
-        this.invite = invite;
-        this.token = token;
-        this.displayName = displayName;
-    }
+public interface IStorage {
 
-    @Override
-    public String getId() {
-        return id;
-    }
+    Collection<ThreePidInviteIO> getInvites();
 
-    @Override
-    public IThreePidInvite getInvite() {
-        return invite;
-    }
+    void insertInvite(IThreePidInviteReply data);
 
-    @Override
-    public String getToken() {
-        return token;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
+    void deleteInvite(String id);
 
 }

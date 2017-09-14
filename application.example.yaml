@@ -244,7 +244,7 @@ invite:
       # - Message-Id
       # - X-Mailer
       #
-      # The following placeholders are possible:
+      # The following placeholders are available:
       # - %DOMAIN%                Domain name as per server.name config item
       # - %DOMAIN_PRETTY%         Word capitalize version of the domain. e.g. example.org -> Example.org
       # - %FROM_EMAIL%            Value of this section's email config item
@@ -258,3 +258,24 @@ invite:
       # - %ROOM_NAME%             Name of the room, empty if not available
       # - %ROOM_NAME_OR_ID%       Value of %ROOM_NAME% or, if empty, value of %ROOM_ID%
       template: "/absolute/path/to/file"
+
+
+
+# Configure persistence settings
+storage:
+
+  # Configure the storage backend, usually a DB
+  # Possible built-in values:
+  #   sqlite                      SQLite backend, default
+  #
+  #backend: 'sqlite'
+
+  # Specific configuration for each provider, refer to their documentation for specifics.
+  provider:
+
+    # Generic SQLite provider config
+    sqlite:
+
+      # Path to the SQLite DB file, required
+      #
+      #database:'%SQLITE_DATABASE_PATH%'
