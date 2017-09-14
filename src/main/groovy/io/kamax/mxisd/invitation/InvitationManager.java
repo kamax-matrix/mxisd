@@ -138,7 +138,7 @@ public class InvitationManager {
         ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.MINUTES);
     }
 
-    private String getId(IThreePidInviteReply reply) {
+    private String getIdForLog(IThreePidInviteReply reply) {
         return reply.getInvite().getSender().getId() + ":" + reply.getInvite().getRoomId() + ":" + reply.getInvite().getMedium() + ":" + reply.getInvite().getAddress();
     }
 
@@ -225,7 +225,7 @@ public class InvitationManager {
     public void lookupMappingsForInvites() {
         log.info("Checking for existing mapping for pending invites");
         for (IThreePidInviteReply reply : invitations.values()) {
-            log.info("Processing invite {}", getId(reply));
+            log.info("Processing invite {}", getIdForLog(reply));
             ForkJoinPool.commonPool().submit(new MappingChecker(reply));
         }
     }
@@ -285,7 +285,7 @@ public class InvitationManager {
                 if (statusCode >= 300) {
                     log.warn("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
                 } else {
-                    invitations.remove(getId(reply));
+                    invitations.remove(getId(reply.getInvite()));
                     storage.deleteInvite(reply.getId());
                     log.info("Removed invite from internal store");
                 }
@@ -307,14 +307,14 @@ public class InvitationManager {
         @Override
         public void run() {
             try {
-                log.info("Searching for mapping created since invite {} was created", getId(reply));
+                log.info("Searching for mapping created since invite {} was created", getIdForLog(reply));
                 Optional<SingleLookupReply> result = lookupMgr.find(reply.getInvite().getMedium(), reply.getInvite().getAddress(), true);
                 if (result.isPresent()) {
                     SingleLookupReply lookup = result.get();
-                    log.info("Found mapping for pending invite {}", getId(reply));
+                    log.info("Found mapping for pending invite {}", getIdForLog(reply));
                     publishMapping(reply, lookup.getMxid().getId());
                 } else {
-                    log.info("No mapping for pending invite {}", getId(reply));
+                    log.info("No mapping for pending invite {}", getIdForLog(reply));
                 }
             } catch (Throwable t) {
                 log.error("Unable to process invite", t);
