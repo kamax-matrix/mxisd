@@ -85,7 +85,7 @@ public class InvitationManager {
     private Timer refreshTimer;
 
     private String getId(IThreePidInvite invite) {
-        return invite.getSender().getDomain() + invite.getMedium() + invite.getAddress();
+        return invite.getSender().getDomain().toLowerCase() + invite.getMedium().toLowerCase() + invite.getAddress().toLowerCase();
     }
 
     @PostConstruct
@@ -233,7 +233,7 @@ public class InvitationManager {
     public void publishMappingIfInvited(ThreePidMapping threePid) {
         log.info("Looking up possible pending invites for {}:{}", threePid.getMedium(), threePid.getValue());
         for (IThreePidInviteReply reply : invitations.values()) {
-            if (StringUtils.equals(reply.getInvite().getMedium(), threePid.getMedium()) && StringUtils.equals(reply.getInvite().getAddress(), threePid.getValue())) {
+            if (StringUtils.equalsIgnoreCase(reply.getInvite().getMedium(), threePid.getMedium()) && StringUtils.equalsIgnoreCase(reply.getInvite().getAddress(), threePid.getValue())) {
                 log.info("{}:{} has an invite pending on HS {}, publishing mapping", threePid.getMedium(), threePid.getValue(), reply.getInvite().getSender().getDomain());
                 publishMapping(reply, threePid.getMxid());
             }

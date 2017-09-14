@@ -223,6 +223,21 @@ key.path: '/path/to/sign.key'
 #ldap.identity.medium.msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
 
 
+############################
+# SQL Provider config item #
+############################
+#
+# Example configuration to integrate with synapse SQLite DB (default configuration)
+#
+#sql.enabled: true
+#sql.type: 'sqlite'
+#sql.connection: '/var/lib/matrix-synapse/homeserver.db'
+#sql.identity.type: 'mxid'
+#sql.identity.query: 'SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?'
+#sql.identity.medium.email: "SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?"
+
+
+
 #######################################
 # Lookup queries forward config items #
 #######################################

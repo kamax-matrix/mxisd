@@ -25,6 +25,7 @@ import com.google.gson.JsonObject
 import io.kamax.mxisd.controller.v1.io.SessionEmailTokenRequestJson
 import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson
 import io.kamax.mxisd.exception.BadRequestException
+import io.kamax.mxisd.invitation.InvitationManager
 import io.kamax.mxisd.lookup.ThreePidValidation
 import io.kamax.mxisd.mapping.MappingManager
 import org.apache.commons.io.IOUtils
@@ -47,6 +48,9 @@ class SessionController {
 
     @Autowired
     private MappingManager mgr
+
+    @Autowired
+    private InvitationManager invMgr;
 
     private Gson gson = new Gson()
 
@@ -131,6 +135,10 @@ class SessionController {
             obj.addProperty("error", e.getMessage())
             response.setStatus(HttpStatus.SC_BAD_REQUEST)
             return gson.toJson(obj)
+        } finally {
+            // If a user registers, there is no standard login event. Instead, this is the only way to trigger
+            // resolution at an appropriate time. Meh at synapse/Riot!
+            invMgr.lookupMappingsForInvites()
         }
     }
 
