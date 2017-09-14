@@ -339,3 +339,20 @@ invite.sender.email.email: "matrix-identity@example.org"
 #  - /var/lib/mxisd/mxisd.db
 #
 storage.provider.sqlite.database: '/path/to/mxisd.db'
+
+
+######################
+# DNS-related config #
+######################
+# The domain to overwrite
+#
+#dns.overwrite.homeserver.name: 'example.org'
+
+# - 'env' from environment variable specified by value
+# - any other value will use the value as-is as host
+#
+#dns.overwrite.homeserver.type: 'raw'
+
+# The value to use, depending on the type
+#
+#dns.overwrite.homeserver.value: 'localhost:8448'
