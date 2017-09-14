@@ -161,16 +161,16 @@ task buildDeb(dependsOn: build) {
             into debBuildConfPath
         }
 
-        ant.replace(
+        ant.replaceregexp(
             file: "${debBuildConfPath}/${debConfFileName}",
-            token: '%SIGNING_KEYS_PATH%',
-            value: "${debDataPath}/signing.key"
+            match: "key.path:(.*)",
+            replace: "key.path: '${debDataPath}/signing.key'"
         )
 
         ant.replaceregexp(
-                file: "${debBuildConfPath}/${debConfFileName}",
-                match: "#?database:\\s*'%SQLITE_DATABASE_PATH%'",
-                replace: "database: '${debDataPath}/mxisd.db'"
+            file: "${debBuildConfPath}/${debConfFileName}",
+            match: "storage.provider.sqlite.database:(.*)",
+            replace: "storage.provider.sqlite.database: '${debDataPath}/mxisd.db'"
         )
 
         copy {

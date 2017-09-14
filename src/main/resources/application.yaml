@@ -25,6 +25,18 @@ lookup:
 
 ldap:
   enabled: false
+  connection:
+    tls: false
+    port: 389
+  attribute:
+    uid:
+      type: 'uid'
+      value: 'userPrincipalName'
+    name: 'displayName'
+  identity:
+    medium:
+      email: "(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))"
+      msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
 
 firebase:
   enabled: false
