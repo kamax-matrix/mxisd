@@ -20,12 +20,13 @@
 
 package io.kamax.mxisd.lookup.fetcher
 
+import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 
 interface IBridgeFetcher {
 
-    Optional<?> find(SingleLookupRequest request)
+    Optional<SingleLookupReply> find(SingleLookupRequest request)
 
     List<ThreePidMapping> populate(List<ThreePidMapping> mappings)
 

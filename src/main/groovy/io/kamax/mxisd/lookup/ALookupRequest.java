@@ -26,6 +26,7 @@ public abstract class ALookupRequest {
 
     private String id;
     private String requester;
+    private String userAgent;
     private boolean isRecursive;
     private List<String> recurseHosts;
 
@@ -43,6 +44,14 @@ public abstract class ALookupRequest {
 
     public void setRequester(String requester) {
         this.requester = requester;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
     public boolean isRecursive() {

@@ -22,10 +22,7 @@ package io.kamax.mxisd.lookup.strategy
 
 import edazdarevic.commons.net.CIDRUtils
 import io.kamax.mxisd.config.RecursiveLookupConfig
-import io.kamax.mxisd.lookup.ALookupRequest
-import io.kamax.mxisd.lookup.BulkLookupRequest
-import io.kamax.mxisd.lookup.SingleLookupRequest
-import io.kamax.mxisd.lookup.ThreePidMapping
+import io.kamax.mxisd.lookup.*
 import io.kamax.mxisd.lookup.fetcher.IBridgeFetcher
 import io.kamax.mxisd.lookup.provider.IThreePidProvider
 import org.slf4j.Logger
@@ -93,13 +90,17 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     }
 
     List<IThreePidProvider> listUsableProviders(ALookupRequest request) {
+        return listUsableProviders(request, false);
+    }
+
+    List<IThreePidProvider> listUsableProviders(ALookupRequest request, boolean forceRecursive) {
         List<IThreePidProvider> usableProviders = new ArrayList<>()
 
-        boolean canRecurse = isAllowedForRecursive(request.getRequester())
+        boolean canRecurse = forceRecursive || isAllowedForRecursive(request.getRequester())
 
         log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse)
         for (IThreePidProvider provider : providers) {
-            if (provider.isEnabled() && (provider.isLocal() || canRecurse)) {
+            if (provider.isEnabled() && (provider.isLocal() || canRecurse || forceRecursive)) {
                 usableProviders.add(provider)
             }
         }
@@ -118,20 +119,42 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
     }
 
     @Override
-    Optional<?> find(SingleLookupRequest request) {
-        for (IThreePidProvider provider : listUsableProviders(request)) {
-            Optional<?> lookupDataOpt = provider.find(request)
+    Optional<SingleLookupReply> find(String medium, String address, boolean recursive) {
+        SingleLookupRequest req = new SingleLookupRequest();
+        req.setType(medium)
+        req.setThreePid(address)
+        req.setRequester("Internal")
+        return find(req, recursive)
+    }
+
+    Optional<SingleLookupReply> find(SingleLookupRequest request, boolean forceRecursive) {
+        for (IThreePidProvider provider : listUsableProviders(request, forceRecursive)) {
+            Optional<SingleLookupReply> lookupDataOpt = provider.find(request)
             if (lookupDataOpt.isPresent()) {
                 return lookupDataOpt
             }
         }
 
-        if (recursiveCfg.getBridge().getEnabled() && (!recursiveCfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))) {
+        if (
+        recursiveCfg.getBridge() != null &&
+                recursiveCfg.getBridge().getEnabled() &&
+                (!recursiveCfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))
+        ) {
             log.info("Using bridge failover for lookup")
             return bridge.find(request)
         }
 
         return Optional.empty()
+    }
+
+    @Override
+    Optional<SingleLookupReply> find(SingleLookupRequest request) {
+        return find(request, false)
+    }
+
+    @Override
+    Optional<SingleLookupReply> findRecursive(SingleLookupRequest request) {
+        return find(request, true)
     }
 
     @Override

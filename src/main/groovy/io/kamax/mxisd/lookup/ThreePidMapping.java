@@ -21,12 +21,27 @@
 package io.kamax.mxisd.lookup;
 
 import groovy.json.JsonOutput;
+import io.kamax.mxisd.ThreePid;
 
 public class ThreePidMapping {
 
     private String medium;
     private String value;
     private String mxid;
+
+    public ThreePidMapping() {
+        // stub
+    }
+
+    public ThreePidMapping(ThreePid threePid, String mxid) {
+        this(threePid.getMedium(), threePid.getAddress(), mxid);
+    }
+
+    public ThreePidMapping(String medium, String value, String mxid) {
+        setMedium(medium);
+        setValue(value);
+        setMxid(mxid);
+    }
 
     public String getMedium() {
         return medium;

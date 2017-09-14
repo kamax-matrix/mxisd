@@ -20,10 +20,22 @@
 
 package io.kamax.mxisd.controller.v1
 
-import io.kamax.mxisd.exception.NotImplementedException
+import com.google.gson.Gson
+import io.kamax.matrix.MatrixID
+import io.kamax.mxisd.config.ServerConfig
+import io.kamax.mxisd.controller.v1.io.ThreePidInviteReplyIO
+import io.kamax.mxisd.invitation.IThreePidInvite
+import io.kamax.mxisd.invitation.IThreePidInviteReply
+import io.kamax.mxisd.invitation.InvitationManager
+import io.kamax.mxisd.invitation.ThreePidInvite
+import io.kamax.mxisd.key.KeyManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 import javax.servlet.http.HttpServletRequest
@@ -31,15 +43,38 @@ import javax.servlet.http.HttpServletRequest
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 
 @RestController
+@CrossOrigin
+@RequestMapping(path = "/_matrix/identity/api/v1", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 class InvitationController {
 
     private Logger log = LoggerFactory.getLogger(InvitationController.class)
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/store-invite", method = POST)
-    String store(HttpServletRequest request) {
-        log.error("{} was requested but not implemented", request.getRequestURL())
+    @Autowired
+    private InvitationManager mgr
 
-        throw new NotImplementedException()
+    @Autowired
+    private KeyManager keyMgr
+
+    @Autowired
+    private ServerConfig srvCfg
+
+    private Gson gson = new Gson()
+
+    @RequestMapping(value = "/store-invite", method = POST)
+    String store(
+            HttpServletRequest request,
+            @RequestParam String sender,
+            @RequestParam String medium,
+            @RequestParam String address,
+            @RequestParam("room_id") String roomId) {
+        Map<String, String> parameters = new HashMap<>()
+        for (String key : request.getParameterMap().keySet()) {
+            parameters.put(key, request.getParameter(key));
+        }
+        IThreePidInvite invite = new ThreePidInvite(new MatrixID(sender), medium, address, roomId, parameters)
+        IThreePidInviteReply reply = mgr.storeInvite(invite)
+
+        return gson.toJson(new ThreePidInviteReplyIO(reply, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex()), srvCfg.getPublicUrl()))
     }
 
 }

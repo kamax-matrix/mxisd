@@ -20,18 +20,20 @@
 
 package io.kamax.mxisd.controller.v1
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import io.kamax.mxisd.lookup.ALookupRequest
-import io.kamax.mxisd.lookup.BulkLookupRequest
-import io.kamax.mxisd.lookup.SingleLookupRequest
-import io.kamax.mxisd.lookup.ThreePidMapping
+import io.kamax.mxisd.controller.v1.io.SingeLookupReplyJson
+import io.kamax.mxisd.lookup.*
 import io.kamax.mxisd.lookup.strategy.LookupStrategy
 import io.kamax.mxisd.signature.SignatureManager
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -42,10 +44,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 
 @RestController
+@CrossOrigin
+@RequestMapping(path = "/_matrix/identity/api/v1", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 class MappingController {
 
     private Logger log = LoggerFactory.getLogger(MappingController.class)
     private JsonSlurper json = new JsonSlurper()
+    private Gson gson = new Gson()
 
     @Autowired
     private LookupStrategy strategy
@@ -60,37 +65,43 @@ class MappingController {
         if (lookupReq.isRecursive()) {
             lookupReq.setRecurseHosts(Arrays.asList(xff.split(",")))
         }
+
+        lookupReq.setUserAgent(req.getHeader("USER-AGENT"))
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/lookup", method = GET)
+    @RequestMapping(value = "/lookup", method = GET)
     String lookup(HttpServletRequest request, @RequestParam String medium, @RequestParam String address) {
         SingleLookupRequest lookupRequest = new SingleLookupRequest()
         setRequesterInfo(lookupRequest, request)
         lookupRequest.setType(medium)
         lookupRequest.setThreePid(address)
 
-        log.info("Got request from {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.isRecursive())
+        log.info("Got single lookup request from {} with client {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.getUserAgent(), lookupRequest.isRecursive())
 
-        Optional<?> lookupOpt = strategy.find(lookupRequest)
+        Optional<SingleLookupReply> lookupOpt = strategy.find(lookupRequest)
         if (!lookupOpt.isPresent()) {
             log.info("No mapping was found, return empty JSON object")
             return JsonOutput.toJson([])
         }
 
-        def lookup = lookupOpt.get()
-        if (lookup['signatures'] == null) {
-            log.info("lookup is not signed yet, we sign it")
-            lookup['signatures'] = signMgr.signMessage(JsonOutput.toJson(lookup))
-        }
+        SingleLookupReply lookup = lookupOpt.get()
+        if (lookup.isSigned()) {
+            log.info("Lookup is already signed, sending as-is")
+            return lookup.getBody();
+        } else {
+            log.info("Lookup is not signed, signing")
+            JsonObject obj = new Gson().toJsonTree(new SingeLookupReplyJson(lookup)).getAsJsonObject()
+            obj.add("signatures", signMgr.signMessageGson(gson.toJson(obj)))
 
-        return JsonOutput.toJson(lookup)
+            return gson.toJson(obj)
+        }
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/bulk_lookup", method = POST)
+    @RequestMapping(value = "/bulk_lookup", method = POST)
     String bulkLookup(HttpServletRequest request) {
         BulkLookupRequest lookupRequest = new BulkLookupRequest()
         setRequesterInfo(lookupRequest, request)
-        log.info("Got request from {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.isRecursive())
+        log.info("Got single lookup request from {} with client {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.getUserAgent(), lookupRequest.isRecursive())
 
         ClientBulkLookupRequest input = (ClientBulkLookupRequest) json.parseText(request.getInputStream().getText())
         List<ThreePidMapping> mappings = new ArrayList<>()

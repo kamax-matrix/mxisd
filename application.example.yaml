@@ -12,6 +12,12 @@ server:
   # e.g. domain name in e-mails.
   name: 'example.org'
 
+  # Public URL to reach this identity server
+  #
+  # This is used with 3PID invites in room and other Homeserver key verification workflow.
+  # If left unconfigured, it will be generated from the server name
+  # publicUrl: 'https://example.org'
+
 
 
 key:
@@ -125,7 +131,7 @@ ldap:
     baseDn: 'CN=Users,DC=example,DC=org'
 
   # How to map Matrix attributes with LDAP attributes when performing lookup/auth
-  attributes:
+  attribute:
 
     # The username/login that will be looked up or used to build Matrix IDs
     uid:
@@ -190,3 +196,86 @@ forward:
   servers:
     - "https://matrix.org"
     - "https://vector.im"
+
+
+
+# Configure the invite components
+invite:
+
+  # Configure invite senders for the various 3PID type
+  sender:
+
+    # E-mail invite sender
+    email:
+
+      # SMTP host
+      host: "smtp.example.org"
+
+      # SMTP port
+      port: 587
+
+      # TLS mode for the connection.
+      #
+      # Possible values:
+      #  0    Disable TLS entirely
+      #  1    Enable TLS if supported by server
+      #  2    Force TLS and fail if not available
+      tls: 1
+
+      # Login for SMTP
+      login: "matrix-identity@example.org"
+
+      # Password for the account
+      password: "ThePassword"
+
+      # The e-mail to send as. If empty, will be the same as login
+      email: "matrix-identity@example.org"
+
+      # The display name used in the e-mail
+      name: "Matrix Identity"
+
+      # The E-mail template to use.
+      #
+      # The template is expected to be a full e-mail body, including client headers, using MIME and UTF-8 encoding.
+      # The following headers will be set by mxisd directly and should not be present in the template:
+      # - From
+      # - To
+      # - Date
+      # - Message-Id
+      # - X-Mailer
+      #
+      # The following placeholders are available:
+      # - %DOMAIN%                Domain name as per server.name config item
+      # - %DOMAIN_PRETTY%         Word capitalize version of the domain. e.g. example.org -> Example.org
+      # - %FROM_EMAIL%            Value of this section's email config item
+      # - %FROM_NAME%             Value of this section's name config item
+      # - %SENDER_ID%             Matrix ID of the invitation sender
+      # - %SENDER_NAME%           Display name of the invitation sender, empty if not available
+      # - %SENDER_NAME_OR_ID%     Value of %SENDER_NAME% or, if empty, value of %SENDER_ID%
+      # - %INVITE_MEDIUM%         Medium of the invite (e.g. email, msisdn)
+      # - %INVITE_ADDRESS%        Address used to invite
+      # - %ROOM_ID%               ID of the room where the invitation took place
+      # - %ROOM_NAME%             Name of the room, empty if not available
+      # - %ROOM_NAME_OR_ID%       Value of %ROOM_NAME% or, if empty, value of %ROOM_ID%
+      template: "/absolute/path/to/file"
+
+
+
+# Configure persistence settings
+storage:
+
+  # Configure the storage backend, usually a DB
+  # Possible built-in values:
+  #   sqlite                      SQLite backend, default
+  #
+  #backend: 'sqlite'
+
+  # Specific configuration for each provider, refer to their documentation for specifics.
+  provider:
+
+    # Generic SQLite provider config
+    sqlite:
+
+      # Path to the SQLite DB file, required
+      #
+      #database:'%SQLITE_DATABASE_PATH%'

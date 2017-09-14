@@ -22,6 +22,8 @@ package io.kamax.mxisd.config
 
 import io.kamax.mxisd.exception.ConfigurationException
 import org.apache.commons.lang.StringUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
@@ -30,7 +32,11 @@ import org.springframework.context.annotation.Configuration
 @ConfigurationProperties(prefix = "server")
 class ServerConfig implements InitializingBean {
 
+    private Logger log = LoggerFactory.getLogger(ServerConfig.class);
+
     private String name
+    private int port
+    private String publicUrl
 
     String getName() {
         return name
@@ -40,11 +46,43 @@ class ServerConfig implements InitializingBean {
         this.name = name
     }
 
+    int getPort() {
+        return port
+    }
+
+    void setPort(int port) {
+        this.port = port
+    }
+
+    String getPublicUrl() {
+        return publicUrl
+    }
+
+    void setPublicUrl(String publicUrl) {
+        this.publicUrl = publicUrl
+    }
+
     @Override
     void afterPropertiesSet() throws Exception {
         if (StringUtils.isBlank(getName())) {
             throw new ConfigurationException("server.name")
         }
+
+        if (StringUtils.isBlank(getPublicUrl())) {
+            log.warn("Public URL is empty, generating from name {}", getName())
+            publicUrl = "https://${getName()}"
+        }
+
+        try {
+            new URL(getPublicUrl())
+        } catch (MalformedURLException e) {
+            log.warn("Public URL is not valid: {}", StringUtils.defaultIfBlank(e.getMessage(), "<no reason provided>"))
+        }
+
+        log.info("--- Server config ---")
+        log.info("Name: {}", getName())
+        log.info("Port: {}", getPort())
+        log.info("Public URL: {}", getPublicUrl())
     }
 
 }

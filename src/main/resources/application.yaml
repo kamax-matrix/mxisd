@@ -1,0 +1,45 @@
+logging:
+  level:
+    org:
+      springframework: "WARN"
+      apache:
+        catalina: "WARN"
+        directory: "WARN"
+
+server:
+  port: 8090
+
+lookup:
+  recursive:
+    enabled: true
+    allowedCidr:
+      - '127.0.0.0/8'
+      - '10.0.0.0/8'
+      - '172.16.0.0/12'
+      - '192.168.0.0/16'
+      - '::1/128'
+
+    bridge:
+      enabled: false
+      recursiveOnly: true
+
+ldap:
+  enabled: false
+
+firebase:
+  enabled: false
+
+forward:
+  servers:
+    - "https://matrix.org"
+    - "https://vector.im"
+
+invite:
+  sender:
+    email:
+      tls: 1
+      name: "mxisd Identity Server"
+      template: "classpath:email/invite-template.eml"
+
+storage:
+  backend: 'sqlite'

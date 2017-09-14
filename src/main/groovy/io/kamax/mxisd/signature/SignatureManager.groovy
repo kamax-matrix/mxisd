@@ -20,9 +20,11 @@
 
 package io.kamax.mxisd.signature
 
+import com.google.gson.JsonObject
 import io.kamax.mxisd.config.ServerConfig
 import io.kamax.mxisd.key.KeyManager
 import net.i2p.crypto.eddsa.EdDSAEngine
+import org.json.JSONObject
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -40,14 +42,31 @@ class SignatureManager implements InitializingBean {
 
     private EdDSAEngine signEngine
 
-    Map<?, ?> signMessage(String message) {
+    private String sign(String message) {
         byte[] signRaw = signEngine.signOneShot(message.getBytes())
-        String sign = Base64.getEncoder().encodeToString(signRaw)
-        return [
-                "${srvCfg.getName()}": [
-                        "ed25519:${keyMgr.getCurrentIndex()}": sign
-                ]
-        ]
+        return Base64.getEncoder().encodeToString(signRaw)
+    }
+
+    JSONObject signMessageJson(String message) {
+        String sign = sign(message)
+
+        JSONObject keySignature = new JSONObject()
+        keySignature.put("ed25519:${keyMgr.getCurrentIndex()}", sign)
+        JSONObject signature = new JSONObject()
+        signature.put("${srvCfg.getName()}", keySignature)
+
+        return signature
+    }
+
+    JsonObject signMessageGson(String message) {
+        String sign = sign(message)
+
+        JsonObject keySignature = new JsonObject()
+        keySignature.addProperty("ed25519:${keyMgr.getCurrentIndex()}", sign)
+        JsonObject signature = new JsonObject()
+        signature.add("${srvCfg.getName()}", keySignature);
+
+        return signature
     }
 
     @Override

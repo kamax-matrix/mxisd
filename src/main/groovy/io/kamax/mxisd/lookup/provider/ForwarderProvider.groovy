@@ -21,6 +21,7 @@
 package io.kamax.mxisd.lookup.provider
 
 import io.kamax.mxisd.config.ForwardConfig
+import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher
@@ -56,9 +57,9 @@ class ForwarderProvider implements IThreePidProvider {
     }
 
     @Override
-    Optional<?> find(SingleLookupRequest request) {
+    Optional<SingleLookupReply> find(SingleLookupRequest request) {
         for (String root : cfg.getServers()) {
-            Optional<?> answer = fetcher.find(root, request.getType(), request.getThreePid())
+            Optional<SingleLookupReply> answer = fetcher.find(root, request)
             if (answer.isPresent()) {
                 return answer
             }

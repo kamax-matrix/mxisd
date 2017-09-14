@@ -25,7 +25,7 @@ import com.google.gson.JsonObject
 import io.kamax.mxisd.controller.v1.io.SessionEmailTokenRequestJson
 import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson
 import io.kamax.mxisd.exception.BadRequestException
-import io.kamax.mxisd.lookup.ThreePid
+import io.kamax.mxisd.lookup.ThreePidValidation
 import io.kamax.mxisd.mapping.MappingManager
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.StringUtils
@@ -33,16 +33,16 @@ import org.apache.http.HttpStatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.*
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import java.nio.charset.StandardCharsets
 
 @RestController
+@CrossOrigin
+@RequestMapping(path = "/_matrix/identity/api/v1", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 class SessionController {
 
     @Autowired
@@ -56,7 +56,7 @@ class SessionController {
         gson.fromJson(new InputStreamReader(req.getInputStream(), StandardCharsets.UTF_8), obj)
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/validate/{medium}/requestToken")
+    @RequestMapping(value = "/validate/{medium}/requestToken")
     String init(HttpServletRequest request, HttpServletResponse response, @PathVariable String medium) {
         log.info("Requested: {}", request.getRequestURL(), request.getQueryString())
 
@@ -77,7 +77,7 @@ class SessionController {
         return gson.toJson(obj)
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/validate/{medium}/submitToken")
+    @RequestMapping(value = "/validate/{medium}/submitToken")
     String validate(HttpServletRequest request,
                     @RequestParam String sid,
                     @RequestParam("client_secret") String secret, @RequestParam String token) {
@@ -88,15 +88,15 @@ class SessionController {
         return "{}"
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/3pid/getValidated3pid")
+    @RequestMapping(value = "/3pid/getValidated3pid")
     String check(HttpServletRequest request, HttpServletResponse response,
                  @RequestParam String sid, @RequestParam("client_secret") String secret) {
         log.info("Requested: {}?{}", request.getRequestURL(), request.getQueryString())
 
-        Optional<ThreePid> result = mgr.getValidated(sid, secret)
+        Optional<ThreePidValidation> result = mgr.getValidated(sid, secret)
         if (result.isPresent()) {
             log.info("requested session was validated")
-            ThreePid pid = result.get()
+            ThreePidValidation pid = result.get()
 
             JsonObject obj = new JsonObject()
             obj.addProperty("medium", pid.getMedium())
@@ -115,7 +115,7 @@ class SessionController {
         }
     }
 
-    @RequestMapping(value = "/_matrix/identity/api/v1/3pid/bind")
+    @RequestMapping(value = "/3pid/bind")
     String bind(HttpServletRequest request, HttpServletResponse response,
                 @RequestParam String sid, @RequestParam("client_secret") String secret, @RequestParam String mxid) {
         String data = IOUtils.toString(request.getReader())

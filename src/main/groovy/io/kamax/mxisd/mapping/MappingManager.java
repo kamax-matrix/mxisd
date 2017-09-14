@@ -1,7 +1,27 @@
+/*
+ * mxisd - Matrix Identity Server Daemon
+ * Copyright (C) 2017 Maxime Dor
+ *
+ * https://max.kamax.io/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package io.kamax.mxisd.mapping;
 
 import io.kamax.mxisd.exception.BadRequestException;
-import io.kamax.mxisd.lookup.ThreePid;
+import io.kamax.mxisd.lookup.ThreePidValidation;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +92,10 @@ public class MappingManager {
         s.validationTimestamp = Instant.now();
     }
 
-    public Optional<ThreePid> getValidated(String sid, String secret) {
+    public Optional<ThreePidValidation> getValidated(String sid, String secret) {
         Session s = sessions.get(sid);
         if (s != null && StringUtils.equals(s.secret, secret)) {
-            return Optional.of(new ThreePid(s.medium, s.address, s.validationTimestamp));
+            return Optional.of(new ThreePidValidation(s.medium, s.address, s.validationTimestamp));
         }
 
         return Optional.empty();

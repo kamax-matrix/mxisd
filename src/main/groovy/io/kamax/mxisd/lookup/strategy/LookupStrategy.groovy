@@ -21,6 +21,7 @@
 package io.kamax.mxisd.lookup.strategy
 
 import io.kamax.mxisd.lookup.BulkLookupRequest
+import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import io.kamax.mxisd.lookup.provider.IThreePidProvider
@@ -29,7 +30,11 @@ interface LookupStrategy {
 
     List<IThreePidProvider> getLocalProviders()
 
-    Optional<?> find(SingleLookupRequest request)
+    Optional<SingleLookupReply> find(String medium, String address, boolean recursive)
+
+    Optional<SingleLookupReply> find(SingleLookupRequest request)
+
+    Optional<SingleLookupReply> findRecursive(SingleLookupRequest request)
 
     List<ThreePidMapping> find(BulkLookupRequest requests)
 

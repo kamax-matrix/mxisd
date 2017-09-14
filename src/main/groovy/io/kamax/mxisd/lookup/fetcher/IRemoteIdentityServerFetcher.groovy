@@ -20,13 +20,15 @@
 
 package io.kamax.mxisd.lookup.fetcher
 
+import io.kamax.mxisd.lookup.SingleLookupReply
+import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 
 interface IRemoteIdentityServerFetcher {
 
     boolean isUsable(String remote)
 
-    Optional<?> find(String remote, String type, String threePid)
+    Optional<SingleLookupReply> find(String remote, SingleLookupRequest request)
 
     List<ThreePidMapping> find(String remote, List<ThreePidMapping> mappings)
 
