@@ -29,6 +29,7 @@ import com.j256.ormlite.table.TableUtils;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.storage.IStorage;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -41,6 +42,11 @@ public class OrmLiteSqliteStorage implements IStorage {
 
     OrmLiteSqliteStorage(String path) {
         try {
+            File parent = new File(path).getParentFile();
+            if (!parent.mkdirs() && !parent.isDirectory()) {
+                throw new RuntimeException("Unable to create DB parent directory: " + parent);
+            }
+
             ConnectionSource connPool = new JdbcConnectionSource("jdbc:sqlite:" + path);
             invDao = DaoManager.createDao(connPool, ThreePidInviteIO.class);
             TableUtils.createTableIfNotExists(connPool, ThreePidInviteIO.class);
