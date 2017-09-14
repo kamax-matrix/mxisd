@@ -20,9 +20,10 @@
 
 package io.kamax.mxisd.controller.v1
 
+import com.google.gson.Gson
 import groovy.json.JsonOutput
+import io.kamax.mxisd.controller.v1.io.KeyValidityJson
 import io.kamax.mxisd.exception.BadRequestException
-import io.kamax.mxisd.exception.NotImplementedException
 import io.kamax.mxisd.key.KeyManager
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
@@ -45,6 +46,10 @@ class KeyController {
     @Autowired
     private KeyManager keyMgr
 
+    private Gson gson = new Gson();
+    private String validKey = gson.toJson(new KeyValidityJson(true));
+    private String invalidKey = gson.toJson(new KeyValidityJson(false));
+
     @RequestMapping(value = "/pubkey/{keyType}:{keyId}", method = GET)
     String getKey(@PathVariable String keyType, @PathVariable int keyId) {
         if (!"ed25519".contentEquals(keyType)) {
@@ -59,9 +64,9 @@ class KeyController {
 
     @RequestMapping(value = "/pubkey/ephemeral/isvalid", method = GET)
     String checkEphemeralKeyValidity(HttpServletRequest request) {
-        log.error("{} was requested but not implemented", request.getRequestURL())
+        log.warn("Ephemeral key was request but no ephemeral key are generated, replying not valid")
 
-        throw new NotImplementedException()
+        return invalidKey
     }
 
     @RequestMapping(value = "/pubkey/isvalid", method = GET)
@@ -70,9 +75,7 @@ class KeyController {
 
         // TODO do in manager
         boolean valid = StringUtils.equals(pubKey, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex()))
-        return JsonOutput.toJson(
-                valid: valid
-        )
+        return valid ? validKey : invalidKey
     }
 
 }
