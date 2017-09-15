@@ -36,7 +36,6 @@ public class MappingManager {
 
     private Logger log = LoggerFactory.getLogger(MappingManager.class);
 
-    private Map<String, Session> threePidLookups = new WeakHashMap<>();
     private Map<String, Session> sessions = new HashMap<>();
     private Timer cleaner;
 
@@ -51,7 +50,6 @@ public class MappingManager {
                         log.info("Session {} is obsolete, removing", s.sid);
 
                         sessions.remove(s.sid);
-                        threePidLookups.remove(s.hash);
                     }
                 }
             }
@@ -65,16 +63,9 @@ public class MappingManager {
         } while (sessions.containsKey(sid));
 
         String threePidHash = data.getMedium() + data.getValue();
-        Session session = threePidLookups.get(threePidHash);
-        if (session != null) {
-            sid = session.sid;
-        } else {
-            // TODO perform some kind of validation
-
-            session = new Session(sid, threePidHash, data);
-            sessions.put(sid, session);
-            threePidLookups.put(threePidHash, session);
-        }
+        // TODO think how to handle different requests for the same e-mail
+        Session session = new Session(sid, threePidHash, data);
+        sessions.put(sid, session);
 
         log.info("Created new session {} to validate {} {}", sid, session.medium, session.address);
         return sid;
