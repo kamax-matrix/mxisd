@@ -7,7 +7,7 @@ mxisd - Federated Matrix Identity Server Daemon
 [Integration](#integration) | [Support](#support)
 
 # Overview
-mxisd is a Federated Matrix Identity server aimed to self-hosted Matrix infrastructures.
+mxisd is a Federated Matrix Identity server for self-hosted Matrix infrastructures.
 
 mxisd uses a cascading lookup model which performs lookup from a more authoritative to a less authoritative source, usually doing:
 - Local identity stores: LDAP, etc.
