@@ -18,12 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.auth.provider;
+package io.kamax.mxisd.backend.ldap;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.auth.UserAuthResult;
-import io.kamax.mxisd.backend.LdapBackend;
-import io.kamax.mxisd.lookup.provider.LdapProvider;
+import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException;
@@ -40,7 +39,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class LdapAuthProvider extends LdapBackend implements AuthenticatorProvider {
+public class LdapAuthProvider extends LdapGenericBackend implements AuthenticatorProvider {
 
     private Logger log = LoggerFactory.getLogger(LdapAuthProvider.class);
 
@@ -63,7 +62,7 @@ public class LdapAuthProvider extends LdapBackend implements AuthenticatorProvid
 
             String uidType = getCfg().getAttribute().getUid().getType();
             MatrixID mxIdExt = new MatrixID(id);
-            String userFilterValue = StringUtils.equals(LdapProvider.UID, uidType) ? mxIdExt.getLocalPart() : mxIdExt.getId();
+            String userFilterValue = StringUtils.equals(LdapThreePidProvider.UID, uidType) ? mxIdExt.getLocalPart() : mxIdExt.getId();
             String userFilter = "(" + getCfg().getAttribute().getUid().getValue() + "=" + userFilterValue + ")";
             EntryCursor cursor = conn.search(getCfg().getConn().getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAttribute(), getCfg().getAttribute().getName());
             try {

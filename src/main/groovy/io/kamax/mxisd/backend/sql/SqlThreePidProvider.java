@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup.provider;
+package io.kamax.mxisd.backend.sql;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
@@ -26,6 +26,7 @@ import io.kamax.mxisd.config.sql.SqlProviderConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
+import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class SqlProvider implements IThreePidProvider {
+public class SqlThreePidProvider implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(SqlProvider.class);
+    private Logger log = LoggerFactory.getLogger(SqlThreePidProvider.class);
 
     @Autowired
     private MatrixConfig mxCfg;

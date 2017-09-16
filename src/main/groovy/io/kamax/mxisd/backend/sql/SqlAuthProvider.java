@@ -18,9 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.auth.provider;
+package io.kamax.mxisd.backend.sql;
 
 import io.kamax.mxisd.auth.UserAuthResult;
+import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.sql.SqlProviderConfig;
 import io.kamax.mxisd.invitation.InvitationManager;

@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.auth.provider
+package io.kamax.mxisd.backend.firebase
 
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -28,6 +28,7 @@ import com.google.firebase.tasks.OnFailureListener
 import com.google.firebase.tasks.OnSuccessListener
 import io.kamax.matrix.ThreePidMedium
 import io.kamax.mxisd.auth.UserAuthResult
+import io.kamax.mxisd.auth.provider.AuthenticatorProvider
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

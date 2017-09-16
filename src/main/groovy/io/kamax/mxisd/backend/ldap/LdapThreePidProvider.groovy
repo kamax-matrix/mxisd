@@ -18,13 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.lookup.provider
+package io.kamax.mxisd.backend.ldap
 
-import io.kamax.mxisd.backend.LdapBackend
 import io.kamax.mxisd.config.MatrixConfig
 import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
+import io.kamax.mxisd.lookup.provider.IThreePidProvider
 import org.apache.commons.lang.StringUtils
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException
 import org.apache.directory.api.ldap.model.cursor.EntryCursor
@@ -38,12 +38,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class LdapProvider extends LdapBackend implements IThreePidProvider {
+class LdapThreePidProvider extends LdapGenericBackend implements IThreePidProvider {
 
     public static final String UID = "uid"
     public static final String MATRIX_ID = "mxid"
 
-    private Logger log = LoggerFactory.getLogger(LdapProvider.class)
+    private Logger log = LoggerFactory.getLogger(LdapThreePidProvider.class)
 
     @Autowired
     private MatrixConfig mxCfg

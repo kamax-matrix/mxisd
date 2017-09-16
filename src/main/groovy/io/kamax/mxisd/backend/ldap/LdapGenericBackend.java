@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend;
+package io.kamax.mxisd.backend.ldap;
 
 import io.kamax.mxisd.config.ldap.LdapConfig;
 import org.apache.commons.lang.StringUtils;
@@ -31,9 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LdapBackend {
+public class LdapGenericBackend {
 
-    private Logger log = LoggerFactory.getLogger(LdapBackend.class);
+    private Logger log = LoggerFactory.getLogger(LdapGenericBackend.class);
 
     @Autowired
     private LdapConfig ldapCfg;

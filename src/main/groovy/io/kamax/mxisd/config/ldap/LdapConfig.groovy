@@ -21,7 +21,7 @@
 package io.kamax.mxisd.config.ldap
 
 import groovy.json.JsonOutput
-import io.kamax.mxisd.lookup.provider.LdapProvider
+import io.kamax.mxisd.backend.ldap.LdapThreePidProvider
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -112,7 +112,7 @@ class LdapConfig {
         }
 
         String uidType = attribute.getUid().getType();
-        if (!StringUtils.equals(LdapProvider.UID, uidType) && !StringUtils.equals(LdapProvider.MATRIX_ID, uidType)) {
+        if (!StringUtils.equals(LdapThreePidProvider.UID, uidType) && !StringUtils.equals(LdapThreePidProvider.MATRIX_ID, uidType)) {
             throw new IllegalArgumentException("Unsupported LDAP UID type: " + uidType)
         }
 
