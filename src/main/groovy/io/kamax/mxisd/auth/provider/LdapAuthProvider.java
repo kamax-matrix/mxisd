@@ -22,7 +22,7 @@ package io.kamax.mxisd.auth.provider;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.auth.UserAuthResult;
-import io.kamax.mxisd.config.ldap.LdapConfig;
+import io.kamax.mxisd.backend.LdapBackend;
 import io.kamax.mxisd.lookup.provider.LdapProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
@@ -33,37 +33,24 @@ import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.ldap.client.api.LdapConnection;
-import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 @Component
-public class LdapAuthProvider implements AuthenticatorProvider {
+public class LdapAuthProvider extends LdapBackend implements AuthenticatorProvider {
 
     private Logger log = LoggerFactory.getLogger(LdapAuthProvider.class);
 
-    @Autowired
-    private LdapConfig ldapCfg;
-
-    private LdapConnection getConn() {
-        return new LdapNetworkConnection(ldapCfg.getConn().getHost(), ldapCfg.getConn().getPort(), ldapCfg.getConn().isTls());
-    }
-
-    private void bind(LdapConnection conn) throws LdapException {
-        conn.bind(ldapCfg.getConn().getBindDn(), ldapCfg.getConn().getBindPassword());
-    }
-
     private String getUidAttribute() {
-        return ldapCfg.getAttribute().getUid().getValue();
+        return getCfg().getAttribute().getUid().getValue();
     }
 
     @Override
     public boolean isEnabled() {
-        return ldapCfg.isEnabled();
+        return getCfg().isEnabled();
     }
 
     @Override
@@ -74,11 +61,11 @@ public class LdapAuthProvider implements AuthenticatorProvider {
         try {
             bind(conn);
 
-            String uidType = ldapCfg.getAttribute().getUid().getType();
+            String uidType = getCfg().getAttribute().getUid().getType();
             MatrixID mxIdExt = new MatrixID(id);
             String userFilterValue = StringUtils.equals(LdapProvider.UID, uidType) ? mxIdExt.getLocalPart() : mxIdExt.getId();
-            String userFilter = "(" + ldapCfg.getAttribute().getUid().getValue() + "=" + userFilterValue + ")";
-            EntryCursor cursor = conn.search(ldapCfg.getConn().getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAttribute(), ldapCfg.getAttribute().getName());
+            String userFilter = "(" + getCfg().getAttribute().getUid().getValue() + "=" + userFilterValue + ")";
+            EntryCursor cursor = conn.search(getCfg().getConn().getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAttribute(), getCfg().getAttribute().getName());
             try {
                 while (cursor.next()) {
                     Entry entry = cursor.get();
@@ -105,7 +92,7 @@ public class LdapAuthProvider implements AuthenticatorProvider {
                         return new UserAuthResult().failure();
                     }
 
-                    Attribute nameAttribute = entry.get(ldapCfg.getAttribute().getName());
+                    Attribute nameAttribute = entry.get(getCfg().getAttribute().getName());
                     String name = nameAttribute != null ? nameAttribute.get().toString() : null;
 
                     log.info("Authentication successful for {}", entry.getDn().getName());

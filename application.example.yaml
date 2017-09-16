@@ -172,12 +172,14 @@ key.path: '/path/to/sign.key'
 #ldap.connection.port: 389
 
 
-# Bind DN to use when performing lookups
+# Bind DN for the connection.
+#
+# If Bind DN and password are empty, anonymous authentication is performed
 #
 #ldap.connection.bindDn: 'CN=Matrix Identity Server,CN=Users,DC=example,DC=org'
 
 
-# Bind password to use
+# Bind password for the connection.
 #
 #ldap.connection.bindPassword: 'password'
 
@@ -256,6 +258,9 @@ key.path: '/path/to/sign.key'
 #sql.enabled: true
 #sql.type: 'sqlite'
 #sql.connection: '/var/lib/matrix-synapse/homeserver.db'
+
+
+# See ldap.attribute.uid.type for more info on possible values
 #sql.identity.type: 'mxid'
 #sql.identity.query: 'SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?'
 #sql.identity.medium.email: "SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?"
@@ -383,6 +388,7 @@ storage.provider.sqlite.database: '/path/to/mxisd.db'
 #dns.overwrite.homeserver.type: 'raw'
 
 
-# The value to use, depending on the type
+# The value to use, depending on the type.
+# Protocol will always be HTTPS
 #
 #dns.overwrite.homeserver.value: 'localhost:8448'

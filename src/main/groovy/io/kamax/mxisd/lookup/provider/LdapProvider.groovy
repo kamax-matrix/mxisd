@@ -20,8 +20,8 @@
 
 package io.kamax.mxisd.lookup.provider
 
+import io.kamax.mxisd.backend.LdapBackend
 import io.kamax.mxisd.config.MatrixConfig
-import io.kamax.mxisd.config.ldap.LdapConfig
 import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
@@ -32,14 +32,13 @@ import org.apache.directory.api.ldap.model.entry.Attribute
 import org.apache.directory.api.ldap.model.entry.Entry
 import org.apache.directory.api.ldap.model.message.SearchScope
 import org.apache.directory.ldap.client.api.LdapConnection
-import org.apache.directory.ldap.client.api.LdapNetworkConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class LdapProvider implements IThreePidProvider {
+class LdapProvider extends LdapBackend implements IThreePidProvider {
 
     public static final String UID = "uid"
     public static final String MATRIX_ID = "mxid"
@@ -49,24 +48,13 @@ class LdapProvider implements IThreePidProvider {
     @Autowired
     private MatrixConfig mxCfg
 
-    @Autowired
-    private LdapConfig ldapCfg
-
     @Override
     boolean isEnabled() {
-        return ldapCfg.isEnabled()
-    }
-
-    private LdapConnection getConn() {
-        return new LdapNetworkConnection(ldapCfg.getConn().getHost(), ldapCfg.getConn().getPort(), ldapCfg.getConn().isTls())
-    }
-
-    private void bind(LdapConnection conn) {
-        conn.bind(ldapCfg.getConn().getBindDn(), ldapCfg.getConn().getBindPassword())
+        return getCfg().isEnabled()
     }
 
     private String getUidAttribute() {
-        return ldapCfg.getAttribute().getUid().getValue();
+        return getCfg().getAttribute().getUid().getValue();
     }
 
     @Override
@@ -82,14 +70,14 @@ class LdapProvider implements IThreePidProvider {
     Optional<String> lookup(LdapConnection conn, String medium, String value) {
         String uidAttribute = getUidAttribute()
 
-        Optional<String> queryOpt = ldapCfg.getIdentity().getQuery(medium)
+        Optional<String> queryOpt = getCfg().getIdentity().getQuery(medium)
         if (!queryOpt.isPresent()) {
             log.warn("{} is not a configured 3PID type for LDAP lookup", medium)
             return Optional.empty()
         }
 
         String searchQuery = queryOpt.get().replaceAll("%3pid", value)
-        EntryCursor cursor = conn.search(ldapCfg.getConn().getBaseDn(), searchQuery, SearchScope.SUBTREE, uidAttribute)
+        EntryCursor cursor = conn.search(getCfg().getConn().getBaseDn(), searchQuery, SearchScope.SUBTREE, uidAttribute)
         try {
             while (cursor.next()) {
                 Entry entry = cursor.get()
@@ -97,19 +85,19 @@ class LdapProvider implements IThreePidProvider {
 
                 Attribute attribute = entry.get(uidAttribute)
                 if (attribute == null) {
-                    log.info("DN {}: no attribute {}, skpping", entry.getDn(), ldapCfg.getAttribute())
+                    log.info("DN {}: no attribute {}, skpping", entry.getDn(), getCfg().getAttribute())
                     continue
                 }
 
                 String data = attribute.get().toString()
                 if (data.length() < 1) {
-                    log.info("DN {}: empty attribute {}, skipping", ldapCfg.getAttribute())
+                    log.info("DN {}: empty attribute {}, skipping", getCfg().getAttribute())
                     continue
                 }
 
                 StringBuilder matrixId = new StringBuilder()
                 // TODO Should we turn this block into a map of functions?
-                String uidType = ldapCfg.getAttribute().getUid().getType()
+                String uidType = getCfg().getAttribute().getUid().getType()
                 if (StringUtils.equals(UID, uidType)) {
                     matrixId.append("@").append(data).append(":").append(mxCfg.getDomain())
                 } else if (StringUtils.equals(MATRIX_ID, uidType)) {
