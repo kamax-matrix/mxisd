@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.lookup.provider
 
-import io.kamax.mxisd.config.ServerConfig
+import io.kamax.mxisd.config.MatrixConfig
 import io.kamax.mxisd.config.ldap.LdapConfig
 import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
@@ -47,7 +47,7 @@ class LdapProvider implements IThreePidProvider {
     private Logger log = LoggerFactory.getLogger(LdapProvider.class)
 
     @Autowired
-    private ServerConfig srvCfg
+    private MatrixConfig mxCfg
 
     @Autowired
     private LdapConfig ldapCfg
@@ -111,7 +111,7 @@ class LdapProvider implements IThreePidProvider {
                 // TODO Should we turn this block into a map of functions?
                 String uidType = ldapCfg.getAttribute().getUid().getType()
                 if (StringUtils.equals(UID, uidType)) {
-                    matrixId.append("@").append(data).append(":").append(srvCfg.getName())
+                    matrixId.append("@").append(data).append(":").append(mxCfg.getDomain())
                 } else if (StringUtils.equals(MATRIX_ID, uidType)) {
                     matrixId.append(data)
                 } else {

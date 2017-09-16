@@ -22,7 +22,7 @@ package io.kamax.mxisd.invitation.sender;
 
 import com.sun.mail.smtp.SMTPTransport;
 import io.kamax.matrix.ThreePidMedium;
-import io.kamax.mxisd.config.ServerConfig;
+import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.invite.sender.EmailSenderConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
@@ -56,7 +56,7 @@ public class EmailInviteSender implements IInviteSender {
     private EmailSenderConfig cfg;
 
     @Autowired
-    private ServerConfig srvCfg;
+    private MatrixConfig mxCfg;
 
     @Autowired
     private ApplicationContext app;
@@ -87,7 +87,7 @@ public class EmailInviteSender implements IInviteSender {
         }
 
         try {
-            String domainPretty = WordUtils.capitalizeFully(srvCfg.getName());
+            String domainPretty = WordUtils.capitalizeFully(mxCfg.getDomain());
             String senderName = invite.getInvite().getProperties().getOrDefault("sender_display_name", "");
             String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getInvite().getSender().getId());
             String roomName = invite.getInvite().getProperties().getOrDefault("room_name", "");
@@ -97,7 +97,7 @@ public class EmailInviteSender implements IInviteSender {
                     StringUtils.startsWith(cfg.getTemplate(), "classpath:") ?
                             app.getResource(cfg.getTemplate()).getInputStream() : new FileInputStream(cfg.getTemplate()),
                     StandardCharsets.UTF_8);
-            templateBody = templateBody.replace("%DOMAIN%", srvCfg.getName());
+            templateBody = templateBody.replace("%DOMAIN%", mxCfg.getDomain());
             templateBody = templateBody.replace("%DOMAIN_PRETTY%", domainPretty);
             templateBody = templateBody.replace("%FROM_EMAIL%", cfg.getEmail());
             templateBody = templateBody.replace("%FROM_NAME%", cfg.getName());

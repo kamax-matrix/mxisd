@@ -40,7 +40,7 @@ public class FirebaseConfig {
     private Logger log = LoggerFactory.getLogger(FirebaseConfig.class);
 
     @Autowired
-    private ServerConfig srvCfg;
+    private MatrixConfig mxCfg;
 
     private boolean enabled;
     private String credentials;
@@ -85,7 +85,7 @@ public class FirebaseConfig {
         if (!enabled) {
             return new GoogleFirebaseAuthenticator(false);
         } else {
-            return new GoogleFirebaseAuthenticator(credentials, database, srvCfg.getName());
+            return new GoogleFirebaseAuthenticator(credentials, database, mxCfg.getDomain());
         }
     }
 
@@ -94,7 +94,7 @@ public class FirebaseConfig {
         if (!enabled) {
             return new GoogleFirebaseProvider(false);
         } else {
-            return new GoogleFirebaseProvider(credentials, database, srvCfg.getName());
+            return new GoogleFirebaseProvider(credentials, database, mxCfg.getDomain());
         }
     }
 

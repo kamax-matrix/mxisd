@@ -21,7 +21,7 @@
 package io.kamax.mxisd.lookup.provider;
 
 import io.kamax.matrix.MatrixID;
-import io.kamax.mxisd.config.ServerConfig;
+import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.SqlProviderConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
@@ -43,7 +43,7 @@ public class SqlProvider implements IThreePidProvider {
     private Logger log = LoggerFactory.getLogger(SqlProvider.class);
 
     @Autowired
-    private ServerConfig srvCfg;
+    private MatrixConfig mxCfg;
 
     @Autowired
     private SqlProviderConfig cfg;
@@ -82,7 +82,7 @@ public class SqlProvider implements IThreePidProvider {
                 log.info("Found match: {}", uid);
                 if (StringUtils.equals("uid", cfg.getIdentity().getType())) {
                     log.info("Resolving as localpart");
-                    return Optional.of(new SingleLookupReply(request, new MatrixID(uid, srvCfg.getName())));
+                    return Optional.of(new SingleLookupReply(request, new MatrixID(uid, mxCfg.getDomain())));
                 }
                 if (StringUtils.equals("mxid", cfg.getIdentity().getType())) {
                     log.info("Resolving as MXID");

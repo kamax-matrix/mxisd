@@ -169,10 +169,13 @@ systemctl start mxisd
 
 # Configuration
 After following the specific instructions to create a config file from the sample:
-1. Set the `server.name` value to the domain value used in your Home Server configuration
+1. Set the `matrix.domain` value to the domain value used in your Home Server configuration
 2. Set an absolute location for the signing keys using `key.path`
 3. Set a location for the default SQLite persistence using `storage.provider.sqlite.database`
 4. Configure the E-mail invite sender with items starting in `invite.sender.email`
+
+In case your IS public domain does not match your Matrix domain, see `server.name` and `server.publicUrl` 
+config items.
 
 If you want to use the LDAP backend:
 1. Enable it with `ldap.enabled`

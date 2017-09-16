@@ -20,11 +20,11 @@
 
 package io.kamax.mxisd.config
 
-import io.kamax.mxisd.exception.ConfigurationException
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 
@@ -33,6 +33,9 @@ import org.springframework.context.annotation.Configuration
 class ServerConfig implements InitializingBean {
 
     private Logger log = LoggerFactory.getLogger(ServerConfig.class);
+
+    @Autowired
+    private MatrixConfig mxCfg;
 
     private String name
     private int port
@@ -64,13 +67,18 @@ class ServerConfig implements InitializingBean {
 
     @Override
     void afterPropertiesSet() throws Exception {
+        log.info("--- Server config ---")
+
         if (StringUtils.isBlank(getName())) {
-            throw new ConfigurationException("server.name")
+            setName(mxCfg.getDomain());
+            log.debug("server.name is empty, using matrix.domain");
         }
 
         if (StringUtils.isBlank(getPublicUrl())) {
-            log.warn("Public URL is empty, generating from name {}", getName())
-            publicUrl = "https://${getName()}"
+            setPublicUrl("https://${getName()}");
+            log.debug("Public URL is empty, generating from name");
+        } else {
+            setPublicUrl(StringUtils.replace(getPublicUrl(), "%SERVER_NAME%", getName()));
         }
 
         try {
@@ -79,7 +87,6 @@ class ServerConfig implements InitializingBean {
             log.warn("Public URL is not valid: {}", StringUtils.defaultIfBlank(e.getMessage(), "<no reason provided>"))
         }
 
-        log.info("--- Server config ---")
         log.info("Name: {}", getName())
         log.info("Port: {}", getPort())
         log.info("Public URL: {}", getPublicUrl())

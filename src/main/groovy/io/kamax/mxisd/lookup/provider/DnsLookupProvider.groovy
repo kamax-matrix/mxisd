@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.lookup.provider
 
-import io.kamax.mxisd.config.ServerConfig
+import io.kamax.mxisd.config.MatrixConfig
 import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
@@ -44,7 +44,7 @@ class DnsLookupProvider implements IThreePidProvider {
     private Logger log = LoggerFactory.getLogger(DnsLookupProvider.class)
 
     @Autowired
-    private ServerConfig srvCfg
+    private MatrixConfig mxCfg
 
     @Autowired
     private IRemoteIdentityServerFetcher fetcher
@@ -79,7 +79,7 @@ class DnsLookupProvider implements IThreePidProvider {
 
     // TODO use caching mechanism
     Optional<String> findIdentityServerForDomain(String domain) {
-        if (StringUtils.equals(srvCfg.getName(), domain)) {
+        if (StringUtils.equals(mxCfg.getDomain(), domain)) {
             log.info("We are authoritative for {}, no remote lookup", domain)
             return Optional.empty()
         }

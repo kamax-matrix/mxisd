@@ -7,6 +7,15 @@
 # Any mandatory configuration item will not be prefixed by # and will also contain a value as example that must be
 # changed. It is advised to re-create a clean config file with only the required configuration item.
 
+#######################
+# Matrix config items #
+#######################
+# Matrix domain, same as the domain configure in your Homeserver configuration.
+#
+# This is used to build the various identifiers for identity, auth and directory.
+matrix.domain: ''
+
+
 
 #######################
 # Server config items #
@@ -19,19 +28,31 @@
 #server.port: 8090
 
 
-# Realm under which this Identity Server is authoritative.
+# Public hostname of this identity server.
 #
-# This is used to avoid unnecessary connections and endless recursive lookup.
-# e.g. domain name in e-mails.
-server.name: 'example.org'
+# This would be typically be the same as your Matrix domain.
+# In case it is not, set this value.
+#
+# This value is used in various signatures within the Matrix protocol and should be a reachable hostname.
+# You can validate by ensuring you see a JSON answer when calling (replace the domain):
+# https://example.org/_matrix/identity/status
+#
+#server.name: 'example.org'
 
 
 # Public URL to reach this identity server
 #
 # This is used with 3PID invites in room and other Homeserver key verification workflow.
-# If left unconfigured, it will be generated from the server name
+# If left unconfigured, it will be generated from the server name.
+#
+# You should typically set this value if you want to change the public port under which
+# this Identity server is reachable.
+#
+# %SERVER_NAME% placeholder is available to avoid configuration duplication.
+# e.g. 'https://%SERVER_NAME%:8443'
 #
 #server.publicUrl: 'https://example.org'
+
 
 
 #############################
@@ -45,6 +66,7 @@ server.name: 'example.org'
 #   - /var/local/mxisd/sign.key
 #   - /var/lib/mxisd/sign.key
 key.path: '/path/to/sign.key'
+
 
 
 #################################
@@ -125,13 +147,14 @@ key.path: '/path/to/sign.key'
 #lookup.recursive.bridge.mappings.msisdn: ''
 
 
+
 #####################
 # LDAP config items #
 #####################
-
 # Global enable/disable switch
 #
 #ldap.enabled: false
+
 
 #### Connection related config items
 # If the connection should be secure
@@ -223,6 +246,7 @@ key.path: '/path/to/sign.key'
 #ldap.identity.medium.msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
 
 
+
 ############################
 # SQL Provider config item #
 ############################
@@ -249,6 +273,7 @@ key.path: '/path/to/sign.key'
 #forward.servers:
 #  - "https://matrix.org"
 #  - "https://vector.im"
+
 
 
 #############################
@@ -319,6 +344,7 @@ invite.sender.email.email: "matrix-identity@example.org"
 #invite.sender.email.template: "/absolute/path/to/file"
 
 
+
 ############################
 # Persistence config items #
 ############################
@@ -328,6 +354,7 @@ invite.sender.email.email: "matrix-identity@example.org"
 #   sqlite                      SQLite backend, default
 #
 #storage.backend: 'sqlite'
+
 
 #### Generic SQLite provider config
 #
@@ -341,6 +368,7 @@ invite.sender.email.email: "matrix-identity@example.org"
 storage.provider.sqlite.database: '/path/to/mxisd.db'
 
 
+
 ######################
 # DNS-related config #
 ######################
@@ -348,10 +376,12 @@ storage.provider.sqlite.database: '/path/to/mxisd.db'
 #
 #dns.overwrite.homeserver.name: 'example.org'
 
+
 # - 'env' from environment variable specified by value
 # - any other value will use the value as-is as host
 #
 #dns.overwrite.homeserver.type: 'raw'
+
 
 # The value to use, depending on the type
 #
