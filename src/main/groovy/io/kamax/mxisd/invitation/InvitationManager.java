@@ -235,10 +235,12 @@ public class InvitationManager {
     }
 
     public void lookupMappingsForInvites() {
-        log.info("Checking for existing mapping for pending invites");
-        for (IThreePidInviteReply reply : invitations.values()) {
-            log.info("Processing invite {}", getIdForLog(reply));
-            ForkJoinPool.commonPool().submit(new MappingChecker(reply));
+        if (!invitations.isEmpty()) {
+            log.info("Checking for existing mapping for pending invites");
+            for (IThreePidInviteReply reply : invitations.values()) {
+                log.info("Processing invite {}", getIdForLog(reply));
+                ForkJoinPool.commonPool().submit(new MappingChecker(reply));
+            }
         }
     }
 
