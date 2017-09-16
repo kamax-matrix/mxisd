@@ -43,7 +43,7 @@ import java.nio.charset.StandardCharsets
 
 @RestController
 @CrossOrigin
-@RequestMapping(path = "/_matrix/identity/api/v1", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(path = IdentityAPIv1.BASE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 class SessionController {
 
     @Autowired

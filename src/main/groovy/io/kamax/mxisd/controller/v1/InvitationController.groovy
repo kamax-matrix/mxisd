@@ -44,7 +44,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST
 
 @RestController
 @CrossOrigin
-@RequestMapping(path = "/_matrix/identity/api/v1", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(path = IdentityAPIv1.BASE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 class InvitationController {
 
     private Logger log = LoggerFactory.getLogger(InvitationController.class)

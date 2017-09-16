@@ -20,30 +20,8 @@
 
 package io.kamax.mxisd.controller.v1;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+public class IdentityAPIv1 {
 
-@RestController
-@CrossOrigin
-@RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-public class StatusController {
-
-    private Gson gson = new Gson();
-
-    @RequestMapping(value = "/_matrix/identity/status")
-    public String getStatus() {
-        // TODO link to backend
-        JsonObject status = new JsonObject();
-        status.addProperty("health", "OK");
-
-        JsonObject obj = new JsonObject();
-        obj.add("status", status);
-
-        return gson.toJson(obj);
-    }
+    public static final String BASE = "/_matrix/identity/api/v1";
 
 }
