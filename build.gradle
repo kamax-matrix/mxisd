@@ -216,3 +216,11 @@ task buildDeb(dependsOn: build) {
         }
     }
 }
+
+task dockerBuild(type: Exec, dependsOn: build) {
+    commandLine 'docker', 'build', '-t', "kamax/mxisd:${gitVersion()}", project.rootDir
+}
+
+task dockerPush(type: Exec) {
+    commandLine 'docker', 'push', "kamax/mxisd:${gitVersion()}"
+}
