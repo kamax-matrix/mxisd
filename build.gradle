@@ -83,7 +83,7 @@ dependencies {
     compile 'net.i2p.crypto:eddsa:0.1.0'
 
     // LDAP connector
-    compile 'org.apache.directory.api:api-all:1.0.0-RC2'
+    compile 'org.apache.directory.api:api-all:1.0.0'
 
     // DNS lookups
     compile 'dnsjava:dnsjava:2.1.8'

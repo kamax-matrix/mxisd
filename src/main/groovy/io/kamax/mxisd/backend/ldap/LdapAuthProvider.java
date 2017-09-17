@@ -64,6 +64,9 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
             MatrixID mxIdExt = new MatrixID(id);
             String userFilterValue = StringUtils.equals(LdapThreePidProvider.UID, uidType) ? mxIdExt.getLocalPart() : mxIdExt.getId();
             String userFilter = "(" + getCfg().getAttribute().getUid().getValue() + "=" + userFilterValue + ")";
+            if (!StringUtils.isBlank(getCfg().getAuth().getFilter())) {
+                userFilter = "(&" + getCfg().getAuth().getFilter() + userFilter + ")";
+            }
             EntryCursor cursor = conn.search(getCfg().getConn().getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAttribute(), getCfg().getAttribute().getName());
             try {
                 while (cursor.next()) {

@@ -227,8 +227,6 @@ key.path: '/path/to/sign.key'
 #
 # Example: (memberOf=CN=Matrix Users,CN=Users,DC=example,DC=org)
 #
-# /!\ Currently NOT supported due to a possible bug in LDAP library /!\
-#
 #ldap.auth.filter: ''
 
 
