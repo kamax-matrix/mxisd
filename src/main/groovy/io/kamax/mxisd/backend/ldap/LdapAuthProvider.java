@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.backend.ldap;
 
-import io.kamax.matrix.MatrixID;
+import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
@@ -54,16 +54,15 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
     }
 
     @Override
-    public BackendAuthResult authenticate(String id, String password) {
-        log.info("Performing auth for {}", id);
+    public BackendAuthResult authenticate(_MatrixID mxid, String password) {
+        log.info("Performing auth for {}", mxid);
 
         LdapConnection conn = getConn();
         try {
             bind(conn);
 
             String uidType = getCfg().getAttribute().getUid().getType();
-            MatrixID mxIdExt = new MatrixID(id);
-            String userFilterValue = StringUtils.equals(LdapThreePidProvider.UID, uidType) ? mxIdExt.getLocalPart() : mxIdExt.getId();
+            String userFilterValue = StringUtils.equals(LdapThreePidProvider.UID, uidType) ? mxid.getLocalPart() : mxid.getId();
             String userFilter = "(" + getCfg().getAttribute().getUid().getValue() + "=" + userFilterValue + ")";
             EntryCursor cursor = conn.search(getCfg().getConn().getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAttribute(), getCfg().getAttribute().getName());
             try {
@@ -99,15 +98,15 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                     log.info("DN {} is a valid match", dn);
 
                     // TODO should we canonicalize the MXID?
-                    return BackendAuthResult.success(mxIdExt.getId(), UserIdType.MatrixID, name);
+                    return BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, name);
                 }
             } catch (CursorLdapReferralException e) {
-                log.warn("Entity for {} is only available via referral, skipping", mxIdExt);
+                log.warn("Entity for {} is only available via referral, skipping", mxid);
             } finally {
                 cursor.close();
             }
 
-            log.info("No match were found for {}", id);
+            log.info("No match were found for {}", mxid);
             return BackendAuthResult.failure();
         } catch (LdapException | IOException | CursorException e) {
             throw new RuntimeException(e);

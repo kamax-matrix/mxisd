@@ -21,6 +21,7 @@
 package io.kamax.mxisd.auth;
 
 import io.kamax.matrix.MatrixID;
+import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
@@ -51,12 +52,13 @@ public class AuthManager {
     private InvitationManager invMgr;
 
     public UserAuthResult authenticate(String id, String password) {
+        _MatrixID mxid = new MatrixID(id);
         for (AuthenticatorProvider provider : providers) {
             if (!provider.isEnabled()) {
                 continue;
             }
 
-            BackendAuthResult result = provider.authenticate(id, password);
+            BackendAuthResult result = provider.authenticate(mxid, password);
             if (result.isSuccess()) {
 
                 String mxId;

@@ -22,12 +22,14 @@ package io.kamax.mxisd.util;
 
 import com.google.gson.*;
 import io.kamax.mxisd.exception.InvalidResponseJsonException;
+import io.kamax.mxisd.exception.JsonMemberNotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 public class GsonParser {
 
@@ -42,18 +44,26 @@ public class GsonParser {
         this.gson = gson;
     }
 
-    public JsonObject parse(InputStream stream, String property) throws IOException {
+    public JsonObject parse(InputStream stream) throws IOException {
         JsonElement el = parser.parse(IOUtils.toString(stream, StandardCharsets.UTF_8));
         if (!el.isJsonObject()) {
             throw new InvalidResponseJsonException("Response body is not a JSON object");
         }
 
-        JsonObject obj = el.getAsJsonObject();
+        return el.getAsJsonObject();
+    }
+
+    public <T> T parse(HttpResponse res, Class<T> type) throws IOException {
+        return gson.fromJson(parse(res.getEntity().getContent()), type);
+    }
+
+    public JsonObject parse(InputStream stream, String property) throws IOException {
+        JsonObject obj = parse(stream);
         if (!obj.has(property)) {
-            throw new IOException("Member " + property + " does not exist");
+            throw new JsonMemberNotFoundException("Member " + property + " does not exist");
         }
 
-        el = obj.get(property);
+        JsonElement el = obj.get(property);
         if (!el.isJsonObject()) {
             throw new InvalidResponseJsonException("Member " + property + " is not a JSON object");
         }
@@ -68,6 +78,14 @@ public class GsonParser {
 
     public <T> T parse(HttpResponse res, String memberName, Class<T> type) throws IOException {
         return parse(res.getEntity().getContent(), memberName, type);
+    }
+
+    public <T> Optional<T> parseOptional(HttpResponse res, String memberName, Class<T> type) throws IOException {
+        try {
+            return Optional.of(parse(res.getEntity().getContent(), memberName, type));
+        } catch (JsonMemberNotFoundException e) {
+            return Optional.empty();
+        }
     }
 
 }

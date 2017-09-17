@@ -18,31 +18,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.util;
+package io.kamax.mxisd.backend.rest;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import com.google.gson.GsonBuilder;
+import io.kamax.mxisd.config.rest.RestBackendConfig;
+import io.kamax.mxisd.util.GsonParser;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
-import java.nio.charset.StandardCharsets;
+public class RestProvider {
 
-public class RestClientUtils {
+    protected RestBackendConfig cfg;
+    protected Gson gson;
+    protected GsonParser parser;
+    protected CloseableHttpClient client;
 
-    public static HttpPost post(String url, String body) {
-        StringEntity entity = new StringEntity(body, StandardCharsets.UTF_8);
-        entity.setContentType(ContentType.APPLICATION_JSON.toString());
-        HttpPost req = new HttpPost(url);
-        req.setEntity(entity);
-        return req;
-    }
+    public RestProvider(RestBackendConfig cfg) {
+        this.cfg = cfg;
 
-    public static HttpPost post(String url, Gson gson, String member, Object o) {
-        return post(url, JsonUtils.getObjAsString(gson, member, o));
-    }
-
-    public static HttpPost post(String url, Gson gson, Object o) {
-        return post(url, gson.toJson(o));
+        client = HttpClients.createDefault();
+        gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        parser = new GsonParser(gson);
     }
 
 }

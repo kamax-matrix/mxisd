@@ -20,23 +20,47 @@
 
 package io.kamax.mxisd.backend.rest;
 
+import io.kamax.matrix.MatrixID;
+import io.kamax.matrix._MatrixID;
+import io.kamax.mxisd.UserID;
+import io.kamax.mxisd.UserIdType;
+import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
-import org.apache.commons.lang.NotImplementedException;
+import io.kamax.mxisd.util.RestClientUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
-public class RestThreePidProvider implements IThreePidProvider {
+public class RestThreePidProvider extends RestProvider implements IThreePidProvider {
+
+    private MatrixConfig mxCfg; // FIXME should be done in the lookup manager
 
     @Autowired
-    private RestBackendConfig cfg;
+    public RestThreePidProvider(RestBackendConfig cfg, MatrixConfig mxCfg) {
+        super(cfg);
+        this.mxCfg = mxCfg;
+    }
+
+    // TODO refactor in lookup manager with above FIXME
+    private _MatrixID getMxId(UserID id) {
+        if (UserIdType.Localpart.is(id.getType())) {
+            return new MatrixID(id.getValue());
+        } else {
+            return new MatrixID(id.getValue(), mxCfg.getDomain());
+        }
+    }
 
     @Override
     public boolean isEnabled() {
@@ -53,14 +77,51 @@ public class RestThreePidProvider implements IThreePidProvider {
         return 20;
     }
 
+    // TODO refactor common code
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
-        throw new NotImplementedException();
+        HttpUriRequest req = RestClientUtils.post(
+                cfg.getEndpoints().getAuth(),
+                gson,
+                "lookup",
+                new LookupSingleRequestJson(request.getType(), request.getThreePid()));
+
+        try (CloseableHttpResponse res = client.execute(req)) {
+            int status = res.getStatusLine().getStatusCode();
+            if (status < 200 || status >= 300) {
+                return Optional.empty();
+            }
+
+            Optional<LookupSingleResponseJson> responseOpt = parser.parseOptional(res, "lookup", LookupSingleResponseJson.class);
+            return responseOpt.map(lookupSingleResponseJson -> new SingleLookupReply(request, getMxId(lookupSingleResponseJson.getId())));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
+    // TODO refactor common code
     @Override
     public List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
-        throw new NotImplementedException();
+        List<LookupSingleRequestJson> ioListRequest = mappings.stream()
+                .map(mapping -> new LookupSingleRequestJson(mapping.getMedium(), mapping.getValue()))
+                .collect(Collectors.toList());
+
+        HttpUriRequest req = RestClientUtils.post(cfg.getEndpoints().getAuth(), gson, "lookup", ioListRequest);
+        try (CloseableHttpResponse res = client.execute(req)) {
+            mappings = new ArrayList<>();
+
+            int status = res.getStatusLine().getStatusCode();
+            if (status < 200 || status >= 300) {
+                return mappings;
+            }
+
+            LookupBulkResponseJson listIo = parser.parse(res, LookupBulkResponseJson.class);
+            return listIo.getLookup().stream()
+                    .map(io -> new ThreePidMapping(io.getMedium(), io.getAddress(), getMxId(io.getId()).getId()))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -20,40 +20,24 @@
 
 package io.kamax.mxisd.backend.rest;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
-import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 @Component
-public class RestAuthProvider implements AuthenticatorProvider {
-
-    private RestBackendConfig cfg;
-    private Gson gson;
-    private GsonParser parser;
-    private CloseableHttpClient client;
+public class RestAuthProvider extends RestProvider implements AuthenticatorProvider {
 
     @Autowired
     public RestAuthProvider(RestBackendConfig cfg) {
-        this.cfg = cfg;
-
-        client = HttpClients.createDefault();
-        gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
-        parser = new GsonParser(gson);
+        super(cfg);
     }
 
     @Override
@@ -62,10 +46,9 @@ public class RestAuthProvider implements AuthenticatorProvider {
     }
 
     @Override
-    public BackendAuthResult authenticate(String id, String password) {
-        _MatrixID mxid = new MatrixID(id);
+    public BackendAuthResult authenticate(_MatrixID mxid, String password) {
         RestAuthRequestJson auth = new RestAuthRequestJson();
-        auth.setMxid(id);
+        auth.setMxid(mxid.getId());
         auth.setLocalpart(mxid.getLocalPart());
         auth.setDomain(mxid.getDomain());
         auth.setPassword(password);

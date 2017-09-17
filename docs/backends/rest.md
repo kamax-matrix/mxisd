@@ -93,8 +93,8 @@ Encoding: JSON UTF-8
 ```
 
 #### Response Body
-`lookup.uid` contains the Matrix ID localpart of the user
-
+If a match was found:
+- `lookup.id.type` supported values: `localpart`, `mxid`
 ```
 {
   "lookup": {
@@ -106,6 +106,11 @@ Encoding: JSON UTF-8
     }
   }
 }
+```
+
+If no match was found:
+```
+{}
 ```
 
 #### Bulk
@@ -131,6 +136,8 @@ Encoding: JSON UTF-8
 ```
 
 #### Response Body
+For all entries where a match was found:
+- `lookup[].id.type` supported values: `localpart`, `mxid`
 ```
 {
   "lookup": [
@@ -151,5 +158,12 @@ Encoding: JSON UTF-8
       }
     }
   ]
+}
+```
+
+If no match was found:
+```
+{
+  "lookup": []
 }
 ```

@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.backend.sql;
 
+import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.ServerConfig;
@@ -50,7 +51,7 @@ public class SqlAuthProvider implements AuthenticatorProvider {
     }
 
     @Override
-    public BackendAuthResult authenticate(String id, String password) {
+    public BackendAuthResult authenticate(_MatrixID mxid, String password) {
         log.info("Performing dummy authentication try to force invite mapping refresh");
 
         invMgr.lookupMappingsForInvites();
