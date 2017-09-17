@@ -30,12 +30,11 @@ Encoding: JSON UTF-8
 {
   "auth": {
     "mxid": "@john.doe:example.org",
-    "localport": "john.doe",
+    "localpart": "john.doe",
     "domain": "example.org",
     "password": "passwordOfTheUser"
   }
 }
-
 ```
 
 #### Response Body
@@ -48,13 +47,17 @@ If the authentication fails:
 }
 ```
 
-If the authentication succeed:  
-`auth.profile` and any sub-member are all optional
+If the authentication succeed:
+- `auth.id` supported values: `localpart`, `mxid`
+- `auth.profile` and any sub-member are all optional
 ```
 {
   "auth": {
     "success": true,
-    "mxid": "@john.doe:example.org",
+    "id": {
+      "type": "localpart",
+      "value": "john"
+    },
     "profile": {
       "display_name": "John Doe",
       "three_pids": [
@@ -97,10 +100,12 @@ Encoding: JSON UTF-8
   "lookup": {
     "medium": "email",
     "address": "john.doe@example.org",
-    "uid": "john"
+    "id": {
+      "type": "mxisd",
+      "value": "@jane:example.org"
+    }
   }
 }
-
 ```
 
 #### Bulk
@@ -119,7 +124,7 @@ Encoding: JSON UTF-8
     },
     {
       "medium": "msisdn",
-      "address: "123456789"
+      "address": "123456789"
     }
   ]
 }
@@ -132,14 +137,19 @@ Encoding: JSON UTF-8
     {
       "medium": "email",
       "address": "john.doe@example.org",
-      "uid": "john"
+      "id": {
+        "type": "localpart",
+        "value": "john"
+      }
     },
     {
       "medium": "msisdn",
-      "address: "123456789",
-      "uid": "jane"
+      "address": "123456789",
+      "id": {
+        "type": "mxisd",
+        "value": "@jane:example.org"
+      }
     }
   ]
 }
-
 ```
