@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.config.rest;
 
-import com.google.gson.Gson;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -112,14 +111,9 @@ public class RestBackendConfig {
         this.endpoints = endpoints;
     }
 
-    @PostConstruct
-    private void postConstruct() {
-        Gson gson = new Gson();
-        log.info("--- REST backend config ---");
-        log.info("Enabled: {}", isEnabled());
-
-        if (isEnabled()) {
-            if (StringUtils.isBlank(host)) {
+    private String buildEndpointUrl(String endpoint) {
+        if (StringUtils.startsWith(endpoint, "/")) {
+            if (StringUtils.isBlank(getHost())) {
                 throw new ConfigurationException("rest.host");
             }
 
@@ -129,8 +123,26 @@ public class RestBackendConfig {
                 throw new ConfigurationException("rest.host", e.getMessage());
             }
 
+            return getHost() + endpoint;
+        } else {
+            return endpoint;
+        }
+    }
+
+    @PostConstruct
+    private void postConstruct() {
+        log.info("--- REST backend config ---");
+        log.info("Enabled: {}", isEnabled());
+
+        if (isEnabled()) {
+            endpoints.setAuth(buildEndpointUrl(endpoints.getAuth()));
+            endpoints.identity.setSingle(buildEndpointUrl(endpoints.identity.getSingle()));
+            endpoints.identity.setBulk(buildEndpointUrl(endpoints.identity.getBulk()));
+
             log.info("Host: {}", getHost());
-            log.info("Endpoints: {}", gson.toJson(endpoints));
+            log.info("Auth endpoint: {}", endpoints.getAuth());
+            log.info("Identity Single endpoint: {}", endpoints.identity.getSingle());
+            log.info("Identity Bulk endpoint: {}", endpoints.identity.getBulk());
         }
     }
 
