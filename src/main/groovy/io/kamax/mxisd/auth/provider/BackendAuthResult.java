@@ -18,16 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.rest;
+package io.kamax.mxisd.auth.provider;
 
 import io.kamax.mxisd.ThreePid;
+import io.kamax.mxisd.UserID;
+import io.kamax.mxisd.UserIdType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RestAuthReplyJson {
+public class BackendAuthResult {
 
-    public static class RestAuthProfileData {
+    public static class BackendAuthProfile {
 
         private String displayName;
         private List<ThreePid> threePids = new ArrayList<>();
@@ -36,46 +38,51 @@ public class RestAuthReplyJson {
             return displayName;
         }
 
-        public void setDisplayName(String displayName) {
-            this.displayName = displayName;
-        }
-
         public List<ThreePid> getThreePids() {
             return threePids;
         }
+    }
 
-        public void setThreePids(List<ThreePid> threePids) {
-            this.threePids = threePids;
-        }
+    public static BackendAuthResult failure() {
+        BackendAuthResult r = new BackendAuthResult();
+        r.success = false;
+        return r;
+    }
 
+    public static BackendAuthResult success(String id, UserIdType type, String displayName) {
+        return success(id, type.getId(), displayName);
+    }
+
+    public static BackendAuthResult success(String id, String type, String displayName) {
+        BackendAuthResult r = new BackendAuthResult();
+        r.success = true;
+        r.id = new UserID(type, id);
+        r.profile = new BackendAuthProfile();
+        r.profile.displayName = displayName;
+
+        return r;
     }
 
     private Boolean success;
-    private String mxid;
-    private RestAuthProfileData profile;
+    private UserID id;
+    private BackendAuthProfile profile = new BackendAuthProfile();
 
-    public boolean isSuccess() {
+    public Boolean isSuccess() {
         return success;
     }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
+    public UserID getId() {
+        return id;
     }
 
-    public String getMxid() {
-        return mxid;
-    }
-
-    public void setMxid(String mxid) {
-        this.mxid = mxid;
-    }
-
-    public RestAuthProfileData getProfile() {
+    public BackendAuthProfile getProfile() {
         return profile;
     }
 
-    public void setProfile(RestAuthProfileData profile) {
-        this.profile = profile;
+    public BackendAuthResult withThreePid(ThreePid threePid) {
+        this.profile.threePids.add(threePid);
+
+        return this;
     }
 
 }

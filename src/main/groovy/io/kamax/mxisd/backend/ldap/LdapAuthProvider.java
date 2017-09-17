@@ -21,8 +21,9 @@
 package io.kamax.mxisd.backend.ldap;
 
 import io.kamax.matrix.MatrixID;
-import io.kamax.mxisd.auth.UserAuthResult;
+import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
+import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException;
@@ -53,7 +54,7 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
     }
 
     @Override
-    public UserAuthResult authenticate(String id, String password) {
+    public BackendAuthResult authenticate(String id, String password) {
         log.info("Performing auth for {}", id);
 
         LdapConnection conn = getConn();
@@ -88,7 +89,7 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                         conn.bind(entry.getDn(), password);
                     } catch (LdapException e) {
                         log.info("Unable to bind using {} because {}", entry.getDn().getName(), e.getMessage());
-                        return new UserAuthResult().failure();
+                        return BackendAuthResult.failure();
                     }
 
                     Attribute nameAttribute = entry.get(getCfg().getAttribute().getName());
@@ -97,7 +98,8 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                     log.info("Authentication successful for {}", entry.getDn().getName());
                     log.info("DN {} is a valid match", dn);
 
-                    return new UserAuthResult().success(mxIdExt.getId(), name);
+                    // TODO should we canonicalize the MXID?
+                    return BackendAuthResult.success(mxIdExt.getId(), UserIdType.MatrixID, name);
                 }
             } catch (CursorLdapReferralException e) {
                 log.warn("Entity for {} is only available via referral, skipping", mxIdExt);
@@ -106,7 +108,7 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
             }
 
             log.info("No match were found for {}", id);
-            return new UserAuthResult().failure();
+            return BackendAuthResult.failure();
         } catch (LdapException | IOException | CursorException e) {
             throw new RuntimeException(e);
         } finally {

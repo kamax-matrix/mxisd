@@ -18,12 +18,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.auth.provider;
+package io.kamax.mxisd;
 
-public interface AuthenticatorProvider {
+// FIXME consider integrating in matrix-java-sdk?
+public class UserID {
 
-    boolean isEnabled();
+    private String type;
+    private String value;
 
-    BackendAuthResult authenticate(String id, String password);
+    protected UserID() {
+        // stub for (de)serialization
+    }
+
+    public UserID(String type, String value) {
+        this.type = type;
+        this.value = value;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getValue() {
+        return value;
+    }
 
 }

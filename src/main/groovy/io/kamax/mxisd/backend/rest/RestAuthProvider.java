@@ -25,8 +25,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
-import io.kamax.mxisd.auth.UserAuthResult;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
+import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
 import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.RestClientUtils;
@@ -62,7 +62,7 @@ public class RestAuthProvider implements AuthenticatorProvider {
     }
 
     @Override
-    public UserAuthResult authenticate(String id, String password) {
+    public BackendAuthResult authenticate(String id, String password) {
         _MatrixID mxid = new MatrixID(id);
         RestAuthRequestJson auth = new RestAuthRequestJson();
         auth.setMxid(id);
@@ -72,19 +72,12 @@ public class RestAuthProvider implements AuthenticatorProvider {
 
         HttpUriRequest req = RestClientUtils.post(cfg.getEndpoints().getAuth(), gson, "auth", auth);
         try (CloseableHttpResponse res = client.execute(req)) {
-            UserAuthResult result = new UserAuthResult();
-
             int status = res.getStatusLine().getStatusCode();
             if (status < 200 || status >= 300) {
-                return result.failure();
+                return BackendAuthResult.failure();
             }
 
-            RestAuthReplyJson reply = parser.parse(res, "auth", RestAuthReplyJson.class);
-            if (!reply.isSuccess()) {
-                return result.failure();
-            }
-
-            return result.success(reply.getMxid(), reply.getProfile().getDisplayName());
+            return parser.parse(res, "auth", BackendAuthResult.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
