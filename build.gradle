@@ -40,6 +40,9 @@ def debBuildConfPath = "${debBuildBasePath}${debConfPath}"
 def debBuildDataPath = "${debBuildBasePath}${debDataPath}"
 def debBuildSystemdPath = "${debBuildBasePath}${debSystemdPath}"
 
+def dockerImageName = "kamax/mxisd"
+def dockerImageTag = "${dockerImageName}:${gitVersion()}"
+
 String gitVersion() {
     def versionPattern = Pattern.compile("v(\\d+\\.)?(\\d+\\.)?(\\d+)(-.*)?")
     ByteArrayOutputStream out = new ByteArrayOutputStream()
@@ -218,9 +221,15 @@ task buildDeb(dependsOn: build) {
 }
 
 task dockerBuild(type: Exec, dependsOn: build) {
-    commandLine 'docker', 'build', '-t', "kamax/mxisd:${gitVersion()}", project.rootDir
+    commandLine 'docker', 'build', '-t', dockerImageTag, project.rootDir
+
+    doLast {
+        exec {
+            commandLine 'docker', 'tag', dockerImageTag, "${dockerImageName}:latest-dev"
+        }
+    }
 }
 
 task dockerPush(type: Exec) {
-    commandLine 'docker', 'push', "kamax/mxisd:${gitVersion()}"
+    commandLine 'docker', 'push', dockerImageTag
 }

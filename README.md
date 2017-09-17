@@ -80,11 +80,11 @@ For more info, see [the public repository](https://hub.docker.com/r/kamax/mxisd/
 ### From source
 [Build mxisd](#build) then build the docker image:
 ```
-docker build -t your-org/mxisd:$(git describe --tags --always --dirty) .
+./gradlew dockerBuild
 ```
 You can run a container of the given image and test it with the following command (adapt volumes host paths):
 ```
-docker run -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -p 8090:8090 -t your-org/mxisd:$(git describe --tags --always --dirty)
+docker run -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -p 8090:8090 -t kamax/mxisd:latest-dev
 ```
 
 # From Source
