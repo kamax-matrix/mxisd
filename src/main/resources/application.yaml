@@ -41,6 +41,9 @@ ldap:
 firebase:
   enabled: false
 
+sql:
+  type: 'sqlite'
+
 forward:
   servers:
     - "https://matrix.org"
