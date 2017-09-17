@@ -23,6 +23,13 @@ lookup:
       enabled: false
       recursiveOnly: true
 
+rest:
+  endpoints:
+    auth: "/_mxisd/identity/api/v1/auth"
+    identity:
+      single: "/_mxisd/identity/api/v1/lookup/single"
+      bulk: "/_mxisd/identity/api/v1/lookup/bulk"
+
 ldap:
   enabled: false
   connection:

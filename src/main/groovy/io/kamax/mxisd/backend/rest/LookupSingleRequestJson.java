@@ -18,14 +18,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.auth.provider;
+package io.kamax.mxisd.backend.rest;
 
-import io.kamax.matrix._MatrixID;
+public class LookupSingleRequestJson {
 
-public interface AuthenticatorProvider {
+    private String medium;
+    private String address;
 
-    boolean isEnabled();
+    public LookupSingleRequestJson(String medium, String address) {
+        this.medium = medium;
+        this.address = address;
+    }
 
-    BackendAuthResult authenticate(_MatrixID mxid, String password);
+    public String getMedium() {
+        return medium;
+    }
 
+    public String getAddress() {
+        return address;
+    }
 }

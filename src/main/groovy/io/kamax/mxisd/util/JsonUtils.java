@@ -18,14 +18,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.auth.provider;
+package io.kamax.mxisd.util;
 
-import io.kamax.matrix._MatrixID;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
-public interface AuthenticatorProvider {
+public class JsonUtils {
 
-    boolean isEnabled();
+    public static JsonObject getObj(Gson gson, String property, Object value) {
+        JsonObject obj = new JsonObject();
+        obj.add(property, gson.toJsonTree(value));
+        return obj;
+    }
 
-    BackendAuthResult authenticate(_MatrixID mxid, String password);
+    public static String getObjAsString(Gson gson, String property, Object value) {
+        return gson.toJson(getObj(gson, property, value));
+    }
 
 }

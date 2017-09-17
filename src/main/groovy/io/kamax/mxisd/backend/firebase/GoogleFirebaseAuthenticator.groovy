@@ -27,15 +27,17 @@ import com.google.firebase.internal.NonNull
 import com.google.firebase.tasks.OnFailureListener
 import com.google.firebase.tasks.OnSuccessListener
 import io.kamax.matrix.ThreePidMedium
-import io.kamax.mxisd.auth.UserAuthResult
+import io.kamax.matrix._MatrixID
+import io.kamax.mxisd.ThreePid
+import io.kamax.mxisd.UserIdType
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider
+import io.kamax.mxisd.auth.provider.BackendAuthResult
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
@@ -49,7 +51,7 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
     private FirebaseApp fbApp;
     private FirebaseAuth fbAuth;
 
-    private void waitOnLatch(UserAuthResult result, CountDownLatch l, long timeout, TimeUnit unit, String purpose) {
+    private void waitOnLatch(BackendAuthResult result, CountDownLatch l, long timeout, TimeUnit unit, String purpose) {
         try {
             l.await(timeout, unit);
         } catch (InterruptedException e) {
@@ -108,22 +110,16 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
     }
 
     @Override
-    public UserAuthResult authenticate(String id, String password) {
+    public BackendAuthResult authenticate(_MatrixID mxid, String password) {
         if (!isEnabled()) {
             throw new IllegalStateException();
         }
 
-        final UserAuthResult result = new UserAuthResult();
+        log.info("Trying to authenticate {}", mxid);
 
-        log.info("Trying to authenticate {}", id);
-        Matcher m = matrixIdLaxPattern.matcher(id);
-        if (!m.matches()) {
-            log.warn("Could not validate {} as a Matrix ID", id);
-            result.failure();
-        }
+        BackendAuthResult result = BackendAuthResult.failure();
 
         String localpart = m.group(1);
-
         CountDownLatch l = new CountDownLatch(1);
         fbAuth.verifyIdToken(password).addOnSuccessListener(new OnSuccessListener<FirebaseToken>() {
             @Override
@@ -131,26 +127,26 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
                 try {
                     if (!StringUtils.equals(localpart, token.getUid())) {
                         log.info("Failture to authenticate {}: Matrix ID localpart '{}' does not match Firebase UID '{}'", id, localpart, token.getUid());
-                        result.failure();
+                        result = BackendAuthResult.failure();
                         return;
                     }
 
-                    log.info("{} was successfully authenticated", id);
-                    result.success(id, token.getName());
-
-                    log.info("Fetching profile for {}", id);
+                    result = BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, token.getName());
+                    log.info("{} was successfully authenticated", mxid);
+                    log.info("Fetching profile for {}", mxid);
                     CountDownLatch userRecordLatch = new CountDownLatch(1);
                     fbAuth.getUser(token.getUid()).addOnSuccessListener(new OnSuccessListener<UserRecord>() {
                         @Override
                         void onSuccess(UserRecord user) {
                             try {
                                 if (StringUtils.isNotBlank(user.getEmail())) {
-                                    result.withThreePid(ThreePidMedium.Email, user.getEmail());
+                                    result.withThreePid(new ThreePid(ThreePidMedium.Email.getId(), user.getEmail()));
                                 }
 
                                 if (StringUtils.isNotBlank(user.getPhoneNumber())) {
-                                    result.withThreePid(ThreePidMedium.PhoneNumber, user.getPhoneNumber());
+                                    result.withThreePid(new ThreePid(ThreePidMedium.PhoneNumber.getId(), user.getPhoneNumber()));
                                 }
+
                             } finally {
                                 userRecordLatch.countDown();
                             }
@@ -159,8 +155,8 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
                         @Override
                         void onFailure(@NonNull Exception e) {
                             try {
-                                log.warn("Unable to fetch Firebase user profile for {}", id);
-                                result.failure();
+                                log.warn("Unable to fetch Firebase user profile for {}", mxid);
+                                result = BackendAuthResult.failure();
                             } finally {
                                 userRecordLatch.countDown();
                             }
@@ -177,13 +173,13 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
             void onFailure(@NonNull Exception e) {
                 try {
                     if (e instanceof IllegalArgumentException) {
-                        log.info("Failure to authenticate {}: invalid firebase token", id);
+                        log.info("Failure to authenticate {}: invalid firebase token", mxid);
                     } else {
                         log.info("Failure to authenticate {}: {}", id, e.getMessage(), e);
                         log.info("Exception", e);
                     }
 
-                    result.failure();
+                    result = BackendAuthResult.failure();
                 } finally {
                     l.countDown()
                 }

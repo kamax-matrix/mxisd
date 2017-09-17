@@ -20,8 +20,13 @@
 
 package io.kamax.mxisd.auth;
 
+import io.kamax.matrix.MatrixID;
+import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.ThreePid;
+import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
+import io.kamax.mxisd.auth.provider.BackendAuthResult;
+import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.invitation.InvitationManager;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import org.slf4j.Logger;
@@ -41,25 +46,44 @@ public class AuthManager {
     private List<AuthenticatorProvider> providers = new ArrayList<>();
 
     @Autowired
+    private MatrixConfig mxCfg;
+
+    @Autowired
     private InvitationManager invMgr;
 
     public UserAuthResult authenticate(String id, String password) {
+        _MatrixID mxid = new MatrixID(id);
         for (AuthenticatorProvider provider : providers) {
             if (!provider.isEnabled()) {
                 continue;
             }
 
-            UserAuthResult result = provider.authenticate(id, password);
+            BackendAuthResult result = provider.authenticate(mxid, password);
             if (result.isSuccess()) {
+
+                String mxId;
+                if (UserIdType.Localpart.is(result.getId().getType())) {
+                    mxId = new MatrixID(result.getId().getValue(), mxCfg.getDomain()).getId();
+                } else if (UserIdType.MatrixID.is(result.getId().getType())) {
+                    mxId = new MatrixID(result.getId().getValue()).getId();
+                } else {
+                    log.warn("Unsupported User ID type {} for backend {}", result.getId().getType(), provider.getClass().getSimpleName());
+                    continue;
+                }
+
+                UserAuthResult authResult = new UserAuthResult().success(mxId, result.getProfile().getDisplayName());
+                for (ThreePid pid : result.getProfile().getThreePids()) {
+                    authResult.withThreePid(pid.getMedium(), pid.getAddress());
+                }
                 log.info("{} was authenticated by {}, publishing 3PID mappings, if any", id, provider.getClass().getSimpleName());
-                for (ThreePid pid : result.getThreePids()) {
+                for (ThreePid pid : authResult.getThreePids()) {
                     log.info("Processing {} for {}", pid, id);
-                    invMgr.publishMappingIfInvited(new ThreePidMapping(pid, result.getMxid()));
+                    invMgr.publishMappingIfInvited(new ThreePidMapping(pid, authResult.getMxid()));
                 }
 
                 invMgr.lookupMappingsForInvites();
 
-                return result;
+                return authResult;
             }
         }
 

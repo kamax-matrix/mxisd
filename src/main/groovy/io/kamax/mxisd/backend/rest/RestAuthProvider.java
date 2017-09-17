@@ -18,32 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.sql;
+package io.kamax.mxisd.backend.rest;
 
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
-import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.config.sql.SqlProviderConfig;
-import io.kamax.mxisd.invitation.InvitationManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.kamax.mxisd.config.rest.RestBackendConfig;
+import io.kamax.mxisd.util.RestClientUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+
 @Component
-public class SqlAuthProvider implements AuthenticatorProvider {
-
-    private Logger log = LoggerFactory.getLogger(SqlAuthProvider.class);
+public class RestAuthProvider extends RestProvider implements AuthenticatorProvider {
 
     @Autowired
-    private ServerConfig srvCfg;
-
-    @Autowired
-    private SqlProviderConfig cfg;
-
-    @Autowired
-    private InvitationManager invMgr;
+    public RestAuthProvider(RestBackendConfig cfg) {
+        super(cfg);
+    }
 
     @Override
     public boolean isEnabled() {
@@ -52,10 +47,23 @@ public class SqlAuthProvider implements AuthenticatorProvider {
 
     @Override
     public BackendAuthResult authenticate(_MatrixID mxid, String password) {
-        log.info("Performing dummy authentication try to force invite mapping refresh");
+        RestAuthRequestJson auth = new RestAuthRequestJson();
+        auth.setMxid(mxid.getId());
+        auth.setLocalpart(mxid.getLocalPart());
+        auth.setDomain(mxid.getDomain());
+        auth.setPassword(password);
 
-        invMgr.lookupMappingsForInvites();
-        return BackendAuthResult.failure();
+        HttpUriRequest req = RestClientUtils.post(cfg.getEndpoints().getAuth(), gson, "auth", auth);
+        try (CloseableHttpResponse res = client.execute(req)) {
+            int status = res.getStatusLine().getStatusCode();
+            if (status < 200 || status >= 300) {
+                return BackendAuthResult.failure();
+            }
+
+            return parser.parse(res, "auth", BackendAuthResult.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

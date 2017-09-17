@@ -18,14 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.auth.provider;
+package io.kamax.mxisd.exception;
 
-import io.kamax.matrix._MatrixID;
+public class InvalidResponseJsonException extends RuntimeException {
 
-public interface AuthenticatorProvider {
-
-    boolean isEnabled();
-
-    BackendAuthResult authenticate(_MatrixID mxid, String password);
+    public InvalidResponseJsonException(String s) {
+        super(s);
+    }
 
 }
