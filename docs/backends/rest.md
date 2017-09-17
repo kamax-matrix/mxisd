@@ -101,8 +101,8 @@ If a match was found:
     "medium": "email",
     "address": "john.doe@example.org",
     "id": {
-      "type": "mxisd",
-      "value": "@jane:example.org"
+      "type": "mxid",
+      "value": "@john:example.org"
     }
   }
 }
@@ -153,7 +153,7 @@ For all entries where a match was found:
       "medium": "msisdn",
       "address": "123456789",
       "id": {
-        "type": "mxisd",
+        "type": "mxid",
         "value": "@jane:example.org"
       }
     }

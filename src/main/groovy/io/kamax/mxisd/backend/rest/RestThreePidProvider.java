@@ -33,6 +33,8 @@ import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +47,8 @@ import java.util.stream.Collectors;
 @Component
 public class RestThreePidProvider extends RestProvider implements IThreePidProvider {
 
+    private Logger log = LoggerFactory.getLogger(RestThreePidProvider.class);
+
     private MatrixConfig mxCfg; // FIXME should be done in the lookup manager
 
     @Autowired
@@ -56,9 +60,9 @@ public class RestThreePidProvider extends RestProvider implements IThreePidProvi
     // TODO refactor in lookup manager with above FIXME
     private _MatrixID getMxId(UserID id) {
         if (UserIdType.Localpart.is(id.getType())) {
-            return new MatrixID(id.getValue());
-        } else {
             return new MatrixID(id.getValue(), mxCfg.getDomain());
+        } else {
+            return new MatrixID(id.getValue());
         }
     }
 
@@ -80,13 +84,14 @@ public class RestThreePidProvider extends RestProvider implements IThreePidProvi
     // TODO refactor common code
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
-        HttpUriRequest req = RestClientUtils.post(
-                cfg.getEndpoints().getIdentity().getSingle(), gson, "lookup",
+        String endpoint = cfg.getEndpoints().getIdentity().getSingle();
+        HttpUriRequest req = RestClientUtils.post(endpoint, gson, "lookup",
                 new LookupSingleRequestJson(request.getType(), request.getThreePid()));
 
         try (CloseableHttpResponse res = client.execute(req)) {
             int status = res.getStatusLine().getStatusCode();
             if (status < 200 || status >= 300) {
+                log.warn("REST endpoint {} answered with status {}, no binding found", endpoint, status);
                 return Optional.empty();
             }
 
