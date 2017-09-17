@@ -81,9 +81,7 @@ public class RestThreePidProvider extends RestProvider implements IThreePidProvi
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
         HttpUriRequest req = RestClientUtils.post(
-                cfg.getEndpoints().getAuth(),
-                gson,
-                "lookup",
+                cfg.getEndpoints().getIdentity().getSingle(), gson, "lookup",
                 new LookupSingleRequestJson(request.getType(), request.getThreePid()));
 
         try (CloseableHttpResponse res = client.execute(req)) {
@@ -106,7 +104,8 @@ public class RestThreePidProvider extends RestProvider implements IThreePidProvi
                 .map(mapping -> new LookupSingleRequestJson(mapping.getMedium(), mapping.getValue()))
                 .collect(Collectors.toList());
 
-        HttpUriRequest req = RestClientUtils.post(cfg.getEndpoints().getAuth(), gson, "lookup", ioListRequest);
+        HttpUriRequest req = RestClientUtils.post(
+                cfg.getEndpoints().getIdentity().getBulk(), gson, "lookup", ioListRequest);
         try (CloseableHttpResponse res = client.execute(req)) {
             mappings = new ArrayList<>();
 

@@ -46,7 +46,7 @@ public class MatrixConfig {
     }
 
     @PostConstruct
-    private void postConstruct() {
+    public void build() {
         log.info("--- Matrix config ---");
 
         if (StringUtils.isBlank(domain)) {

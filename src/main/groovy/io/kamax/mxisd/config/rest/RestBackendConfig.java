@@ -130,7 +130,7 @@ public class RestBackendConfig {
     }
 
     @PostConstruct
-    private void postConstruct() {
+    public void build() {
         log.info("--- REST backend config ---");
         log.info("Enabled: {}", isEnabled());
 
