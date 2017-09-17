@@ -220,7 +220,7 @@ key.path: '/path/to/sign.key'
 #### Configuration section relating the authentication of users performed via LDAP.
 #
 # This can be done using the REST Auth module for synapse and pointing it to the identity server.
-# See https://github.com/maxidor/matrix-synapse-rest-auth
+# See https://github.com/kamax-io/matrix-synapse-rest-auth
 #
 # During authentication, What to filter potential users by, typically by using a dedicated group.
 # If this value is not set, login check will be performed for all entities within the LDAP
