@@ -236,4 +236,10 @@ task dockerBuild(type: Exec, dependsOn: build) {
 
 task dockerPush(type: Exec) {
     commandLine 'docker', 'push', dockerImageTag
+
+    doLast {
+        exec {
+            commandLine 'docker', 'push', "${dockerImageName}:latest-dev"
+        }
+    }
 }
