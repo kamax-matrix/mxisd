@@ -1,7 +1,16 @@
 # REST backend
-The REST backend allows you to query arbitrary REST JSON endpoints as backends for the following flows:
+The REST backend allows you to query identity data in existing webapps, like:
+- Forums (phpBB, Discourse, etc.)
+- Custom Identity stores (Keycloak, ...)
+- CRMs (Wordpress, ...)
+- self-hosted clouds (Nextcloud, ownCloud, ...)
+
+It supports the following mxisd flows:
 - Identity lookup
 - Authentication
+
+To integrate this backend with your webapp, you will need to implement three specific REST endpoints detailed below.
+
 
 ## Configuration
 | Key                            | Default                               | Description                                          |
@@ -9,8 +18,8 @@ The REST backend allows you to query arbitrary REST JSON endpoints as backends f
 | rest.enabled                   | false                                 | Globally enable/disable the REST backend             |
 | rest.host                      | *empty*                               | Default base URL to use for the different endpoints. |
 | rest.endpoints.auth            | /_mxisd/identity/api/v1/auth          | Endpoint to validate credentials                     |
-| rest.endpoints.identity.single | /_mxisd/identity/api/v1/lookup/single | Endpoint to lookup a single 3PID                     |
-| rest.endpoints.identity.bulk   | /_mxisd/identity/api/v1/lookup/bulk   | Endpoint to lookup a list of 3PID                    |
+| rest.endpoints.identity.single | /_mxisd/identity/api/v1/lookup/single | Endpoint to query a single 3PID                      |
+| rest.endpoints.identity.bulk   | /_mxisd/identity/api/v1/lookup/bulk   | Endpoint to query a list of 3PID                     |
 
 Endpoint values can handle two formats:
 - URL Path starting with `/` that gets happened to the `rest.host`
