@@ -63,6 +63,11 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
 
             String uidType = getCfg().getAttribute().getUid().getType();
             String userFilterValue = StringUtils.equals(LdapThreePidProvider.UID, uidType) ? mxid.getLocalPart() : mxid.getId();
+            if (StringUtils.isBlank(userFilterValue)) {
+                log.warn("Username is empty, failing auth");
+                return BackendAuthResult.failure();
+            }
+
             String userFilter = "(" + getCfg().getAttribute().getUid().getValue() + "=" + userFilterValue + ")";
             if (!StringUtils.isBlank(getCfg().getAuth().getFilter())) {
                 userFilter = "(&" + getCfg().getAuth().getFilter() + userFilter + ")";
