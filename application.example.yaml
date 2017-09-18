@@ -258,10 +258,32 @@ key.path: '/path/to/sign.key'
 #sql.connection: '/var/lib/matrix-synapse/homeserver.db'
 
 
-# See ldap.attribute.uid.type for more info on possible values
+#
+# Example configuration to integrate with synapse PostgreSQL DB
+#sql.enabled: true
+#sql.type: 'postgresql'
+#sql.connection: '//dnsOrIpToServer/dbName?user=synapseDbUser&password=synapseDbPassword'
+
+
+#
+# Configuration for an arbitrary server with arbitrary driver
+#
+# sql.identity.type possible values:
+# - uid       Returned value is the localpart of the Matrix ID
+# - mxid      Full Matrix ID, including domain
+#
+# sql.identity.query MUST contain a column with label 'uid'
+#
+# If you would like to overwrite the global lookup query for specific medium type,
+# add a config item (see below for example) in the following format
+# sql.identity.medium.theMediumIdYouWant: 'the query'
+
+#sql.enabled: true
+#sql.type: 'jdbcDriverName'
+#sql.connection: '//dnsOrIpToServer/dbName?user=synapseDbUser&password=synapseDbPassword'
 #sql.identity.type: 'mxid'
-#sql.identity.query: 'SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?'
-#sql.identity.medium.email: "SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?"
+#sql.identity.query: 'SELECT raw AS uid FROM table WHERE medium = ? AND address = ?'
+#sql.identity.medium.email: 'SELECT raw AS uid FROM emailTable WHERE address = ?'
 
 
 
