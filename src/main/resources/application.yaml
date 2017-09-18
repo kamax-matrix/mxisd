@@ -1,3 +1,7 @@
+spring:
+  main:
+    banner-mode: 'off'
+
 logging:
   level:
     org:
@@ -5,6 +9,8 @@ logging:
       apache:
         catalina: "WARN"
         directory: "WARN"
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:%5p} [%15.15t] %35.35logger{34} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}'
 
 server:
   port: 8090
@@ -65,3 +71,11 @@ invite:
 
 storage:
   backend: 'sqlite'
+
+---
+spring:
+  profiles: systemd
+
+logging:
+  pattern:
+    console: '%d{.SSS}${LOG_LEVEL_PATTERN:%5p} [%15.15t] %35.35logger{34} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}'
