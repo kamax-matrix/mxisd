@@ -115,7 +115,7 @@ public class EmailSenderConfig {
         log.info("Port: {}", getPort());
         log.info("TLS Mode: {}", getTls());
         log.info("Login: {}", getLogin());
-        log.info("Has password: {}", StringUtils.isBlank(getPassword()));
+        log.info("Has password: {}", !StringUtils.isBlank(getPassword()));
         log.info("E-mail: {}", getEmail());
         if (!StringUtils.startsWith(getTemplate(), "classpath:")) {
             if (StringUtils.isBlank(getTemplate())) {
