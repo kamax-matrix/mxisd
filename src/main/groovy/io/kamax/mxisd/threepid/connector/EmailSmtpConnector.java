@@ -18,61 +18,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.invitation.sender;
+package io.kamax.mxisd.threepid.connector;
 
 import com.sun.mail.smtp.SMTPTransport;
 import io.kamax.matrix.ThreePidMedium;
-import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.invite.sender.EmailSenderConfig;
+import io.kamax.mxisd.config.invite.medium.EmailInviteConfig;
+import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-public class EmailInviteSender implements IInviteSender {
+public class EmailSmtpConnector implements IThreePidConnector {
 
-    private Logger log = LoggerFactory.getLogger(EmailInviteSender.class);
+    private Logger log = LoggerFactory.getLogger(EmailSmtpConnector.class);
 
-    @Autowired
-    private EmailSenderConfig cfg;
-
-    @Autowired
-    private MatrixConfig mxCfg;
-
-    @Autowired
-    private ApplicationContext app;
+    private EmailSmtpConfig cfg;
+    private EmailInviteConfig invCfg;
 
     private Session session;
     private InternetAddress sender;
 
-    @PostConstruct
-    private void postConstruct() {
+    @Autowired
+    public EmailSmtpConnector(EmailSmtpConfig cfg, EmailInviteConfig invCfg) {
         try {
             session = Session.getInstance(System.getProperties());
-            sender = new InternetAddress(cfg.getEmail(), cfg.getName());
+            sender = new InternetAddress(invCfg.getFrom(), invCfg.getName());
         } catch (UnsupportedEncodingException e) {
             // What are we supposed to do with this?!
             throw new ConfigurationException(e);
         }
+
+        this.cfg = cfg;
+        this.invCfg = invCfg;
     }
 
     @Override
@@ -81,36 +72,13 @@ public class EmailInviteSender implements IInviteSender {
     }
 
     @Override
-    public void send(IThreePidInviteReply invite) {
+    public void send(IThreePidInviteReply invite, String content) {
         if (!ThreePidMedium.Email.is(invite.getInvite().getMedium())) {
             throw new IllegalArgumentException(invite.getInvite().getMedium() + " is not a supported 3PID type");
         }
 
         try {
-            String domainPretty = WordUtils.capitalizeFully(mxCfg.getDomain());
-            String senderName = invite.getInvite().getProperties().getOrDefault("sender_display_name", "");
-            String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getInvite().getSender().getId());
-            String roomName = invite.getInvite().getProperties().getOrDefault("room_name", "");
-            String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
-
-            String templateBody = IOUtils.toString(
-                    StringUtils.startsWith(cfg.getTemplate(), "classpath:") ?
-                            app.getResource(cfg.getTemplate()).getInputStream() : new FileInputStream(cfg.getTemplate()),
-                    StandardCharsets.UTF_8);
-            templateBody = templateBody.replace("%DOMAIN%", mxCfg.getDomain());
-            templateBody = templateBody.replace("%DOMAIN_PRETTY%", domainPretty);
-            templateBody = templateBody.replace("%FROM_EMAIL%", cfg.getEmail());
-            templateBody = templateBody.replace("%FROM_NAME%", cfg.getName());
-            templateBody = templateBody.replace("%SENDER_ID%", invite.getInvite().getSender().getId());
-            templateBody = templateBody.replace("%SENDER_NAME%", senderName);
-            templateBody = templateBody.replace("%SENDER_NAME_OR_ID%", senderNameOrId);
-            templateBody = templateBody.replace("%INVITE_MEDIUM%", invite.getInvite().getMedium());
-            templateBody = templateBody.replace("%INVITE_ADDRESS%", invite.getInvite().getAddress());
-            templateBody = templateBody.replace("%ROOM_ID%", invite.getInvite().getRoomId());
-            templateBody = templateBody.replace("%ROOM_NAME%", roomName);
-            templateBody = templateBody.replace("%ROOM_NAME_OR_ID%", roomNameOrId);
-
-            MimeMessage msg = new MimeMessage(session, IOUtils.toInputStream(templateBody, StandardCharsets.UTF_8));
+            MimeMessage msg = new MimeMessage(session, IOUtils.toInputStream(content, StandardCharsets.UTF_8));
             msg.setHeader("X-Mailer", "mxisd"); // TODO set version
             msg.setSentDate(new Date());
             msg.setFrom(sender);
@@ -130,7 +98,7 @@ public class EmailInviteSender implements IInviteSender {
             } finally {
                 transport.close();
             }
-        } catch (IOException | MessagingException e) {
+        } catch (MessagingException e) {
             throw new RuntimeException("Unable to send e-mail invite to " + invite.getInvite().getAddress(), e);
         }
     }

@@ -26,13 +26,14 @@ import io.kamax.mxisd.config.DnsOverwrite;
 import io.kamax.mxisd.config.DnsOverwriteEntry;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
-import io.kamax.mxisd.invitation.sender.IInviteSender;
+import io.kamax.mxisd.invitation.generator.IInviteContentGenerator;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.signature.SignatureManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.ormlite.ThreePidInviteIO;
+import io.kamax.mxisd.threepid.connector.IThreePidConnector;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -83,14 +84,35 @@ public class InvitationManager {
     @Autowired
     private DnsOverwrite dns;
 
-    private Map<String, IInviteSender> senders;
+    private Map<String, IInviteContentGenerator> generators;
+    private Map<String, IThreePidConnector> connectors;
 
     private CloseableHttpClient client;
     private Gson gson;
     private Timer refreshTimer;
 
-    private String getId(IThreePidInvite invite) {
-        return invite.getSender().getDomain().toLowerCase() + invite.getMedium().toLowerCase() + invite.getAddress().toLowerCase();
+    @Autowired
+    public InvitationManager(
+            List<IInviteContentGenerator> generatorList,
+            List<IThreePidConnector> connectorList
+    ) {
+        generators = new HashMap<>();
+        generatorList.forEach(sender -> { // FIXME to support several possible implementations
+            if (generators.containsKey(sender.getMedium())) {
+                throw new RuntimeException("More than one " + sender.getMedium() + " content generator");
+            }
+
+            generators.put(sender.getMedium(), sender);
+        });
+
+        connectors = new HashMap<>();
+        connectorList.forEach(connector -> { // FIXME to support several possible implementations
+            if (connectors.containsKey(connector.getMedium())) {
+                throw new RuntimeException("More than one " + connector.getMedium() + " connector");
+            }
+
+            connectors.put(connector.getMedium(), connector);
+        });
     }
 
     @PostConstruct
@@ -140,7 +162,12 @@ public class InvitationManager {
 
     @PreDestroy
     private void preDestroy() {
+        refreshTimer.cancel();
         ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.MINUTES);
+    }
+
+    private String getId(IThreePidInvite invite) {
+        return invite.getSender().getDomain().toLowerCase() + invite.getMedium().toLowerCase() + invite.getAddress().toLowerCase();
     }
 
     private String getIdForLog(IThreePidInviteReply reply) {
@@ -193,21 +220,16 @@ public class InvitationManager {
         return "https://" + domain + ":8448";
     }
 
-    @Autowired
-    public InvitationManager(List<IInviteSender> senderList) {
-        senders = new HashMap<>();
-        senderList.forEach(sender -> senders.put(sender.getMedium(), sender));
-    }
-
     public synchronized IThreePidInviteReply storeInvite(IThreePidInvite invitation) { // TODO better sync
-        IInviteSender sender = senders.get(invitation.getMedium());
-        if (sender == null) {
+        IInviteContentGenerator generator = generators.get(invitation.getMedium());
+        IThreePidConnector connector = connectors.get(invitation.getMedium());
+        if (generator == null || connector == null) {
             throw new BadRequestException("Medium type " + invitation.getMedium() + " is not supported");
         }
 
         String invId = getId(invitation);
         log.info("Handling invite for {}:{} from {} in room {}", invitation.getMedium(), invitation.getAddress(), invitation.getSender(), invitation.getRoomId());
-        if (invitations.containsKey(invId)) { // FIXME we need to lookup using the HS domain too!!
+        if (invitations.containsKey(invId)) {
             log.info("Invite is already pending for {}:{}, returning data", invitation.getMedium(), invitation.getAddress());
             return invitations.get(invId);
         }
@@ -224,7 +246,7 @@ public class InvitationManager {
         IThreePidInviteReply reply = new ThreePidInviteReply(invId, invitation, token, displayName);
 
         log.info("Performing invite to {}:{}", invitation.getMedium(), invitation.getAddress());
-        sender.send(reply);
+        connector.send(reply, generator.generate(reply));
 
         log.info("Storing invite under ID {}", invId);
         storage.insertInvite(reply);

@@ -18,14 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.invitation.sender;
+package io.kamax.mxisd.threepid.connector;
 
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 
-public interface IInviteSender {
+public interface IThreePidConnector {
 
     String getMedium();
 
-    void send(IThreePidInviteReply invite);
+    void send(IThreePidInviteReply invite, String content);
 
 }
