@@ -18,24 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.io;
+package io.kamax.mxisd.exception;
 
-public abstract class GenericTokenRequestJson {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-    private String client_secret;
-    private int send_attempt;
-    private String next_link;
+import java.time.Instant;
 
-    public String getSecret() {
-        return client_secret;
-    }
+@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+public class InternalServerError extends RuntimeException {
 
-    public int getAttempt() {
-        return send_attempt;
-    }
-
-    public String getNextLink() {
-        return next_link;
+    public InternalServerError() {
+        super("An internal server error occured. If this error persists, please contact support with reference #" + Instant.now().toEpochMilli());
     }
 
 }

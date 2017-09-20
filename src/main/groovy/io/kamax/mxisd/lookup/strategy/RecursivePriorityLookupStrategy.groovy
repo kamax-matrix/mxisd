@@ -118,17 +118,44 @@ class RecursivePriorityLookupStrategy implements LookupStrategy, InitializingBea
         }).collect(Collectors.toList())
     }
 
-    @Override
-    Optional<SingleLookupReply> find(String medium, String address, boolean recursive) {
+    List<IThreePidProvider> getRemoteProviders() {
+        return providers.stream().filter(new Predicate<IThreePidProvider>() {
+            @Override
+            boolean test(IThreePidProvider iThreePidProvider) {
+                return iThreePidProvider.isEnabled() && !iThreePidProvider.isLocal()
+            }
+        }).collect(Collectors.toList())
+    }
+
+    private static SingleLookupRequest build(String medium, String address) {
         SingleLookupRequest req = new SingleLookupRequest();
         req.setType(medium)
         req.setThreePid(address)
         req.setRequester("Internal")
-        return find(req, recursive)
+        return req;
+    }
+
+    @Override
+    Optional<SingleLookupReply> find(String medium, String address, boolean recursive) {
+        return find(build(medium, address), recursive)
+    }
+
+    @Override
+    Optional<SingleLookupReply> findLocal(String medium, String address) {
+        return find(build(medium, address), getLocalProviders())
+    }
+
+    @Override
+    Optional<SingleLookupReply> findRemote(String medium, String address) {
+        return find(build(medium, address), getRemoteProviders())
     }
 
     Optional<SingleLookupReply> find(SingleLookupRequest request, boolean forceRecursive) {
-        for (IThreePidProvider provider : listUsableProviders(request, forceRecursive)) {
+        return find(request, listUsableProviders(request, forceRecursive));
+    }
+
+    Optional<SingleLookupReply> find(SingleLookupRequest request, List<IThreePidProvider> providers) {
+        for (IThreePidProvider provider : providers) {
             Optional<SingleLookupReply> lookupDataOpt = provider.find(request)
             if (lookupDataOpt.isPresent()) {
                 return lookupDataOpt

@@ -18,18 +18,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.mapping;
+package io.kamax.mxisd.threepid.session;
 
-public interface MappingSession {
+import io.kamax.mxisd.ThreePid;
+
+import java.time.Instant;
+import java.util.Optional;
+
+public interface IThreePidSession {
+
+    String getId();
+
+    String getHash();
+
+    Instant getCreationTime();
 
     String getServer();
 
-    String getSecret();
+    ThreePid getThreePid();
 
     int getAttempt();
 
-    String getMedium();
+    void increaseAttempt();
 
-    String getValue();
+    Optional<String> getNextLink();
+
+    void validate(String token);
+
+    boolean isValidated();
+
+    Instant getValidationTime();
 
 }

@@ -18,24 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.io;
+package io.kamax.mxisd.storage.dao;
 
-public abstract class GenericTokenRequestJson {
+public interface IThreePidSessionDao {
 
-    private String client_secret;
-    private int send_attempt;
-    private String next_link;
+    String getId();
 
-    public String getSecret() {
-        return client_secret;
-    }
+    String getServer();
 
-    public int getAttempt() {
-        return send_attempt;
-    }
+    String getMedium();
 
-    public String getNextLink() {
-        return next_link;
-    }
+    String getAddress();
+
+    String getSecret();
+
+    int getAttempt();
+
+    String getNextLink();
+
+    String getToken();
 
 }

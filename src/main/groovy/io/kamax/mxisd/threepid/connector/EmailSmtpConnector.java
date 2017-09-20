@@ -22,8 +22,8 @@ package io.kamax.mxisd.threepid.connector;
 
 import com.sun.mail.smtp.SMTPTransport;
 import io.kamax.matrix.ThreePidMedium;
-import io.kamax.mxisd.config.invite.medium.EmailInviteConfig;
 import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
+import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import org.apache.commons.io.IOUtils;
@@ -47,23 +47,21 @@ public class EmailSmtpConnector implements IThreePidConnector {
     private Logger log = LoggerFactory.getLogger(EmailSmtpConnector.class);
 
     private EmailSmtpConfig cfg;
-    private EmailInviteConfig invCfg;
 
     private Session session;
     private InternetAddress sender;
 
     @Autowired
-    public EmailSmtpConnector(EmailSmtpConfig cfg, EmailInviteConfig invCfg) {
+    public EmailSmtpConnector(EmailConfig cfg, EmailSmtpConfig smtpCfg) {
         try {
             session = Session.getInstance(System.getProperties());
-            sender = new InternetAddress(invCfg.getFrom(), invCfg.getName());
+            sender = new InternetAddress(cfg.getFrom(), cfg.getName());
         } catch (UnsupportedEncodingException e) {
             // What are we supposed to do with this?!
             throw new ConfigurationException(e);
         }
 
-        this.cfg = cfg;
-        this.invCfg = invCfg;
+        this.cfg = smtpCfg;
     }
 
     @Override

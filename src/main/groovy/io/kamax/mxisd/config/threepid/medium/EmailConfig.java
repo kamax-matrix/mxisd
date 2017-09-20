@@ -18,50 +18,60 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.invite.medium;
+package io.kamax.mxisd.config.threepid.medium;
 
+import io.kamax.mxisd.config.MatrixConfig;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 
 @Configuration
-@ConfigurationProperties("invite.medium.email")
-public class EmailInviteConfig {
+@ConfigurationProperties("threepid.medium.email")
+public class EmailConfig {
 
-    private Logger log = LoggerFactory.getLogger(EmailInviteConfig.class);
+    private Logger log = LoggerFactory.getLogger(EmailConfig.class);
 
-    private String template;
+    private MatrixConfig mxCfg;
 
-    public String getTemplate() {
-        return template;
+    private String from;
+    private String name;
+
+    @Autowired
+    public EmailConfig(MatrixConfig mxCfg) {
+        this.mxCfg = mxCfg;
     }
 
-    public void setTemplate(String template) {
-        this.template = template;
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @PostConstruct
     public void build() {
-        log.info("--- E-mail invites config ---");
+        log.info("--- E-mail config ---");
+        log.info("From: {}", getFrom());
 
-        if (!StringUtils.startsWith(getTemplate(), "classpath:")) {
-            if (StringUtils.isBlank(getTemplate())) {
-                log.warn("invite.medium.email is empty! Will not send invites");
-            } else {
-                File cp = new File(getTemplate()).getAbsoluteFile();
-                log.info("Template: {}", cp.getAbsolutePath());
-                if (!cp.exists() || !cp.isFile() || !cp.canRead()) {
-                    log.warn(getTemplate() + " does not exist, is not a file or cannot be read");
-                }
-            }
-        } else {
-            log.info("Template: Built-in: {}", getTemplate());
+        if (StringUtils.isBlank(getName())) {
+            setName(WordUtils.capitalize(mxCfg.getDomain()) + " Identity Server");
         }
+        log.info("Name: {}", getName());
     }
 
 }

@@ -26,6 +26,10 @@ public class ThreePid {
     private String medium;
     private String address;
 
+    public ThreePid(ThreePid tpid) {
+        this(tpid.getMedium(), tpid.getAddress());
+    }
+
     public ThreePid(String medium, String address) {
         this.medium = medium;
         this.address = address;

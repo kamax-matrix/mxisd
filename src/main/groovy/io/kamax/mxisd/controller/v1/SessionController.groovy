@@ -22,6 +22,8 @@ package io.kamax.mxisd.controller.v1
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import io.kamax.matrix.ThreePidMedium
+import io.kamax.mxisd.ThreePid
 import io.kamax.mxisd.controller.v1.io.SessionEmailTokenRequestJson
 import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson
 import io.kamax.mxisd.exception.BadRequestException
@@ -29,7 +31,6 @@ import io.kamax.mxisd.invitation.InvitationManager
 import io.kamax.mxisd.lookup.ThreePidValidation
 import io.kamax.mxisd.mapping.MappingManager
 import org.apache.commons.io.IOUtils
-import org.apache.commons.lang.StringUtils
 import org.apache.http.HttpStatus
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -62,16 +63,25 @@ class SessionController {
 
     @RequestMapping(value = "/validate/{medium}/requestToken")
     String init(HttpServletRequest request, HttpServletResponse response, @PathVariable String medium) {
-        log.info("Requested: {}", request.getRequestURL(), request.getQueryString())
-
-        if (StringUtils.equals("email", medium)) {
+        log.info("Request {}: {}", request.getMethod(), request.getRequestURL(), request.getQueryString())
+        if (ThreePidMedium.Email.is(medium)) {
             SessionEmailTokenRequestJson req = fromJson(request, SessionEmailTokenRequestJson.class)
-            return gson.toJson(new Sid(mgr.create(req)))
+            return gson.toJson(new Sid(mgr.create(
+                    request.getRemoteHost(),
+                    new ThreePid(req.getMedium(), req.getValue()),
+                    req.getSecret(),
+                    req.getAttempt(),
+                    req.getNextLink())));
         }
 
-        if (StringUtils.equals("msisdn", medium)) {
+        if (ThreePidMedium.PhoneNumber) {
             SessionPhoneTokenRequestJson req = fromJson(request, SessionPhoneTokenRequestJson.class)
-            return gson.toJson(new Sid(mgr.create(req)))
+            return gson.toJson(new Sid(mgr.create(
+                    request.getRemoteHost(),
+                    new ThreePid(req.getMedium(), req.getValue()),
+                    req.getSecret(),
+                    req.getAttempt(),
+                    req.getNextLink())));
         }
 
         JsonObject obj = new JsonObject();

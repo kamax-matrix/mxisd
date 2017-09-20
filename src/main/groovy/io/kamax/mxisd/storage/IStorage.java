@@ -20,10 +20,13 @@
 
 package io.kamax.mxisd.storage;
 
+import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
+import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
 import io.kamax.mxisd.storage.ormlite.ThreePidInviteIO;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface IStorage {
 
@@ -32,5 +35,13 @@ public interface IStorage {
     void insertInvite(IThreePidInviteReply data);
 
     void deleteInvite(String id);
+
+    Optional<IThreePidSessionDao> getThreePidSession(String sid);
+
+    Optional<IThreePidSessionDao> findThreePidSession(ThreePid tpid, String secret);
+
+    void insertThreePidSession(IThreePidSessionDao session);
+
+    void updateThreePidSession(IThreePidSessionDao session);
 
 }

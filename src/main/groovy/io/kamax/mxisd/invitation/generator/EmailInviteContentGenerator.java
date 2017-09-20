@@ -23,6 +23,7 @@ package io.kamax.mxisd.invitation.generator;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.invite.medium.EmailInviteConfig;
+import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,13 +39,15 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class EmailInviteContentGenerator implements IInviteContentGenerator {
 
-    private EmailInviteConfig cfg;
+    private EmailConfig cfg;
+    private EmailInviteConfig invCfg;
     private MatrixConfig mxCfg;
     private ApplicationContext app;
 
-    @Autowired
-    public EmailInviteContentGenerator(EmailInviteConfig cfg, MatrixConfig mxCfg, ApplicationContext app) {
+    @Autowired // FIXME ApplicationContext shouldn't be injected, find another way from config (?)
+    public EmailInviteContentGenerator(EmailConfig cfg, EmailInviteConfig invCfg, MatrixConfig mxCfg, ApplicationContext app) {
         this.cfg = cfg;
+        this.invCfg = invCfg;
         this.mxCfg = mxCfg;
         this.app = app;
     }
@@ -68,8 +71,8 @@ public class EmailInviteContentGenerator implements IInviteContentGenerator {
             String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
 
             String templateBody = IOUtils.toString(
-                    StringUtils.startsWith(cfg.getTemplate(), "classpath:") ?
-                            app.getResource(cfg.getTemplate()).getInputStream() : new FileInputStream(cfg.getTemplate()),
+                    StringUtils.startsWith(invCfg.getTemplate(), "classpath:") ?
+                            app.getResource(invCfg.getTemplate()).getInputStream() : new FileInputStream(invCfg.getTemplate()),
                     StandardCharsets.UTF_8);
             templateBody = templateBody.replace("%DOMAIN%", mxCfg.getDomain());
             templateBody = templateBody.replace("%DOMAIN_PRETTY%", domainPretty);

@@ -28,8 +28,8 @@ public class ThreePidValidation extends ThreePid {
 
     private Instant validation;
 
-    public ThreePidValidation(String medium, String address, Instant validation) {
-        super(medium, address);
+    public ThreePidValidation(ThreePid tpid, Instant validation) {
+        super(tpid);
         this.validation = validation;
     }
 
