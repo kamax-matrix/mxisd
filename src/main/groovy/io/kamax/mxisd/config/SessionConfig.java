@@ -18,16 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.exception
+package io.kamax.mxisd.config;
 
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ResponseStatus
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
-public class NotImplementedException extends RuntimeException {
+@Configuration
+@ConfigurationProperties("session")
+public class SessionConfig {
 
-    public NotImplementedException(String s) {
-        super(s);
-    }
+    private static Logger log = LoggerFactory.getLogger(SessionConfig.class);
+
 
 }

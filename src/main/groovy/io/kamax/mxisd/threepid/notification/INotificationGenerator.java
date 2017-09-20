@@ -18,16 +18,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.exception
+package io.kamax.mxisd.threepid.notification;
 
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ResponseStatus
+import io.kamax.mxisd.invitation.IThreePidInviteReply;
+import io.kamax.mxisd.threepid.session.IThreePidSession;
 
-@ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
-public class NotImplementedException extends RuntimeException {
+public interface INotificationGenerator {
 
-    public NotImplementedException(String s) {
-        super(s);
-    }
+    String getId();
+
+    String getMedium();
+
+    String get(IThreePidInviteReply invite);
+
+    String getForValidation(IThreePidSession session);
+
+    String getForRemotePublishingValidation(IThreePidSession session);
 
 }

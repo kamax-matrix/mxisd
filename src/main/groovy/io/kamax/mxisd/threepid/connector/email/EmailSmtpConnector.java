@@ -18,14 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.connector;
+package io.kamax.mxisd.threepid.connector.email;
 
 import com.sun.mail.smtp.SMTPTransport;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
-import io.kamax.mxisd.config.threepid.medium.EmailConfig;
-import io.kamax.mxisd.exception.ConfigurationException;
-import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,26 +39,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-public class EmailSmtpConnector implements IThreePidConnector {
+public class EmailSmtpConnector implements IEmailConnector {
 
     private Logger log = LoggerFactory.getLogger(EmailSmtpConnector.class);
 
     private EmailSmtpConfig cfg;
-
     private Session session;
-    private InternetAddress sender;
 
     @Autowired
-    public EmailSmtpConnector(EmailConfig cfg, EmailSmtpConfig smtpCfg) {
-        try {
-            session = Session.getInstance(System.getProperties());
-            sender = new InternetAddress(cfg.getFrom(), cfg.getName());
-        } catch (UnsupportedEncodingException e) {
-            // What are we supposed to do with this?!
-            throw new ConfigurationException(e);
-        }
+    public EmailSmtpConnector(EmailSmtpConfig cfg) {
+        this.cfg = cfg;
+        session = Session.getInstance(System.getProperties());
+    }
 
-        this.cfg = smtpCfg;
+    @Override
+    public String getId() {
+        return "smtp";
     }
 
     @Override
@@ -70,20 +63,17 @@ public class EmailSmtpConnector implements IThreePidConnector {
     }
 
     @Override
-    public void send(IThreePidInviteReply invite, String content) {
-        if (!ThreePidMedium.Email.is(invite.getInvite().getMedium())) {
-            throw new IllegalArgumentException(invite.getInvite().getMedium() + " is not a supported 3PID type");
-        }
-
+    public void send(String senderAddress, String senderName, String recipient, String content) {
         try {
+            InternetAddress sender = new InternetAddress(senderAddress, senderName);
             MimeMessage msg = new MimeMessage(session, IOUtils.toInputStream(content, StandardCharsets.UTF_8));
-            msg.setHeader("X-Mailer", "mxisd"); // TODO set version
+            msg.setHeader("X-Mailer", "mxisd"); // FIXME set version
             msg.setSentDate(new Date());
             msg.setFrom(sender);
-            msg.setRecipients(Message.RecipientType.TO, invite.getInvite().getAddress());
+            msg.setRecipients(Message.RecipientType.TO, recipient);
             msg.saveChanges();
 
-            log.info("Sending invite to {} via SMTP using {}:{}", invite.getInvite().getAddress(), cfg.getHost(), cfg.getPort());
+            log.info("Sending invite to {} via SMTP using {}:{}", recipient, cfg.getHost(), cfg.getPort());
             SMTPTransport transport = (SMTPTransport) session.getTransport("smtp");
             transport.setStartTLS(cfg.getTls() > 0);
             transport.setRequireStartTLS(cfg.getTls() > 1);
@@ -91,13 +81,13 @@ public class EmailSmtpConnector implements IThreePidConnector {
             log.info("Connecting to {}:{}", cfg.getHost(), cfg.getPort());
             transport.connect(cfg.getHost(), cfg.getPort(), cfg.getLogin(), cfg.getPassword());
             try {
-                transport.sendMessage(msg, InternetAddress.parse(invite.getInvite().getAddress()));
-                log.info("Invite to {} was sent", invite.getInvite().getAddress());
+                transport.sendMessage(msg, InternetAddress.parse(recipient));
+                log.info("Invite to {} was sent", recipient);
             } finally {
                 transport.close();
             }
-        } catch (MessagingException e) {
-            throw new RuntimeException("Unable to send e-mail invite to " + invite.getInvite().getAddress(), e);
+        } catch (UnsupportedEncodingException | MessagingException e) {
+            throw new RuntimeException("Unable to send e-mail invite to " + recipient, e);
         }
     }
 

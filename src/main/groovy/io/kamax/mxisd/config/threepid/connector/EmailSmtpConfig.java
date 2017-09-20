@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 
 @Configuration
-@ConfigurationProperties(prefix = "threepid.email.connector.provider.smtp")
+@ConfigurationProperties(prefix = "threepid.medium.email.connectors.smtp")
 public class EmailSmtpConfig {
 
     private Logger log = LoggerFactory.getLogger(EmailSmtpConfig.class);

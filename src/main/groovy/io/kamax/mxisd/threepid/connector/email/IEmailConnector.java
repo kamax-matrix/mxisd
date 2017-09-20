@@ -18,16 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.exception
+package io.kamax.mxisd.threepid.connector.email;
 
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ResponseStatus
+import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.threepid.connector.IThreePidConnector;
 
-@ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
-public class NotImplementedException extends RuntimeException {
+public interface IEmailConnector extends IThreePidConnector {
 
-    public NotImplementedException(String s) {
-        super(s);
+    @Override
+    default String getMedium() {
+        return ThreePidMedium.Email.getId();
     }
+
+    void send(String senderAddress, String senderName, String recipient, String content);
 
 }

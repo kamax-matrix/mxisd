@@ -20,12 +20,10 @@
 
 package io.kamax.mxisd.threepid.connector;
 
-import io.kamax.mxisd.invitation.IThreePidInviteReply;
-
 public interface IThreePidConnector {
 
-    String getMedium();
+    String getId();
 
-    void send(IThreePidInviteReply invite, String content);
+    String getMedium();
 
 }

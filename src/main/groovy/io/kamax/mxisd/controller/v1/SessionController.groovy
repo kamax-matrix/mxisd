@@ -29,7 +29,7 @@ import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson
 import io.kamax.mxisd.exception.BadRequestException
 import io.kamax.mxisd.invitation.InvitationManager
 import io.kamax.mxisd.lookup.ThreePidValidation
-import io.kamax.mxisd.mapping.MappingManager
+import io.kamax.mxisd.session.SessionMananger
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpStatus
 import org.slf4j.Logger
@@ -48,7 +48,7 @@ import java.nio.charset.StandardCharsets
 class SessionController {
 
     @Autowired
-    private MappingManager mgr
+    private SessionMananger mgr
 
     @Autowired
     private InvitationManager invMgr;

@@ -113,6 +113,11 @@ public class ThreePidSession implements IThreePidSession {
         return Optional.ofNullable(nextLink);
     }
 
+    @Override
+    public String getToken() {
+        return token;
+    }
+
     public synchronized void setAttempt(int attempt) {
         if (isValidated()) {
             throw new IllegalStateException();

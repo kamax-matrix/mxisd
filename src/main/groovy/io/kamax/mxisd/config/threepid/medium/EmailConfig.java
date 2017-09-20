@@ -21,6 +21,7 @@
 package io.kamax.mxisd.config.threepid.medium;
 
 import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.slf4j.Logger;
@@ -35,43 +36,81 @@ import javax.annotation.PostConstruct;
 @ConfigurationProperties("threepid.medium.email")
 public class EmailConfig {
 
+    public static class Identity {
+        private String from;
+        private String name;
+
+        public String getFrom() {
+            return from;
+        }
+
+        public void setFrom(String from) {
+            this.from = from;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+    }
+
+    private String generator;
+    private String connector;
+
     private Logger log = LoggerFactory.getLogger(EmailConfig.class);
 
     private MatrixConfig mxCfg;
-
-    private String from;
-    private String name;
+    private Identity identity = new Identity();
 
     @Autowired
     public EmailConfig(MatrixConfig mxCfg) {
         this.mxCfg = mxCfg;
     }
 
-    public String getFrom() {
-        return from;
+    public Identity getIdentity() {
+        return identity;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public String getGenerator() {
+        return generator;
     }
 
-    public String getName() {
-        return name;
+    public void setGenerator(String generator) {
+        this.generator = generator;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getConnector() {
+        return connector;
+    }
+
+    public void setConnector(String connector) {
+        this.connector = connector;
     }
 
     @PostConstruct
     public void build() {
         log.info("--- E-mail config ---");
-        log.info("From: {}", getFrom());
 
-        if (StringUtils.isBlank(getName())) {
-            setName(WordUtils.capitalize(mxCfg.getDomain()) + " Identity Server");
+        if (StringUtils.isBlank(getGenerator())) {
+            throw new ConfigurationException("generator");
         }
-        log.info("Name: {}", getName());
+
+        if (StringUtils.isBlank(getConnector())) {
+            throw new ConfigurationException("connector");
+        }
+
+        log.info("From: {}", identity.getFrom());
+
+        if (StringUtils.isBlank(identity.getName())) {
+            identity.setName(WordUtils.capitalize(mxCfg.getDomain()) + " Identity Server");
+        }
+        log.info("Name: {}", identity.getName());
+        log.info("Generator: {}", getGenerator());
+        log.info("Connector: {}", getConnector());
     }
 
 }

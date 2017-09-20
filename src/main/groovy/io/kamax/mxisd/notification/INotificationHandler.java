@@ -18,14 +18,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.invitation.generator;
+package io.kamax.mxisd.notification;
 
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
+import io.kamax.mxisd.threepid.session.IThreePidSession;
 
-public interface IInviteContentGenerator {
+public interface INotificationHandler {
 
     String getMedium();
 
-    String generate(IThreePidInviteReply invite);
+    void notify(IThreePidInviteReply invite);
+
+    void notify(IThreePidSession session);
 
 }

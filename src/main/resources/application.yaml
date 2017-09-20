@@ -63,18 +63,25 @@ forward:
     - "https://vector.im"
 
 threepid:
-  email:
-    connector:
-      active: 'smtp'
-      provider:
-        smtp:
-          port: 587
-          tls: 1
-
-invite:
   medium:
     email:
-      template: 'classpath:email/invite-template.eml'
+      identity:
+        from: ''
+        name: ''
+      connector: 'smtp'
+      generator: 'template'
+      connectors:
+        smtp:
+          host: ''
+          port: 587
+          tls: 1
+          login: ''
+          password: ''
+      generators:
+        template:
+          invite: 'classpath:email/invite-template.eml'
+          session:
+            validation: 'classpath:email/validate-template.eml'
 
 storage:
   backend: 'sqlite'

@@ -29,8 +29,6 @@ public interface IThreePidSession {
 
     String getId();
 
-    String getHash();
-
     Instant getCreationTime();
 
     String getServer();
@@ -42,6 +40,8 @@ public interface IThreePidSession {
     void increaseAttempt();
 
     Optional<String> getNextLink();
+
+    String getToken();
 
     void validate(String token);
 

@@ -18,13 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.invitation.generator;
+package io.kamax.mxisd.threepid.notification.email;
 
-import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.invite.medium.EmailInviteConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
+import io.kamax.mxisd.config.threepid.medium.EmailTemplateConfig;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
+import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -34,55 +35,68 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class EmailInviteContentGenerator implements IInviteContentGenerator {
+public class EmailNotificationGenerator implements IEmailNotificationGenerator {
 
     private EmailConfig cfg;
-    private EmailInviteConfig invCfg;
+    private EmailTemplateConfig templateCfg;
     private MatrixConfig mxCfg;
     private ApplicationContext app;
 
     @Autowired // FIXME ApplicationContext shouldn't be injected, find another way from config (?)
-    public EmailInviteContentGenerator(EmailConfig cfg, EmailInviteConfig invCfg, MatrixConfig mxCfg, ApplicationContext app) {
+    public EmailNotificationGenerator(EmailConfig cfg, EmailTemplateConfig templateCfg, MatrixConfig mxCfg, ApplicationContext app) {
         this.cfg = cfg;
-        this.invCfg = invCfg;
+        this.templateCfg = templateCfg;
         this.mxCfg = mxCfg;
         this.app = app;
     }
 
     @Override
-    public String getMedium() {
-        return ThreePidMedium.Email.getId();
+    public String getId() {
+        return "template";
+    }
+
+    private String getTemplateContent(String location) throws IOException {
+        InputStream is = StringUtils.startsWith(location, "classpath:") ?
+                app.getResource(location).getInputStream() : new FileInputStream(location);
+        return IOUtils.toString(is, StandardCharsets.UTF_8);
+    }
+
+    private String populateCommon(String content, ThreePid recipient) {
+        String domainPretty = WordUtils.capitalizeFully(mxCfg.getDomain());
+
+        content = content.replace("%DOMAIN%", mxCfg.getDomain());
+        content = content.replace("%DOMAIN_PRETTY%", domainPretty);
+        content = content.replace("%FROM_EMAIL%", cfg.getIdentity().getFrom());
+        content = content.replace("%FROM_NAME%", cfg.getIdentity().getName());
+        content = content.replace("%RECIPIENT_MEDIUM%", recipient.getMedium());
+        content = content.replace("%RECIPIENT_ADDRESS%", recipient.getAddress());
+        return content;
+    }
+
+    private String getTemplateAndPopulate(String location, ThreePid recipient) throws IOException {
+        return populateCommon(getTemplateContent(location), recipient);
     }
 
     @Override
-    public String generate(IThreePidInviteReply invite) {
-        if (!ThreePidMedium.Email.is(invite.getInvite().getMedium())) {
-            throw new IllegalArgumentException(invite.getInvite().getMedium() + " is not a supported 3PID type");
-        }
-
+    public String get(IThreePidInviteReply invite) {
         try {
-            String domainPretty = WordUtils.capitalizeFully(mxCfg.getDomain());
+            ThreePid tpid = new ThreePid(invite.getInvite().getMedium(), invite.getInvite().getAddress());
+            String templateBody = getTemplateAndPopulate(templateCfg.getInvite(), tpid);
+
             String senderName = invite.getInvite().getProperties().getOrDefault("sender_display_name", "");
             String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getInvite().getSender().getId());
             String roomName = invite.getInvite().getProperties().getOrDefault("room_name", "");
             String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
 
-            String templateBody = IOUtils.toString(
-                    StringUtils.startsWith(invCfg.getTemplate(), "classpath:") ?
-                            app.getResource(invCfg.getTemplate()).getInputStream() : new FileInputStream(invCfg.getTemplate()),
-                    StandardCharsets.UTF_8);
-            templateBody = templateBody.replace("%DOMAIN%", mxCfg.getDomain());
-            templateBody = templateBody.replace("%DOMAIN_PRETTY%", domainPretty);
-            templateBody = templateBody.replace("%FROM_EMAIL%", cfg.getFrom());
-            templateBody = templateBody.replace("%FROM_NAME%", cfg.getName());
             templateBody = templateBody.replace("%SENDER_ID%", invite.getInvite().getSender().getId());
             templateBody = templateBody.replace("%SENDER_NAME%", senderName);
             templateBody = templateBody.replace("%SENDER_NAME_OR_ID%", senderNameOrId);
-            templateBody = templateBody.replace("%INVITE_MEDIUM%", invite.getInvite().getMedium());
-            templateBody = templateBody.replace("%INVITE_ADDRESS%", invite.getInvite().getAddress());
+            templateBody = templateBody.replace("%INVITE_MEDIUM%", tpid.getMedium());
+            templateBody = templateBody.replace("%INVITE_ADDRESS%", tpid.getAddress());
             templateBody = templateBody.replace("%ROOM_ID%", invite.getInvite().getRoomId());
             templateBody = templateBody.replace("%ROOM_NAME%", roomName);
             templateBody = templateBody.replace("%ROOM_NAME_OR_ID%", roomNameOrId);
@@ -91,6 +105,16 @@ public class EmailInviteContentGenerator implements IInviteContentGenerator {
         } catch (IOException e) {
             throw new RuntimeException("Unable to read template file", e);
         }
+    }
+
+    @Override
+    public String getForValidation(IThreePidSession session) {
+        return null;
+    }
+
+    @Override
+    public String getForRemotePublishingValidation(IThreePidSession session) {
+        return null;
     }
 
 }

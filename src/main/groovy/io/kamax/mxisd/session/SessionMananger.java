@@ -18,14 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.mapping;
+package io.kamax.mxisd.session;
 
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.ThreePid;
+import io.kamax.mxisd.config.SessionConfig;
 import io.kamax.mxisd.exception.InvalidCredentialsException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidValidation;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
+import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
 import io.kamax.mxisd.threepid.session.ThreePidSession;
@@ -40,16 +42,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
-public class MappingManager {
+public class SessionMananger {
 
-    private Logger log = LoggerFactory.getLogger(MappingManager.class);
+    private Logger log = LoggerFactory.getLogger(SessionMananger.class);
 
+    private SessionConfig cfg;
     private IStorage storage;
     private LookupStrategy lookup;
+    private NotificationManager notifMgr;
 
     @Autowired
-    public MappingManager(IStorage storage, LookupStrategy lookup) {
+    public SessionMananger(SessionConfig cfg, IStorage storage, LookupStrategy lookup, NotificationManager notifMgr) {
+        this.cfg = cfg;
         this.storage = storage;
+        this.lookup = lookup;
+        this.notifMgr = notifMgr;
     }
 
     private ThreePidSession getSession(String sid, String secret) {
@@ -78,7 +85,8 @@ public class MappingManager {
                 log.info("We already have a session for {}: {}", tpid, session.getId());
                 if (session.getAttempt() < attempt) {
                     log.info("Received attempt {} is greater than stored attempt {}, sending validation communication", attempt, session.getAttempt());
-                    // TODO send via connector
+                    notifMgr.sendForValidation(session);
+                    log.info("Sent validation notification to {}", tpid);
                     session.increaseAttempt();
                     storage.updateThreePidSession(session.getDao());
                 }
@@ -95,8 +103,8 @@ public class MappingManager {
                 ThreePidSession session = new ThreePidSession(sessionId, server, tpid, secret, attempt, nextLink, token);
                 log.info("Generated new session {} to validate {} from server {}", sessionId, tpid, server);
 
-                // TODO send via connector
-                // log.info("Sent validation notification to {}", tpid);
+                notifMgr.sendForValidation(session);
+                log.info("Sent validation notification to {}", tpid);
 
                 storage.insertThreePidSession(session.getDao());
                 log.info("Stored session {}", sessionId, tpid, server);
@@ -124,13 +132,7 @@ public class MappingManager {
         ThreePidSession session = getSessionIfValidated(sid, secret);
         log.info("Attempting bind of {} on session {} from server {}", mxid, session.getId(), session.getServer());
 
-        // We lookup if the 3PID is already known locally.
-        // If it is, we do not need to process any further as it is already bound.
-        Optional<SingleLookupReply> rLocal = lookup.findLocal(session.getThreePid().getMedium(), session.getThreePid().getAddress());
-        boolean knownLocal = rLocal.isPresent() && StringUtils.equals(rLocal.get().getMxid().getId(), mxid);
-        log.info("Mapping {} -> {} is " + (knownLocal ? "already" : "not") + " known locally", mxid, session.getThreePid());
-
-        // MXID is not known locally, checking remotely
+        // We lookup if the 3PID is already known remotely.
         Optional<SingleLookupReply> rRemote = lookup.findRemote(session.getThreePid().getMedium(), session.getThreePid().getAddress());
         boolean knownRemote = rRemote.isPresent() && StringUtils.equals(rRemote.get().getMxid().getId(), mxid);
         log.info("Mapping {} -> {} is " + (knownRemote ? "already" : "not") + " known remotely", mxid, session.getThreePid());
@@ -143,13 +145,14 @@ public class MappingManager {
             isLocalDomain = session.getThreePid().getAddress().isEmpty(); // FIXME only for testing
         }
         if (knownRemote) {
-            if (isLocalDomain && !knownLocal) {
-                log.warn("Mapping {} -> {} is not known locally but is about a local domain!");
-            }
-
             log.info("No further action needed for Mapping {} -> {}");
             return;
         }
+
+        // We lookup if the 3PID is already known locally.
+        Optional<SingleLookupReply> rLocal = lookup.findLocal(session.getThreePid().getMedium(), session.getThreePid().getAddress());
+        boolean knownLocal = rLocal.isPresent() && StringUtils.equals(rLocal.get().getMxid().getId(), mxid);
+        log.info("Mapping {} -> {} is " + (knownLocal ? "already" : "not") + " known locally", mxid, session.getThreePid());
 
         // This might need a configuration by medium type?
         if (knownLocal) { // 3PID is ony known local
@@ -157,11 +160,13 @@ public class MappingManager {
                 // TODO
                 // 1. Check if global publishing is enabled, allowed and offered. If one is no, return.
                 // 2. Publish globally
+                notifMgr.sendforRemotePublish(session);
             }
 
-            if (System.currentTimeMillis() % 2 == 0) {
+            if (System.currentTimeMillis() % 2 == 0) {  // FIXME only for testing
                 // TODO
                 // 1. Check if configured to publish globally non-local domain. If no, return
+                notifMgr.sendforRemotePublish(session);
             }
 
             // TODO
@@ -172,6 +177,7 @@ public class MappingManager {
             // 2. call mxisd-specific endpoint to publish globally
             // 3. check regularly on client page for a binding
             // 4. when found, show page "Done globally!"
+            notifMgr.sendforRemotePublish(session);
         } else {
             if (isLocalDomain) { // 3PID is not known anywhere but is a local domain
                 // TODO
@@ -180,6 +186,7 @@ public class MappingManager {
             } else { // 3PID is not known anywhere and is remote
                 // TODO
                 // Proxy to configurable IS, by default Matrix.org
+                notifMgr.sendforRemotePublish(session);
             }
         }
     }
