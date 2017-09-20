@@ -223,7 +223,7 @@ public class InvitationManager {
         IThreePidInviteReply reply = new ThreePidInviteReply(invId, invitation, token, displayName);
 
         log.info("Performing invite to {}:{}", invitation.getMedium(), invitation.getAddress());
-        notifMgr.send(reply);
+        notifMgr.sendForInvite(reply);
 
         log.info("Storing invite under ID {}", invId);
         storage.insertInvite(reply);

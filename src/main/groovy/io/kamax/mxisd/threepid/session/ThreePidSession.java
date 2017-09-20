@@ -34,7 +34,6 @@ public class ThreePidSession implements IThreePidSession {
 
     private String id;
     private Instant timestamp;
-    private String hash;
     private String server;
     private ThreePid tPid;
     private String secret;
@@ -66,17 +65,11 @@ public class ThreePidSession implements IThreePidSession {
         this.token = token;
 
         this.timestamp = Instant.now();
-        this.hash = server.toLowerCase() + tPid.getMedium().toLowerCase() + tPid.getAddress().toLowerCase() + secret;
     }
 
     @Override
     public String getId() {
         return id;
-    }
-
-    @Override
-    public String getHash() {
-        return hash;
     }
 
     @Override
