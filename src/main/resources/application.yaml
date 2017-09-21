@@ -93,7 +93,7 @@ session.policy.validation:
     toRemote: true
   forRemote:
     enabled: true
-    toLocal: true
+    toLocal: false
     toRemote: true
 
 storage:

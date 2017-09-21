@@ -1,0 +1,102 @@
+Subject: Linking your Email address to your Matrix account
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hello there!
+
+We have received a request to link this email address with your Matrix account.
+
+Due to the security policy in place, this email address can only be stored in the central Matrix Identity Server.
+If you continue, your e-mail address and Matrix ID association will be made public without any current mean to be removed.
+
+If you would still like to continue, you will need to:
+1. Go to your private Public registration process page:
+
+  %NEXT_STEP_LINK%
+
+2. Follow the registration process of the central Identity Server, usually another email with similar content
+3. Once your email address validated with the central Identity Server, click on "Continue" on page of step #1
+4. If your public association is found by our Identity server, the next step will be given to you.
+
+
+If you didn't make this request, or do not want to make your address public, you can safely disregard this email.
+
+%DOMAIN_PRETTY% Admins
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: multipart/related;
+	boundary="M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR";
+	type="text/html"
+
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR
+Content-Type: text/html; charset=UTF-8
+Content-Disposition: inline
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <style type="text/css">
+body {
+    margin: 0px;
+}
+
+pre, code {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+#page {
+    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+    font-color: #454545;
+    font-size: 12pt;
+    width: 100%%;
+    padding: 20px;
+}
+
+#inner {
+    width: 640px;
+}
+
+.notif_link a, .footer a {
+    color: #76CFA6 ! important;
+}
+        </style>
+    </head>
+    <body>
+        <table id="page">
+            <tr>
+                <td></td>
+                <td id="inner">
+                    <p>Hello there!</p>
+
+                    <p>We have received a request to link this email address with your Matrix account.</p>
+
+                    <p>Due to the security policy in place, this email address can only be stored in the central Matrix Identity Server.
+                       If you continue, your e-mail address and Matrix ID association will be made public without any current mean to be removed.</p>
+
+                    <p>If you would still like to continue, you will need to:
+                        <ol>
+                            <li>Go to your private <a href="%NEXT_STEP_LINK%">Public registration process page</a></li>
+                            <li>Follow the registration process of the central Identity Server, usually another email with similar content</li>
+                            <li>Once your email address validated with the central Identity Server, click on "Continue" on page of step #1</li>
+                            <li>If your public association is found by our Identity server, the next step will be given to you.</li>
+                        </ol>
+                    </p>
+
+                    <p>If you didn't make this request, or do not want to make your address public, you can safely disregard this email.</p>
+
+                    <p>%DOMAIN_PRETTY% Admins</p>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </body>
+</html>
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ--

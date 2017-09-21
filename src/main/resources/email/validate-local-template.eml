@@ -18,8 +18,6 @@ complete the verification of your email address:
 
 If you didn't make this request, you can safely disregard this email.
 
-Thanks!
-
 %DOMAIN_PRETTY% Admins
 
 --7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
@@ -76,8 +74,6 @@ pre, code {
                     <p><a href="%VALIDATION_LINK%">Complete email verification</a></p>
 
                     <p>If you didn't make this request, you can safely disregard this email.</p>
-
-                    <p>Thanks!</p>
 
                     <p>%DOMAIN_PRETTY% Admins</p>
                 </td>

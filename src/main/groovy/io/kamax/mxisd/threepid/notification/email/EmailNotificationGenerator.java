@@ -137,15 +137,18 @@ public class EmailNotificationGenerator implements IEmailNotificationGenerator {
 
     @Override
     public String getForRemoteValidation(IThreePidSession session) {
-        log.info("Generating notification content for 3PID Session validation");
-        String templateBody = getTemplateAndPopulate(templateCfg.getSession().getValidation().getLocal(), session.getThreePid());
+        log.info("Generating notification content for remote-only 3PID session");
+        String templateBody = getTemplateAndPopulate(templateCfg.getSession().getValidation().getRemote(), session.getThreePid());
 
         // FIXME should have a global link builder, specific to mxisd
         String nextStepLink = srvCfg.getPublicUrl() + RemoteIdentityAPIv1.BASE +
-                "/validate/requestToken?sid=" + session.getId() + "&client_secret=" + session.getSecret();
+                "/validate/requestToken?sid=" + session.getId() +
+                "&client_secret=" + session.getSecret() +
+                "&token=" + session.getToken();
 
         templateBody = templateBody.replace("%SESSION_ID%", session.getId());
         templateBody = templateBody.replace("%SESSION_SECRET%", session.getSecret());
+        templateBody = templateBody.replace("%SESSION_TOKEN%", session.getToken());
         templateBody = templateBody.replace("%NEXT_STEP_LINK%", nextStepLink);
 
         return templateBody;
