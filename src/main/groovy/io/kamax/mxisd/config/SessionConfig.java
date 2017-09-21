@@ -20,10 +20,14 @@
 
 package io.kamax.mxisd.config;
 
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 
 @Configuration
 @ConfigurationProperties("session")
@@ -31,5 +35,116 @@ public class SessionConfig {
 
     private static Logger log = LoggerFactory.getLogger(SessionConfig.class);
 
+    public static class Policy {
+
+        public static class PolicyTemplate {
+
+            public static class PolicySource {
+
+                private boolean enabled;
+                private boolean toLocal;
+                private boolean toRemote;
+
+                public boolean isEnabled() {
+                    return enabled;
+                }
+
+                public void setEnabled(boolean enabled) {
+                    this.enabled = enabled;
+                }
+
+                public boolean toLocal() {
+                    return toLocal;
+                }
+
+                public void setToLocal(boolean toLocal) {
+                    this.toLocal = toLocal;
+                }
+
+                public boolean toRemote() {
+                    return toRemote;
+                }
+
+                public void setToRemote(boolean toRemote) {
+                    this.toRemote = toRemote;
+                }
+
+            }
+
+            private boolean enabled;
+            private PolicySource forLocal = new PolicySource();
+            private PolicySource forRemote = new PolicySource();
+
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            public void setEnabled(boolean enabled) {
+                this.enabled = enabled;
+            }
+
+            public PolicySource getForLocal() {
+                return forLocal;
+            }
+
+            public PolicySource forLocal() {
+                return forLocal;
+            }
+
+            public PolicySource getForRemote() {
+                return forRemote;
+            }
+
+            public PolicySource forRemote() {
+                return forRemote;
+            }
+        }
+
+        private PolicyTemplate bind = new PolicyTemplate();
+        private PolicyTemplate validation = new PolicyTemplate();
+
+        public PolicyTemplate getBind() {
+            return bind;
+        }
+
+        public void setBind(PolicyTemplate bind) {
+            this.bind = bind;
+        }
+
+        public PolicyTemplate getValidation() {
+            return validation;
+        }
+
+        public void setValidation(PolicyTemplate validation) {
+            this.validation = validation;
+        }
+
+    }
+
+    private MatrixConfig mxCfg;
+    private Policy policy = new Policy();
+
+    @Autowired
+    public SessionConfig(MatrixConfig mxCfg) {
+        this.mxCfg = mxCfg;
+    }
+
+    public MatrixConfig getMatrixCfg() {
+        return mxCfg;
+    }
+
+    public Policy getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(Policy policy) {
+        this.policy = policy;
+    }
+
+    @PostConstruct
+    public void build() {
+        log.info("--- Session config ---");
+        log.info("Global Policy: {}", new Gson().toJson(policy));
+    }
 
 }

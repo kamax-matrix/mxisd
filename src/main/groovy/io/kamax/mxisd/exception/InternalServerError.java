@@ -20,16 +20,35 @@
 
 package io.kamax.mxisd.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.apache.http.HttpStatus;
 
 import java.time.Instant;
 
-@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-public class InternalServerError extends RuntimeException {
+public class InternalServerError extends MatrixException {
+
+    private String reference = Long.toString(Instant.now().toEpochMilli());
+    private String internalReason;
 
     public InternalServerError() {
-        super("An internal server error occured. If this error persists, please contact support with reference #" + Instant.now().toEpochMilli());
+        super(
+                HttpStatus.SC_INTERNAL_SERVER_ERROR,
+                "M_UNKNOWN",
+                "An internal server error occured. If this error persists, please contact support with reference #" +
+                        Instant.now().toEpochMilli()
+        );
+    }
+
+    public InternalServerError(String internalReason) {
+        this();
+        this.internalReason = internalReason;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public String getInternalReason() {
+        return internalReason;
     }
 
 }

@@ -27,6 +27,7 @@ import io.kamax.mxisd.ThreePid
 import io.kamax.mxisd.controller.v1.io.SessionEmailTokenRequestJson
 import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson
 import io.kamax.mxisd.exception.BadRequestException
+import io.kamax.mxisd.exception.SessionNotValidatedException
 import io.kamax.mxisd.invitation.InvitationManager
 import io.kamax.mxisd.lookup.ThreePidValidation
 import io.kamax.mxisd.session.SessionMananger
@@ -105,12 +106,10 @@ class SessionController {
     @RequestMapping(value = "/3pid/getValidated3pid")
     String check(HttpServletRequest request, HttpServletResponse response,
                  @RequestParam String sid, @RequestParam("client_secret") String secret) {
-        log.info("Requested: {}?{}", request.getRequestURL(), request.getQueryString())
+        log.info("Requested: {}", request.getRequestURL(), request.getQueryString())
 
-        Optional<ThreePidValidation> result = mgr.getValidated(sid, secret)
-        if (result.isPresent()) {
-            log.info("requested session was validated")
-            ThreePidValidation pid = result.get()
+        try {
+            ThreePidValidation pid = mgr.getValidated(sid, secret)
 
             JsonObject obj = new JsonObject()
             obj.addProperty("medium", pid.getMedium())
@@ -118,14 +117,9 @@ class SessionController {
             obj.addProperty("validated_at", pid.getValidation().toEpochMilli())
 
             return gson.toJson(obj);
-        } else {
-            log.info("requested session was not validated")
-
-            JsonObject obj = new JsonObject()
-            obj.addProperty("errcode", "M_SESSION_NOT_VALIDATED")
-            obj.addProperty("error", "sid, secret or session not valid")
-            response.setStatus(HttpStatus.SC_BAD_REQUEST)
-            return gson.toJson(obj)
+        } catch (SessionNotValidatedException e) {
+            log.info("Session {} was requested but has not yet been validated", sid);
+            throw e;
         }
     }
 

@@ -22,9 +22,11 @@ package io.kamax.mxisd.session;
 
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.ThreePid;
+import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.SessionConfig;
 import io.kamax.mxisd.exception.InvalidCredentialsException;
-import io.kamax.mxisd.lookup.SingleLookupReply;
+import io.kamax.mxisd.exception.NotAllowedException;
+import io.kamax.mxisd.exception.SessionNotValidatedException;
 import io.kamax.mxisd.lookup.ThreePidValidation;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.notification.NotificationManager;
@@ -39,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Component
 public class SessionMananger {
@@ -52,11 +53,24 @@ public class SessionMananger {
     private NotificationManager notifMgr;
 
     @Autowired
-    public SessionMananger(SessionConfig cfg, IStorage storage, LookupStrategy lookup, NotificationManager notifMgr) {
+    public SessionMananger(SessionConfig cfg, MatrixConfig mxCfg, IStorage storage, LookupStrategy lookup, NotificationManager notifMgr) {
         this.cfg = cfg;
         this.storage = storage;
         this.lookup = lookup;
         this.notifMgr = notifMgr;
+    }
+
+    private boolean isLocal(ThreePid tpid) {
+        if (!ThreePidMedium.Email.is(tpid.getMedium())) { // We can only handle E-mails for now
+            return false;
+        }
+
+        String domain = tpid.getAddress().split("@")[1];
+        return StringUtils.equalsIgnoreCase(cfg.getMatrixCfg().getDomain(), domain);
+    }
+
+    private boolean isKnownLocal(ThreePid tpid) {
+        return lookup.findLocal(tpid.getMedium(), tpid.getAddress()).isPresent();
     }
 
     private ThreePidSession getSession(String sid, String secret) {
@@ -71,12 +85,17 @@ public class SessionMananger {
     private ThreePidSession getSessionIfValidated(String sid, String secret) {
         ThreePidSession session = getSession(sid, secret);
         if (!session.isValidated()) {
-            throw new IllegalStateException("Session " + sid + " has not been validated");
+            throw new SessionNotValidatedException();
         }
         return session;
     }
 
     public String create(String server, ThreePid tpid, String secret, int attempt, String nextLink) {
+        SessionConfig.Policy.PolicyTemplate policy = cfg.getPolicy().getValidation();
+        if (!policy.isEnabled()) {
+            throw new NotAllowedException("Validating 3PID is disabled globally");
+        }
+
         synchronized (this) {
             log.info("Server {} is asking to create session for {} (Attempt #{}) - Next link: {}", server, tpid, attempt, nextLink);
             Optional<IThreePidSessionDao> dao = storage.findThreePidSession(tpid, secret);
@@ -94,17 +113,46 @@ public class SessionMananger {
                 return session.getId();
             } else {
                 log.info("No existing session for {}", tpid);
+
+                boolean isLocalDomain = isLocal(tpid);
+                log.info("Is 3PID bound to local domain? {}", isLocalDomain);
+
+                if (isLocalDomain && (!policy.forLocal().isEnabled() || !policy.forLocal().toLocal())) {
+                    throw new NotAllowedException("Validating local 3PID is not allowed");
+                }
+
+                // We lookup if the 3PID is already known locally.
+                boolean knownLocal = isKnownLocal(tpid);
+                log.info("Mapping with {} is " + (knownLocal ? "already" : "not") + " known locally", tpid);
+
+                if (!isLocalDomain && (
+                        !policy.forRemote().isEnabled() || (
+                                !policy.forRemote().toLocal() &&
+                                        !policy.forRemote().toRemote()
+                        )
+                )) {
+                    throw new NotAllowedException("Validating unknown remote 3PID is not allowed");
+                }
+
                 String sessionId;
                 do {
-                    sessionId = UUID.randomUUID().toString().replace("-", "");
+                    sessionId = Long.toString(System.currentTimeMillis());
                 } while (storage.getThreePidSession(sessionId).isPresent());
 
                 String token = RandomStringUtils.randomNumeric(6);
                 ThreePidSession session = new ThreePidSession(sessionId, server, tpid, secret, attempt, nextLink, token);
                 log.info("Generated new session {} to validate {} from server {}", sessionId, tpid, server);
 
-                notifMgr.sendForValidation(session);
-                log.info("Sent validation notification to {}", tpid);
+                // This might need a configuration by medium type?
+                if (!isLocalDomain) {
+                    if (policy.forRemote().toLocal() && policy.forRemote().toRemote()) {
+                        log.info("Session {} for {}: sending local validation notification", sessionId, tpid);
+                        notifMgr.sendForValidation(session);
+                    } else {
+                        log.info("Session {} for {}: sending remote-only validation notification", sessionId, tpid);
+                        notifMgr.sendforRemoteValidation(session);
+                    }
+                }
 
                 storage.insertThreePidSession(session.getDao());
                 log.info("Stored session {}", sessionId, tpid, server);
@@ -130,65 +178,8 @@ public class SessionMananger {
 
     public void bind(String sid, String secret, String mxid) {
         ThreePidSession session = getSessionIfValidated(sid, secret);
-        log.info("Attempting bind of {} on session {} from server {}", mxid, session.getId(), session.getServer());
-
-        // We lookup if the 3PID is already known remotely.
-        Optional<SingleLookupReply> rRemote = lookup.findRemote(session.getThreePid().getMedium(), session.getThreePid().getAddress());
-        boolean knownRemote = rRemote.isPresent() && StringUtils.equals(rRemote.get().getMxid().getId(), mxid);
-        log.info("Mapping {} -> {} is " + (knownRemote ? "already" : "not") + " known remotely", mxid, session.getThreePid());
-
-        boolean isLocalDomain = false;
-        if (ThreePidMedium.Email.is(session.getThreePid().getMedium())) {
-            // TODO
-            // 1. Extract domain from email
-            // 2. set isLocalDomain
-            isLocalDomain = session.getThreePid().getAddress().isEmpty(); // FIXME only for testing
-        }
-        if (knownRemote) {
-            log.info("No further action needed for Mapping {} -> {}");
-            return;
-        }
-
-        // We lookup if the 3PID is already known locally.
-        Optional<SingleLookupReply> rLocal = lookup.findLocal(session.getThreePid().getMedium(), session.getThreePid().getAddress());
-        boolean knownLocal = rLocal.isPresent() && StringUtils.equals(rLocal.get().getMxid().getId(), mxid);
-        log.info("Mapping {} -> {} is " + (knownLocal ? "already" : "not") + " known locally", mxid, session.getThreePid());
-
-        // This might need a configuration by medium type?
-        if (knownLocal) { // 3PID is ony known local
-            if (isLocalDomain) {
-                // TODO
-                // 1. Check if global publishing is enabled, allowed and offered. If one is no, return.
-                // 2. Publish globally
-                notifMgr.sendforRemotePublish(session);
-            }
-
-            if (System.currentTimeMillis() % 2 == 0) {  // FIXME only for testing
-                // TODO
-                // 1. Check if configured to publish globally non-local domain. If no, return
-                notifMgr.sendforRemotePublish(session);
-            }
-
-            // TODO
-            // Proxy to configurable IS, by default Matrix.org
-            //
-            // Separate workflow, if user accepts to publish globally
-            // 1. display page to the user that it is waiting for the confirmation
-            // 2. call mxisd-specific endpoint to publish globally
-            // 3. check regularly on client page for a binding
-            // 4. when found, show page "Done globally!"
-            notifMgr.sendforRemotePublish(session);
-        } else {
-            if (isLocalDomain) { // 3PID is not known anywhere but is a local domain
-                // TODO
-                // check if config says this should fail or silently accept.
-                // Required to silently accept if the backend is synapse itself.
-            } else { // 3PID is not known anywhere and is remote
-                // TODO
-                // Proxy to configurable IS, by default Matrix.org
-                notifMgr.sendforRemotePublish(session);
-            }
-        }
+        log.info("Accepting bind of {} on session {} from server {}", mxid, session.getId(), session.getServer());
+        // TODO perform this if request was proxied
     }
 
 }

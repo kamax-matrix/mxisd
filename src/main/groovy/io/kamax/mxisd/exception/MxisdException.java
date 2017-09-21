@@ -18,30 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.dao;
+package io.kamax.mxisd.exception;
 
-public interface IThreePidSessionDao {
-
-    String getId();
-
-    long getCreationTime();
-
-    String getServer();
-
-    String getMedium();
-
-    String getAddress();
-
-    String getSecret();
-
-    int getAttempt();
-
-    String getNextLink();
-
-    String getToken();
-
-    boolean getValidated();
-
-    long getValidationTime();
-
+public class MxisdException extends RuntimeException {
 }

@@ -18,30 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.dao;
+package io.kamax.mxisd.exception;
 
-public interface IThreePidSessionDao {
+import org.apache.http.HttpStatus;
 
-    String getId();
+public class SessionNotValidatedException extends MatrixException {
 
-    long getCreationTime();
-
-    String getServer();
-
-    String getMedium();
-
-    String getAddress();
-
-    String getSecret();
-
-    int getAttempt();
-
-    String getNextLink();
-
-    String getToken();
-
-    boolean getValidated();
-
-    long getValidationTime();
+    public SessionNotValidatedException() {
+        super(HttpStatus.SC_OK, "M_SESSION_NOT_VALIDATED", "This validation session has not yet been completed");
+    }
 
 }

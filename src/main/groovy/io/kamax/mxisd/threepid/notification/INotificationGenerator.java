@@ -29,7 +29,7 @@ public interface INotificationGenerator {
 
     String getMedium();
 
-    String get(IThreePidInviteReply invite);
+    String getForInvite(IThreePidInviteReply invite);
 
     String getForValidation(IThreePidSession session);
 

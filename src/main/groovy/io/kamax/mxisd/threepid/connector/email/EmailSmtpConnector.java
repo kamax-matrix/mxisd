@@ -23,7 +23,9 @@ package io.kamax.mxisd.threepid.connector.email;
 import com.sun.mail.smtp.SMTPTransport;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
+import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,10 @@ public class EmailSmtpConnector implements IEmailConnector {
 
     @Override
     public void send(String senderAddress, String senderName, String recipient, String content) {
+        if (StringUtils.isBlank(content)) {
+            throw new InternalServerError("Notification content is empty");
+        }
+
         try {
             InternetAddress sender = new InternetAddress(senderAddress, senderName);
             MimeMessage msg = new MimeMessage(session, IOUtils.toInputStream(content, StandardCharsets.UTF_8));

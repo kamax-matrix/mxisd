@@ -83,6 +83,17 @@ threepid:
           session:
             validation: 'classpath:email/validate-template.eml'
 
+session.policy.validation:
+  enabled: true
+  forLocal:
+    enabled: true
+    toLocal: true
+    toRemote: true
+  forRemote:
+    enabled: true
+    toLocal: true # This should not be changed unless you know exactly the implications!
+    toRemote: true
+
 storage:
   backend: 'sqlite'
 

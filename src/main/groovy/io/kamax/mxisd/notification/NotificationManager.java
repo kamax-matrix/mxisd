@@ -55,14 +55,14 @@ public class NotificationManager {
     }
 
     public void sendForInvite(IThreePidInviteReply invite) {
-        ensureMedium(invite.getInvite().getMedium()).notify(invite);
+        ensureMedium(invite.getInvite().getMedium()).sendForInvite(invite);
     }
 
     public void sendForValidation(IThreePidSession session) {
-        ensureMedium(session.getThreePid().getMedium()).notify(session);
+        ensureMedium(session.getThreePid().getMedium()).sendForValidation(session);
     }
 
-    public void sendforRemotePublish(IThreePidSession session) {
+    public void sendforRemoteValidation(IThreePidSession session) {
         throw new NotImplementedException("Remote publish of 3PID bind");
     }
 

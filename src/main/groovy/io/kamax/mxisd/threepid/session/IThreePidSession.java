@@ -35,6 +35,8 @@ public interface IThreePidSession {
 
     ThreePid getThreePid();
 
+    String getSecret();
+
     int getAttempt();
 
     void increaseAttempt();

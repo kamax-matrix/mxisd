@@ -45,7 +45,7 @@ body {
    If this was you who made this request, you may use the following link to
    complete the verification of your email address:</p>
 
-<p><a href=%VALIDATION_LINK%">Complete email verification</a></p>
+<p><a href="%VALIDATION_LINK%">Complete email verification</a></p>
 
 <p>...or copy this link into your web browser:</p>
 

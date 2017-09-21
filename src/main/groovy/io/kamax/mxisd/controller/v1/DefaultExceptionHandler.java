@@ -23,7 +23,9 @@ package io.kamax.mxisd.controller.v1;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.kamax.mxisd.exception.BadRequestException;
+import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
+import io.kamax.mxisd.exception.MatrixException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.time.Instant;
 
 @ControllerAdvice
 @ResponseBody
@@ -48,6 +52,23 @@ public class DefaultExceptionHandler {
         obj.addProperty("errcode", erroCode);
         obj.addProperty("error", error);
         return gson.toJson(obj);
+    }
+
+    @ExceptionHandler(InternalServerError.class)
+    public String handle(InternalServerError e, HttpServletResponse response) {
+        if (StringUtils.isNotBlank(e.getInternalReason())) {
+            log.error("Reference #{} - {}", e.getReference(), e.getInternalReason());
+        } else {
+            log.error("Reference #{}", e);
+        }
+
+        return handleGeneric(e, response);
+    }
+
+    @ExceptionHandler(MatrixException.class)
+    public String handleGeneric(MatrixException e, HttpServletResponse response) {
+        response.setStatus(e.getStatus());
+        return handle(e.getErrorCode(), e.getError());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -72,7 +93,14 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public String handle(HttpServletRequest req, RuntimeException e) {
         log.error("Unknown error when handling {}", req.getRequestURL(), e);
-        return handle("M_UNKNOWN", StringUtils.defaultIfBlank(e.getMessage(), "An uknown error occured. Contact the server administrator if this persists."));
+        return handle(
+                "M_UNKNOWN",
+                StringUtils.defaultIfBlank(
+                        e.getMessage(),
+                        "An internal server error occured. If this error persists, please contact support with reference #" +
+                                Instant.now().toEpochMilli()
+                )
+        );
     }
 
 }

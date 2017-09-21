@@ -32,6 +32,9 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
     private String id;
 
     @DatabaseField(canBeNull = false)
+    private long creationTime;
+
+    @DatabaseField(canBeNull = false)
     private String server;
 
     @DatabaseField(canBeNull = false)
@@ -52,12 +55,19 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
     @DatabaseField(canBeNull = false)
     private String token;
 
+    @DatabaseField
+    private boolean validated;
+
+    @DatabaseField
+    private long validationTime;
+
     public ThreePidSessionDao() {
         // stub for ORMLite
     }
 
     public ThreePidSessionDao(IThreePidSessionDao session) {
         setId(session.getId());
+        setCreationTime(session.getCreationTime());
         setServer(session.getServer());
         setMedium(session.getMedium());
         setAddress(session.getAddress());
@@ -65,6 +75,9 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
         setAttempt(session.getAttempt());
         setNextLink(session.getNextLink());
         setToken(session.getToken());
+        setValidated(session.getValidated());
+        setValidationTime(session.getValidationTime());
+
     }
 
     public ThreePidSessionDao(ThreePid tpid, String secret) {
@@ -83,30 +96,21 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
     }
 
     @Override
+    public long getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(long creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    @Override
     public String getServer() {
         return server;
     }
 
     public void setServer(String server) {
         this.server = server;
-    }
-
-    @Override
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    @Override
-    public int getAttempt() {
-        return attempt;
-    }
-
-    public void setAttempt(int attempt) {
-        this.attempt = attempt;
     }
 
     @Override
@@ -128,6 +132,24 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
     }
 
     @Override
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    @Override
+    public int getAttempt() {
+        return attempt;
+    }
+
+    public void setAttempt(int attempt) {
+        this.attempt = attempt;
+    }
+
+    @Override
     public String getNextLink() {
         return nextLink;
     }
@@ -144,4 +166,22 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
     public void setToken(String token) {
         this.token = token;
     }
+
+    public boolean getValidated() {
+        return validated;
+    }
+
+    public void setValidated(boolean validated) {
+        this.validated = validated;
+    }
+
+    @Override
+    public long getValidationTime() {
+        return validationTime;
+    }
+
+    public void setValidationTime(long validationTime) {
+        this.validationTime = validationTime;
+    }
+
 }

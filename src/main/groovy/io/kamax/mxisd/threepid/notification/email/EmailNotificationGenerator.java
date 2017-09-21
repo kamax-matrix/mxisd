@@ -22,13 +22,19 @@ package io.kamax.mxisd.threepid.notification.email;
 
 import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailTemplateConfig;
+import io.kamax.mxisd.controller.v1.IdentityAPIv1;
+import io.kamax.mxisd.exception.InternalServerError;
+import io.kamax.mxisd.exception.NotImplementedException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -41,17 +47,22 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class EmailNotificationGenerator implements IEmailNotificationGenerator {
 
+    private Logger log = LoggerFactory.getLogger(EmailNotificationGenerator.class);
+
     private EmailConfig cfg;
     private EmailTemplateConfig templateCfg;
     private MatrixConfig mxCfg;
+    private ServerConfig srvCfg;
+
+    @Autowired
     private ApplicationContext app;
 
-    @Autowired // FIXME ApplicationContext shouldn't be injected, find another way from config (?)
-    public EmailNotificationGenerator(EmailConfig cfg, EmailTemplateConfig templateCfg, MatrixConfig mxCfg, ApplicationContext app) {
+    @Autowired
+    public EmailNotificationGenerator(EmailTemplateConfig templateCfg, EmailConfig cfg, MatrixConfig mxCfg, ServerConfig srvCfg) {
         this.cfg = cfg;
         this.templateCfg = templateCfg;
         this.mxCfg = mxCfg;
-        this.app = app;
+        this.srvCfg = srvCfg;
     }
 
     @Override
@@ -59,10 +70,14 @@ public class EmailNotificationGenerator implements IEmailNotificationGenerator {
         return "template";
     }
 
-    private String getTemplateContent(String location) throws IOException {
-        InputStream is = StringUtils.startsWith(location, "classpath:") ?
-                app.getResource(location).getInputStream() : new FileInputStream(location);
-        return IOUtils.toString(is, StandardCharsets.UTF_8);
+    private String getTemplateContent(String location) {
+        try {
+            InputStream is = StringUtils.startsWith(location, "classpath:") ?
+                    app.getResource(location).getInputStream() : new FileInputStream(location);
+            return IOUtils.toString(is, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new InternalServerError("Unable to read template content at " + location + ": " + e.getMessage());
+        }
     }
 
     private String populateCommon(String content, ThreePid recipient) {
@@ -77,44 +92,51 @@ public class EmailNotificationGenerator implements IEmailNotificationGenerator {
         return content;
     }
 
-    private String getTemplateAndPopulate(String location, ThreePid recipient) throws IOException {
+    private String getTemplateAndPopulate(String location, ThreePid recipient) {
         return populateCommon(getTemplateContent(location), recipient);
     }
 
     @Override
-    public String get(IThreePidInviteReply invite) {
-        try {
-            ThreePid tpid = new ThreePid(invite.getInvite().getMedium(), invite.getInvite().getAddress());
-            String templateBody = getTemplateAndPopulate(templateCfg.getInvite(), tpid);
+    public String getForInvite(IThreePidInviteReply invite) {
+        ThreePid tpid = new ThreePid(invite.getInvite().getMedium(), invite.getInvite().getAddress());
+        String templateBody = getTemplateAndPopulate(templateCfg.getInvite(), tpid);
 
-            String senderName = invite.getInvite().getProperties().getOrDefault("sender_display_name", "");
-            String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getInvite().getSender().getId());
-            String roomName = invite.getInvite().getProperties().getOrDefault("room_name", "");
-            String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
+        String senderName = invite.getInvite().getProperties().getOrDefault("sender_display_name", "");
+        String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getInvite().getSender().getId());
+        String roomName = invite.getInvite().getProperties().getOrDefault("room_name", "");
+        String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
 
-            templateBody = templateBody.replace("%SENDER_ID%", invite.getInvite().getSender().getId());
-            templateBody = templateBody.replace("%SENDER_NAME%", senderName);
-            templateBody = templateBody.replace("%SENDER_NAME_OR_ID%", senderNameOrId);
-            templateBody = templateBody.replace("%INVITE_MEDIUM%", tpid.getMedium());
-            templateBody = templateBody.replace("%INVITE_ADDRESS%", tpid.getAddress());
-            templateBody = templateBody.replace("%ROOM_ID%", invite.getInvite().getRoomId());
-            templateBody = templateBody.replace("%ROOM_NAME%", roomName);
-            templateBody = templateBody.replace("%ROOM_NAME_OR_ID%", roomNameOrId);
+        templateBody = templateBody.replace("%SENDER_ID%", invite.getInvite().getSender().getId());
+        templateBody = templateBody.replace("%SENDER_NAME%", senderName);
+        templateBody = templateBody.replace("%SENDER_NAME_OR_ID%", senderNameOrId);
+        templateBody = templateBody.replace("%INVITE_MEDIUM%", tpid.getMedium());
+        templateBody = templateBody.replace("%INVITE_ADDRESS%", tpid.getAddress());
+        templateBody = templateBody.replace("%ROOM_ID%", invite.getInvite().getRoomId());
+        templateBody = templateBody.replace("%ROOM_NAME%", roomName);
+        templateBody = templateBody.replace("%ROOM_NAME_OR_ID%", roomNameOrId);
 
-            return templateBody;
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to read template file", e);
-        }
+        return templateBody;
     }
 
     @Override
     public String getForValidation(IThreePidSession session) {
-        return null;
+        log.info("Generating notification content for 3PID Session validation");
+        String templateBody = getTemplateAndPopulate(templateCfg.getSession().getValidation(), session.getThreePid());
+
+        String validationLink = srvCfg.getPublicUrl() + IdentityAPIv1.BASE +
+                "/validate/" + session.getThreePid().getMedium() +
+                "/submitToken?sid=" + session.getId() + "&client_secret=" + session.getSecret() +
+                "&token=" + session.getToken();
+
+        templateBody = templateBody.replace("%VALIDATION_LINK%", validationLink);
+        templateBody = templateBody.replace("%VALIDATION_TOKEN%", session.getToken());
+
+        return templateBody;
     }
 
     @Override
     public String getForRemotePublishingValidation(IThreePidSession session) {
-        return null;
+        throw new NotImplementedException("");
     }
 
 }

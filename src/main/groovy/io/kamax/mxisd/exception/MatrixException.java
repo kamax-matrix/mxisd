@@ -18,30 +18,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.dao;
+package io.kamax.mxisd.exception;
 
-public interface IThreePidSessionDao {
+public abstract class MatrixException extends MxisdException {
 
-    String getId();
+    private int status;
+    private String errorCode;
+    private String error;
 
-    long getCreationTime();
+    public MatrixException(int status, String errorCode, String error) {
+        this.status = status;
+        this.errorCode = errorCode;
+        this.error = error;
+    }
 
-    String getServer();
+    public int getStatus() {
+        return status;
+    }
 
-    String getMedium();
+    public String getErrorCode() {
+        return errorCode;
+    }
 
-    String getAddress();
-
-    String getSecret();
-
-    int getAttempt();
-
-    String getNextLink();
-
-    String getToken();
-
-    boolean getValidated();
-
-    long getValidationTime();
+    public String getError() {
+        return error;
+    }
 
 }

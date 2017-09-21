@@ -53,6 +53,11 @@ public class ThreePidSession implements IThreePidSession {
                 dao.getNextLink(),
                 dao.getToken()
         );
+        timestamp = Instant.ofEpochMilli(dao.getCreationTime());
+        isValidated = dao.getValidated();
+        if (isValidated) {
+            validationTimestamp = Instant.ofEpochMilli(dao.getValidationTime());
+        }
     }
 
     public ThreePidSession(String id, String server, ThreePid tPid, String secret, int attempt, String nextLink, String token) {
@@ -155,6 +160,11 @@ public class ThreePidSession implements IThreePidSession {
             }
 
             @Override
+            public long getCreationTime() {
+                return timestamp.toEpochMilli();
+            }
+
+            @Override
             public String getServer() {
                 return server;
             }
@@ -187,6 +197,16 @@ public class ThreePidSession implements IThreePidSession {
             @Override
             public String getToken() {
                 return token;
+            }
+
+            @Override
+            public boolean getValidated() {
+                return isValidated;
+            }
+
+            @Override
+            public long getValidationTime() {
+                return isValidated ? validationTimestamp.toEpochMilli() : 0;
             }
 
         };

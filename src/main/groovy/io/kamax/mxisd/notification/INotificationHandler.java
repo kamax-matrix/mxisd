@@ -27,8 +27,8 @@ public interface INotificationHandler {
 
     String getMedium();
 
-    void notify(IThreePidInviteReply invite);
+    void sendForInvite(IThreePidInviteReply invite);
 
-    void notify(IThreePidSession session);
+    void sendForValidation(IThreePidSession session);
 
 }
