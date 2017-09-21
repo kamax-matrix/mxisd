@@ -20,27 +20,37 @@
 
 package io.kamax.mxisd.session;
 
+import com.google.gson.JsonObject;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.SessionConfig;
-import io.kamax.mxisd.exception.InvalidCredentialsException;
-import io.kamax.mxisd.exception.NotAllowedException;
-import io.kamax.mxisd.exception.SessionNotValidatedException;
+import io.kamax.mxisd.exception.*;
 import io.kamax.mxisd.lookup.ThreePidValidation;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
+import io.kamax.mxisd.matrix.IdentityServerUtils;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
 import io.kamax.mxisd.threepid.session.ThreePidSession;
+import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+
+import static io.kamax.mxisd.config.SessionConfig.Policy.PolicyTemplate;
+import static io.kamax.mxisd.config.SessionConfig.Policy.PolicyTemplate.PolicySource;
 
 @Component
 public class SessionMananger {
@@ -48,13 +58,18 @@ public class SessionMananger {
     private Logger log = LoggerFactory.getLogger(SessionMananger.class);
 
     private SessionConfig cfg;
+    private MatrixConfig mxCfg;
     private IStorage storage;
     private LookupStrategy lookup;
     private NotificationManager notifMgr;
 
+    // FIXME export into central class, set version
+    private CloseableHttpClient client = HttpClients.custom().setUserAgent("mxisd").build();
+
     @Autowired
     public SessionMananger(SessionConfig cfg, MatrixConfig mxCfg, IStorage storage, LookupStrategy lookup, NotificationManager notifMgr) {
         this.cfg = cfg;
+        this.mxCfg = mxCfg;
         this.storage = storage;
         this.lookup = lookup;
         this.notifMgr = notifMgr;
@@ -91,7 +106,7 @@ public class SessionMananger {
     }
 
     public String create(String server, ThreePid tpid, String secret, int attempt, String nextLink) {
-        SessionConfig.Policy.PolicyTemplate policy = cfg.getPolicy().getValidation();
+        PolicyTemplate policy = cfg.getPolicy().getValidation();
         if (!policy.isEnabled()) {
             throw new NotAllowedException("Validating 3PID is disabled globally");
         }
@@ -118,7 +133,7 @@ public class SessionMananger {
                 log.info("Is 3PID bound to local domain? {}", isLocal);
 
                 // This might need a configuration by medium type?
-                SessionConfig.Policy.PolicyTemplate.PolicySource policySource = policy.forIf(isLocal);
+                PolicySource policySource = policy.forIf(isLocal);
                 if (!policySource.isEnabled() || (!policySource.toLocal() && !policySource.toRemote())) {
                     log.info("Session for {}: cancelled due to policy", tpid);
                     throw new NotAllowedException("Validating " + (isLocal ? "local" : "remote") + " 3PID is not allowed");
@@ -168,6 +183,44 @@ public class SessionMananger {
         ThreePidSession session = getSessionIfValidated(sid, secret);
         log.info("Accepting bind of {} on session {} from server {}", mxid, session.getId(), session.getServer());
         // TODO perform this if request was proxied
+    }
+
+    public void createRemote(String sid, String secret, String token) {
+        ThreePidSession session = getSessionIfValidated(sid, secret);
+
+        boolean isLocal = isLocal(session.getThreePid());
+        PolicySource policy = cfg.getPolicy().getValidation().forIf(isLocal);
+        if (!policy.isEnabled() || !policy.toRemote()) {
+            throw new NotAllowedException("Validating " + (isLocal ? "local" : "remote") + " 3PID is not allowed");
+        }
+
+        List<String> servers = mxCfg.getIdentity().getServers(policy.getToRemote().getServer());
+        if (servers.isEmpty()) {
+            throw new InternalServerError();
+        }
+
+        String url = IdentityServerUtils.findIsUrlForDomain(servers.get(0)).orElseThrow(InternalServerError::new);
+
+        JsonObject body = new JsonObject();
+        body.addProperty("client_secret", RandomStringUtils.randomAlphanumeric(16));
+        body.addProperty(session.getThreePid().getMedium(), session.getThreePid().getAddress());
+        body.addProperty("send_attempt", 1);
+
+        log.info("Creating remote 3PID session for {} with local session [{}] to {}", session.getThreePid(), sid);
+        HttpPost tokenReq = RestClientUtils.post(url + "/_matrix/identity/api/v1/validate/" + session.getThreePid().getMedium() + "/requestToken", body);
+        try (CloseableHttpResponse response = client.execute(tokenReq)) {
+            int status = response.getStatusLine().getStatusCode();
+            if (status < 200 || status >= 300) {
+                throw new RemoteIdentityServerException("Remote identity server returned with status " + status);
+            }
+
+            // TODO finish
+        } catch (IOException e) {
+            log.warn("Failed to create remote session with {} for {}: {}", url, session.getThreePid(), e.getMessage());
+            throw new RemoteIdentityServerException(e.getMessage());
+        }
+
+
     }
 
 }

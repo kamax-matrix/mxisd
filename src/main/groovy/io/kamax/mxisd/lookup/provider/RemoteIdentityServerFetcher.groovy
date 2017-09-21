@@ -28,6 +28,7 @@ import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher
+import io.kamax.mxisd.matrix.IdentityServerUtils
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
@@ -46,36 +47,13 @@ import org.springframework.stereotype.Component
 @Lazy
 public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher {
 
-    public static final String THREEPID_TEST_MEDIUM = "email"
-    public static final String THREEPID_TEST_ADDRESS = "john.doe@example.org"
-
     private Logger log = LoggerFactory.getLogger(RemoteIdentityServerFetcher.class)
 
     private JsonSlurper json = new JsonSlurper()
 
     @Override
     boolean isUsable(String remote) {
-        try {
-            HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
-                    "${remote}/_matrix/identity/api/v1/lookup?medium=${THREEPID_TEST_MEDIUM}&address=${THREEPID_TEST_ADDRESS}"
-            ).openConnection()
-            // TODO turn this into a configuration property
-            rootSrvConn.setConnectTimeout(2000)
-
-            if (rootSrvConn.getResponseCode() != 200) {
-                return false
-            }
-
-            def output = json.parseText(rootSrvConn.getInputStream().getText())
-            if (output['address']) {
-                return false
-            }
-
-            return true
-        } catch (IOException | JsonException e) {
-            log.info("{} is not a usable Identity Server: {}", remote, e.getMessage())
-            return false
-        }
+        return IdentityServerUtils.isUsable(remote)
     }
 
     @Override

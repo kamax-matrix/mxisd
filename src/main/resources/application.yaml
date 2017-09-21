@@ -15,6 +15,12 @@ logging:
 server:
   port: 8090
 
+matrix:
+  identity:
+    servers:
+      root:
+        - 'https://matrix.org'
+
 lookup:
   recursive:
     enabled: true
@@ -90,11 +96,15 @@ session.policy.validation:
   forLocal:
     enabled: true
     toLocal: true # This should not be changed unless you know exactly the implications!
-    toRemote: true
+    toRemote:
+      enabled: true
+      server: 'root'
   forRemote:
     enabled: true
     toLocal: false
-    toRemote: true
+    toRemote:
+      enabled: true
+      server: 'root'
 
 storage:
   backend: 'sqlite'
