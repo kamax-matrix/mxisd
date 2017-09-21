@@ -31,4 +31,6 @@ public interface INotificationHandler {
 
     void sendForValidation(IThreePidSession session);
 
+    void sendForRemoteValidation(IThreePidSession session);
+
 }

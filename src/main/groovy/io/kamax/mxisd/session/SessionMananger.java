@@ -114,24 +114,14 @@ public class SessionMananger {
             } else {
                 log.info("No existing session for {}", tpid);
 
-                boolean isLocalDomain = isLocal(tpid);
-                log.info("Is 3PID bound to local domain? {}", isLocalDomain);
+                boolean isLocal = isLocal(tpid);
+                log.info("Is 3PID bound to local domain? {}", isLocal);
 
-                if (isLocalDomain && (!policy.forLocal().isEnabled() || !policy.forLocal().toLocal())) {
-                    throw new NotAllowedException("Validating local 3PID is not allowed");
-                }
-
-                // We lookup if the 3PID is already known locally.
-                boolean knownLocal = isKnownLocal(tpid);
-                log.info("Mapping with {} is " + (knownLocal ? "already" : "not") + " known locally", tpid);
-
-                if (!isLocalDomain && (
-                        !policy.forRemote().isEnabled() || (
-                                !policy.forRemote().toLocal() &&
-                                        !policy.forRemote().toRemote()
-                        )
-                )) {
-                    throw new NotAllowedException("Validating unknown remote 3PID is not allowed");
+                // This might need a configuration by medium type?
+                SessionConfig.Policy.PolicyTemplate.PolicySource policySource = policy.forIf(isLocal);
+                if (!policySource.isEnabled() || (!policySource.toLocal() && !policySource.toRemote())) {
+                    log.info("Session for {}: cancelled due to policy", tpid);
+                    throw new NotAllowedException("Validating " + (isLocal ? "local" : "remote") + " 3PID is not allowed");
                 }
 
                 String sessionId;
@@ -144,14 +134,12 @@ public class SessionMananger {
                 log.info("Generated new session {} to validate {} from server {}", sessionId, tpid, server);
 
                 // This might need a configuration by medium type?
-                if (!isLocalDomain) {
-                    if (policy.forRemote().toLocal() && policy.forRemote().toRemote()) {
-                        log.info("Session {} for {}: sending local validation notification", sessionId, tpid);
-                        notifMgr.sendForValidation(session);
-                    } else {
-                        log.info("Session {} for {}: sending remote-only validation notification", sessionId, tpid);
-                        notifMgr.sendforRemoteValidation(session);
-                    }
+                if (policySource.toLocal()) {
+                    log.info("Session {} for {}: sending local validation notification", sessionId, tpid);
+                    notifMgr.sendForValidation(session);
+                } else {
+                    log.info("Session {} for {}: sending remote-only validation notification", sessionId, tpid);
+                    notifMgr.sendforRemoteValidation(session);
                 }
 
                 storage.insertThreePidSession(session.getDao());

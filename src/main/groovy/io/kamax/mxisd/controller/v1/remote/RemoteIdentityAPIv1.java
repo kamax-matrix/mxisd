@@ -18,15 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.exception;
+package io.kamax.mxisd.controller.v1.remote;
 
+public class RemoteIdentityAPIv1 {
 
-import org.apache.http.HttpStatus;
-
-public class NotAllowedException extends MatrixException {
-
-    public NotAllowedException(String s) {
-        super(HttpStatus.SC_FORBIDDEN, "M_FORBIDDEN", s);
-    }
+    public static final String BASE = "/_matrix/identity-remote/api/v1";
 
 }

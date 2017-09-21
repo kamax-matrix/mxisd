@@ -42,6 +42,7 @@ public class SessionConfig {
             public static class PolicySource {
 
                 private boolean enabled;
+                private boolean alwaysValidate;
                 private boolean toLocal;
                 private boolean toRemote;
 
@@ -51,6 +52,14 @@ public class SessionConfig {
 
                 public void setEnabled(boolean enabled) {
                     this.enabled = enabled;
+                }
+
+                public boolean isAlwaysValidate() {
+                    return alwaysValidate;
+                }
+
+                public void setAlwaysValidate(boolean alwaysValidate) {
+                    this.alwaysValidate = alwaysValidate;
                 }
 
                 public boolean toLocal() {
@@ -97,6 +106,10 @@ public class SessionConfig {
 
             public PolicySource forRemote() {
                 return forRemote;
+            }
+
+            public PolicySource forIf(boolean isLocal) {
+                return isLocal ? forLocal : forRemote;
             }
         }
 

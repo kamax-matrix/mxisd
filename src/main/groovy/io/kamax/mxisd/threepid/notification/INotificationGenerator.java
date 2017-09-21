@@ -33,6 +33,6 @@ public interface INotificationGenerator {
 
     String getForValidation(IThreePidSession session);
 
-    String getForRemotePublishingValidation(IThreePidSession session);
+    String getForRemoteValidation(IThreePidSession session);
 
 }

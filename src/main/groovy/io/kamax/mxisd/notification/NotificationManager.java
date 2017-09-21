@@ -63,7 +63,7 @@ public class NotificationManager {
     }
 
     public void sendforRemoteValidation(IThreePidSession session) {
-        throw new NotImplementedException("Remote publish of 3PID bind");
+        ensureMedium(session.getThreePid().getMedium()).sendForRemoteValidation(session);
     }
 
 }

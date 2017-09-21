@@ -43,6 +43,7 @@ public class EmailNotificationHandler implements INotificationHandler {
     @Autowired
     public EmailNotificationHandler(EmailConfig cfg, List<IEmailNotificationGenerator> generators, List<IEmailConnector> connectors) {
         this.cfg = cfg;
+
         generator = generators.stream()
                 .filter(o -> StringUtils.equals(cfg.getGenerator(), o.getId()))
                 .findFirst()
@@ -59,24 +60,28 @@ public class EmailNotificationHandler implements INotificationHandler {
         return ThreePidMedium.Email.getId();
     }
 
-    @Override
-    public void sendForInvite(IThreePidInviteReply invite) {
+    private void send(String recipient, String content) {
         connector.send(
                 cfg.getIdentity().getFrom(),
                 cfg.getIdentity().getName(),
-                invite.getInvite().getAddress(),
-                generator.getForInvite(invite)
+                recipient,
+                content
         );
     }
 
     @Override
+    public void sendForInvite(IThreePidInviteReply invite) {
+        send(invite.getInvite().getAddress(), generator.getForInvite(invite));
+    }
+
+    @Override
     public void sendForValidation(IThreePidSession session) {
-        connector.send(
-                cfg.getIdentity().getFrom(),
-                cfg.getIdentity().getName(),
-                session.getThreePid().getAddress(),
-                generator.getForValidation(session)
-        );
+        send(session.getThreePid().getAddress(), generator.getForValidation(session));
+    }
+
+    @Override
+    public void sendForRemoteValidation(IThreePidSession session) {
+        send(session.getThreePid().getAddress(), generator.getForRemoteValidation(session));
     }
 
 }

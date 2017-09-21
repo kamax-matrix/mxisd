@@ -1,0 +1,91 @@
+Subject: Your Matrix Validation Token
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hello there!
+
+We have received a request to link this email address with your Matrix account.
+
+If it was really you who made this request, you can click on the following link to
+complete the verification of your email address:
+
+  %VALIDATION_LINK%
+
+If you didn't make this request, you can safely disregard this email.
+
+Thanks!
+
+%DOMAIN_PRETTY% Admins
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: multipart/related;
+	boundary="M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR";
+	type="text/html"
+
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR
+Content-Type: text/html; charset=UTF-8
+Content-Disposition: inline
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <style type="text/css">
+body {
+    margin: 0px;
+}
+
+pre, code {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+#page {
+    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+    font-color: #454545;
+    font-size: 12pt;
+    width: 100%%;
+    padding: 20px;
+}
+
+#inner {
+    width: 640px;
+}
+
+.notif_link a, .footer a {
+    color: #76CFA6 ! important;
+}
+        </style>
+    </head>
+    <body>
+        <table id="page">
+            <tr>
+                <td></td>
+                <td id="inner">
+                    <p>Hello there!</p>
+
+                    <p>We have received a request to link this email address with your Matrix account.</p>
+
+                    <p>If it was really you who made this request, you can click on the following link to
+                    complete the verification of your email address:</p>
+
+                    <p><a href="%VALIDATION_LINK%">Complete email verification</a></p>
+
+                    <p>If you didn't make this request, you can safely disregard this email.</p>
+
+                    <p>Thanks!</p>
+
+                    <p>%DOMAIN_PRETTY% Admins</p>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </body>
+</html>
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ--

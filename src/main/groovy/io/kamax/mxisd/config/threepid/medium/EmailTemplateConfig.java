@@ -45,13 +45,36 @@ public class EmailTemplateConfig {
 
     public static class Session {
 
-        private String validation;
+        public static class SessionValidation {
 
-        public String getValidation() {
+            private String local;
+            private String remote;
+
+            public String getLocal() {
+                return local;
+            }
+
+            public void setLocal(String local) {
+                this.local = local;
+            }
+
+            public String getRemote() {
+                return remote;
+            }
+
+            public void setRemote(String remote) {
+                this.remote = remote;
+            }
+
+        }
+
+        private SessionValidation validation;
+
+        public SessionValidation getValidation() {
             return validation;
         }
 
-        public void setValidation(String validation) {
+        public void setValidation(SessionValidation validation) {
             this.validation = validation;
         }
 
@@ -76,7 +99,9 @@ public class EmailTemplateConfig {
     public void build() {
         log.info("--- E-mail Generator templates config ---");
         log.info("Invite: {}", getName(getInvite()));
-        log.info("Session validation: {}", getName(getSession().getValidation()));
+        log.info("Session validation:");
+        log.info("\tLocal: {}", getName(getSession().getValidation().getLocal()));
+        log.info("\tRemote: {}", getName(getSession().getValidation().getRemote()));
     }
 
 }

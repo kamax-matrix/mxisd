@@ -26,8 +26,8 @@ import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailTemplateConfig;
 import io.kamax.mxisd.controller.v1.IdentityAPIv1;
+import io.kamax.mxisd.controller.v1.remote.RemoteIdentityAPIv1;
 import io.kamax.mxisd.exception.InternalServerError;
-import io.kamax.mxisd.exception.NotImplementedException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.io.IOUtils;
@@ -121,8 +121,9 @@ public class EmailNotificationGenerator implements IEmailNotificationGenerator {
     @Override
     public String getForValidation(IThreePidSession session) {
         log.info("Generating notification content for 3PID Session validation");
-        String templateBody = getTemplateAndPopulate(templateCfg.getSession().getValidation(), session.getThreePid());
+        String templateBody = getTemplateAndPopulate(templateCfg.getSession().getValidation().getLocal(), session.getThreePid());
 
+        // FIXME should have a global link builder, most likely in the SDK?
         String validationLink = srvCfg.getPublicUrl() + IdentityAPIv1.BASE +
                 "/validate/" + session.getThreePid().getMedium() +
                 "/submitToken?sid=" + session.getId() + "&client_secret=" + session.getSecret() +
@@ -135,8 +136,19 @@ public class EmailNotificationGenerator implements IEmailNotificationGenerator {
     }
 
     @Override
-    public String getForRemotePublishingValidation(IThreePidSession session) {
-        throw new NotImplementedException("");
+    public String getForRemoteValidation(IThreePidSession session) {
+        log.info("Generating notification content for 3PID Session validation");
+        String templateBody = getTemplateAndPopulate(templateCfg.getSession().getValidation().getLocal(), session.getThreePid());
+
+        // FIXME should have a global link builder, specific to mxisd
+        String nextStepLink = srvCfg.getPublicUrl() + RemoteIdentityAPIv1.BASE +
+                "/validate/requestToken?sid=" + session.getId() + "&client_secret=" + session.getSecret();
+
+        templateBody = templateBody.replace("%SESSION_ID%", session.getId());
+        templateBody = templateBody.replace("%SESSION_SECRET%", session.getSecret());
+        templateBody = templateBody.replace("%NEXT_STEP_LINK%", nextStepLink);
+
+        return templateBody;
     }
 
 }
