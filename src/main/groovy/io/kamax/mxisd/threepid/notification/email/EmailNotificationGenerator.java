@@ -26,7 +26,6 @@ import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailTemplateConfig;
 import io.kamax.mxisd.controller.v1.IdentityAPIv1;
-import io.kamax.mxisd.controller.v1.remote.RemoteIdentityAPIv1;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
@@ -140,16 +139,14 @@ public class EmailNotificationGenerator implements IEmailNotificationGenerator {
         log.info("Generating notification content for remote-only 3PID session");
         String templateBody = getTemplateAndPopulate(templateCfg.getSession().getValidation().getRemote(), session.getThreePid());
 
-        // FIXME should have a global link builder, specific to mxisd
-        String nextStepLink = srvCfg.getPublicUrl() + RemoteIdentityAPIv1.BASE +
-                "/validate/requestToken?sid=" + session.getId() +
-                "&client_secret=" + session.getSecret() +
+        // FIXME should have a global link builder, most likely in the SDK?
+        String validationLink = srvCfg.getPublicUrl() + IdentityAPIv1.BASE +
+                "/validate/" + session.getThreePid().getMedium() +
+                "/submitToken?sid=" + session.getId() + "&client_secret=" + session.getSecret() +
                 "&token=" + session.getToken();
 
-        templateBody = templateBody.replace("%SESSION_ID%", session.getId());
-        templateBody = templateBody.replace("%SESSION_SECRET%", session.getSecret());
-        templateBody = templateBody.replace("%SESSION_TOKEN%", session.getToken());
-        templateBody = templateBody.replace("%NEXT_STEP_LINK%", nextStepLink);
+        templateBody = templateBody.replace("%VALIDATION_LINK%", validationLink);
+        templateBody = templateBody.replace("%VALIDATION_TOKEN%", session.getToken());
 
         return templateBody;
     }

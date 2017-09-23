@@ -20,146 +20,62 @@
 
 package io.kamax.mxisd.controller.v1
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import io.kamax.matrix.ThreePidMedium
-import io.kamax.mxisd.ThreePid
-import io.kamax.mxisd.controller.v1.io.SessionEmailTokenRequestJson
-import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson
-import io.kamax.mxisd.exception.BadRequestException
-import io.kamax.mxisd.exception.SessionNotValidatedException
-import io.kamax.mxisd.invitation.InvitationManager
-import io.kamax.mxisd.lookup.ThreePidValidation
+import io.kamax.mxisd.config.ServerConfig
+import io.kamax.mxisd.config.ViewConfig
+import io.kamax.mxisd.controller.v1.remote.RemoteIdentityAPIv1
 import io.kamax.mxisd.session.SessionMananger
-import org.apache.commons.io.IOUtils
-import org.apache.http.HttpStatus
+import io.kamax.mxisd.session.ValidationResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.*
+import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import java.nio.charset.StandardCharsets
 
-@RestController
-@CrossOrigin
-@RequestMapping(path = IdentityAPIv1.BASE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@Controller
+@RequestMapping(path = IdentityAPIv1.BASE)
 class SessionController {
+
+    private Logger log = LoggerFactory.getLogger(SessionController.class)
+
+    @Autowired
+    private ServerConfig srvCfg;
 
     @Autowired
     private SessionMananger mgr
 
     @Autowired
-    private InvitationManager invMgr;
-
-    private Gson gson = new Gson()
-
-    private Logger log = LoggerFactory.getLogger(SessionController.class)
-
-    private <T> T fromJson(HttpServletRequest req, Class<T> obj) {
-        gson.fromJson(new InputStreamReader(req.getInputStream(), StandardCharsets.UTF_8), obj)
-    }
-
-    @RequestMapping(value = "/validate/{medium}/requestToken")
-    String init(HttpServletRequest request, HttpServletResponse response, @PathVariable String medium) {
-        log.info("Request {}: {}", request.getMethod(), request.getRequestURL(), request.getQueryString())
-        if (ThreePidMedium.Email.is(medium)) {
-            SessionEmailTokenRequestJson req = fromJson(request, SessionEmailTokenRequestJson.class)
-            return gson.toJson(new Sid(mgr.create(
-                    request.getRemoteHost(),
-                    new ThreePid(req.getMedium(), req.getValue()),
-                    req.getSecret(),
-                    req.getAttempt(),
-                    req.getNextLink())));
-        }
-
-        if (ThreePidMedium.PhoneNumber) {
-            SessionPhoneTokenRequestJson req = fromJson(request, SessionPhoneTokenRequestJson.class)
-            return gson.toJson(new Sid(mgr.create(
-                    request.getRemoteHost(),
-                    new ThreePid(req.getMedium(), req.getValue()),
-                    req.getSecret(),
-                    req.getAttempt(),
-                    req.getNextLink())));
-        }
-
-        JsonObject obj = new JsonObject();
-        obj.addProperty("errcode", "M_INVALID_3PID_TYPE")
-        obj.addProperty("error", medium + " is not supported as a 3PID type")
-        response.setStatus(HttpStatus.SC_BAD_REQUEST)
-        return gson.toJson(obj)
-    }
+    private ViewConfig viewCfg;
 
     @RequestMapping(value = "/validate/{medium}/submitToken")
-    String validate(HttpServletRequest request,
-                    @RequestParam String sid,
-                    @RequestParam("client_secret") String secret, @RequestParam String token) {
+    String validate(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestParam String sid,
+            @RequestParam("client_secret") String secret,
+            @RequestParam String token,
+            Model model
+    ) {
         log.info("Requested: {}?{}", request.getRequestURL(), request.getQueryString())
 
-        mgr.validate(sid, secret, token)
-
-        return "{}"
-    }
-
-    @RequestMapping(value = "/3pid/getValidated3pid")
-    String check(HttpServletRequest request, HttpServletResponse response,
-                 @RequestParam String sid, @RequestParam("client_secret") String secret) {
-        log.info("Requested: {}", request.getRequestURL(), request.getQueryString())
-
-        try {
-            ThreePidValidation pid = mgr.getValidated(sid, secret)
-
-            JsonObject obj = new JsonObject()
-            obj.addProperty("medium", pid.getMedium())
-            obj.addProperty("address", pid.getAddress())
-            obj.addProperty("validated_at", pid.getValidation().toEpochMilli())
-
-            return gson.toJson(obj);
-        } catch (SessionNotValidatedException e) {
-            log.info("Session {} was requested but has not yet been validated", sid);
-            throw e;
-        }
-    }
-
-    @RequestMapping(value = "/3pid/bind")
-    String bind(HttpServletRequest request, HttpServletResponse response,
-                @RequestParam String sid, @RequestParam("client_secret") String secret, @RequestParam String mxid) {
-        String data = IOUtils.toString(request.getReader())
-        log.info("Requested: {}", request.getRequestURL(), request.getQueryString())
-        try {
-            mgr.bind(sid, secret, mxid)
-            return "{}"
-        } catch (BadRequestException e) {
-            log.info("requested session was not validated")
-
-            JsonObject obj = new JsonObject()
-            obj.addProperty("errcode", "M_SESSION_NOT_VALIDATED")
-            obj.addProperty("error", e.getMessage())
-            response.setStatus(HttpStatus.SC_BAD_REQUEST)
-            return gson.toJson(obj)
-        } finally {
-            // If a user registers, there is no standard login event. Instead, this is the only way to trigger
-            // resolution at an appropriate time. Meh at synapse/Riot!
-            invMgr.lookupMappingsForInvites()
-        }
-    }
-
-    private class Sid {
-
-        private String sid;
-
-        public Sid(String sid) {
-            setSid(sid);
-        }
-
-        String getSid() {
-            return sid
-        }
-
-        void setSid(String sid) {
-            this.sid = sid
+        ValidationResult r = mgr.validate(sid, secret, token)
+        log.info("Session {} was validated", sid)
+        if (r.getNextUrl().isPresent()) {
+            String url = srvCfg.getPublicUrl() + r.getNextUrl().get()
+            log.info("Session {} validation: next URL is present, redirecting to {}", sid, url)
+            response.sendRedirect(url)
+        } else {
+            if (r.isCanRemote()) {
+                String url = srvCfg.getPublicUrl() + RemoteIdentityAPIv1.getRequestToken(r.getSession().getId(), r.getSession().getSecret());
+                model.addAttribute("remoteSessionLink", url)
+                return viewCfg.getSession().getLocalRemote().getOnTokenSubmit().getSuccess()
+            } else {
+                return viewCfg.getSession().getLocal().getOnTokenSubmit().getSuccess()
+            }
         }
     }
 

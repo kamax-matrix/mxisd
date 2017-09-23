@@ -21,10 +21,14 @@
 package io.kamax.mxisd.session;
 
 import com.google.gson.JsonObject;
+import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.ThreePidMedium;
+import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.SessionConfig;
+import io.kamax.mxisd.controller.v1.io.RequestTokenResponse;
+import io.kamax.mxisd.controller.v1.remote.RemoteIdentityAPIv1;
 import io.kamax.mxisd.exception.*;
 import io.kamax.mxisd.lookup.ThreePidValidation;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
@@ -32,20 +36,28 @@ import io.kamax.mxisd.matrix.IdentityServerUtils;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
+import io.kamax.mxisd.threepid.session.IThreePidSession;
 import io.kamax.mxisd.threepid.session.ThreePidSession;
+import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.RestClientUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,7 +103,7 @@ public class SessionMananger {
     private ThreePidSession getSession(String sid, String secret) {
         Optional<IThreePidSessionDao> dao = storage.getThreePidSession(sid);
         if (!dao.isPresent() || !StringUtils.equals(dao.get().getSecret(), secret)) {
-            throw new InvalidCredentialsException();
+            throw new SessionUnknownException();
         }
 
         return new ThreePidSession(dao.get());
@@ -165,13 +177,28 @@ public class SessionMananger {
         }
     }
 
-    public Optional<String> validate(String sid, String secret, String token) {
+    public ValidationResult validate(String sid, String secret, String token) {
         ThreePidSession session = getSession(sid, secret);
         log.info("Attempting validation for session {} from {}", session.getId(), session.getServer());
+
+        boolean isLocal = isLocal(session.getThreePid());
+        PolicySource policy = cfg.getPolicy().getValidation().forIf(isLocal);
+        if (!policy.isEnabled()) {
+            throw new NotAllowedException("Validating " + (isLocal ? "local" : "remote") + " 3PID is not allowed");
+        }
+
         session.validate(token);
         storage.updateThreePidSession(session.getDao());
         log.info("Session {} has been validated", session.getId());
-        return session.getNextLink();
+
+        // FIXME definitely doable in a nicer way
+        ValidationResult r = new ValidationResult(session, policy.toRemote());
+        if (!policy.toLocal()) {
+            r.setNextUrl(RemoteIdentityAPIv1.getRequestToken(sid, secret));
+        } else {
+            session.getNextLink().ifPresent(r::setNextUrl);
+        }
+        return r;
     }
 
     public ThreePidValidation getValidated(String sid, String secret) {
@@ -179,34 +206,74 @@ public class SessionMananger {
         return new ThreePidValidation(session.getThreePid(), session.getValidationTime());
     }
 
-    public void bind(String sid, String secret, String mxid) {
+    public void bind(String sid, String secret, String mxidRaw) {
+        _MatrixID mxid = new MatrixID(mxidRaw);
         ThreePidSession session = getSessionIfValidated(sid, secret);
-        log.info("Accepting bind of {} on session {} from server {}", mxid, session.getId(), session.getServer());
-        // TODO perform this if request was proxied
+
+        if (!session.isRemote()) {
+            log.info("Session {} for {}: MXID {} was bound locally", sid, session.getThreePid(), mxid);
+            return;
+        }
+
+        log.info("Session {} for {}: MXID {} bind is remote", sid, session.getThreePid(), mxid);
+        if (!session.isRemoteValidated()) {
+            log.error("Session {} for {}: Not validated remotely", sid, session.getThreePid());
+            throw new SessionNotValidatedException();
+        }
+
+        log.info("Session {} for {}: Performing remote bind", sid, session.getThreePid());
+
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(
+                Arrays.asList(
+                        new BasicNameValuePair("sid", session.getRemoteId()),
+                        new BasicNameValuePair("client_secret", session.getRemoteSecret()),
+                        new BasicNameValuePair("mxid", mxid.getId())
+                ), StandardCharsets.UTF_8);
+        HttpPost bindReq = new HttpPost(session.getRemoteServer() + "/_matrix/identity/api/v1/3pid/bind");
+        bindReq.setEntity(entity);
+
+        try (CloseableHttpResponse response = client.execute(bindReq)) {
+            int status = response.getStatusLine().getStatusCode();
+            if (status < 200 || status >= 300) {
+                String body = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+                log.error("Session {} for {}: Remote IS {} failed when trying to bind {} for remote session {}\n{}",
+                        sid, session.getThreePid(), session.getRemoteServer(), mxid, session.getRemoteId(), body);
+                throw new RemoteIdentityServerException(body);
+            }
+
+            log.error("Session {} for {}: MXID {} was bound remotely", sid, session.getThreePid(), mxid);
+        } catch (IOException e) {
+            log.error("Session {} for {}: I/O Error when trying to bind mxid {}", sid, session.getThreePid(), mxid);
+            throw new RemoteIdentityServerException(e.getMessage());
+        }
     }
 
-    public void createRemote(String sid, String secret, String token) {
+    public IThreePidSession createRemote(String sid, String secret) {
         ThreePidSession session = getSessionIfValidated(sid, secret);
+        log.info("Creating remote 3PID session for {} with local session [{}] to {}", session.getThreePid(), sid);
 
         boolean isLocal = isLocal(session.getThreePid());
         PolicySource policy = cfg.getPolicy().getValidation().forIf(isLocal);
         if (!policy.isEnabled() || !policy.toRemote()) {
             throw new NotAllowedException("Validating " + (isLocal ? "local" : "remote") + " 3PID is not allowed");
         }
+        log.info("Remote 3PID is allowed by policy");
 
         List<String> servers = mxCfg.getIdentity().getServers(policy.getToRemote().getServer());
         if (servers.isEmpty()) {
             throw new InternalServerError();
         }
-
         String url = IdentityServerUtils.findIsUrlForDomain(servers.get(0)).orElseThrow(InternalServerError::new);
+        log.info("Will use IS endpoint {}", url);
+
+        String remoteSecret = session.isRemote() ? session.getRemoteSecret() : RandomStringUtils.randomAlphanumeric(16);
 
         JsonObject body = new JsonObject();
-        body.addProperty("client_secret", RandomStringUtils.randomAlphanumeric(16));
+        body.addProperty("client_secret", remoteSecret);
         body.addProperty(session.getThreePid().getMedium(), session.getThreePid().getAddress());
-        body.addProperty("send_attempt", 1);
+        body.addProperty("send_attempt", session.increaseAndGetRemoteAttempt());
 
-        log.info("Creating remote 3PID session for {} with local session [{}] to {}", session.getThreePid(), sid);
+        log.info("Requesting remote session with attempt {}", session.getRemoteAttempt());
         HttpPost tokenReq = RestClientUtils.post(url + "/_matrix/identity/api/v1/validate/" + session.getThreePid().getMedium() + "/requestToken", body);
         try (CloseableHttpResponse response = client.execute(tokenReq)) {
             int status = response.getStatusLine().getStatusCode();
@@ -214,13 +281,66 @@ public class SessionMananger {
                 throw new RemoteIdentityServerException("Remote identity server returned with status " + status);
             }
 
-            // TODO finish
+            RequestTokenResponse data = new GsonParser().parse(response, RequestTokenResponse.class);
+            log.info("Remote Session ID: {}", data.getSid());
+
+            session.setRemoteData(url, data.getSid(), remoteSecret, 1);
+            storage.updateThreePidSession(session.getDao());
+            log.info("Updated Session {} with remote data", sid);
+
+            return session;
         } catch (IOException e) {
             log.warn("Failed to create remote session with {} for {}: {}", url, session.getThreePid(), e.getMessage());
             throw new RemoteIdentityServerException(e.getMessage());
         }
+    }
 
+    public void validateRemote(String sid, String secret) {
+        ThreePidSession session = getSessionIfValidated(sid, secret);
+        if (!session.isRemote()) {
+            throw new NotAllowedException("Cannot remotely validate a local session");
+        }
 
+        log.info("Session {} for {}: Validating remote 3PID session {} on {}", sid, session.getThreePid(), session.getRemoteId(), session.getRemoteServer());
+        if (session.isRemoteValidated()) {
+            log.info("Session {} for {}: Already remotely validated", sid, session.getThreePid());
+            return;
+        }
+
+        HttpGet validateReq = new HttpGet(session.getRemoteServer() + "/_matrix/identity/api/v1/3pid/getValidated3pid?sid=" + session.getRemoteId() + "&client_secret=" + session.getRemoteSecret());
+        try (CloseableHttpResponse response = client.execute(validateReq)) {
+            int status = response.getStatusLine().getStatusCode();
+            if (status < 200 || status >= 300) {
+                throw new RemoteIdentityServerException("Remote identity server returned with status " + status);
+            }
+
+            JsonObject o = new GsonParser().parse(response.getEntity().getContent());
+            if (o.has("errcode")) {
+                String errcode = o.get("errcode").getAsString();
+                if (StringUtils.equals("M_SESSION_NOT_VALIDATED", errcode)) {
+                    throw new SessionNotValidatedException();
+                } else if (StringUtils.equals("M_NO_VALID_SESSION", errcode)) {
+                    throw new SessionUnknownException();
+                } else {
+                    throw new RemoteIdentityServerException("Unknown error while validating Remote 3PID session: " + errcode + " - " + o.get("error").getAsString());
+                }
+            }
+
+            if (o.has("validated_at")) {
+                ThreePid remoteThreePid = new ThreePid(o.get("medium").getAsString(), o.get("address").getAsString());
+                if (session.getThreePid().equals(remoteThreePid)) { // sanity check
+                    throw new InternalServerError("Local 3PID " + session.getThreePid() + " and remote 3PID " + remoteThreePid + " do not match for session " + session.getId());
+                }
+
+                log.info("Session {} for {}: Remotely validated successfully", sid, session.getThreePid());
+                session.validateRemote();
+                storage.updateThreePidSession(session.getDao());
+                log.info("Session {} was updated in storage", sid);
+            }
+        } catch (IOException e) {
+            log.warn("Session {} for {}: Failed to validated remotely on {}: {}", sid, session.getThreePid(), session.getRemoteServer(), e.getMessage());
+            throw new RemoteIdentityServerException(e.getMessage());
+        }
     }
 
 }

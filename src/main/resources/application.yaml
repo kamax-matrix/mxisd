@@ -106,6 +106,24 @@ session.policy.validation:
       enabled: true
       server: 'root'
 
+view:
+  session:
+    local:
+      onTokenSubmit:
+        success: 'session/local/tokenSubmitSuccess'
+        failure: 'session/local/tokenSubmitFailure'
+    localRemote:
+      onTokenSubmit:
+        success: 'session/localRemote/tokenSubmitSuccess'
+        failure: 'session/local/tokenSubmitFailure'
+    remote:
+      onRequest:
+        success: 'session/remote/requestSuccess'
+        failure: 'session/remote/requestFailure'
+      onCheck:
+        success: 'session/remote/checkSuccess'
+        failure: 'session/remote/checkFailure'
+
 storage:
   backend: 'sqlite'
 

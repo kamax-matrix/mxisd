@@ -18,20 +18,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.remote;
+package io.kamax.mxisd.session;
 
-public class RemoteIdentityAPIv1 {
+import io.kamax.mxisd.threepid.session.IThreePidSession;
 
-    public static final String BASE = "/_matrix/identity/remote/api/v1";
-    public static final String SESSION_REQUEST_TOKEN = BASE + "/validate/requestToken";
-    public static final String SESSION_CHECK = BASE + "/validate/check";
+import java.util.Optional;
 
-    public static String getRequestToken(String id, String secret) {
-        return SESSION_REQUEST_TOKEN + "?sid=" + id + "&client_secret=" + secret;
+public class ValidationResult {
+
+    private IThreePidSession session;
+    private boolean canRemote;
+    private String nextUrl;
+
+    public ValidationResult(IThreePidSession session, boolean canRemote) {
+        this.session = session;
+        this.canRemote = canRemote;
     }
 
-    public static String getSessionCheck(String id, String secret) {
-        return SESSION_CHECK + "?sid=" + id + "&client_secret=" + secret;
+    public IThreePidSession getSession() {
+        return session;
+    }
+
+    public boolean isCanRemote() {
+        return canRemote;
+    }
+
+    public Optional<String> getNextUrl() {
+        return Optional.ofNullable(nextUrl);
+    }
+
+    public void setNextUrl(String nextUrl) {
+        this.nextUrl = nextUrl;
     }
 
 }

@@ -18,20 +18,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.remote;
+package io.kamax.mxisd.config;
 
-public class RemoteIdentityAPIv1 {
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.thymeleaf.resourceresolver.FileResourceResolver;
+import org.thymeleaf.templateresolver.TemplateResolver;
 
-    public static final String BASE = "/_matrix/identity/remote/api/v1";
-    public static final String SESSION_REQUEST_TOKEN = BASE + "/validate/requestToken";
-    public static final String SESSION_CHECK = BASE + "/validate/check";
+@Configuration
+public class ThymeleafConfig {
 
-    public static String getRequestToken(String id, String secret) {
-        return SESSION_REQUEST_TOKEN + "?sid=" + id + "&client_secret=" + secret;
-    }
-
-    public static String getSessionCheck(String id, String secret) {
-        return SESSION_CHECK + "?sid=" + id + "&client_secret=" + secret;
+    @Bean
+    public TemplateResolver getFileSystemResolver() {
+        TemplateResolver resolver = new TemplateResolver();
+        resolver.setPrefix("");
+        resolver.setSuffix("");
+        resolver.setCacheable(false);
+        resolver.setOrder(1);
+        resolver.setResourceResolver(new FileResourceResolver());
+        return resolver;
     }
 
 }

@@ -42,6 +42,12 @@ public class ThreePidSession implements IThreePidSession {
     private int attempt;
     private Instant validationTimestamp;
     private boolean isValidated;
+    private boolean isRemote;
+    private String remoteServer;
+    private String remoteId;
+    private String remoteSecret;
+    private int remoteAttempt;
+    private boolean isRemoteValidated;
 
     public ThreePidSession(IThreePidSessionDao dao) {
         this(
@@ -58,6 +64,13 @@ public class ThreePidSession implements IThreePidSession {
         if (isValidated) {
             validationTimestamp = Instant.ofEpochMilli(dao.getValidationTime());
         }
+
+        isRemote = dao.isRemote();
+        remoteServer = dao.getRemoteServer();
+        remoteId = dao.getRemoteId();
+        remoteSecret = dao.getRemoteSecret();
+        remoteAttempt = dao.getRemoteAttempt();
+        isRemoteValidated = dao.isRemoteValidated();
     }
 
     public ThreePidSession(String id, String server, ThreePid tPid, String secret, int attempt, String nextLink, String token) {
@@ -130,6 +143,44 @@ public class ThreePidSession implements IThreePidSession {
     }
 
     @Override
+    public boolean isRemote() {
+        return isRemote;
+    }
+
+    @Override
+    public String getRemoteServer() {
+        return remoteServer;
+    }
+
+    @Override
+    public String getRemoteId() {
+        return remoteId;
+    }
+
+    @Override
+    public String getRemoteSecret() {
+        return remoteSecret;
+    }
+
+    @Override
+    public int getRemoteAttempt() {
+        return remoteAttempt;
+    }
+
+    public int increaseAndGetRemoteAttempt() {
+        return ++remoteAttempt;
+    }
+
+    @Override
+    public void setRemoteData(String server, String id, String secret, int attempt) {
+        this.remoteServer = server;
+        this.remoteId = id;
+        this.remoteSecret = secret;
+        this.attempt = attempt;
+        this.isRemote = true;
+    }
+
+    @Override
     public boolean isValidated() {
         return isValidated;
     }
@@ -149,6 +200,14 @@ public class ThreePidSession implements IThreePidSession {
 
         validationTimestamp = Instant.now();
         isValidated = true;
+    }
+
+    public boolean isRemoteValidated() {
+        return isRemoteValidated;
+    }
+
+    public void validateRemote() {
+        this.isRemoteValidated = true;
     }
 
     public IThreePidSessionDao getDao() {
@@ -207,6 +266,36 @@ public class ThreePidSession implements IThreePidSession {
             @Override
             public long getValidationTime() {
                 return isValidated ? validationTimestamp.toEpochMilli() : 0;
+            }
+
+            @Override
+            public boolean isRemote() {
+                return isRemote;
+            }
+
+            @Override
+            public String getRemoteServer() {
+                return remoteServer;
+            }
+
+            @Override
+            public String getRemoteId() {
+                return remoteId;
+            }
+
+            @Override
+            public String getRemoteSecret() {
+                return remoteSecret;
+            }
+
+            @Override
+            public int getRemoteAttempt() {
+                return remoteAttempt;
+            }
+
+            @Override
+            public boolean isRemoteValidated() {
+                return isRemoteValidated;
             }
 
         };

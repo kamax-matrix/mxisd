@@ -61,6 +61,24 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
     @DatabaseField
     private long validationTime;
 
+    @DatabaseField(canBeNull = false)
+    private boolean isRemote;
+
+    @DatabaseField
+    private String remoteServer;
+
+    @DatabaseField
+    private String remoteId;
+
+    @DatabaseField
+    private String remoteSecret;
+
+    @DatabaseField
+    private Integer remoteAttempt;
+
+    @DatabaseField(canBeNull = false)
+    private boolean isRemoteValidated;
+
     public ThreePidSessionDao() {
         // stub for ORMLite
     }
@@ -77,7 +95,12 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
         setToken(session.getToken());
         setValidated(session.getValidated());
         setValidationTime(session.getValidationTime());
-
+        setRemote(session.isRemote());
+        setRemoteServer(session.getRemoteServer());
+        setRemoteId(session.getRemoteId());
+        setRemoteSecret(session.getRemoteSecret());
+        setRemoteAttempt(session.getRemoteAttempt());
+        setRemoteValidated(session.isRemoteValidated());
     }
 
     public ThreePidSessionDao(ThreePid tpid, String secret) {
@@ -178,6 +201,60 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
     @Override
     public long getValidationTime() {
         return validationTime;
+    }
+
+    @Override
+    public boolean isRemote() {
+        return isRemote;
+    }
+
+    public void setRemote(boolean remote) {
+        isRemote = remote;
+    }
+
+    @Override
+    public String getRemoteServer() {
+        return remoteServer;
+    }
+
+    public void setRemoteServer(String remoteServer) {
+        this.remoteServer = remoteServer;
+    }
+
+    @Override
+    public String getRemoteId() {
+        return remoteId;
+    }
+
+    public void setRemoteId(String remoteId) {
+        this.remoteId = remoteId;
+    }
+
+    @Override
+    public String getRemoteSecret() {
+        return remoteSecret;
+    }
+
+    public void setRemoteSecret(String remoteSecret) {
+        this.remoteSecret = remoteSecret;
+    }
+
+    @Override
+    public int getRemoteAttempt() {
+        return remoteAttempt;
+    }
+
+    @Override
+    public boolean isRemoteValidated() {
+        return isRemoteValidated;
+    }
+
+    public void setRemoteValidated(boolean remoteValidated) {
+        isRemoteValidated = remoteValidated;
+    }
+
+    public void setRemoteAttempt(int remoteAttempt) {
+        this.remoteAttempt = remoteAttempt;
     }
 
     public void setValidationTime(long validationTime) {

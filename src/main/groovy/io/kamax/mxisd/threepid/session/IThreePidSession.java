@@ -51,4 +51,16 @@ public interface IThreePidSession {
 
     Instant getValidationTime();
 
+    boolean isRemote();
+
+    String getRemoteServer();
+
+    String getRemoteId();
+
+    String getRemoteSecret();
+
+    int getRemoteAttempt();
+
+    void setRemoteData(String server, String id, String secret, int attempt);
+
 }

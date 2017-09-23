@@ -44,4 +44,16 @@ public interface IThreePidSessionDao {
 
     long getValidationTime();
 
+    boolean isRemote();
+
+    String getRemoteServer();
+
+    String getRemoteId();
+
+    String getRemoteSecret();
+
+    int getRemoteAttempt();
+
+    boolean isRemoteValidated();
+
 }

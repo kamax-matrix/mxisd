@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8"/>
+    <title>Matrix global token verification</title>
+    <style>
+        body {
+            font-family: "Myriad Pro", "Myriad", Helvetica, Arial, sans-serif;
+            font-size: 12pt;
+            margin: 1em;
+        }
+        #message {
+            width: 1200px;
+            text-align: left;
+            padding: 1em;
+            margin-bottom: 40px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 50px;
+
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+
+            -webkit-box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
+            -moz-box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
+            box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.15);
+
+            background-color: #f8f8f8;
+            border: 1px #ccc solid;
+        }
+
+    </style>
+</head>
+<body>
+<div id="message">
+    <p>The process to be globally discoverable has started. A verification token has been requested on your behalf.</p>
+    <p>You will receive a similar communication as the first verification message.<br/>
+        Follow the instructions and come back to this page once you are told to return to your Matrix client or that the
+        verification was successful.</p>
+    <p>Once the validation was successful with the global server, please follow <a th:href="${checkLink}">this link</a>
+        to validate it with us.</p>
+</div>
+</body>
+</html>

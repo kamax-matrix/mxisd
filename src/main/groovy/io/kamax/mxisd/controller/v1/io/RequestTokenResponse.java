@@ -18,20 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.remote;
+package io.kamax.mxisd.controller.v1.io;
 
-public class RemoteIdentityAPIv1 {
+public class RequestTokenResponse {
 
-    public static final String BASE = "/_matrix/identity/remote/api/v1";
-    public static final String SESSION_REQUEST_TOKEN = BASE + "/validate/requestToken";
-    public static final String SESSION_CHECK = BASE + "/validate/check";
+    private String sid;
 
-    public static String getRequestToken(String id, String secret) {
-        return SESSION_REQUEST_TOKEN + "?sid=" + id + "&client_secret=" + secret;
-    }
-
-    public static String getSessionCheck(String id, String secret) {
-        return SESSION_CHECK + "?sid=" + id + "&client_secret=" + secret;
+    public String getSid() {
+        return sid;
     }
 
 }
