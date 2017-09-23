@@ -31,7 +31,6 @@ import io.kamax.mxisd.controller.v1.io.RequestTokenResponse;
 import io.kamax.mxisd.controller.v1.remote.RemoteIdentityAPIv1;
 import io.kamax.mxisd.exception.*;
 import io.kamax.mxisd.lookup.ThreePidValidation;
-import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.matrix.IdentityServerUtils;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
@@ -72,18 +71,16 @@ public class SessionMananger {
     private SessionConfig cfg;
     private MatrixConfig mxCfg;
     private IStorage storage;
-    private LookupStrategy lookup;
     private NotificationManager notifMgr;
 
     // FIXME export into central class, set version
     private CloseableHttpClient client = HttpClients.custom().setUserAgent("mxisd").build();
 
     @Autowired
-    public SessionMananger(SessionConfig cfg, MatrixConfig mxCfg, IStorage storage, LookupStrategy lookup, NotificationManager notifMgr) {
+    public SessionMananger(SessionConfig cfg, MatrixConfig mxCfg, IStorage storage, NotificationManager notifMgr) {
         this.cfg = cfg;
         this.mxCfg = mxCfg;
         this.storage = storage;
-        this.lookup = lookup;
         this.notifMgr = notifMgr;
     }
 
@@ -94,10 +91,6 @@ public class SessionMananger {
 
         String domain = tpid.getAddress().split("@")[1];
         return StringUtils.equalsIgnoreCase(cfg.getMatrixCfg().getDomain(), domain);
-    }
-
-    private boolean isKnownLocal(ThreePid tpid) {
-        return lookup.findLocal(tpid.getMedium(), tpid.getAddress()).isPresent();
     }
 
     private ThreePidSession getSession(String sid, String secret) {

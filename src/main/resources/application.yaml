@@ -91,20 +91,22 @@ threepid:
               local: 'classpath:email/validate-local-template.eml'
               remote: 'classpath:email/validate-remote-template.eml'
 
-session.policy.validation:
-  enabled: true
-  forLocal:
-    enabled: true
-    toLocal: true # This should not be changed unless you know exactly the implications!
-    toRemote:
+session:
+  policy:
+    validation:
       enabled: true
-      server: 'root'
-  forRemote:
-    enabled: true
-    toLocal: false
-    toRemote:
-      enabled: true
-      server: 'root'
+      forLocal:
+        enabled: true
+        toLocal: true
+        toRemote:
+          enabled: true
+          server: 'root'
+      forRemote:
+        enabled: true
+        toLocal: false
+        toRemote:
+          enabled: true
+          server: 'root'
 
 view:
   session:
