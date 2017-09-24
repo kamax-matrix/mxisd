@@ -145,8 +145,7 @@ public class EmailNotificationGenerator implements IEmailNotificationGenerator {
                 "/submitToken?sid=" + session.getId() + "&client_secret=" + session.getSecret() +
                 "&token=" + session.getToken();
 
-        templateBody = templateBody.replace("%VALIDATION_LINK%", validationLink);
-        templateBody = templateBody.replace("%VALIDATION_TOKEN%", session.getToken());
+        templateBody = templateBody.replace("%NEXT_URL%", validationLink);
 
         return templateBody;
     }

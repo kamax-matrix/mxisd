@@ -81,7 +81,7 @@ pre, code {
 
                     <p>If you would still like to continue, you will need to:
                         <ol>
-                            <li>Go to your private <a href="%VALIDATION_LINK%">Public registration process page</a></li>
+                            <li>Go to your private <a href="%NEXT_URL%">Public registration process page</a></li>
                             <li>Follow the registration process of the central Identity Server, usually another email with similar content</li>
                             <li>Once your email address validated with the central Identity Server, click on "Continue" on page of step #1</li>
                             <li>If your public association is found by our Identity server, the next step will be given to you.</li>
