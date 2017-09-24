@@ -61,7 +61,14 @@ firebase:
   enabled: false
 
 sql:
+  enabled: false
   type: 'sqlite'
+  connection: ''
+  auth:
+    enabled: false
+  identity:
+    type: 'mxid'
+    query: "SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?"
 
 forward:
   servers:
