@@ -8,6 +8,7 @@
   - [Email](#email)
 - [Usage](#usage)
   - [Configuration](#configuration)
+  - [Web views](#web-views)
   - [Scenarios](#scenarios)
     - [Default](#default)
     - [Local sessions only](#local-sessions-only)
