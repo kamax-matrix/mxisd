@@ -98,10 +98,10 @@ Built-in generators and connectors for supported 3PID types:
 
 ### Email
 Generators:
-- Template
+- [Template](https://github.com/kamax-io/mxisd/blob/master/docs/threepids/email/notifications/template-generator.md)
 
 Connectors:
-- SMTP
+- [SMTP](https://github.com/kamax-io/mxisd/blob/master/docs/threepids/email/notifications/smtp-connector.md)
 
 
 ## Usage
