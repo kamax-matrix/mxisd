@@ -303,10 +303,10 @@ session:
         enabled: true
         toLocal: false
         toRemote:
-          enabled: false
+          enabled: true
       forRemote:
         enabled: true
-        toLocal: true
+        toLocal: false
         toRemote:
           enabled: true
 ```
