@@ -6,18 +6,16 @@ import com.google.gson.JsonParser;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
+import org.xbill.DNS.*;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 // FIXME placeholder, this must go in matrix-java-sdk for 1.0
@@ -38,7 +36,9 @@ public class IdentityServerUtils {
             // TODO turn this into a configuration property
             rootSrvConn.setConnectTimeout(2000);
 
-            if (rootSrvConn.getResponseCode() != 200) {
+            int status = rootSrvConn.getResponseCode();
+            if (status != 200) {
+                log.info("Usability of {} as Identity server: answer status: {}", remote, status);
                 return false;
             }
 
@@ -77,20 +77,27 @@ public class IdentityServerUtils {
             String lookupDns = getSrvRecordName(domainOrUrl);
             log.info("Lookup name: {}", lookupDns);
 
-            SRVRecord[] records = (SRVRecord[]) new Lookup(lookupDns, Type.SRV).run();
+            List<SRVRecord> srvRecords = new ArrayList<>();
+            Record[] records = new Lookup(lookupDns, Type.SRV).run();
             if (records != null) {
-                Arrays.sort(records, Comparator.comparingInt(SRVRecord::getPriority));
-
-                for (SRVRecord record : records) {
-                    log.info("Found SRV record: {}", record.toString());
-                    String baseUrl = "https://${record.getTarget().toString(true)}:${record.getPort()}";
-                    if (isUsable(baseUrl)) {
-                        log.info("Found Identity Server for domain {} at {}", domainOrUrl, baseUrl);
-                        return Optional.of(baseUrl);
+                for (Record record : records) {
+                    log.info("Record: {}", record.toString());
+                    if (record.getType() == Type.SRV) {
+                        if (record instanceof SRVRecord) {
+                            srvRecords.add((SRVRecord) record);
+                        } else {
+                            log.warn("We requested SRV records but we got {} instead!", record.getClass().getName());
+                        }
                     } else {
-                        log.info("{} is not a usable Identity Server", baseUrl);
-                        return Optional.empty();
+                        log.warn("We request SRV type records but we got type #{} instead!", record.getType());
                     }
+                }
+                srvRecords.sort(Comparator.comparingInt(SRVRecord::getPriority));
+
+                for (SRVRecord srvRecord : srvRecords) {
+                    String baseUrl = "https://" + srvRecord.getTarget().toString(true) + ":" + srvRecord.getPort();
+                    log.info("Found Identity Server for domain {} at {}", domainOrUrl, baseUrl);
+                    return Optional.of(baseUrl);
                 }
             } else {
                 log.info("No SRV record for {}", lookupDns);
