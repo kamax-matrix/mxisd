@@ -5,10 +5,14 @@
   - [3PID scope](#3pid-scope)
   - [Session scope](#session-scope)
 - [Notifications](#notifications)
+  - [Email](#email)
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Scenarios](#scenarios)
-  - [Recommendations](#recommendations)
+    - [Default](#default)
+    - [Local sessions only](#local-sessions-only)
+    - [Remote sessions only](#remote-sessions-only)
+    - [Sessions disabled](#sessions-disabled)
 
 ## Overview
 When adding an email, a phone number or any other kind of 3PID (Third-Party Identifier), 
@@ -91,7 +95,7 @@ mxisd use two components for this:
 
 Built-in generators and connectors for supported 3PID types:
 
-**Email**  
+### Email
 Generators:
 - Template
 
@@ -204,11 +208,11 @@ If both `toLocal` and `toRemote` are enabled, the user will be offered to initia
 locally validated.
 
 ### Scenarios
-It is important to keep in mind that mxisd does not create bindings, irrelevant if a user added a 3PID to their profile.
+It is important to keep in mind that mxisd does not create bindings, irrelevant if a user added a 3PID to their profile.  
 Instead, when queried for bindings, mxisd will query Identity backends which are responsible to store this kind of information.
 
 This has the side effect that any 3PID added to a user profile which is NOT within a configured and enabled Identity backend
-will simply not be usable for search or invites, **even on the same Homeserver!**
+will simply not be usable for search or invites, **even on the same Homeserver!**  
 mxisd does not store binds on purpose, as one of its primary goal is to ensure maximum compatibility with federation
 and the rest of the Matrix ecosystem is preserved.
 
@@ -216,7 +220,7 @@ Nonetheless, because mxisd also aims at offering support for tight control over 
 such 3PID bindings available for search and invite queries on the local Homeserver by using the `SQL` backend and
 configuring it to use the synapse database. Support for `SQLite` and `PostgreSQL` is available.
 
-See the *Local only* use case for more information on how to configure.
+See the [Local sessions only](#local-sessions-only) use case for more information on how to configure.
 
 #### Default
 By default, mxisd allows the following:
@@ -226,7 +230,7 @@ By default, mxisd allows the following:
 | **Local 3PID** | Yes | Yes, offered |
 | **Remote 3PID** | No, Remote forced | Yes |
 
-This is usually what people typically expect and will feel natural to users and does not involve further integration.
+This is usually what people expect and will feel natural to users and does not involve further integration.
 
 This allows to stay in control for e-mail addresses which domain matches your Matrix environment, still making them
 discoverable with federation but not recorded in a 3rd party Identity server which is not under your control.  
