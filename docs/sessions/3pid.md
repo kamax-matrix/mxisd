@@ -325,3 +325,11 @@ at user login and prevent any further add.
 - This prevents users from initiating remote session to make their 3PID binds globally visible
 
 It is therefore recommended to not fully disable sessions but instead restrict specific set of 3PID and Session scopes.
+
+Use the following values to enable this mode:
+```
+session:
+  policy:
+    validation:
+      enabled: false
+```
