@@ -15,6 +15,12 @@ logging:
 server:
   port: 8090
 
+matrix:
+  identity:
+    servers:
+      root:
+        - 'https://matrix.org'
+
 lookup:
   recursive:
     enabled: true
@@ -55,19 +61,77 @@ firebase:
   enabled: false
 
 sql:
+  enabled: false
   type: 'sqlite'
+  connection: ''
+  auth:
+    enabled: false
+  identity:
+    type: 'mxid'
+    query: "SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?"
 
 forward:
   servers:
     - "https://matrix.org"
     - "https://vector.im"
 
-invite:
-  sender:
+threepid:
+  medium:
     email:
-      tls: 1
-      name: "mxisd Identity Server"
-      template: "classpath:email/invite-template.eml"
+      identity:
+        from: ''
+        name: ''
+      connector: 'smtp'
+      generator: 'template'
+      connectors:
+        smtp:
+          host: ''
+          port: 587
+          tls: 1
+          login: ''
+          password: ''
+      generators:
+        template:
+          invite: 'classpath:email/invite-template.eml'
+          session:
+            validation:
+              local: 'classpath:email/validate-local-template.eml'
+              remote: 'classpath:email/validate-remote-template.eml'
+
+session:
+  policy:
+    validation:
+      enabled: true
+      forLocal:
+        enabled: true
+        toLocal: true
+        toRemote:
+          enabled: true
+          server: 'root'
+      forRemote:
+        enabled: true
+        toLocal: false
+        toRemote:
+          enabled: true
+          server: 'root'
+
+view:
+  session:
+    local:
+      onTokenSubmit:
+        success: 'session/local/tokenSubmitSuccess'
+        failure: 'session/local/tokenSubmitFailure'
+    localRemote:
+      onTokenSubmit:
+        success: 'session/localRemote/tokenSubmitSuccess'
+        failure: 'session/local/tokenSubmitFailure'
+    remote:
+      onRequest:
+        success: 'session/remote/requestSuccess'
+        failure: 'session/remote/requestFailure'
+      onCheck:
+        success: 'session/remote/checkSuccess'
+        failure: 'session/remote/checkFailure'
 
 storage:
   backend: 'sqlite'

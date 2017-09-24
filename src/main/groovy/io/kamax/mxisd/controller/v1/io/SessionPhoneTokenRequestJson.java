@@ -31,12 +31,10 @@ public class SessionPhoneTokenRequestJson extends GenericTokenRequestJson {
     private String country;
     private String phone_number;
 
-    @Override
     public String getMedium() {
         return "msisdn";
     }
 
-    @Override
     public String getValue() {
         try {
             Phonenumber.PhoneNumber num = phoneUtil.parse(phone_number, country);

@@ -24,5 +24,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED)
-class NotImplementedException extends RuntimeException {
+public class NotImplementedException extends RuntimeException {
+
+    public NotImplementedException(String s) {
+        super(s);
+    }
+
 }

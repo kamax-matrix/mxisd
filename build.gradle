@@ -79,6 +79,9 @@ dependencies {
     // Spring Boot - standalone app
     compile 'org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE'
 
+    // Thymeleaf for HTML templates
+    compile "org.springframework.boot:spring-boot-starter-thymeleaf:1.5.3.RELEASE"
+
     // Matrix Java SDK
     compile 'io.kamax:matrix-java-sdk:0.0.2'
 

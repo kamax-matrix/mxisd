@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.config;
 
+import com.google.gson.Gson;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -28,14 +29,38 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 @ConfigurationProperties("matrix")
 public class MatrixConfig {
 
+    public static class Identity {
+        private Map<String, List<String>> servers = new HashMap<>();
+
+        public Map<String, List<String>> getServers() {
+            return servers;
+        }
+
+        public void setServers(Map<String, List<String>> servers) {
+            this.servers = servers;
+        }
+
+        public List<String> getServers(String label) {
+            if (!servers.containsKey(label)) {
+                throw new RuntimeException("No Identity server list with label '" + label + "'");
+            }
+
+            return servers.get(label);
+        }
+    }
+
     private Logger log = LoggerFactory.getLogger(MatrixConfig.class);
 
     private String domain;
+    private Identity identity = new Identity();
 
     public String getDomain() {
         return domain;
@@ -43,6 +68,14 @@ public class MatrixConfig {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public Identity getIdentity() {
+        return identity;
+    }
+
+    public void setIdentity(Identity identity) {
+        this.identity = identity;
     }
 
     @PostConstruct
@@ -54,6 +87,8 @@ public class MatrixConfig {
         }
 
         log.info("Domain: {}", getDomain());
+        log.info("Identity:");
+        log.info("\tServers: {}", new Gson().toJson(identity.getServers()));
     }
 
 }

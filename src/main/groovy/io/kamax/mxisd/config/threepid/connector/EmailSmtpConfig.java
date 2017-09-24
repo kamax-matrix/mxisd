@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.invite.sender;
+package io.kamax.mxisd.config.threepid.connector;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -27,22 +27,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 
 @Configuration
-@ConfigurationProperties(prefix = "invite.sender.email")
-public class EmailSenderConfig {
+@ConfigurationProperties(prefix = "threepid.medium.email.connectors.smtp")
+public class EmailSmtpConfig {
 
-    private Logger log = LoggerFactory.getLogger(EmailSenderConfig.class);
+    private Logger log = LoggerFactory.getLogger(EmailSmtpConfig.class);
 
     private String host;
     private int port;
     private int tls;
     private String login;
     private String password;
-    private String email;
-    private String name;
-    private String template;
 
     public String getHost() {
         return host;
@@ -84,52 +80,14 @@ public class EmailSenderConfig {
         this.password = password;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(String template) {
-        this.template = template;
-    }
-
     @PostConstruct
-    private void postConstruct() {
-        log.info("--- E-mail Invite Sender config ---");
+    public void build() {
+        log.info("--- E-mail SMTP Connector config ---");
         log.info("Host: {}", getHost());
         log.info("Port: {}", getPort());
         log.info("TLS Mode: {}", getTls());
         log.info("Login: {}", getLogin());
-        log.info("Has password: {}", !StringUtils.isBlank(getPassword()));
-        log.info("E-mail: {}", getEmail());
-        if (!StringUtils.startsWith(getTemplate(), "classpath:")) {
-            if (StringUtils.isBlank(getTemplate())) {
-                log.warn("invite.sender.template is empty! Will not send invites");
-            } else {
-                File cp = new File(getTemplate()).getAbsoluteFile();
-                log.info("Template: {}", cp.getAbsolutePath());
-                if (!cp.exists() || !cp.isFile() || !cp.canRead()) {
-                    log.warn(getTemplate() + " does not exist, is not a file or cannot be read");
-                }
-            }
-        } else {
-            log.info("Template: Built-in");
-        }
+        log.info("Has password: {}", StringUtils.isNotBlank(getPassword()));
     }
 
 }

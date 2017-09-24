@@ -20,13 +20,11 @@
 
 package io.kamax.mxisd.controller.v1.io;
 
-import io.kamax.mxisd.mapping.MappingSession;
-
-public abstract class GenericTokenRequestJson implements MappingSession {
+public abstract class GenericTokenRequestJson {
 
     private String client_secret;
     private int send_attempt;
-    private String id_server;
+    private String next_link;
 
     public String getSecret() {
         return client_secret;
@@ -36,8 +34,8 @@ public abstract class GenericTokenRequestJson implements MappingSession {
         return send_attempt;
     }
 
-    public String getServer() {
-        return id_server;
+    public String getNextLink() {
+        return next_link;
     }
 
 }

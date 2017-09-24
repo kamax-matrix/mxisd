@@ -18,18 +18,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.mapping;
+package io.kamax.mxisd.controller.v1.remote;
 
-public interface MappingSession {
+public class RemoteIdentityAPIv1 {
 
-    String getServer();
+    public static final String BASE = "/_matrix/identity/remote/api/v1";
+    public static final String SESSION_REQUEST_TOKEN = BASE + "/validate/requestToken";
+    public static final String SESSION_CHECK = BASE + "/validate/check";
 
-    String getSecret();
+    public static String getRequestToken(String id, String secret) {
+        return SESSION_REQUEST_TOKEN + "?sid=" + id + "&client_secret=" + secret;
+    }
 
-    int getAttempt();
-
-    String getMedium();
-
-    String getValue();
+    public static String getSessionCheck(String id, String secret) {
+        return SESSION_CHECK + "?sid=" + id + "&client_secret=" + secret;
+    }
 
 }

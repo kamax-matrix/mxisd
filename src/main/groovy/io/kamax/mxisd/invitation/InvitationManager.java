@@ -26,10 +26,10 @@ import io.kamax.mxisd.config.DnsOverwrite;
 import io.kamax.mxisd.config.DnsOverwriteEntry;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
-import io.kamax.mxisd.invitation.sender.IInviteSender;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
+import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.signature.SignatureManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.ormlite.ThreePidInviteIO;
@@ -83,14 +83,15 @@ public class InvitationManager {
     @Autowired
     private DnsOverwrite dns;
 
-    private Map<String, IInviteSender> senders;
+    private NotificationManager notifMgr;
 
     private CloseableHttpClient client;
     private Gson gson;
     private Timer refreshTimer;
 
-    private String getId(IThreePidInvite invite) {
-        return invite.getSender().getDomain().toLowerCase() + invite.getMedium().toLowerCase() + invite.getAddress().toLowerCase();
+    @Autowired
+    public InvitationManager(NotificationManager notifMgr) {
+        this.notifMgr = notifMgr;
     }
 
     @PostConstruct
@@ -140,7 +141,12 @@ public class InvitationManager {
 
     @PreDestroy
     private void preDestroy() {
+        refreshTimer.cancel();
         ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.MINUTES);
+    }
+
+    private String getId(IThreePidInvite invite) {
+        return invite.getSender().getDomain().toLowerCase() + invite.getMedium().toLowerCase() + invite.getAddress().toLowerCase();
     }
 
     private String getIdForLog(IThreePidInviteReply reply) {
@@ -193,21 +199,14 @@ public class InvitationManager {
         return "https://" + domain + ":8448";
     }
 
-    @Autowired
-    public InvitationManager(List<IInviteSender> senderList) {
-        senders = new HashMap<>();
-        senderList.forEach(sender -> senders.put(sender.getMedium(), sender));
-    }
-
     public synchronized IThreePidInviteReply storeInvite(IThreePidInvite invitation) { // TODO better sync
-        IInviteSender sender = senders.get(invitation.getMedium());
-        if (sender == null) {
+        if (!notifMgr.isMediumSupported(invitation.getMedium())) {
             throw new BadRequestException("Medium type " + invitation.getMedium() + " is not supported");
         }
 
         String invId = getId(invitation);
         log.info("Handling invite for {}:{} from {} in room {}", invitation.getMedium(), invitation.getAddress(), invitation.getSender(), invitation.getRoomId());
-        if (invitations.containsKey(invId)) { // FIXME we need to lookup using the HS domain too!!
+        if (invitations.containsKey(invId)) {
             log.info("Invite is already pending for {}:{}, returning data", invitation.getMedium(), invitation.getAddress());
             return invitations.get(invId);
         }
@@ -224,7 +223,7 @@ public class InvitationManager {
         IThreePidInviteReply reply = new ThreePidInviteReply(invId, invitation, token, displayName);
 
         log.info("Performing invite to {}:{}", invitation.getMedium(), invitation.getAddress());
-        sender.send(reply);
+        notifMgr.sendForInvite(reply);
 
         log.info("Storing invite under ID {}", invId);
         storage.insertInvite(reply);

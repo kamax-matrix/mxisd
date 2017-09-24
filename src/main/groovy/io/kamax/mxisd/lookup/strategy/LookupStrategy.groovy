@@ -32,6 +32,10 @@ interface LookupStrategy {
 
     Optional<SingleLookupReply> find(String medium, String address, boolean recursive)
 
+    Optional<SingleLookupReply> findLocal(String medium, String address);
+
+    Optional<SingleLookupReply> findRemote(String medium, String address);
+
     Optional<SingleLookupReply> find(SingleLookupRequest request)
 
     Optional<SingleLookupReply> findRecursive(SingleLookupRequest request)

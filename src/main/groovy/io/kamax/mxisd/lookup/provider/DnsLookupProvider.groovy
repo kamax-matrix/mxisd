@@ -25,14 +25,12 @@ import io.kamax.mxisd.lookup.SingleLookupReply
 import io.kamax.mxisd.lookup.SingleLookupRequest
 import io.kamax.mxisd.lookup.ThreePidMapping
 import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher
+import io.kamax.mxisd.matrix.IdentityServerUtils
 import org.apache.commons.lang.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.xbill.DNS.Lookup
-import org.xbill.DNS.SRVRecord
-import org.xbill.DNS.Type
 
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.RecursiveTask
@@ -64,10 +62,6 @@ class DnsLookupProvider implements IThreePidProvider {
         return 10
     }
 
-    String getSrvRecordName(String domain) {
-        return "_matrix-identity._tcp." + domain
-    }
-
     Optional<String> getDomain(String email) {
         int atIndex = email.lastIndexOf("@")
         if (atIndex == -1) {
@@ -84,44 +78,7 @@ class DnsLookupProvider implements IThreePidProvider {
             return Optional.empty()
         }
 
-        log.info("Performing SRV lookup")
-        String lookupDns = getSrvRecordName(domain)
-        log.info("Lookup name: {}", lookupDns)
-
-        SRVRecord[] records = (SRVRecord[]) new Lookup(lookupDns, Type.SRV).run()
-        if (records != null) {
-            Arrays.sort(records, new Comparator<SRVRecord>() {
-
-                @Override
-                int compare(SRVRecord o1, SRVRecord o2) {
-                    return Integer.compare(o1.getPriority(), o2.getPriority())
-                }
-
-            })
-
-            for (SRVRecord record : records) {
-                log.info("Found SRV record: {}", record.toString())
-                String baseUrl = "https://${record.getTarget().toString(true)}:${record.getPort()}"
-                if (fetcher.isUsable(baseUrl)) {
-                    log.info("Found Identity Server for domain {} at {}", domain, baseUrl)
-                    return Optional.of(baseUrl)
-                } else {
-                    log.info("{} is not a usable Identity Server", baseUrl)
-                }
-            }
-        } else {
-            log.info("No SRV record for {}", lookupDns)
-        }
-
-        log.info("Performing basic lookup using domain name {}", domain)
-        String baseUrl = "https://" + domain
-        if (fetcher.isUsable(baseUrl)) {
-            log.info("Found Identity Server for domain {} at {}", domain, baseUrl)
-            return Optional.of(baseUrl)
-        } else {
-            log.info("{} is not a usable Identity Server", baseUrl)
-            return Optional.empty()
-        }
+        return IdentityServerUtils.findIsUrlForDomain(domain)
     }
 
     @Override

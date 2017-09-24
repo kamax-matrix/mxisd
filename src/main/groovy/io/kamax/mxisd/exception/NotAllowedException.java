@@ -18,14 +18,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.invitation.sender;
+package io.kamax.mxisd.exception;
 
-import io.kamax.mxisd.invitation.IThreePidInviteReply;
 
-public interface IInviteSender {
+import org.apache.http.HttpStatus;
 
-    String getMedium();
+public class NotAllowedException extends MatrixException {
 
-    void send(IThreePidInviteReply invite);
+    public NotAllowedException(String s) {
+        super(HttpStatus.SC_FORBIDDEN, "M_FORBIDDEN", s);
+    }
 
 }
