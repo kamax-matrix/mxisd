@@ -81,7 +81,7 @@ class MappingController {
         Optional<SingleLookupReply> lookupOpt = strategy.find(lookupRequest)
         if (!lookupOpt.isPresent()) {
             log.info("No mapping was found, return empty JSON object")
-            return JsonOutput.toJson([])
+            return "{}"
         }
 
         SingleLookupReply lookup = lookupOpt.get()
