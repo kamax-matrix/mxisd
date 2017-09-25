@@ -24,7 +24,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-class MatrixIdentityServerApplication {
+public class MatrixIdentityServerApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MatrixIdentityServerApplication.class, args);
