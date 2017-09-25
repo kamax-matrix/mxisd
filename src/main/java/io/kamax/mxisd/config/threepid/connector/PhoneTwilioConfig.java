@@ -20,8 +20,6 @@
 
 package io.kamax.mxisd.config.threepid.connector;
 
-import io.kamax.mxisd.exception.ConfigurationException;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -68,19 +66,6 @@ public class PhoneTwilioConfig {
     @PostConstruct
     public void build() {
         log.info("--- Phone SMS Twilio connector config ---");
-
-        if (StringUtils.isBlank(getAccountSid())) {
-            throw new ConfigurationException(NAMESPACE + ".accountSid");
-        }
-
-        if (StringUtils.isBlank(getAuthToken())) {
-            throw new ConfigurationException(NAMESPACE + ".authToken");
-        }
-
-        if (StringUtils.isBlank(getNumber())) {
-            throw new ConfigurationException(NAMESPACE + ".number");
-        }
-
         log.info("Account SID: {}", getAccountSid());
         log.info("Sender number: {}", getNumber());
     }
