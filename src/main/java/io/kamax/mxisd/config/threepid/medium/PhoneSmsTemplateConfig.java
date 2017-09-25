@@ -28,14 +28,14 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 
 @Configuration
-@ConfigurationProperties("threepid.medium.email.generators.template")
-public class EmailTemplateConfig extends GenericTemplateConfig {
+@ConfigurationProperties("threepid.medium.msisdn.generators.template")
+public class PhoneSmsTemplateConfig extends GenericTemplateConfig {
 
     private static Logger log = LoggerFactory.getLogger(EmailTemplateConfig.class);
 
     @PostConstruct
     public void build() {
-        log.info("--- E-mail Generator templates config ---");
+        log.info("--- SMS Generator templates config ---");
         log.info("Invite: {}", getName(getInvite()));
         log.info("Session validation:");
         log.info("\tLocal: {}", getName(getSession().getValidation().getLocal()));

@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
 @Controller
 @RequestMapping(path = IdentityAPIv1.BASE)
 class SessionController {
@@ -52,9 +54,8 @@ class SessionController {
 
     @Autowired
     private ViewConfig viewCfg;
-    ;
 
-    @RequestMapping(value = "/validate/{medium}/submitToken")
+    @RequestMapping(value = "/validate/{medium}/submitToken", method = GET)
     public String validate(
             HttpServletRequest request,
             HttpServletResponse response,

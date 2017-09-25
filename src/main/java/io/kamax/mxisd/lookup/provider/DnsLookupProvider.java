@@ -83,7 +83,7 @@ class DnsLookupProvider implements IThreePidProvider {
 
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
-        if (!StringUtils.equals("email", request.getType())) { // TODO use enum
+        if (!StringUtils.equals("threepids/email", request.getType())) { // TODO use enum
             log.info("Skipping unsupported type {} for {}", request.getType(), request.getThreePid());
             return Optional.empty();
         }
@@ -106,7 +106,7 @@ class DnsLookupProvider implements IThreePidProvider {
         Map<String, List<ThreePidMapping>> domains = new HashMap<>();
 
         for (ThreePidMapping mapping : mappings) {
-            if (!StringUtils.equals("email", mapping.getMedium())) {
+            if (!StringUtils.equals("threepids/email", mapping.getMedium())) {
                 log.info("Skipping unsupported type {} for {}", mapping.getMedium(), mapping.getValue());
                 continue;
             }

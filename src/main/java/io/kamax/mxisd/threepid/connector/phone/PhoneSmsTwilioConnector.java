@@ -18,38 +18,42 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.notification.email;
+package io.kamax.mxisd.threepid.connector.phone;
 
-import io.kamax.mxisd.ThreePid;
-import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.config.threepid.medium.EmailConfig;
-import io.kamax.mxisd.config.threepid.medium.EmailTemplateConfig;
-import io.kamax.mxisd.threepid.notification.GenericTemplateNotificationGenerator;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
+import io.kamax.mxisd.config.threepid.connector.PhoneTwilioConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EmailNotificationGenerator extends GenericTemplateNotificationGenerator implements IEmailNotificationGenerator {
+public class PhoneSmsTwilioConnector implements IPhoneConnector {
 
-    private EmailConfig cfg;
+    private Logger log = LoggerFactory.getLogger(PhoneSmsTwilioConnector.class);
+
+    private PhoneTwilioConfig cfg;
 
     @Autowired
-    public EmailNotificationGenerator(EmailTemplateConfig templateCfg, EmailConfig cfg, MatrixConfig mxCfg, ServerConfig srvCfg) {
-        super(mxCfg, srvCfg, templateCfg);
+    public PhoneSmsTwilioConnector(PhoneTwilioConfig cfg) {
         this.cfg = cfg;
+
+        Twilio.init(cfg.getAccountSid(), cfg.getAuthToken());
+        log.info("Twilio API has been initiated");
     }
 
     @Override
     public String getId() {
-        return "template";
+        return "twilio";
     }
 
     @Override
-    protected String populateForCommon(String body, ThreePid recipient) {
-        body = body.replace("%FROM_EMAIL%", cfg.getIdentity().getFrom());
-        body = body.replace("%FROM_NAME%", cfg.getIdentity().getName());
-        return body;
+    public void send(String recipient, String content) {
+        recipient = "+" + recipient;
+        log.info("Sending SMS notification from {} to {} with {} characters", cfg.getNumber(), recipient, content.length());
+        Message.creator(new PhoneNumber("+" + recipient), new PhoneNumber(cfg.getNumber()), content).create();
     }
 
 }

@@ -51,6 +51,7 @@ public class DefaultExceptionHandler {
         JsonObject obj = new JsonObject();
         obj.addProperty("errcode", erroCode);
         obj.addProperty("error", error);
+        obj.addProperty("success", false);
         return gson.toJson(obj);
     }
 

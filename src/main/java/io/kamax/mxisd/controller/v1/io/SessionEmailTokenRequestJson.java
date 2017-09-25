@@ -25,7 +25,7 @@ public class SessionEmailTokenRequestJson extends GenericTokenRequestJson {
     private String email;
 
     public String getMedium() {
-        return "email";
+        return "threepids/email";
     }
 
     public String getValue() {

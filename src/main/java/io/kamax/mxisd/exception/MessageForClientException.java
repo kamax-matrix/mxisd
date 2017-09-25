@@ -18,30 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd;
+package io.kamax.mxisd.exception;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
 
-// FIXME consider integrating in matrix-java-sdk?
-public enum UserIdType {
+public class MessageForClientException extends MatrixException {
 
-    Localpart("localpart"),
-    MatrixID("mxid"),
-    EmailLocalpart("email_localpart"),
-    Email("threepids/email");
-
-    private String id;
-
-    UserIdType(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public boolean is(String id) {
-        return StringUtils.equalsIgnoreCase(this.id, id);
+    public MessageForClientException(String error) {
+        super(HttpStatus.SC_OK, "M_MESSAGE_FOR_CLIENT", error);
     }
 
 }

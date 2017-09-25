@@ -21,6 +21,9 @@
 package io.kamax.mxisd.session;
 
 import com.google.gson.JsonObject;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
@@ -72,6 +75,9 @@ public class SessionMananger {
     private MatrixConfig mxCfg;
     private IStorage storage;
     private NotificationManager notifMgr;
+
+    private GsonParser parser = new GsonParser();
+    private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance(); // FIXME refactor for sessions handling their own stuff
 
     // FIXME export into central class, set version
     private CloseableHttpClient client = HttpClients.custom().setUserAgent("mxisd").build();
@@ -180,9 +186,21 @@ public class SessionMananger {
             throw new NotAllowedException("Validating " + (isLocal ? "local" : "remote") + " 3PID is not allowed");
         }
 
+        if (ThreePidMedium.PhoneNumber.is(session.getThreePid().getMedium()) && session.isValidated() && session.isRemote()) {
+            submitRemote(session, token);
+            session.validateRemote();
+            return new ValidationResult(session, false);
+        }
+
         session.validate(token);
         storage.updateThreePidSession(session.getDao());
-        log.info("Session {} has been validated", session.getId());
+        log.info("Session {} has been validated locally", session.getId());
+
+        if (ThreePidMedium.PhoneNumber.is(session.getThreePid().getMedium()) && session.isValidated()) {
+            createRemote(sid, secret);
+            // FIXME make the message configurable/customizable (templates?)
+            throw new MessageForClientException("You will receive a NEW code from another number. Enter it below");
+        }
 
         // FIXME definitely doable in a nicer way
         ValidationResult r = new ValidationResult(session, policy.toRemote());
@@ -265,13 +283,22 @@ public class SessionMananger {
         body.addProperty("client_secret", remoteSecret);
         body.addProperty(session.getThreePid().getMedium(), session.getThreePid().getAddress());
         body.addProperty("send_attempt", session.increaseAndGetRemoteAttempt());
+        try {
+            Phonenumber.PhoneNumber msisdn = phoneUtil.parse("+" + session.getThreePid().getAddress(), null);
+            String country = phoneUtil.getRegionCodeForNumber(msisdn).toUpperCase();
+            body.addProperty("phone_number", phoneUtil.format(msisdn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL));
+            body.addProperty("country", country);
+        } catch (NumberParseException e) {
+            throw new InternalServerError(e);
+        }
 
         log.info("Requesting remote session with attempt {}", session.getRemoteAttempt());
         HttpPost tokenReq = RestClientUtils.post(url + "/_matrix/identity/api/v1/validate/" + session.getThreePid().getMedium() + "/requestToken", body);
         try (CloseableHttpResponse response = client.execute(tokenReq)) {
             int status = response.getStatusLine().getStatusCode();
             if (status < 200 || status >= 300) {
-                throw new RemoteIdentityServerException("Remote identity server returned with status " + status);
+                JsonObject obj = parser.parseOptional(response).orElseThrow(() -> new RemoteIdentityServerException("Status " + status));
+                throw new RemoteIdentityServerException(obj.get("errcode").getAsString() + ": " + obj.get("error").getAsString());
             }
 
             RequestTokenResponse data = new GsonParser().parse(response, RequestTokenResponse.class);
@@ -284,6 +311,29 @@ public class SessionMananger {
             return session;
         } catch (IOException e) {
             log.warn("Failed to create remote session with {} for {}: {}", url, session.getThreePid(), e.getMessage());
+            throw new RemoteIdentityServerException(e.getMessage());
+        }
+    }
+
+    private void submitRemote(ThreePidSession session, String token) {
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(
+                Arrays.asList(
+                        new BasicNameValuePair("sid", session.getRemoteId()),
+                        new BasicNameValuePair("client_secret", session.getRemoteSecret()),
+                        new BasicNameValuePair("token", token)
+                ), StandardCharsets.UTF_8);
+        HttpPost submitReq = new HttpPost(session.getRemoteServer() + "/_matrix/identity/api/v1/submitToken");
+        submitReq.setEntity(entity);
+
+        try (CloseableHttpResponse response = client.execute(submitReq)) {
+            JsonObject o = new GsonParser().parse(response.getEntity().getContent());
+            if (!o.has("success") || !o.get("success").getAsBoolean()) {
+                String errcode = o.get("errcode").getAsString();
+                throw new RemoteIdentityServerException(errcode + ": " + o.get("error").getAsString());
+            }
+
+            log.info("Successfully submitted validation token for {} to {}", session.getThreePid(), session.getRemoteServer());
+        } catch (IOException e) {
             throw new RemoteIdentityServerException(e.getMessage());
         }
     }
