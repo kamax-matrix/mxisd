@@ -171,10 +171,8 @@ systemctl start mxisd
 After following the specific instructions to create a config file from the sample:
 1. Set the `matrix.domain` value to the domain value used in your Home Server configuration
 2. Set an absolute location for the signing keys using `key.path`
-3. Configure the E-mail notification sender with items starting with:
-  - `threepid.medium.email.identity`
-  - `threepid.medium.email.connectors.smtp`
-4. If you would like to support Phone number validation, see the [Twilio configuration](docs/threepids/msisdn/twilio-connector.md)
+3. Configure the E-mail notification sender following [the documentation](docs/threepids/medium/email/smtp-connector.md)
+4. If you would like to support Phone number validation, see the [Twilio configuration](docs/threepids/medium/msisdn/twilio-connector.md)
 
 In case your IS public domain does not match your Matrix domain, see `server.name` and `server.publicUrl` 
 config items.
