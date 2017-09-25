@@ -1,5 +1,7 @@
 # Email notifications - SMTP connector
-The following configuration items are available:
+Connector ID: `smtp`
+
+Example configuration:
 ```
 threepid:
   medium:
