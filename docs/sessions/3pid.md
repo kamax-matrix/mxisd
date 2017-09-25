@@ -6,6 +6,7 @@
   - [Session scope](#session-scope)
 - [Notifications](#notifications)
   - [Email](#email)
+  - [Phone numbers](#msisdn-phone-numbers)
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Web views](#web-views)
