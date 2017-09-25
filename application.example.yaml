@@ -301,18 +301,19 @@ key.path: '/path/to/sign.key'
 
 
 
-#############################
-# 3PID invites config items #
-#############################
+###################################
+# 3PID notifications config items #
+###################################
+# If you would like to change the content, see https://github.com/kamax-io/mxisd/blob/master/docs/threepids/notifications/template-generator.md
 #
 #### E-mail invite sender
 #
 # SMTP host
-invite.sender.email.host: "smtp.example.org"
+threepid.medium.email.connectors.smtp.host: "smtp.example.org"
 
 
 # SMTP port
-invite.sender.email.port: 587
+threepid.medium.email.connectors.smtp.port: 587
 
 
 # TLS mode for the connection.
@@ -322,51 +323,19 @@ invite.sender.email.port: 587
 #  1    Enable TLS if supported by server
 #  2    Force TLS and fail if not available
 #
-#invite.sender.email.tls: 1
+#threepid.medium.email.connectors.smtp.tls: 1
 
 
 # Login for SMTP
-invite.sender.email.login: "matrix-identity@example.org"
+threepid.medium.email.connectors.smtp.login: "matrix-identity@example.org"
 
 
 # Password for the account
-invite.sender.email.password: "ThePassword"
+threepid.medium.email.connectors.smtp.password: "ThePassword"
 
 
 # The e-mail to send as. If empty, will be the same as login
-invite.sender.email.email: "matrix-identity@example.org"
-
-
-# The display name used in the e-mail
-#
-#invite.sender.email.name: "mxisd Identity Server"
-
-
-# The E-mail template to use, using built-in template by default
-#
-# The template is expected to be a full e-mail body, including client headers, using MIME and UTF-8 encoding.
-# The following headers will be set by mxisd directly and should not be present in the template:
-# - From
-# - To
-# - Date
-# - Message-Id
-# - X-Mailer
-#
-# The following placeholders are available:
-# - %DOMAIN%                Domain name as per server.name config item
-# - %DOMAIN_PRETTY%         Word capitalize version of the domain. e.g. example.org -> Example.org
-# - %FROM_EMAIL%            Value of this section's email config item
-# - %FROM_NAME%             Value of this section's name config item
-# - %SENDER_ID%             Matrix ID of the invitation sender
-# - %SENDER_NAME%           Display name of the invitation sender, empty if not available
-# - %SENDER_NAME_OR_ID%     Value of %SENDER_NAME% or, if empty, value of %SENDER_ID%
-# - %INVITE_MEDIUM%         Medium of the invite (e.g. email, msisdn)
-# - %INVITE_ADDRESS%        Address used to invite
-# - %ROOM_ID%               ID of the room where the invitation took place
-# - %ROOM_NAME%             Name of the room, empty if not available
-# - %ROOM_NAME_OR_ID%       Value of %ROOM_NAME% or, if empty, value of %ROOM_ID%
-#
-#invite.sender.email.template: "/absolute/path/to/file"
+threepid.medium.email.identity.from: "matrix-identity@example.org"
 
 
 
