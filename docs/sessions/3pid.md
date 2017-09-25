@@ -99,17 +99,17 @@ Built-in generators and connectors for supported 3PID types:
 
 ### Email
 Generators:
-- [Template](https://github.com/kamax-io/mxisd/blob/master/docs/threepids/notifications/template-generator.md)
+- [Template](../threepids/notifications/template-generator.md)
 
 Connectors:
-- [SMTP](https://github.com/kamax-io/mxisd/blob/master/docs/threepids/medium/email/smtp-connector.md)
+- [SMTP](../threepids/medium/email/smtp-connector.md)
 
 #### MSISDN (Phone numbers)
 Generators:
-- [Template](https://github.com/kamax-io/mxisd/blob/master/docs/threepids/notifications/template-generator.md)
+- [Template](../threepids/notifications/template-generator.md)
 
 Connectors:
- - [Twilio](https://github.com/kamax-io/mxisd/blob/master/docs/threepids/medium/msisdn/twilio-connector.md) with SMS
+ - [Twilio](../threepids/medium/msisdn/twilio-connector.md) with SMS
 
 ## Usage
 ### Configuration
@@ -207,7 +207,7 @@ Once a user click on a validation link, it is taken to the Identity Server valid
 If the session or token is invalid, an error page is displayed.  
 Workflow pages are also available for the remote 3PID session process.
 
-See [the dedicated document](https://github.com/kamax-io/mxisd/tree/master/docs/sessions/3pid-views.md)
+See [the dedicated document](3pid-views.md)
 on how to configure/customize/brand those pages to your liking.
 
 ### Scenarios
