@@ -25,7 +25,7 @@ import org.apache.http.HttpStatus;
 public class RemoteIdentityServerException extends MatrixException {
 
     public RemoteIdentityServerException(String error) {
-        super(HttpStatus.SC_SERVICE_UNAVAILABLE, "M_REMOTE_IS_ERROR", error);
+        super(HttpStatus.SC_SERVICE_UNAVAILABLE, "M_REMOTE_IS_ERROR", "Error from remote server: " + error);
     }
 
 }

@@ -18,30 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd;
+package io.kamax.mxisd.threepid.connector.phone;
 
-import org.apache.commons.lang.StringUtils;
+import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.threepid.connector.IThreePidConnector;
 
-// FIXME consider integrating in matrix-java-sdk?
-public enum UserIdType {
+public interface IPhoneConnector extends IThreePidConnector {
 
-    Localpart("localpart"),
-    MatrixID("mxid"),
-    EmailLocalpart("email_localpart"),
-    Email("threepids/email");
-
-    private String id;
-
-    UserIdType(String id) {
-        this.id = id;
+    @Override
+    default String getMedium() {
+        return ThreePidMedium.PhoneNumber.getId();
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public boolean is(String id) {
-        return StringUtils.equalsIgnoreCase(this.id, id);
-    }
+    void send(String recipient, String content);
 
 }

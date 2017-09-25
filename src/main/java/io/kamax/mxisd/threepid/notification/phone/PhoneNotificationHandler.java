@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.notification.email;
+package io.kamax.mxisd.threepid.notification.phone;
 
 import io.kamax.matrix.ThreePidMedium;
-import io.kamax.mxisd.config.threepid.medium.EmailConfig;
-import io.kamax.mxisd.threepid.connector.email.IEmailConnector;
+import io.kamax.mxisd.config.threepid.medium.PhoneConfig;
+import io.kamax.mxisd.threepid.connector.phone.IPhoneConnector;
 import io.kamax.mxisd.threepid.notification.GenericNotificationHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,19 +30,19 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class EmailNotificationHandler extends GenericNotificationHandler<IEmailConnector, IEmailNotificationGenerator> {
+public class PhoneNotificationHandler extends GenericNotificationHandler<IPhoneConnector, IPhoneNotificationGenerator> {
 
-    private EmailConfig cfg;
+    private PhoneConfig cfg;
 
     @Autowired
-    public EmailNotificationHandler(EmailConfig cfg, List<IEmailNotificationGenerator> generators, List<IEmailConnector> connectors) {
+    public PhoneNotificationHandler(PhoneConfig cfg, List<IPhoneConnector> connectors, List<IPhoneNotificationGenerator> generators) {
         this.cfg = cfg;
         process(connectors, generators);
     }
 
     @Override
     public String getMedium() {
-        return ThreePidMedium.Email.getId();
+        return ThreePidMedium.PhoneNumber.getId();
     }
 
     @Override
@@ -56,13 +56,8 @@ public class EmailNotificationHandler extends GenericNotificationHandler<IEmailC
     }
 
     @Override
-    protected void send(IEmailConnector connector, String recipient, String content) {
-        connector.send(
-                cfg.getIdentity().getFrom(),
-                cfg.getIdentity().getName(),
-                recipient,
-                content
-        );
+    protected void send(IPhoneConnector connector, String recipient, String content) {
+        connector.send(recipient, content);
     }
 
 }

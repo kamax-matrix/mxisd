@@ -62,6 +62,14 @@ public class GsonParser {
         return gson.fromJson(parse(res.getEntity().getContent()), type);
     }
 
+    public Optional<JsonObject> parseOptional(HttpResponse res) {
+        try {
+            return Optional.of(parse(res.getEntity().getContent()));
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+    }
+
     public JsonObject parse(InputStream stream, String property) throws IOException {
         JsonObject obj = parse(stream);
         if (!obj.has(property)) {

@@ -36,6 +36,8 @@ import javax.annotation.PostConstruct;
 @ConfigurationProperties("threepid.medium.email")
 public class EmailConfig {
 
+    private Logger log = LoggerFactory.getLogger(EmailConfig.class);
+
     public static class Identity {
         private String from;
         private String name;
@@ -60,8 +62,6 @@ public class EmailConfig {
 
     private String generator;
     private String connector;
-
-    private Logger log = LoggerFactory.getLogger(EmailConfig.class);
 
     private MatrixConfig mxCfg;
     private Identity identity = new Identity();

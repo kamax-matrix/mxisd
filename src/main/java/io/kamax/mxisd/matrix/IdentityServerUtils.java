@@ -21,7 +21,7 @@ import java.util.Optional;
 // FIXME placeholder, this must go in matrix-java-sdk for 1.0
 public class IdentityServerUtils {
 
-    public static final String THREEPID_TEST_MEDIUM = "email";
+    public static final String THREEPID_TEST_MEDIUM = "threepids/email";
     public static final String THREEPID_TEST_ADDRESS = "mxisd-email-forever-unknown@forever-invalid.kamax.io";
 
     private static Logger log = LoggerFactory.getLogger(IdentityServerUtils.class);

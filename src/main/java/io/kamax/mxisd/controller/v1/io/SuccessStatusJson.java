@@ -18,30 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd;
+package io.kamax.mxisd.controller.v1.io;
 
-import org.apache.commons.lang.StringUtils;
+public class SuccessStatusJson {
 
-// FIXME consider integrating in matrix-java-sdk?
-public enum UserIdType {
+    private boolean success;
 
-    Localpart("localpart"),
-    MatrixID("mxid"),
-    EmailLocalpart("email_localpart"),
-    Email("threepids/email");
-
-    private String id;
-
-    UserIdType(String id) {
-        this.id = id;
+    public SuccessStatusJson(boolean success) {
+        this.success = success;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public boolean is(String id) {
-        return StringUtils.equalsIgnoreCase(this.id, id);
+    public boolean isSuccess() {
+        return success;
     }
 
 }

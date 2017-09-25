@@ -92,11 +92,26 @@ threepid:
           password: ''
       generators:
         template:
-          invite: 'classpath:email/invite-template.eml'
+          invite: 'classpath:threepids/email/invite-template.eml'
           session:
             validation:
-              local: 'classpath:email/validate-local-template.eml'
-              remote: 'classpath:email/validate-remote-template.eml'
+              local: 'classpath:threepids/email/validate-local-template.eml'
+              remote: 'classpath:threepids/email/validate-remote-template.eml'
+    msisdn:
+      connector: 'twilio'
+      generator: 'template'
+      connectors:
+        twilio:
+          accountSid: ''
+          authToken: ''
+          number: ''
+      generators:
+        template:
+          invite: 'classpath:threepids/sms/invite-template.txt'
+          session:
+            validation:
+              local: 'classpath:threepids/sms/validate-local-template.txt'
+              remote: 'classpath:threepids/sms/validate-remote-template.txt'
 
 session:
   policy:

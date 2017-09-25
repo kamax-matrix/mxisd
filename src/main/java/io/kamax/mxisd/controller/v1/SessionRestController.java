@@ -28,22 +28,27 @@ import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.ViewConfig;
 import io.kamax.mxisd.controller.v1.io.SessionEmailTokenRequestJson;
 import io.kamax.mxisd.controller.v1.io.SessionPhoneTokenRequestJson;
+import io.kamax.mxisd.controller.v1.io.SuccessStatusJson;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.SessionNotValidatedException;
 import io.kamax.mxisd.invitation.InvitationManager;
 import io.kamax.mxisd.lookup.ThreePidValidation;
 import io.kamax.mxisd.session.SessionMananger;
+import io.kamax.mxisd.session.ValidationResult;
 import io.kamax.mxisd.util.GsonParser;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @CrossOrigin
@@ -112,6 +117,23 @@ public class SessionRestController {
         obj.addProperty("error", medium + " is not supported as a 3PID type");
         response.setStatus(HttpStatus.SC_BAD_REQUEST);
         return gson.toJson(obj);
+    }
+
+    @RequestMapping(value = "/validate/{medium}/submitToken", method = POST)
+    public String validate(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestParam String sid,
+            @RequestParam("client_secret") String secret,
+            @RequestParam String token,
+            Model model
+    ) {
+        log.info("Requested: {}", request.getRequestURL());
+
+        ValidationResult r = mgr.validate(sid, secret, token);
+        log.info("Session {} was validated", sid);
+
+        return gson.toJson(new SuccessStatusJson(true));
     }
 
     @RequestMapping(value = "/3pid/getValidated3pid")
