@@ -23,7 +23,7 @@ mxisd only aims to support workflows that do NOT break federation or basic looku
 # Features
 - Single lookup of 3PID (E-mail, phone number, etc.) by the Matrix Client or Homeserver.
 - Bulk lookups when trying to find possible matches within contacts in Android and iOS clients.
-- Bind of 3PID by a Matrix user within a Matrix client.
+- Bind of 3PID by a Matrix user within a Matrix client - See [documentation](docs/sessions/3pid.md)
 - Support of invitation to rooms by e-mail with e-mail notification to invitee.
 - Authentication support in [synapse](https://github.com/matrix-org/synapse) via the [REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth).
 
@@ -126,7 +126,7 @@ curl "http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=
 If you plan on testing the integration with a homeserver, you will need to run an HTTPS reverse proxy in front of it
 as the reference Home Server implementation [synapse](https://github.com/matrix-org/synapse) requires a HTTPS connection
 to an ID server.  
-See the [Integration section](https://github.com/kamax-io/mxisd#integration) for more details.
+See the [Integration section](#integration) for more details.
 
 ## Install
 After [building](#build) the software, run all the following commands as `root` or using `sudo`
