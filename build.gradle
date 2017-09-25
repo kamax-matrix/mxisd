@@ -1,5 +1,3 @@
-import java.util.regex.Pattern
-
 /*
  * mxisd - Matrix Identity Server Daemon
  * Copyright (C) 2017 Maxime Dor
@@ -20,7 +18,9 @@ import java.util.regex.Pattern
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: 'groovy'
+import java.util.regex.Pattern
+
+apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 
 def confFileName = "application.example.yaml"
@@ -70,9 +70,6 @@ repositories {
 }
 
 dependencies {
-    // We are a groovy project
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
-
     // Easy file management
     compile 'commons-io:commons-io:2.5'
 

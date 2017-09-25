@@ -1,0 +1,131 @@
+/*
+ * mxisd - Matrix Identity Server Daemon
+ * Copyright (C) 2017 Maxime Dor
+ *
+ * https://max.kamax.io/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package io.kamax.mxisd.config.ldap;
+
+import com.google.gson.Gson;
+import io.kamax.mxisd.backend.ldap.LdapThreePidProvider;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
+
+@Configuration
+@ConfigurationProperties(prefix = "ldap")
+public class LdapConfig {
+
+    private static Gson gson = new Gson();
+
+    private Logger log = LoggerFactory.getLogger(LdapConfig.class);
+
+    private boolean enabled;
+
+    @Autowired
+    private LdapConnectionConfig conn;
+    private LdapAttributeConfig attribute;
+    private LdapAuthConfig auth;
+    private LdapIdentityConfig identity;
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public LdapConnectionConfig getConn() {
+        return conn;
+    }
+
+    public void setConn(LdapConnectionConfig conn) {
+        this.conn = conn;
+    }
+
+    public LdapAttributeConfig getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(LdapAttributeConfig attribute) {
+        this.attribute = attribute;
+    }
+
+    public LdapAuthConfig getAuth() {
+        return auth;
+    }
+
+    public void setAuth(LdapAuthConfig auth) {
+        this.auth = auth;
+    }
+
+    public LdapIdentityConfig getIdentity() {
+        return identity;
+    }
+
+    public void setIdentity(LdapIdentityConfig identity) {
+        this.identity = identity;
+    }
+
+    @PostConstruct
+    public void build() {
+        log.info("--- LDAP Config ---");
+        log.info("Enabled: {}", isEnabled());
+
+        if (!isEnabled()) {
+            return;
+        }
+
+        if (StringUtils.isBlank(conn.getHost())) {
+            throw new IllegalStateException("LDAP Host must be configured!");
+        }
+
+        if (1 > conn.getPort() || 65535 < conn.getPort()) {
+            throw new IllegalStateException("LDAP port is not valid");
+        }
+
+        if (StringUtils.isBlank(attribute.getUid().getType())) {
+            throw new IllegalStateException("Attribute UID Type cannot be empty");
+        }
+
+
+        if (StringUtils.isBlank(attribute.getUid().getValue())) {
+            throw new IllegalStateException("Attribute UID value cannot be empty");
+        }
+
+        String uidType = attribute.getUid().getType();
+        if (!StringUtils.equals(LdapThreePidProvider.UID, uidType) && !StringUtils.equals(LdapThreePidProvider.MATRIX_ID, uidType)) {
+            throw new IllegalArgumentException("Unsupported LDAP UID type: " + uidType);
+        }
+
+        log.info("Host: {}", conn.getHost());
+        log.info("Port: {}", conn.getPort());
+        log.info("Bind DN: {}", conn.getBindDn());
+        log.info("Base DN: {}", conn.getBaseDn());
+
+        log.info("Attribute: {}", gson.toJson(attribute));
+        log.info("Auth: {}", gson.toJson(auth));
+        log.info("Identity: {}", gson.toJson(identity));
+    }
+
+}
