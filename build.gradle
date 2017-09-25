@@ -47,7 +47,7 @@ String gitVersion() {
     def versionPattern = Pattern.compile("v(\\d+\\.)?(\\d+\\.)?(\\d+)(-.*)?")
     ByteArrayOutputStream out = new ByteArrayOutputStream()
     exec {
-        commandLine = [ 'git', 'describe', '--always', '--dirty' ]
+        commandLine = ['git', 'describe', '--always', '--dirty']
         standardOutput = out
     }
     def v = out.toString().replace(System.lineSeparator(), '')
@@ -157,8 +157,8 @@ task buildDeb(dependsOn: build) {
         }
 
         ant.chmod(
-            file: "${debBuildBinPath}/mxisd.jar",
-            perm: 'a+x'
+                file: "${debBuildBinPath}/mxisd.jar",
+                perm: 'a+x'
         )
 
         copy {
@@ -169,15 +169,15 @@ task buildDeb(dependsOn: build) {
         }
 
         ant.replaceregexp(
-            file: "${debBuildConfPath}/${debConfFileName}",
-            match: "key.path:(.*)",
-            replace: "key.path: '${debDataPath}/signing.key'"
+                file: "${debBuildConfPath}/${debConfFileName}",
+                match: "key.path:(.*)",
+                replace: "key.path: '${debDataPath}/signing.key'"
         )
 
         ant.replaceregexp(
-            file: "${debBuildConfPath}/${debConfFileName}",
-            match: "storage.provider.sqlite.database:(.*)",
-            replace: "storage.provider.sqlite.database: '${debDataPath}/mxisd.db'"
+                file: "${debBuildConfPath}/${debConfFileName}",
+                match: "storage.provider.sqlite.database:(.*)",
+                replace: "storage.provider.sqlite.database: '${debDataPath}/mxisd.db'"
         )
 
         copy {
@@ -186,25 +186,25 @@ task buildDeb(dependsOn: build) {
         }
 
         ant.replace(
-            file: "${debBuildDebianPath}/control",
-            token: 'Version: 0',
-            value: "Version: ${v}"
+                file: "${debBuildDebianPath}/control",
+                token: 'Version: 0',
+                value: "Version: ${v}"
         )
 
         ant.replace(
-            file: "${debBuildDebianPath}/postinst",
-            token: '%DEB_DATA_DIR%',
-            value: debDataPath
+                file: "${debBuildDebianPath}/postinst",
+                token: '%DEB_DATA_DIR%',
+                value: debDataPath
         )
 
         ant.chmod(
-            file: "${debBuildDebianPath}/postinst",
-            perm: 'a+x'
+                file: "${debBuildDebianPath}/postinst",
+                perm: 'a+x'
         )
 
         ant.chmod(
-            file: "${debBuildDebianPath}/prerm",
-            perm: 'a+x'
+                file: "${debBuildDebianPath}/prerm",
+                perm: 'a+x'
         )
 
         copy {
@@ -214,11 +214,11 @@ task buildDeb(dependsOn: build) {
 
         exec {
             commandLine(
-                'fakeroot',
-                'dpkg-deb',
-                '-b',
-                debBuildBasePath,
-                "${project.buildDir}/dist"
+                    'fakeroot',
+                    'dpkg-deb',
+                    '-b',
+                    debBuildBasePath,
+                    "${project.buildDir}/dist"
             )
         }
     }
