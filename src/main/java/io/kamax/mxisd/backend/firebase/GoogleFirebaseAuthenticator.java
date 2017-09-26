@@ -26,6 +26,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseCredential;
 import com.google.firebase.auth.FirebaseCredentials;
 import com.google.firebase.auth.UserInfo;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.ThreePid;
@@ -49,14 +51,7 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
     private FirebaseApp fbApp;
     private FirebaseAuth fbAuth;
 
-    private void waitOnLatch(BackendAuthResult result, CountDownLatch l, String purpose) {
-        try {
-            l.await(30, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            log.warn("Interrupted while waiting for " + purpose);
-            result.fail();
-        }
-    }
+    private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
     public GoogleFirebaseAuthenticator(boolean isEnabled) {
         this.isEnabled = isEnabled;
@@ -71,6 +66,42 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
             log.info("Google Firebase Authentication is ready");
         } catch (IOException e) {
             throw new RuntimeException("Error when initializing Firebase", e);
+        }
+    }
+
+    private void waitOnLatch(BackendAuthResult result, CountDownLatch l, String purpose) {
+        try {
+            l.await(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.warn("Interrupted while waiting for " + purpose);
+            result.fail();
+        }
+    }
+
+    private void toEmail(BackendAuthResult result, String email) {
+        if (StringUtils.isBlank(email)) {
+            return;
+        }
+
+        result.withThreePid(new ThreePid(ThreePidMedium.Email.getId(), email));
+    }
+
+    private void toMsisdn(BackendAuthResult result, String phoneNumber) {
+        if (StringUtils.isBlank(phoneNumber)) {
+            return;
+        }
+
+        try {
+            String number = phoneUtil.format(
+                    phoneUtil.parse(
+                            phoneNumber,
+                            null // No default region
+                    ),
+                    PhoneNumberUtil.PhoneNumberFormat.E164
+            ).substring(1); // We want without the leading +
+            result.withThreePid(new ThreePid(ThreePidMedium.PhoneNumber.getId(), number));
+        } catch (NumberParseException e) {
+            log.warn("Invalid phone number: {}", phoneNumber);
         }
     }
 
@@ -132,22 +163,12 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
                 CountDownLatch userRecordLatch = new CountDownLatch(1);
                 fbAuth.getUser(token.getUid()).addOnSuccessListener(user -> {
                     try {
-                        if (StringUtils.isNotBlank(user.getEmail())) {
-                            result.withThreePid(new ThreePid(ThreePidMedium.Email.getId(), user.getEmail()));
-                        }
-
-                        if (StringUtils.isNotBlank(user.getPhoneNumber())) {
-                            result.withThreePid(new ThreePid(ThreePidMedium.PhoneNumber.getId(), user.getPhoneNumber()));
-                        }
+                        toEmail(result, user.getEmail());
+                        toMsisdn(result, user.getPhoneNumber());
 
                         for (UserInfo info : user.getProviderData()) {
-                            if (StringUtils.isNotBlank(info.getEmail())) {
-                                result.withThreePid(new ThreePid(ThreePidMedium.Email.getId(), info.getEmail()));
-                            }
-
-                            if (StringUtils.isNotBlank(info.getPhoneNumber())) {
-                                result.withThreePid(new ThreePid(ThreePidMedium.PhoneNumber.getId(), info.getPhoneNumber()));
-                            }
+                            toEmail(result, info.getEmail());
+                            toMsisdn(result, info.getPhoneNumber());
                         }
 
                         log.info("Got {} 3PIDs in profile", result.getProfile().getThreePids().size());
