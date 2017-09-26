@@ -41,6 +41,11 @@ public class PhoneNotificationHandler extends GenericNotificationHandler<IPhoneC
     }
 
     @Override
+    public String getId() {
+        return "raw";
+    }
+
+    @Override
     public String getMedium() {
         return ThreePidMedium.PhoneNumber.getId();
     }

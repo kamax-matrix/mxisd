@@ -20,9 +20,13 @@
 
 package io.kamax.mxisd.notification;
 
+import io.kamax.mxisd.config.threepid.notification.NotificationConfig;
 import io.kamax.mxisd.exception.NotImplementedException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,12 +37,25 @@ import java.util.Map;
 @Component
 public class NotificationManager {
 
+    private Logger log = LoggerFactory.getLogger(NotificationManager.class);
+
     private Map<String, INotificationHandler> handlers;
 
     @Autowired
-    public NotificationManager(List<INotificationHandler> handlers) {
+    public NotificationManager(NotificationConfig cfg, List<INotificationHandler> handlers) {
         this.handlers = new HashMap<>();
-        handlers.forEach(h -> this.handlers.put(h.getMedium(), h));
+        handlers.forEach(h -> {
+            log.info("Found handler {} for medium {}", h.getId(), h.getMedium());
+            String handlerId = cfg.getHandler().get(h.getMedium());
+            if (StringUtils.isBlank(handlerId) || StringUtils.equals(handlerId, h.getId())) {
+                this.handlers.put(h.getMedium(), h);
+            }
+        });
+
+        log.info("--- Notification handler ---");
+        this.handlers.forEach((k, v) -> {
+            log.info("\tHandler for {}: {}", k, v.getId());
+        });
     }
 
     private INotificationHandler ensureMedium(String medium) {
@@ -46,7 +63,6 @@ public class NotificationManager {
         if (handler == null) {
             throw new NotImplementedException(medium + " is not a supported 3PID medium type");
         }
-
         return handler;
     }
 

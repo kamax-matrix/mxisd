@@ -119,6 +119,9 @@ dependencies {
     // Twilio SDK for SMS
     compile 'com.twilio.sdk:twilio:7.14.5'
 
+    // SendGrid SDK to send emails from GCE
+    compile 'com.sendgrid:sendgrid-java:2.2.2'
+
     testCompile 'junit:junit:4.12'
     testCompile 'com.github.tomakehurst:wiremock:2.8.0'
 }

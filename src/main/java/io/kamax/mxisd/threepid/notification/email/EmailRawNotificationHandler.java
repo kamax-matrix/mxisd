@@ -30,14 +30,19 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class EmailNotificationHandler extends GenericNotificationHandler<IEmailConnector, IEmailNotificationGenerator> {
+public class EmailRawNotificationHandler extends GenericNotificationHandler<IEmailConnector, IEmailNotificationGenerator> {
 
     private EmailConfig cfg;
 
     @Autowired
-    public EmailNotificationHandler(EmailConfig cfg, List<IEmailNotificationGenerator> generators, List<IEmailConnector> connectors) {
+    public EmailRawNotificationHandler(EmailConfig cfg, List<IEmailNotificationGenerator> generators, List<IEmailConnector> connectors) {
         this.cfg = cfg;
         process(connectors, generators);
+    }
+
+    @Override
+    public String getId() {
+        return "raw";
     }
 
     @Override

@@ -25,6 +25,8 @@ import io.kamax.mxisd.threepid.session.IThreePidSession;
 
 public interface INotificationHandler {
 
+    String getId();
+
     String getMedium();
 
     void sendForInvite(IThreePidInviteReply invite);
