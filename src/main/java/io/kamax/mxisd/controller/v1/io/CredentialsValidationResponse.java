@@ -18,43 +18,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.auth;
+package io.kamax.mxisd.controller.v1.io;
 
 import io.kamax.mxisd.ThreePid;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class UserAuthResult {
+public class CredentialsValidationResponse {
 
-    private boolean success;
-    private String displayName;
-    private String photo;
-    private Set<ThreePid> threePids = new HashSet<>();
+    public static class Profile {
 
-    public UserAuthResult failure() {
-        success = false;
-        displayName = null;
-        photo = null;
-        threePids.clear();
+        private String displayName;
+        private Set<ThreePid> threePids = new HashSet<>();
 
-        return this;
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public Set<ThreePid> getThreePids() {
+            return threePids;
+        }
+
+        public void setThreePids(Set<ThreePid> threePids) {
+            this.threePids = new HashSet<>(threePids);
+        }
+
     }
 
-    public UserAuthResult success(String displayName) {
-        setSuccess(true);
-        setDisplayName(displayName);
+    private boolean success;
+    private String displayName; // TODO remove later, legacy support
+    private Profile profile = new Profile();
 
-        return this;
+    public CredentialsValidationResponse(boolean success) {
+        this.success = success;
     }
 
     public boolean isSuccess() {
         return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
     }
 
     public String getDisplayName() {
@@ -63,24 +64,11 @@ public class UserAuthResult {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+        this.profile.displayName = displayName;
     }
 
-    public String getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(String photo) {
-        this.photo = photo;
-    }
-
-    public UserAuthResult withThreePid(String medium, String address) {
-        threePids.add(new ThreePid(medium, address));
-
-        return this;
-    }
-
-    public Set<ThreePid> getThreePids() {
-        return Collections.unmodifiableSet(threePids);
+    public Profile getProfile() {
+        return profile;
     }
 
 }

@@ -23,10 +23,12 @@ package io.kamax.mxisd.controller.v1;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.kamax.mxisd.auth.AuthManager;
 import io.kamax.mxisd.auth.UserAuthResult;
-import org.apache.commons.io.IOUtils;
+import io.kamax.mxisd.controller.v1.io.CredentialsValidationResponse;
+import io.kamax.mxisd.exception.JsonMemberNotFoundException;
+import io.kamax.mxisd.util.GsonParser;
+import io.kamax.mxisd.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 @RestController
 @CrossOrigin
@@ -47,7 +48,8 @@ public class AuthController {
 
     private Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    private Gson gson = new Gson();
+    private Gson gson = GsonUtil.build();
+    private GsonParser parser = new GsonParser(gson);
 
     @Autowired
     private AuthManager mgr;
@@ -55,14 +57,9 @@ public class AuthController {
     @RequestMapping(value = "/_matrix-internal/identity/v1/check_credentials", method = RequestMethod.POST)
     public String checkCredentials(HttpServletRequest req) {
         try {
-            JsonElement el = new JsonParser().parse(IOUtils.toString(req.getInputStream(), StandardCharsets.UTF_8));
-            if (!el.isJsonObject() || !el.getAsJsonObject().has("user")) {
-                throw new IllegalArgumentException("Missing user key");
-            }
-
-            JsonObject authData = el.getAsJsonObject().get("user").getAsJsonObject();
+            JsonObject authData = parser.parse(req.getInputStream(), "user");
             if (!authData.has("id") || !authData.has("password")) {
-                throw new IllegalArgumentException("Missing id or password keys");
+                throw new JsonMemberNotFoundException("Missing id or password keys");
             }
 
             String id = authData.get("id").getAsString();
@@ -70,16 +67,17 @@ public class AuthController {
             String password = authData.get("password").getAsString();
 
             UserAuthResult result = mgr.authenticate(id, password);
+            CredentialsValidationResponse response = new CredentialsValidationResponse(result.isSuccess());
 
-            JsonObject authObj = new JsonObject();
-            authObj.addProperty("success", result.isSuccess());
             if (result.isSuccess()) {
-                authObj.addProperty("mxid", result.getMxid());
-                authObj.addProperty("display_name", result.getDisplayName());
+                response.setDisplayName(result.getDisplayName());
+                response.getProfile().setThreePids(result.getThreePids());
             }
-            JsonObject obj = new JsonObject();
+            JsonElement authObj = gson.toJsonTree(response);
 
-            obj.add("authentication", authObj);
+            JsonObject obj = new JsonObject();
+            obj.add("auth", authObj);
+            obj.add("authentication", authObj); // TODO remove later, legacy support
             return gson.toJson(obj);
         } catch (IOException e) {
             throw new RuntimeException(e);

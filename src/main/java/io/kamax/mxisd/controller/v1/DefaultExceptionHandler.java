@@ -22,10 +22,7 @@ package io.kamax.mxisd.controller.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.kamax.mxisd.exception.BadRequestException;
-import io.kamax.mxisd.exception.InternalServerError;
-import io.kamax.mxisd.exception.MappingAlreadyExistsException;
-import io.kamax.mxisd.exception.MatrixException;
+import io.kamax.mxisd.exception.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +73,18 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public String handle(MissingServletRequestParameterException e) {
         return handle("M_INVALID_BODY", e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidResponseJsonException.class)
+    public String handle(InvalidResponseJsonException e) {
+        return handle("M_INVALID_JSON", e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(JsonMemberNotFoundException.class)
+    public String handle(JsonMemberNotFoundException e) {
+        return handle("M_JSON_MISSING_KEYS", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

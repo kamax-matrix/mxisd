@@ -48,4 +48,22 @@ public class ThreePid {
         return getMedium() + ":" + getAddress();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ThreePid threePid = (ThreePid) o;
+
+        if (!medium.equals(threePid.medium)) return false;
+        return address.equals(threePid.address);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = medium.hashCode();
+        result = 31 * result + address.hashCode();
+        return result;
+    }
+
 }

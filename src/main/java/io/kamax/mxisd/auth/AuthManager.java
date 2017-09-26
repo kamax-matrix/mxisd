@@ -71,14 +71,14 @@ public class AuthManager {
                     continue;
                 }
 
-                UserAuthResult authResult = new UserAuthResult().success(mxId, result.getProfile().getDisplayName());
+                UserAuthResult authResult = new UserAuthResult().success(result.getProfile().getDisplayName());
                 for (ThreePid pid : result.getProfile().getThreePids()) {
                     authResult.withThreePid(pid.getMedium(), pid.getAddress());
                 }
                 log.info("{} was authenticated by {}, publishing 3PID mappings, if any", id, provider.getClass().getSimpleName());
                 for (ThreePid pid : authResult.getThreePids()) {
                     log.info("Processing {} for {}", pid, id);
-                    invMgr.publishMappingIfInvited(new ThreePidMapping(pid, authResult.getMxid()));
+                    invMgr.publishMappingIfInvited(new ThreePidMapping(pid, mxId));
                 }
 
                 invMgr.lookupMappingsForInvites();

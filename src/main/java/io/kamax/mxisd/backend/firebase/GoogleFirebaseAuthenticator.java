@@ -25,6 +25,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseCredential;
 import com.google.firebase.auth.FirebaseCredentials;
+import com.google.firebase.auth.UserInfo;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.ThreePid;
@@ -139,6 +140,17 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
                             result.withThreePid(new ThreePid(ThreePidMedium.PhoneNumber.getId(), user.getPhoneNumber()));
                         }
 
+                        for (UserInfo info : user.getProviderData()) {
+                            if (StringUtils.isNotBlank(info.getEmail())) {
+                                result.withThreePid(new ThreePid(ThreePidMedium.Email.getId(), info.getEmail()));
+                            }
+
+                            if (StringUtils.isNotBlank(info.getPhoneNumber())) {
+                                result.withThreePid(new ThreePid(ThreePidMedium.PhoneNumber.getId(), info.getPhoneNumber()));
+                            }
+                        }
+
+                        log.info("Got {} 3PIDs in profile", result.getProfile().getThreePids().size());
                     } finally {
                         userRecordLatch.countDown();
                     }

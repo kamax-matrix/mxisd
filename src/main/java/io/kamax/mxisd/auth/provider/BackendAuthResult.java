@@ -24,21 +24,21 @@ import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.UserID;
 import io.kamax.mxisd.UserIdType;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BackendAuthResult {
 
     public static class BackendAuthProfile {
 
         private String displayName;
-        private List<ThreePid> threePids = new ArrayList<>();
+        private Set<ThreePid> threePids = new HashSet<>();
 
         public String getDisplayName() {
             return displayName;
         }
 
-        public List<ThreePid> getThreePids() {
+        public Set<ThreePid> getThreePids() {
             return threePids;
         }
     }
