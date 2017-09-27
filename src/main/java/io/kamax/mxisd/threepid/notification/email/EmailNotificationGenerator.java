@@ -47,6 +47,7 @@ public class EmailNotificationGenerator extends GenericTemplateNotificationGener
 
     @Override
     protected String populateForCommon(String body, ThreePid recipient) {
+        body = super.populateForCommon(body, recipient);
         body = body.replace("%FROM_EMAIL%", cfg.getIdentity().getFrom());
         body = body.replace("%FROM_NAME%", cfg.getIdentity().getName());
         return body;
