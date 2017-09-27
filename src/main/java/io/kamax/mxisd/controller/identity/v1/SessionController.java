@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1;
+package io.kamax.mxisd.controller.identity.v1;
 
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.ViewConfig;
-import io.kamax.mxisd.controller.v1.remote.RemoteIdentityAPIv1;
+import io.kamax.mxisd.controller.identity.v1.remote.RemoteIdentityAPIv1;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.session.SessionMananger;
 import io.kamax.mxisd.session.ValidationResult;

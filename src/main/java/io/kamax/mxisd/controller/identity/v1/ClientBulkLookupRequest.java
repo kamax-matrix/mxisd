@@ -18,18 +18,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.io;
+package io.kamax.mxisd.controller.identity.v1;
 
-public class KeyValidityJson {
+import io.kamax.mxisd.lookup.ThreePidMapping;
 
-    private boolean valid;
+import java.util.ArrayList;
+import java.util.List;
 
-    public KeyValidityJson(boolean isValid) {
-        this.valid = isValid;
+public class ClientBulkLookupRequest {
+
+    private List<List<String>> threepids = new ArrayList<>();
+
+    public List<List<String>> getThreepids() {
+        return threepids;
     }
 
-    public boolean isValid() {
-        return valid;
+    public void setThreepids(List<List<String>> threepids) {
+        this.threepids = threepids;
+    }
+
+    public void setMappings(List<ThreePidMapping> mappings) {
+        for (ThreePidMapping mapping : mappings) {
+            List<String> threepid = new ArrayList<>();
+            threepid.add(mapping.getMedium());
+            threepid.add(mapping.getValue());
+            threepids.add(threepid);
+        }
     }
 
 }

@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1;
+package io.kamax.mxisd.controller.identity.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

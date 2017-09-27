@@ -18,14 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1;
+package io.kamax.mxisd.controller.auth.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.kamax.mxisd.auth.AuthManager;
 import io.kamax.mxisd.auth.UserAuthResult;
-import io.kamax.mxisd.controller.v1.io.CredentialsValidationResponse;
+import io.kamax.mxisd.controller.auth.v1.io.CredentialsValidationResponse;
 import io.kamax.mxisd.exception.JsonMemberNotFoundException;
 import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.GsonUtil;

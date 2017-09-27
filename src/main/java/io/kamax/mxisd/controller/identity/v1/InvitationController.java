@@ -18,12 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1;
+package io.kamax.mxisd.controller.identity.v1;
 
 import com.google.gson.Gson;
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.controller.v1.io.ThreePidInviteReplyIO;
+import io.kamax.mxisd.controller.identity.v1.io.ThreePidInviteReplyIO;
 import io.kamax.mxisd.invitation.IThreePidInvite;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.invitation.InvitationManager;

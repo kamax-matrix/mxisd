@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.io;
+package io.kamax.mxisd.controller.identity.v1.io;
 
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 

@@ -23,7 +23,7 @@ package io.kamax.mxisd.threepid.notification;
 import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.controller.v1.IdentityAPIv1;
+import io.kamax.mxisd.controller.identity.v1.IdentityAPIv1;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.lang.StringUtils;

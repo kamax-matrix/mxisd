@@ -18,18 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.io;
+package io.kamax.mxisd.controller.identity.v1.io;
 
-public class SessionEmailTokenRequestJson extends GenericTokenRequestJson {
+public abstract class GenericTokenRequestJson {
 
-    private String email;
+    private String client_secret;
+    private int send_attempt;
+    private String next_link;
 
-    public String getMedium() {
-        return "threepids/email";
+    public String getSecret() {
+        return client_secret;
     }
 
-    public String getValue() {
-        return email;
+    public int getAttempt() {
+        return send_attempt;
+    }
+
+    public String getNextLink() {
+        return next_link;
     }
 
 }

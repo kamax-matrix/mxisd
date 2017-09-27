@@ -1,4 +1,4 @@
-package io.kamax.mxisd.controller.v1.remote;
+package io.kamax.mxisd.controller.identity.v1.remote;
 
 import io.kamax.mxisd.config.ViewConfig;
 import io.kamax.mxisd.exception.SessionNotValidatedException;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static io.kamax.mxisd.controller.v1.remote.RemoteIdentityAPIv1.SESSION_CHECK;
-import static io.kamax.mxisd.controller.v1.remote.RemoteIdentityAPIv1.SESSION_REQUEST_TOKEN;
+import static io.kamax.mxisd.controller.identity.v1.remote.RemoteIdentityAPIv1.SESSION_CHECK;
+import static io.kamax.mxisd.controller.identity.v1.remote.RemoteIdentityAPIv1.SESSION_REQUEST_TOKEN;
 
 @Controller
 public class RemoteSessionController {

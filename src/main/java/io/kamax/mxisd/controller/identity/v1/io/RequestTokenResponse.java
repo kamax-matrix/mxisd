@@ -18,15 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1;
+package io.kamax.mxisd.controller.identity.v1.io;
 
-public class IdentityAPIv1 {
+public class RequestTokenResponse {
 
-    public static final String BASE = "/_matrix/identity/api/v1";
+    private String sid;
 
-    public static String getValidate(String medium, String sid, String secret, String token) {
-        // FIXME use some kind of URLBuilder
-        return BASE + "/validate/" + medium + "/submitToken?sid=" + sid + "&client_secret=" + secret + "&token=" + token;
+    public String getSid() {
+        return sid;
     }
 
 }

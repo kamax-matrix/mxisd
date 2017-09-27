@@ -23,7 +23,7 @@ package io.kamax.mxisd.lookup.provider;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import io.kamax.mxisd.controller.v1.ClientBulkLookupRequest;
+import io.kamax.mxisd.controller.identity.v1.ClientBulkLookupRequest;
 import io.kamax.mxisd.exception.InvalidResponseJsonException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;

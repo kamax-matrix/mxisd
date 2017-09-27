@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.v1.io;
+package io.kamax.mxisd.controller.auth.v1.io;
 
 import io.kamax.mxisd.ThreePid;
 
