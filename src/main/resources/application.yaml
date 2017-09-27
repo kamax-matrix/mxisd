@@ -97,6 +97,7 @@ threepid:
             validation:
               local: 'classpath:threepids/email/validate-local-template.eml'
               remote: 'classpath:threepids/email/validate-remote-template.eml'
+
     msisdn:
       connector: 'twilio'
       generator: 'template'
@@ -129,6 +130,35 @@ session:
         toRemote:
           enabled: true
           server: 'root'
+
+notification:
+#  handler:
+#    3PID-medium: 'handlerId'
+  handlers:
+    sendgrid:
+      api:
+        key: ''
+      identity:
+        from: ''
+        name: ''
+      templates:
+        invite:
+          subject: ''
+          body:
+            text: ''
+            html: ''
+        session:
+          validation:
+            local:
+              subject: ''
+              body:
+                text: ''
+                html: ''
+            remote:
+              subject: ''
+              body:
+                text: ''
+                html: ''
 
 view:
   session:
