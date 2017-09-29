@@ -57,6 +57,8 @@ import javax.annotation.PreDestroy;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -163,7 +165,11 @@ public class InvitationManager {
         if (entryOpt.isPresent()) {
             String entry = entryOpt.get();
             log.info("Found DNS overwrite for {} to {}", domain, entry);
-            return "https://" + entry;
+            try {
+                return new URL(entry).toString();
+            } catch (MalformedURLException e) {
+                log.warn("Skipping homeserver Federation DNS overwrite for {} - not a valid URL: {}", domain, entry);
+            }
         }
 
         log.debug("Performing SRV lookup for {}", domain);
