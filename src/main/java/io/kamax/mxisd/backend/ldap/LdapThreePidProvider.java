@@ -80,10 +80,13 @@ public class LdapThreePidProvider extends LdapGenericBackend implements IThreePi
                 Entry entry = cursor.get();
                 log.info("Found possible match, DN: {}", entry.getDn().getName());
 
-                getAttribute(entry, getUidAtt()).map(uid -> {
-                    log.info("DN {} is a valid match", entry.getDn().getName());
-                    return buildMatrixIdFromUid(uid);
-                });
+                Optional<String> data = getAttribute(entry, getUidAtt());
+                if (!data.isPresent()) {
+                    continue;
+                }
+
+                log.info("DN {} is a valid match", entry.getDn().getName());
+                return Optional.of(buildMatrixIdFromUid(data.get()));
             }
         } catch (CursorLdapReferralException e) {
             log.warn("3PID {} is only available via referral, skipping", value);
@@ -100,13 +103,10 @@ public class LdapThreePidProvider extends LdapGenericBackend implements IThreePi
 
         try (LdapConnection conn = getConn()) {
             bind(conn);
-            lookup(conn, request.getType(), request.getThreePid()).map(id -> new SingleLookupReply(request, id));
+            return lookup(conn, request.getType(), request.getThreePid()).map(id -> new SingleLookupReply(request, id));
         } catch (LdapException | IOException e) {
             throw new InternalServerError(e);
         }
-
-        log.info("No match found");
-        return Optional.empty();
     }
 
     @Override

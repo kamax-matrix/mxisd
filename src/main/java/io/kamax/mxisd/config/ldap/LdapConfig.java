@@ -159,9 +159,9 @@ public class LdapConfig {
         attribute.getThreepid().forEach((k, v) -> {
             if (StringUtils.isBlank(identity.getMedium().get(k))) {
                 if (ThreePidMedium.PhoneNumber.is(k)) {
-                    identity.getMedium().put(k, LdapGenericBackend.buildOrQuery("+" + getIdentity().getToken()));
+                    identity.getMedium().put(k, LdapGenericBackend.buildOrQuery("+" + getIdentity().getToken(), v));
                 } else {
-                    identity.getMedium().put(k, LdapGenericBackend.buildOrQuery(getIdentity().getToken()));
+                    identity.getMedium().put(k, LdapGenericBackend.buildOrQuery(getIdentity().getToken(), v));
                 }
             }
         });

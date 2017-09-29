@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public abstract class LdapGenericBackend {
@@ -66,7 +67,7 @@ public abstract class LdapGenericBackend {
         return getAt().getUid().getValue();
     }
 
-    protected LdapConnection getConn() {
+    protected synchronized LdapConnection getConn() throws LdapException {
         return new LdapNetworkConnection(cfg.getConn().getHost(), cfg.getConn().getPort(), cfg.getConn().isTls());
     }
 
@@ -86,15 +87,23 @@ public abstract class LdapGenericBackend {
         }
     }
 
-    public static String buildOrQuery(String value, String... attributes) {
+    public static String buildOrQuery(String value, List<String> attributes) {
+        if (attributes.size() < 1) {
+            throw new IllegalArgumentException();
+        }
+
         StringBuilder builder = new StringBuilder();
         builder.append("(|");
-        Arrays.stream(attributes).forEach(s -> {
+        attributes.forEach(s -> {
             builder.append("(");
             builder.append(s).append("=").append(value).append(")");
         });
         builder.append(")");
         return builder.toString();
+    }
+
+    public static String buildOrQuery(String value, String... attributes) {
+        return buildOrQuery(value, Arrays.asList(attributes));
     }
 
     public String buildOrQueryWithFilter(String filter, String value, String... attributes) {

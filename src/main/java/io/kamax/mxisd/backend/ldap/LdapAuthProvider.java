@@ -72,7 +72,7 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                 return BackendAuthResult.failure();
             }
 
-            String userFilter = "(" + getCfg().getAttribute().getUid().getValue() + "=" + userFilterValue + ")";
+            String userFilter = "(" + getUidAtt() + "=" + userFilterValue + ")";
             userFilter = buildWithFilter(userFilter, getCfg().getAuth().getFilter());
             try (EntryCursor cursor = conn.search(getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAtt(), getAt().getName())) {
                 while (cursor.next()) {
@@ -80,15 +80,7 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                     String dn = entry.getDn().getName();
                     log.info("Checking possible match, DN: {}", dn);
 
-                    Attribute attribute = entry.get(getUidAtt());
-                    if (attribute == null) {
-                        log.info("DN {}: no attribute {}, skpping", dn, getUidAtt());
-                        continue;
-                    }
-
-                    String data = attribute.get().toString();
-                    if (data.length() < 1) {
-                        log.info("DN {}: empty attribute {}, skipping", getUidAtt());
+                    if (!getAttribute(entry, getUidAtt()).isPresent()) {
                         continue;
                     }
 
