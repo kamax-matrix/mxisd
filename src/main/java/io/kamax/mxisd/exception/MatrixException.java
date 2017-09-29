@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.exception;
 
-public abstract class MatrixException extends MxisdException {
+public class MatrixException extends MxisdException {
 
     private int status;
     private String errorCode;

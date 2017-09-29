@@ -66,9 +66,20 @@ sql:
   connection: ''
   auth:
     enabled: false
+  directory:
+    enabled: false
+    query:
+      name:
+        value: 'SELECT 1'
+      threepid:
+        value: 'SELECT 1'
   identity:
     type: 'mxid'
-    query: "SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?"
+    query: 'SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?'
+
+synapseSql:
+  enabled: false
+  type: 'sqlite'
 
 forward:
   servers:

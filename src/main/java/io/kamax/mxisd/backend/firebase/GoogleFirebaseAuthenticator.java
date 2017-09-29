@@ -20,11 +20,6 @@
 
 package io.kamax.mxisd.backend.firebase;
 
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseCredential;
-import com.google.firebase.auth.FirebaseCredentials;
 import com.google.firebase.auth.UserInfo;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -38,35 +33,17 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
+public class GoogleFirebaseAuthenticator extends GoogleFirebaseBackend implements AuthenticatorProvider {
 
     private Logger log = LoggerFactory.getLogger(GoogleFirebaseAuthenticator.class);
 
-    private boolean isEnabled;
-    private FirebaseApp fbApp;
-    private FirebaseAuth fbAuth;
-
     private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
-    public GoogleFirebaseAuthenticator(boolean isEnabled) {
-        this.isEnabled = isEnabled;
-    }
-
-    public GoogleFirebaseAuthenticator(String credsPath, String db) {
-        this(true);
-        try {
-            fbApp = FirebaseApp.initializeApp(getOpts(credsPath, db), "AuthenticationProvider");
-            fbAuth = FirebaseAuth.getInstance(fbApp);
-
-            log.info("Google Firebase Authentication is ready");
-        } catch (IOException e) {
-            throw new RuntimeException("Error when initializing Firebase", e);
-        }
+    public GoogleFirebaseAuthenticator(boolean isEnabled, String credsPath, String db) {
+        super(isEnabled, "AuthenticationProvider", credsPath, db);
     }
 
     private void waitOnLatch(BackendAuthResult result, CountDownLatch l, String purpose) {
@@ -105,30 +82,6 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
         }
     }
 
-    private FirebaseCredential getCreds(String credsPath) throws IOException {
-        if (StringUtils.isNotBlank(credsPath)) {
-            return FirebaseCredentials.fromCertificate(new FileInputStream(credsPath));
-        } else {
-            return FirebaseCredentials.applicationDefault();
-        }
-    }
-
-    private FirebaseOptions getOpts(String credsPath, String db) throws IOException {
-        if (StringUtils.isBlank(db)) {
-            throw new IllegalArgumentException("Firebase database is not configured");
-        }
-
-        return new FirebaseOptions.Builder()
-                .setCredential(getCreds(credsPath))
-                .setDatabaseUrl(db)
-                .build();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return isEnabled;
-    }
-
     private void waitOnLatch(CountDownLatch l) {
         try {
             l.await(30, TimeUnit.SECONDS);
@@ -149,7 +102,7 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
 
         String localpart = mxid.getLocalPart();
         CountDownLatch l = new CountDownLatch(1);
-        fbAuth.verifyIdToken(password).addOnSuccessListener(token -> {
+        getFirebase().verifyIdToken(password).addOnSuccessListener(token -> {
             try {
                 if (!StringUtils.equals(localpart, token.getUid())) {
                     log.info("Failure to authenticate {}: Matrix ID localpart '{}' does not match Firebase UID '{}'", mxid, localpart, token.getUid());
@@ -161,7 +114,7 @@ public class GoogleFirebaseAuthenticator implements AuthenticatorProvider {
                 log.info("{} was successfully authenticated", mxid);
                 log.info("Fetching profile for {}", mxid);
                 CountDownLatch userRecordLatch = new CountDownLatch(1);
-                fbAuth.getUser(token.getUid()).addOnSuccessListener(user -> {
+                getFirebase().getUser(token.getUid()).addOnSuccessListener(user -> {
                     try {
                         toEmail(result, user.getEmail());
                         toMsisdn(result, user.getPhoneNumber());

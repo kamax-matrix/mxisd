@@ -110,6 +110,9 @@ dependencies {
     // ORMLite
     compile 'com.j256.ormlite:ormlite-jdbc:5.0'
 
+    // Connection Pool
+    compile 'com.mchange:c3p0:0.9.5.2'
+
     // SQLite
     compile 'org.xerial:sqlite-jdbc:3.20.0'
 

@@ -28,10 +28,7 @@ import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.GsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -48,7 +45,7 @@ public class UserDirectoryController {
     @Autowired
     private DirectoryManager mgr;
 
-    @RequestMapping(path = "/search")
+    @RequestMapping(path = "/search", method = RequestMethod.POST)
     public String search(HttpServletRequest request, @RequestParam("access_token") String accessToken) throws IOException {
         UserDirectorySearchRequest searchQuery = parser.parse(request, UserDirectorySearchRequest.class);
         URI target = URI.create(request.getRequestURL().toString());

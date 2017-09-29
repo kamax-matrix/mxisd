@@ -18,22 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.directory.io;
+package io.kamax.mxisd.directory;
 
-public class UserDirectorySearchRequest {
+import io.kamax.mxisd.controller.directory.io.UserDirectorySearchResult;
 
-    private String searchTerm;
+public interface IDirectoryProvider {
 
-    public UserDirectorySearchRequest(String searchTerm) {
-        setSearchTerm(searchTerm);
-    }
+    boolean isEnabled();
 
-    public String getSearchTerm() {
-        return searchTerm;
-    }
+    UserDirectorySearchResult searchByDisplayName(String query);
 
-    public void setSearchTerm(String searchTerm) {
-        this.searchTerm = searchTerm;
-    }
+    UserDirectorySearchResult searchBy3pid(String query);
 
 }

@@ -18,22 +18,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.directory.io;
+package io.kamax.mxisd.backend.sql;
 
-public class UserDirectorySearchRequest {
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import io.kamax.mxisd.config.sql.SqlProviderConfig;
+import org.springframework.stereotype.Component;
 
-    private String searchTerm;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-    public UserDirectorySearchRequest(String searchTerm) {
-        setSearchTerm(searchTerm);
+@Component
+public class SqlConnectionPool {
+
+    private ComboPooledDataSource ds;
+
+    public SqlConnectionPool(SqlProviderConfig cfg) {
+        ds = new ComboPooledDataSource();
+        ds.setJdbcUrl("jdbc:" + cfg.getType() + ":" + cfg.getConnection());
+        ds.setMinPoolSize(1);
+        ds.setMaxPoolSize(10);
+        ds.setAcquireIncrement(2);
     }
 
-    public String getSearchTerm() {
-        return searchTerm;
-    }
-
-    public void setSearchTerm(String searchTerm) {
-        this.searchTerm = searchTerm;
+    public Connection get() throws SQLException {
+        return ds.getConnection();
     }
 
 }

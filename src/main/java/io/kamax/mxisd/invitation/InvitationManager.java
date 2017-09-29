@@ -24,8 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
-import io.kamax.mxisd.config.DnsOverwrite;
-import io.kamax.mxisd.config.DnsOverwriteEntry;
+import io.kamax.mxisd.dns.FederationDnsOverwrite;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
@@ -81,7 +80,7 @@ public class InvitationManager {
     private SignatureManager signMgr;
 
     @Autowired
-    private DnsOverwrite dns;
+    private FederationDnsOverwrite dns;
 
     private NotificationManager notifMgr;
 
@@ -160,11 +159,11 @@ public class InvitationManager {
     // TODO use caching mechanism
     // TODO export in matrix-java-sdk
     private String findHomeserverForDomain(String domain) {
-        Optional<DnsOverwriteEntry> entryOpt = dns.findHost(domain);
+        Optional<String> entryOpt = dns.findHost(domain);
         if (entryOpt.isPresent()) {
-            DnsOverwriteEntry entry = entryOpt.get();
-            log.info("Found DNS overwrite for {} to {}", entry.getName(), entry.getTarget());
-            return "https://" + entry.getTarget();
+            String entry = entryOpt.get();
+            log.info("Found DNS overwrite for {} to {}", domain, entry);
+            return "https://" + entry;
         }
 
         log.debug("Performing SRV lookup for {}", domain);

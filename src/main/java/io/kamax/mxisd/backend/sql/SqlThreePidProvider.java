@@ -33,7 +33,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,11 +46,17 @@ public class SqlThreePidProvider implements IThreePidProvider {
 
     private Logger log = LoggerFactory.getLogger(SqlThreePidProvider.class);
 
-    @Autowired
+    private SqlProviderConfig cfg;
     private MatrixConfig mxCfg;
 
+    private SqlConnectionPool pool;
+
     @Autowired
-    private SqlProviderConfig cfg;
+    public SqlThreePidProvider(SqlProviderConfig cfg, MatrixConfig mxCfg, SqlConnectionPool pool) {
+        this.cfg = cfg;
+        this.pool = pool;
+        this.mxCfg = mxCfg;
+    }
 
     @Override
     public boolean isEnabled() {
@@ -64,37 +73,36 @@ public class SqlThreePidProvider implements IThreePidProvider {
         return 20;
     }
 
-    private Connection getConn() throws SQLException {
-        return DriverManager.getConnection("jdbc:" + cfg.getType() + ":" + cfg.getConnection());
-    }
-
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
         log.info("SQL lookup");
         String stmtSql = StringUtils.defaultIfBlank(cfg.getIdentity().getMedium().get(request.getType()), cfg.getIdentity().getQuery());
         log.info("SQL query: {}", stmtSql);
-        try (PreparedStatement stmt = getConn().prepareStatement(stmtSql)) {
-            stmt.setString(1, request.getType().toLowerCase());
-            stmt.setString(2, request.getThreePid().toLowerCase());
+        try (Connection conn = pool.get()) {
+            try (PreparedStatement stmt = conn.prepareStatement(stmtSql)) {
+                stmt.setString(1, request.getType().toLowerCase());
+                stmt.setString(2, request.getThreePid().toLowerCase());
 
-            ResultSet rSet = stmt.executeQuery();
-            while (rSet.next()) {
-                String uid = rSet.getString("uid");
-                log.info("Found match: {}", uid);
-                if (StringUtils.equals("uid", cfg.getIdentity().getType())) {
-                    log.info("Resolving as localpart");
-                    return Optional.of(new SingleLookupReply(request, new MatrixID(uid, mxCfg.getDomain())));
-                }
-                if (StringUtils.equals("mxid", cfg.getIdentity().getType())) {
-                    log.info("Resolving as MXID");
-                    return Optional.of(new SingleLookupReply(request, new MatrixID(uid)));
-                }
+                try (ResultSet rSet = stmt.executeQuery()) {
+                    while (rSet.next()) {
+                        String uid = rSet.getString("uid");
+                        log.info("Found match: {}", uid);
+                        if (StringUtils.equals("uid", cfg.getIdentity().getType())) {
+                            log.info("Resolving as localpart");
+                            return Optional.of(new SingleLookupReply(request, new MatrixID(uid, mxCfg.getDomain())));
+                        }
+                        if (StringUtils.equals("mxid", cfg.getIdentity().getType())) {
+                            log.info("Resolving as MXID");
+                            return Optional.of(new SingleLookupReply(request, new MatrixID(uid)));
+                        }
 
-                log.info("Identity type is unknown, skipping");
+                        log.info("Identity type is unknown, skipping");
+                    }
+
+                    log.info("No match found in SQL");
+                    return Optional.empty();
+                }
             }
-
-            log.info("No match found in SQL");
-            return Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

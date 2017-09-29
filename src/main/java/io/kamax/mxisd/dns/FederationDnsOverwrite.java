@@ -18,35 +18,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config;
+package io.kamax.mxisd.dns;
 
-import org.apache.commons.lang.StringUtils;
+import io.kamax.mxisd.config.DnsOverwriteConfig;
+import io.kamax.mxisd.config.ServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-@Configuration
-@ConfigurationProperties("dns.overwrite")
-public class DnsOverwrite {
+import static io.kamax.mxisd.config.DnsOverwriteConfig.Entry;
 
-    private Logger log = LoggerFactory.getLogger(DnsOverwrite.class);
+@Component
+public class FederationDnsOverwrite {
 
-    @Autowired
+    private Logger log = LoggerFactory.getLogger(FederationDnsOverwrite.class);
+
     private ServerConfig srvCfg;
+    private Map<String, Entry> mappings;
 
     @Autowired
-    private DnsOverwriteEntry homeserver;
+    public FederationDnsOverwrite(DnsOverwriteConfig cfg, ServerConfig srvCfg) {
+        this.srvCfg = srvCfg;
 
-    public Optional<DnsOverwriteEntry> findHost(String lookup) {
-        if (homeserver != null && StringUtils.equalsIgnoreCase(lookup, homeserver.getName())) {
-            return Optional.of(homeserver);
+        mappings = new HashMap<>();
+        cfg.getHomeserver().getFederation().forEach(e -> mappings.put(e.getName(), e));
+    }
+
+    public Optional<String> findHost(String lookup) {
+        Entry mapping = mappings.get(lookup);
+        if (mapping == null) {
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        return Optional.of(mapping.getValue());
     }
 
 }

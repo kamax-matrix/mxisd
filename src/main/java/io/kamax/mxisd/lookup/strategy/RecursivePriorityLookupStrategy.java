@@ -43,26 +43,28 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
 
     private Logger log = LoggerFactory.getLogger(RecursivePriorityLookupStrategy.class);
 
-    @Autowired
-    private RecursiveLookupConfig recursiveCfg;
-
-    @Autowired
+    private RecursiveLookupConfig cfg;
     private List<IThreePidProvider> providers;
-
-    @Autowired
     private IBridgeFetcher bridge;
 
     private List<CIDRUtils> allowedCidr = new ArrayList<>();
+
+    @Autowired
+    public RecursivePriorityLookupStrategy(RecursiveLookupConfig cfg, List<IThreePidProvider> providers, IBridgeFetcher bridge) {
+        this.cfg = cfg;
+        this.bridge = bridge;
+        this.providers = providers.stream().filter(IThreePidProvider::isEnabled).collect(Collectors.toList());
+    }
 
     @PostConstruct
     private void build() throws UnknownHostException {
         try {
             log.info("Found {} providers", providers.size());
-
+            providers.forEach(p -> log.info("\t- {}", p.getClass().getName()));
             providers.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority()));
 
-            log.info("Recursive lookup enabled: {}", recursiveCfg.isEnabled());
-            for (String cidr : recursiveCfg.getAllowedCidr()) {
+            log.info("Recursive lookup enabled: {}", cfg.isEnabled());
+            for (String cidr : cfg.getAllowedCidr()) {
                 log.info("{} is allowed for recursion", cidr);
                 allowedCidr.add(new CIDRUtils(cidr));
             }
@@ -75,7 +77,7 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
         boolean canRecurse = false;
 
         try {
-            if (recursiveCfg.isEnabled()) {
+            if (cfg.isEnabled()) {
                 log.debug("Checking {} CIDRs for recursion", allowedCidr.size());
                 for (CIDRUtils cidr : allowedCidr) {
                     if (cidr.isInRange(source)) {
@@ -106,7 +108,7 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
 
         log.info("Host {} allowed for recursion: {}", request.getRequester(), canRecurse);
         for (IThreePidProvider provider : providers) {
-            if (provider.isEnabled() && (provider.isLocal() || canRecurse || forceRecursive)) {
+            if (provider.isLocal() || canRecurse || forceRecursive) {
                 usableProviders.add(provider);
             }
         }
@@ -159,9 +161,9 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
         }
 
         if (
-                recursiveCfg.getBridge() != null &&
-                        recursiveCfg.getBridge().getEnabled() &&
-                        (!recursiveCfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))
+                cfg.getBridge() != null &&
+                        cfg.getBridge().getEnabled() &&
+                        (!cfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))
                 ) {
             log.info("Using bridge failover for lookup");
             return bridge.find(request);

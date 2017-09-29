@@ -18,10 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.identity.v1;
+package io.kamax.mxisd.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import io.kamax.mxisd.exception.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -72,12 +73,18 @@ public class DefaultExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public String handle(MissingServletRequestParameterException e) {
-        return handle("M_INVALID_BODY", e.getMessage());
+        return handle("M_INCOMPLETE_REQUEST", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidResponseJsonException.class)
     public String handle(InvalidResponseJsonException e) {
+        return handle("M_INVALID_JSON", e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(JsonSyntaxException.class)
+    public String handle(JsonSyntaxException e) {
         return handle("M_INVALID_JSON", e.getMessage());
     }
 
@@ -107,7 +114,7 @@ public class DefaultExceptionHandler {
                 "M_UNKNOWN",
                 StringUtils.defaultIfBlank(
                         e.getMessage(),
-                        "An internal server error occured. If this error persists, please contact support with reference #" +
+                        "An internal server error occurred. If this error persists, please contact support with reference #" +
                                 Instant.now().toEpochMilli()
                 )
         );

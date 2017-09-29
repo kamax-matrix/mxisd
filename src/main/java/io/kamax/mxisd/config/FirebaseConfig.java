@@ -71,7 +71,7 @@ public class FirebaseConfig {
     }
 
     @PostConstruct
-    private void postConstruct() {
+    public void build() {
         log.info("--- Firebase configuration ---");
         log.info("Enabled: {}", isEnabled());
         if (isEnabled()) {
@@ -82,20 +82,12 @@ public class FirebaseConfig {
 
     @Bean
     public AuthenticatorProvider getAuthProvider() {
-        if (!enabled) {
-            return new GoogleFirebaseAuthenticator(false);
-        } else {
-            return new GoogleFirebaseAuthenticator(credentials, database);
-        }
+        return new GoogleFirebaseAuthenticator(enabled, credentials, database);
     }
 
     @Bean
     public IThreePidProvider getLookupProvider() {
-        if (!enabled) {
-            return new GoogleFirebaseProvider(false);
-        } else {
-            return new GoogleFirebaseProvider(credentials, database, mxCfg.getDomain());
-        }
+        return new GoogleFirebaseProvider(enabled, credentials, database, mxCfg.getDomain());
     }
 
 }
