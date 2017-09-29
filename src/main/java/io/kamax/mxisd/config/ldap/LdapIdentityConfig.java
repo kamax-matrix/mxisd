@@ -31,7 +31,25 @@ import java.util.Optional;
 @ConfigurationProperties(prefix = "ldap.identity")
 public class LdapIdentityConfig {
 
+    private String filter;
+    private String token = "%3pid";
     private Map<String, String> medium = new HashMap<>();
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public Map<String, String> getMedium() {
         return medium;

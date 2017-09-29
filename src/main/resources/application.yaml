@@ -44,6 +44,7 @@ rest:
 
 ldap:
   enabled: false
+  filter: ''
   connection:
     tls: false
     port: 389
@@ -52,10 +53,27 @@ ldap:
       type: 'uid'
       value: 'userPrincipalName'
     name: 'displayName'
+    threepid:
+      email:
+        - 'mailPrimaryAddress'
+        - 'mail'
+        - 'otherMailbox'
+      msisdn:
+        - 'telephoneNumber'
+        - 'mobile'
+        - 'homePhone'
+        - 'otherTelephone'
+        - 'otherMobile'
+        - 'otherHomePhone'
+  auth:
+    filter: ''
+  directory:
+    filter: ''
   identity:
+    filter: ''
     medium:
-      email: "(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))"
-      msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
+      email: ''
+      msisdn: ''
 
 firebase:
   enabled: false

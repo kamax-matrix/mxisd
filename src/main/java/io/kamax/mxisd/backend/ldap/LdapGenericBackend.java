@@ -20,38 +20,112 @@
 
 package io.kamax.mxisd.backend.ldap;
 
+import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.ldap.LdapAttributeConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
 import org.apache.commons.lang.StringUtils;
+import org.apache.directory.api.ldap.model.entry.Attribute;
+import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
-public class LdapGenericBackend {
+import java.util.Arrays;
+import java.util.Optional;
+
+public abstract class LdapGenericBackend {
+
+    public static final String UID = "uid";
+    public static final String MATRIX_ID = "mxid";
 
     private Logger log = LoggerFactory.getLogger(LdapGenericBackend.class);
 
-    @Autowired
-    private LdapConfig ldapCfg;
+    private LdapConfig cfg;
+    private MatrixConfig mxCfg;
 
-    protected LdapConnection getConn() {
-        return new LdapNetworkConnection(ldapCfg.getConn().getHost(), ldapCfg.getConn().getPort(), ldapCfg.getConn().isTls());
-    }
-
-    protected void bind(LdapConnection conn) throws LdapException {
-        if (StringUtils.isBlank(ldapCfg.getConn().getBindDn()) && StringUtils.isBlank(ldapCfg.getConn().getBindPassword())) {
-            conn.anonymousBind();
-        } else {
-            conn.bind(ldapCfg.getConn().getBindDn(), ldapCfg.getConn().getBindPassword());
-        }
+    public LdapGenericBackend(LdapConfig cfg, MatrixConfig mxCfg) {
+        this.cfg = cfg;
+        this.mxCfg = mxCfg;
     }
 
     protected LdapConfig getCfg() {
-        return ldapCfg;
+        return cfg;
+    }
+
+    protected String getBaseDn() {
+        return cfg.getConn().getBaseDn();
+    }
+
+    protected LdapAttributeConfig getAt() {
+        return cfg.getAttribute();
+    }
+
+    protected String getUidAtt() {
+        return getAt().getUid().getValue();
+    }
+
+    protected LdapConnection getConn() {
+        return new LdapNetworkConnection(cfg.getConn().getHost(), cfg.getConn().getPort(), cfg.getConn().isTls());
+    }
+
+    protected void bind(LdapConnection conn) throws LdapException {
+        if (StringUtils.isBlank(cfg.getConn().getBindDn()) && StringUtils.isBlank(cfg.getConn().getBindPassword())) {
+            conn.anonymousBind();
+        } else {
+            conn.bind(cfg.getConn().getBindDn(), cfg.getConn().getBindPassword());
+        }
+    }
+
+    protected String buildWithFilter(String base, String filter) {
+        if (StringUtils.isBlank(filter)) {
+            return base;
+        } else {
+            return "(&" + filter + base + ")";
+        }
+    }
+
+    public static String buildOrQuery(String value, String... attributes) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(|");
+        Arrays.stream(attributes).forEach(s -> {
+            builder.append("(");
+            builder.append(s).append("=").append(value).append(")");
+        });
+        builder.append(")");
+        return builder.toString();
+    }
+
+    public String buildOrQueryWithFilter(String filter, String value, String... attributes) {
+        return buildWithFilter(buildOrQuery(value, attributes), filter);
+    }
+
+    public String buildMatrixIdFromUid(String uid) {
+        String uidType = getCfg().getAttribute().getUid().getType();
+        if (StringUtils.equals(UID, uidType)) {
+            return "@" + uid + ":" + mxCfg.getDomain();
+        } else if (StringUtils.equals(MATRIX_ID, uidType)) {
+            return uid;
+        } else {
+            throw new IllegalArgumentException("Bind type " + uidType + " is not supported");
+        }
+    }
+
+    public Optional<String> getAttribute(Entry entry, String attName) {
+        Attribute attribute = entry.get(attName);
+        if (attribute == null) {
+            log.info("DN {}: no attribute {}, skipping", entry.getDn(), attName);
+            return Optional.empty();
+        }
+
+        String value = attribute.get().toString();
+        if (StringUtils.isBlank(value)) {
+            log.info("DN {}: empty attribute {}, skipping", attName);
+            return Optional.empty();
+        }
+
+        return Optional.of(value);
     }
 
 }

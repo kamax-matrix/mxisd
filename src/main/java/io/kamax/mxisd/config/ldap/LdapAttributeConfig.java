@@ -23,12 +23,17 @@ package io.kamax.mxisd.config.ldap;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Configuration
 @ConfigurationProperties(prefix = "ldap.attribute")
 public class LdapAttributeConfig {
 
     private LdapAttributeUidConfig uid;
     private String name;
+    private Map<String, List<String>> threepid = new HashMap<>();
 
     public LdapAttributeUidConfig getUid() {
         return uid;
@@ -44,6 +49,14 @@ public class LdapAttributeConfig {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Map<String, List<String>> getThreepid() {
+        return threepid;
+    }
+
+    public void setThreepid(Map<String, List<String>> threepid) {
+        this.threepid = threepid;
     }
 
 }
