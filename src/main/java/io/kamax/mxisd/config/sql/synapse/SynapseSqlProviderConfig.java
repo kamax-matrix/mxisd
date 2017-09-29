@@ -20,20 +20,24 @@
 
 package io.kamax.mxisd.config.sql.synapse;
 
-import io.kamax.mxisd.config.sql.SqlProviderConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.kamax.mxisd.config.sql.SqlConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import static io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig.NAMESPACE;
+import javax.annotation.PostConstruct;
 
 @Configuration
-@ConfigurationProperties(NAMESPACE)
-public class SynapseSqlProviderConfig extends SqlProviderConfig {
+@ConfigurationProperties("synapseSql")
+public class SynapseSqlProviderConfig extends SqlConfig {
 
-    public static final String NAMESPACE = "synapseSql";
+    @Override
+    protected String getProviderName() {
+        return "Synapse SQL";
+    }
 
-    private Logger log = LoggerFactory.getLogger(SynapseSqlProviderConfig.class);
+    @PostConstruct
+    public void build() {
+        super.build();
+    }
 
 }

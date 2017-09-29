@@ -37,8 +37,8 @@ public class SynapseSqliteDirectoryProvider extends SqlDirectoryProvider {
     private SynapseSqlProviderConfig cfg;
 
     @Autowired
-    public SynapseSqliteDirectoryProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg, SqlConnectionPool pool) {
-        super(cfg, mxCfg, pool);
+    public SynapseSqliteDirectoryProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg) {
+        super(cfg, mxCfg);
 
         if (StringUtils.equals("sqlite", cfg.getType())) {
             String userId = "'@' || p.user_id || ':" + mxCfg.getDomain() + "'";

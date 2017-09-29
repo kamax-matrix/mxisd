@@ -43,6 +43,10 @@ public class GoogleFirebaseBackend {
 
     GoogleFirebaseBackend(boolean isEnabled, String name, String credsPath, String db) {
         this.isEnabled = isEnabled;
+        if (!isEnabled) {
+            return;
+        }
+
         try {
             FirebaseApp fbApp = FirebaseApp.initializeApp(getOpts(credsPath, db), name);
             fbAuth = FirebaseAuth.getInstance(fbApp);

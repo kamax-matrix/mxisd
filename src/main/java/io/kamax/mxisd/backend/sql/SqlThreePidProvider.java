@@ -52,9 +52,9 @@ public class SqlThreePidProvider implements IThreePidProvider {
     private SqlConnectionPool pool;
 
     @Autowired
-    public SqlThreePidProvider(SqlProviderConfig cfg, MatrixConfig mxCfg, SqlConnectionPool pool) {
+    public SqlThreePidProvider(SqlProviderConfig cfg, MatrixConfig mxCfg) {
         this.cfg = cfg;
-        this.pool = pool;
+        this.pool = new SqlConnectionPool(cfg);
         this.mxCfg = mxCfg;
     }
 

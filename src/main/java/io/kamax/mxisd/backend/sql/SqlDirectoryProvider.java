@@ -20,7 +20,9 @@
 
 package io.kamax.mxisd.backend.sql;
 
+import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.sql.SqlConfig;
 import io.kamax.mxisd.config.sql.SqlProviderConfig;
 import io.kamax.mxisd.controller.directory.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
@@ -28,8 +30,6 @@ import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,21 +39,18 @@ import java.util.Optional;
 
 import static io.kamax.mxisd.controller.directory.io.UserDirectorySearchResult.Result;
 
-
-@Component
-public class SqlDirectoryProvider implements IDirectoryProvider {
+public abstract class SqlDirectoryProvider implements IDirectoryProvider {
 
     private Logger log = LoggerFactory.getLogger(SqlDirectoryProvider.class);
 
-    protected SqlProviderConfig cfg;
+    protected SqlConfig cfg;
     private MatrixConfig mxCfg;
 
     private SqlConnectionPool pool;
 
-    @Autowired
-    public SqlDirectoryProvider(SqlProviderConfig cfg, MatrixConfig mxCfg, SqlConnectionPool pool) {
+    public SqlDirectoryProvider(SqlConfig cfg, MatrixConfig mxCfg) {
         this.cfg = cfg;
-        this.pool = pool;
+        this.pool = new SqlConnectionPool(cfg);
         this.mxCfg = mxCfg;
     }
 
@@ -77,6 +74,7 @@ public class SqlDirectoryProvider implements IDirectoryProvider {
 
     public UserDirectorySearchResult search(String searchTerm, SqlProviderConfig.Query query) {
         try (Connection conn = pool.get()) {
+            log.info("Will execute query: {}", query.getValue());
             try (PreparedStatement stmt = conn.prepareStatement(query.getValue())) {
                 setParameters(stmt, searchTerm);
 
@@ -87,7 +85,7 @@ public class SqlDirectoryProvider implements IDirectoryProvider {
                     while (rSet.next()) {
                         processRow(rSet).ifPresent(e -> {
                             if (StringUtils.equalsIgnoreCase("localpart", query.getType())) {
-                                e.setUserId("@" + e.getUserId() + mxCfg.getDomain());
+                                e.setUserId(new MatrixID(e.getUserId(), mxCfg.getDomain()).getId());
                             }
                             result.addResult(e);
                         });

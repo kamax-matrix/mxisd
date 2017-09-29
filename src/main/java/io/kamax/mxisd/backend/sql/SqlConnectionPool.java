@@ -21,18 +21,16 @@
 package io.kamax.mxisd.backend.sql;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import io.kamax.mxisd.config.sql.SqlProviderConfig;
-import org.springframework.stereotype.Component;
+import io.kamax.mxisd.config.sql.SqlConfig;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Component
 public class SqlConnectionPool {
 
     private ComboPooledDataSource ds;
 
-    public SqlConnectionPool(SqlProviderConfig cfg) {
+    public SqlConnectionPool(SqlConfig cfg) {
         ds = new ComboPooledDataSource();
         ds.setJdbcUrl("jdbc:" + cfg.getType() + ":" + cfg.getConnection());
         ds.setMinPoolSize(1);
