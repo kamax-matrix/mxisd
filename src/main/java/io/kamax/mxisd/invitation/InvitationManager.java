@@ -211,9 +211,16 @@ public class InvitationManager {
 
         String invId = getId(invitation);
         log.info("Handling invite for {}:{} from {} in room {}", invitation.getMedium(), invitation.getAddress(), invitation.getSender(), invitation.getRoomId());
-        if (invitations.containsKey(invId)) {
+        IThreePidInviteReply reply = invitations.get(invId);
+        if (reply != null) {
             log.info("Invite is already pending for {}:{}, returning data", invitation.getMedium(), invitation.getAddress());
-            return invitations.get(invId);
+            if (!StringUtils.equals(invitation.getRoomId(), reply.getInvite().getRoomId())) {
+                log.info("Sending new notification as new invite room {} is different from the original {}", invitation.getRoomId(), reply.getInvite().getRoomId());
+                notifMgr.sendForInvite(new ThreePidInviteReply(reply.getId(), invitation, reply.getToken(), reply.getDisplayName()));
+            } else {
+                // FIXME we should check attempt and send if bigger
+            }
+            return reply;
         }
 
         Optional<?> result = lookupMgr.find(invitation.getMedium(), invitation.getAddress(), true);
@@ -225,7 +232,7 @@ public class InvitationManager {
         String token = RandomStringUtils.randomAlphanumeric(64);
         String displayName = invitation.getAddress().substring(0, 3) + "...";
 
-        IThreePidInviteReply reply = new ThreePidInviteReply(invId, invitation, token, displayName);
+        reply = new ThreePidInviteReply(invId, invitation, token, displayName);
 
         log.info("Performing invite to {}:{}", invitation.getMedium(), invitation.getAddress());
         notifMgr.sendForInvite(reply);
