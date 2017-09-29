@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.directory;
+package io.kamax.mxisd.controller.directory.v1;
 
 import com.google.gson.Gson;
-import io.kamax.mxisd.controller.directory.io.UserDirectorySearchRequest;
-import io.kamax.mxisd.controller.directory.io.UserDirectorySearchResult;
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.DirectoryManager;
 import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.GsonUtil;

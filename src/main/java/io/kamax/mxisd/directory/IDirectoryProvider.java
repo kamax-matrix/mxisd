@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.directory;
 
-import io.kamax.mxisd.controller.directory.io.UserDirectorySearchResult;
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 
 public interface IDirectoryProvider {
 

@@ -24,7 +24,7 @@ import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.SqlConfig;
 import io.kamax.mxisd.config.sql.SqlProviderConfig;
-import io.kamax.mxisd.controller.directory.io.UserDirectorySearchResult;
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +37,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import static io.kamax.mxisd.controller.directory.io.UserDirectorySearchResult.Result;
+import static io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult.Result;
 
 public abstract class SqlDirectoryProvider implements IDirectoryProvider {
 

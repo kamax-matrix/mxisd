@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.directory.io;
+package io.kamax.mxisd.controller.directory.v1.io;
 
 import java.util.ArrayList;
 import java.util.List;

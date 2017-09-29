@@ -22,8 +22,8 @@ package io.kamax.mxisd.directory;
 
 import com.google.gson.Gson;
 import io.kamax.matrix.MatrixErrorInfo;
-import io.kamax.mxisd.controller.directory.io.UserDirectorySearchRequest;
-import io.kamax.mxisd.controller.directory.io.UserDirectorySearchResult;
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.exception.MatrixException;
