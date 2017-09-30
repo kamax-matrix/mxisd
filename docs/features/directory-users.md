@@ -3,12 +3,12 @@
   - For SQL: Use `synapseSql` module with `type: {sqlite|postgresql}` and `database` as JDBC url after `jdbc:driver:`
     - `/path/to/db` for `sqlite`
     - `//host/db?username...` for `postgresql`)
-- Configure DNS overwrite for domain name (and mention ${matrix.domain} can be used)
+- Configure DNS overwrite for the Homeserver hostname used when connecting as a client (and mention ${matrix.domain} can be used)
 ```
 dns.overwrite.homeserver.client:
   - name: 'example.org'
     value: 'http://localhost:8008'
 ```
 - Configure reverse proxy
-  - for `/_matrix/client/r0/user_directory/search` to `http://internalIp:8008/_matrix/client/r0/user_directory/search`
+  - for `/_matrix/client/r0/user_directory/search` to `http://internalIpOfMxisd:8090/_matrix/client/r0/user_directory/search`
   - With `ProxyPreserveHost on` on apache

@@ -21,6 +21,7 @@
 package io.kamax.mxisd.directory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import io.kamax.matrix.MatrixErrorInfo;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
@@ -96,8 +97,10 @@ public class DirectoryManager {
             if (resultHs.isLimited()) {
                 result.setLimited(true);
             }
+        } catch (JsonSyntaxException e) {
+            throw new InternalServerError("Invalid JSON reply from the HS: " + e.getMessage());
         } catch (IOException e) {
-            throw new InternalServerError(e);
+            throw new InternalServerError("Unable to query the HS: I/O error: " + e.getMessage());
         }
 
         for (IDirectoryProvider provider : providers) {
