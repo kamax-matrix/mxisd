@@ -24,6 +24,8 @@ import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
+import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.ldap.LdapConfig;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException;
@@ -35,6 +37,7 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -44,8 +47,9 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
 
     private Logger log = LoggerFactory.getLogger(LdapAuthProvider.class);
 
-    private String getUidAttribute() {
-        return getCfg().getAttribute().getUid().getValue();
+    @Autowired
+    public LdapAuthProvider(LdapConfig cfg, MatrixConfig mxCfg) {
+        super(cfg, mxCfg);
     }
 
     @Override
@@ -57,37 +61,26 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
     public BackendAuthResult authenticate(_MatrixID mxid, String password) {
         log.info("Performing auth for {}", mxid);
 
-        LdapConnection conn = getConn();
-        try {
+
+        try (LdapConnection conn = getConn()) {
             bind(conn);
 
-            String uidType = getCfg().getAttribute().getUid().getType();
-            String userFilterValue = StringUtils.equals(LdapThreePidProvider.UID, uidType) ? mxid.getLocalPart() : mxid.getId();
+            String uidType = getAt().getUid().getType();
+            String userFilterValue = StringUtils.equals(LdapGenericBackend.UID, uidType) ? mxid.getLocalPart() : mxid.getId();
             if (StringUtils.isBlank(userFilterValue)) {
                 log.warn("Username is empty, failing auth");
                 return BackendAuthResult.failure();
             }
 
-            String userFilter = "(" + getCfg().getAttribute().getUid().getValue() + "=" + userFilterValue + ")";
-            if (!StringUtils.isBlank(getCfg().getAuth().getFilter())) {
-                userFilter = "(&" + getCfg().getAuth().getFilter() + userFilter + ")";
-            }
-            EntryCursor cursor = conn.search(getCfg().getConn().getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAttribute(), getCfg().getAttribute().getName());
-            try {
+            String userFilter = "(" + getUidAtt() + "=" + userFilterValue + ")";
+            userFilter = buildWithFilter(userFilter, getCfg().getAuth().getFilter());
+            try (EntryCursor cursor = conn.search(getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAtt(), getAt().getName())) {
                 while (cursor.next()) {
                     Entry entry = cursor.get();
                     String dn = entry.getDn().getName();
                     log.info("Checking possible match, DN: {}", dn);
 
-                    Attribute attribute = entry.get(getUidAttribute());
-                    if (attribute == null) {
-                        log.info("DN {}: no attribute {}, skpping", dn, getUidAttribute());
-                        continue;
-                    }
-
-                    String data = attribute.get().toString();
-                    if (data.length() < 1) {
-                        log.info("DN {}: empty attribute {}, skipping", getUidAttribute());
+                    if (!getAttribute(entry, getUidAtt()).isPresent()) {
                         continue;
                     }
 
@@ -99,7 +92,7 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                         return BackendAuthResult.failure();
                     }
 
-                    Attribute nameAttribute = entry.get(getCfg().getAttribute().getName());
+                    Attribute nameAttribute = entry.get(getAt().getName());
                     String name = nameAttribute != null ? nameAttribute.get().toString() : null;
 
                     log.info("Authentication successful for {}", entry.getDn().getName());
@@ -110,20 +103,12 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                 }
             } catch (CursorLdapReferralException e) {
                 log.warn("Entity for {} is only available via referral, skipping", mxid);
-            } finally {
-                cursor.close();
             }
 
             log.info("No match were found for {}", mxid);
             return BackendAuthResult.failure();
         } catch (LdapException | IOException | CursorException e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                conn.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 

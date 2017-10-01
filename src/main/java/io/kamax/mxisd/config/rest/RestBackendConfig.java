@@ -60,16 +60,9 @@ public class RestBackendConfig {
 
     public static class Endpoints {
 
-        private IdentityEndpoints identity = new IdentityEndpoints();
         private String auth;
-
-        public IdentityEndpoints getIdentity() {
-            return identity;
-        }
-
-        public void setIdentity(IdentityEndpoints identity) {
-            this.identity = identity;
-        }
+        private String directory;
+        private IdentityEndpoints identity = new IdentityEndpoints();
 
         public String getAuth() {
             return auth;
@@ -77,6 +70,22 @@ public class RestBackendConfig {
 
         public void setAuth(String auth) {
             this.auth = auth;
+        }
+
+        public String getDirectory() {
+            return directory;
+        }
+
+        public void setDirectory(String directory) {
+            this.directory = directory;
+        }
+
+        public IdentityEndpoints getIdentity() {
+            return identity;
+        }
+
+        public void setIdentity(IdentityEndpoints identity) {
+            this.identity = identity;
         }
 
     }
@@ -136,11 +145,13 @@ public class RestBackendConfig {
 
         if (isEnabled()) {
             endpoints.setAuth(buildEndpointUrl(endpoints.getAuth()));
+            endpoints.setDirectory(buildEndpointUrl(endpoints.getDirectory()));
             endpoints.identity.setSingle(buildEndpointUrl(endpoints.identity.getSingle()));
             endpoints.identity.setBulk(buildEndpointUrl(endpoints.identity.getBulk()));
 
             log.info("Host: {}", getHost());
             log.info("Auth endpoint: {}", endpoints.getAuth());
+            log.info("Directory endpoint: {}", endpoints.getDirectory());
             log.info("Identity Single endpoint: {}", endpoints.identity.getSingle());
             log.info("Identity Bulk endpoint: {}", endpoints.identity.getBulk());
         }

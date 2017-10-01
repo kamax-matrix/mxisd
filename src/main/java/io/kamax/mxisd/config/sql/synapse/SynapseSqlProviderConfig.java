@@ -18,50 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config;
+package io.kamax.mxisd.config.sql.synapse;
 
-import org.apache.commons.lang.StringUtils;
+import io.kamax.mxisd.config.sql.SqlConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+
 @Configuration
-@ConfigurationProperties("dns.overwrite.homeserver")
-public class DnsOverwriteEntry {
+@ConfigurationProperties("synapseSql")
+public class SynapseSqlProviderConfig extends SqlConfig {
 
-    private String name;
-    private String type;
-    private String value;
-
-    public String getName() {
-        return name;
+    @Override
+    protected String getProviderName() {
+        return "Synapse SQL";
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getTarget() {
-        if (StringUtils.equals("env", getType())) {
-            return System.getenv(getValue());
-        } else {
-            return getValue();
-        }
+    @PostConstruct
+    public void build() {
+        super.build();
     }
 
 }

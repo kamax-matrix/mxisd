@@ -6,33 +6,33 @@ The REST backend allows you to query identity data in existing webapps, like:
 - self-hosted clouds (Nextcloud, ownCloud, ...)
 
 It supports the following mxisd flows:
-- Identity lookup
-- Authentication
+- [Authentication](#authentication)
+- [Directory](#directory)
+- [Identity](#identity)
 
 To integrate this backend with your webapp, you will need to implement three specific REST endpoints detailed below.
 
 
 ## Configuration
-| Key                            | Default                               | Description                                          |
----------------------------------|---------------------------------------|------------------------------------------------------|
-| rest.enabled                   | false                                 | Globally enable/disable the REST backend             |
-| rest.host                      | *empty*                               | Default base URL to use for the different endpoints. |
-| rest.endpoints.auth            | /_mxisd/identity/api/v1/auth          | Endpoint to validate credentials                     |
-| rest.endpoints.identity.single | /_mxisd/identity/api/v1/lookup/single | Endpoint to query a single 3PID                      |
-| rest.endpoints.identity.bulk   | /_mxisd/identity/api/v1/lookup/bulk   | Endpoint to query a list of 3PID                     |
+| Key                            | Default                                      | Description                                          |
+---------------------------------|----------------------------------------------|------------------------------------------------------|
+| rest.enabled                   | false                                        | Globally enable/disable the REST backend             |
+| rest.host                      | *empty*                                      | Default base URL to use for the different endpoints. |
+| rest.endpoints.auth            | /_mxisd/backend/api/v1/auth/login            | Validate credentials and get user profile            |
+| rest.endpoints.directory       | /_mxisd/backend/api/v1/directory/user/search | Search for users by arbitrary input                  |
+| rest.endpoints.identity.single | /_mxisd/backend/api/v1/identity/single       | Endpoint to query a single 3PID                      |
+| rest.endpoints.identity.bulk   | /_mxisd/backend/api/v1/identity/bulk         | Endpoint to query a list of 3PID                     |
 
 Endpoint values can handle two formats:
 - URL Path starting with `/` that gets happened to the `rest.host`
 - Full URL, if you want each endpoint to go to a specific server/protocol/port
 
-`rest.host` is only mandatory if at least one endpoint is not a full URL.
+`rest.host` is mandatory if at least one endpoint is not a full URL.
 
 ## Endpoints
-### Authenticate
-Configured with `rest.endpoints.auth`
-
+### Authentication
 HTTP method: `POST`  
-Encoding: JSON UTF-8
+Content-type: JSON UTF-8
   
 #### Request Body
 ```
@@ -84,12 +84,51 @@ If the authentication succeed:
 }
 ```
 
-### Lookup
-#### Single
-Configured with `rest.endpoints.identity.single`
+### Directory
+HTTP method: `POST`
+Content-type: JSON UTF-8
 
+#### Request Body
+```
+{
+  "by": "<search type>",
+  "search_term": "doe"
+}
+```
+`by` can be:
+- `name`
+- `threepid`
+
+#### Response Body:
+If users found:
+```
+{
+  "limited": false,
+  "results": [
+    {
+      "avatar_url": "http://domain.tld/path/to/avatar.png",
+      "display_name": "John Doe",
+      "user_id": "UserIdLocalpart"
+    },
+    {
+      ...
+    }
+  ]
+}
+```
+
+If no user found:
+```
+{
+  "limited": false,
+  "results": []
+}
+```
+
+### Identity
+#### Single 3PID lookup
 HTTP method: `POST`  
-Encoding: JSON UTF-8  
+Content-type: JSON UTF-8  
   
 #### Request Body
 ```
@@ -122,11 +161,9 @@ If no match was found:
 {}
 ```
 
-#### Bulk
-Configured with `rest.endpoints.identity.bulk`
-
+#### Bulk 3PID lookup
 HTTP method: `POST`  
-Encoding: JSON UTF-8  
+Content-type: JSON UTF-8  
   
 #### Request Body
 ```

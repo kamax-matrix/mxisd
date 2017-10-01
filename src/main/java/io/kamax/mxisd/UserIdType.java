@@ -28,7 +28,7 @@ public enum UserIdType {
     Localpart("localpart"),
     MatrixID("mxid"),
     EmailLocalpart("email_localpart"),
-    Email("threepids/email");
+    Email("email");
 
     private String id;
 

@@ -18,27 +18,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.sql;
+package io.kamax.mxisd.backend.sql;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import io.kamax.mxisd.config.sql.SqlConfig;
 
-import javax.annotation.PostConstruct;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-@Configuration
-@ConfigurationProperties("sql")
-@Primary
-public class SqlProviderConfig extends SqlConfig {
+public class SqlConnectionPool {
 
-    @Override
-    protected String getProviderName() {
-        return "Generic SQL";
+    private ComboPooledDataSource ds;
+
+    public SqlConnectionPool(SqlConfig cfg) {
+        ds = new ComboPooledDataSource();
+        ds.setJdbcUrl("jdbc:" + cfg.getType() + ":" + cfg.getConnection());
+        ds.setMinPoolSize(1);
+        ds.setMaxPoolSize(10);
+        ds.setAcquireIncrement(2);
     }
 
-    @PostConstruct
-    public void build() {
-        super.build();
+    public Connection get() throws SQLException {
+        return ds.getConnection();
     }
 
 }

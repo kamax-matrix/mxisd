@@ -20,12 +20,14 @@
 
 package io.kamax.mxisd.controller.identity.v1.io;
 
+import io.kamax.matrix.ThreePidMedium;
+
 public class SessionEmailTokenRequestJson extends GenericTokenRequestJson {
 
     private String email;
 
     public String getMedium() {
-        return "threepids/email";
+        return ThreePidMedium.Email.getId();
     }
 
     public String getValue() {

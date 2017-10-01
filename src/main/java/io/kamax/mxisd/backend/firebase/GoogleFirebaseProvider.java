@@ -20,11 +20,6 @@
 
 package io.kamax.mxisd.backend.firebase;
 
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseCredential;
-import com.google.firebase.auth.FirebaseCredentials;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.tasks.OnFailureListener;
 import com.google.firebase.tasks.OnSuccessListener;
@@ -34,70 +29,27 @@ import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class GoogleFirebaseProvider implements IThreePidProvider {
+public class GoogleFirebaseProvider extends GoogleFirebaseBackend implements IThreePidProvider {
 
     private Logger log = LoggerFactory.getLogger(GoogleFirebaseProvider.class);
-
-    private boolean isEnabled;
     private String domain;
-    private FirebaseAuth fbAuth;
 
-    public GoogleFirebaseProvider(boolean isEnabled) {
-        this.isEnabled = isEnabled;
-    }
-
-    public GoogleFirebaseProvider(String credsPath, String db, String domain) {
-        this(true);
+    public GoogleFirebaseProvider(boolean isEnabled, String credsPath, String db, String domain) {
+        super(isEnabled, "ThreePidProvider", credsPath, db);
         this.domain = domain;
-
-        try {
-            FirebaseApp fbApp = FirebaseApp.initializeApp(getOpts(credsPath, db), "ThreePidProvider");
-            fbAuth = FirebaseAuth.getInstance(fbApp);
-
-            log.info("Google Firebase Authentication is ready");
-        } catch (IOException e) {
-            throw new RuntimeException("Error when initializing Firebase", e);
-        }
-    }
-
-    private FirebaseCredential getCreds(String credsPath) throws IOException {
-        if (StringUtils.isNotBlank(credsPath)) {
-            return FirebaseCredentials.fromCertificate(new FileInputStream(credsPath));
-        } else {
-            return FirebaseCredentials.applicationDefault();
-        }
-    }
-
-    private FirebaseOptions getOpts(String credsPath, String db) throws IOException {
-        if (StringUtils.isBlank(db)) {
-            throw new IllegalArgumentException("Firebase database is not configured");
-        }
-
-        return new FirebaseOptions.Builder()
-                .setCredential(getCreds(credsPath))
-                .setDatabaseUrl(db)
-                .build();
     }
 
     private String getMxid(UserRecord record) {
         return new MatrixID(record.getUid(), domain).getId();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return isEnabled;
     }
 
     @Override
@@ -136,13 +88,13 @@ public class GoogleFirebaseProvider implements IThreePidProvider {
 
         if (ThreePidMedium.Email.is(medium)) {
             log.info("Performing E-mail 3PID lookup for {}", address);
-            fbAuth.getUserByEmail(address)
+            getFirebase().getUserByEmail(address)
                     .addOnSuccessListener(success)
                     .addOnFailureListener(failure);
             waitOnLatch(l);
         } else if (ThreePidMedium.PhoneNumber.is(medium)) {
             log.info("Performing msisdn 3PID lookup for {}", address);
-            fbAuth.getUserByPhoneNumber(address)
+            getFirebase().getUserByPhoneNumber(address)
                     .addOnSuccessListener(success)
                     .addOnFailureListener(failure);
             waitOnLatch(l);

@@ -37,13 +37,15 @@ lookup:
 
 rest:
   endpoints:
-    auth: "/_mxisd/identity/api/v1/auth"
+    auth: '/_mxisd/backend/api/v1/auth/login'
+    directory: '/_mxisd/backend/api/v1/directory/user/search'
     identity:
-      single: "/_mxisd/identity/api/v1/lookup/single"
-      bulk: "/_mxisd/identity/api/v1/lookup/bulk"
+      single: '/_mxisd/backend/api/v1/identity/lookup/single'
+      bulk: '/_mxisd/backend/api/v1/identity/lookup/bulk'
 
 ldap:
   enabled: false
+  filter: ''
   connection:
     tls: false
     port: 389
@@ -52,10 +54,29 @@ ldap:
       type: 'uid'
       value: 'userPrincipalName'
     name: 'displayName'
+    threepid:
+      email:
+        - 'mailPrimaryAddress'
+        - 'mail'
+        - 'otherMailbox'
+      msisdn:
+        - 'telephoneNumber'
+        - 'mobile'
+        - 'homePhone'
+        - 'otherTelephone'
+        - 'otherMobile'
+        - 'otherHomePhone'
+  auth:
+    filter: ''
+  directory:
+    attribute:
+      other: []
+    filter: ''
   identity:
+    filter: ''
     medium:
-      email: "(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))"
-      msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
+      email: ''
+      msisdn: ''
 
 firebase:
   enabled: false
@@ -66,9 +87,22 @@ sql:
   connection: ''
   auth:
     enabled: false
+  directory:
+    enabled: false
+    query:
+      name:
+        type: 'localpart'
+        value: 'SELECT 1'
+      threepid:
+        type: 'localpart'
+        value: 'SELECT 1'
   identity:
     type: 'mxid'
-    query: "SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?"
+    query: 'SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?'
+
+synapseSql:
+  enabled: false
+  type: 'sqlite'
 
 forward:
   servers:

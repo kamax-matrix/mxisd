@@ -18,27 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.sql;
+package io.kamax.mxisd.directory;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 
-import javax.annotation.PostConstruct;
+public interface IDirectoryProvider {
 
-@Configuration
-@ConfigurationProperties("sql")
-@Primary
-public class SqlProviderConfig extends SqlConfig {
+    boolean isEnabled();
 
-    @Override
-    protected String getProviderName() {
-        return "Generic SQL";
-    }
+    UserDirectorySearchResult searchByDisplayName(String query);
 
-    @PostConstruct
-    public void build() {
-        super.build();
-    }
+    UserDirectorySearchResult searchBy3pid(String query);
 
 }

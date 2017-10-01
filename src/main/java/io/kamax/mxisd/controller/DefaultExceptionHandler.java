@@ -18,10 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.controller.identity.v1;
+package io.kamax.mxisd.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import io.kamax.mxisd.exception.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -44,59 +45,66 @@ public class DefaultExceptionHandler {
 
     private static Gson gson = new Gson();
 
-    static String handle(String erroCode, String error) {
+    private String handle(HttpServletRequest req, String erroCode, String error) {
         JsonObject obj = new JsonObject();
         obj.addProperty("errcode", erroCode);
         obj.addProperty("error", error);
         obj.addProperty("success", false);
+        log.info("Request {} {} - Error {}: {}", req.getMethod(), req.getRequestURL(), erroCode, error);
         return gson.toJson(obj);
     }
 
     @ExceptionHandler(InternalServerError.class)
-    public String handle(InternalServerError e, HttpServletResponse response) {
+    public String handle(HttpServletRequest req, InternalServerError e, HttpServletResponse response) {
         if (StringUtils.isNotBlank(e.getInternalReason())) {
             log.error("Reference #{} - {}", e.getReference(), e.getInternalReason());
         } else {
             log.error("Reference #{}", e);
         }
 
-        return handleGeneric(e, response);
+        return handleGeneric(req, e, response);
     }
 
     @ExceptionHandler(MatrixException.class)
-    public String handleGeneric(MatrixException e, HttpServletResponse response) {
+    public String handleGeneric(HttpServletRequest req, MatrixException e, HttpServletResponse response) {
         response.setStatus(e.getStatus());
-        return handle(e.getErrorCode(), e.getError());
+        return handle(req, e.getErrorCode(), e.getError());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public String handle(MissingServletRequestParameterException e) {
-        return handle("M_INVALID_BODY", e.getMessage());
+    public String handle(HttpServletRequest req, MissingServletRequestParameterException e) {
+        return handle(req, "M_INCOMPLETE_REQUEST", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidResponseJsonException.class)
-    public String handle(InvalidResponseJsonException e) {
-        return handle("M_INVALID_JSON", e.getMessage());
+    public String handle(HttpServletRequest req, InvalidResponseJsonException e) {
+        return handle(req, "M_INVALID_JSON", e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(JsonSyntaxException.class)
+    public String handle(HttpServletRequest req, JsonSyntaxException e) {
+        return handle(req, "M_INVALID_JSON", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(JsonMemberNotFoundException.class)
-    public String handle(JsonMemberNotFoundException e) {
-        return handle("M_JSON_MISSING_KEYS", e.getMessage());
+    public String handle(HttpServletRequest req, JsonMemberNotFoundException e) {
+        return handle(req, "M_JSON_MISSING_KEYS", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MappingAlreadyExistsException.class)
-    public String handle(MappingAlreadyExistsException e) {
-        return handle("M_ALREADY_EXISTS", e.getMessage());
+    public String handle(HttpServletRequest req, MappingAlreadyExistsException e) {
+        return handle(req, "M_ALREADY_EXISTS", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
-    public String handle(BadRequestException e) {
-        return handle("M_BAD_REQUEST", e.getMessage());
+    public String handle(HttpServletRequest req, BadRequestException e) {
+        return handle(req, "M_BAD_REQUEST", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -104,10 +112,11 @@ public class DefaultExceptionHandler {
     public String handle(HttpServletRequest req, RuntimeException e) {
         log.error("Unknown error when handling {}", req.getRequestURL(), e);
         return handle(
+                req,
                 "M_UNKNOWN",
                 StringUtils.defaultIfBlank(
                         e.getMessage(),
-                        "An internal server error occured. If this error persists, please contact support with reference #" +
+                        "An internal server error occurred. If this error persists, please contact support with reference #" +
                                 Instant.now().toEpochMilli()
                 )
         );
