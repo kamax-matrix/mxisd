@@ -37,10 +37,11 @@ lookup:
 
 rest:
   endpoints:
-    auth: "/_mxisd/identity/api/v1/auth"
+    auth: '/_mxisd/backend/api/v1/auth/login'
+    directory: '/_mxisd/backend/api/v1/directory/user/search'
     identity:
-      single: "/_mxisd/identity/api/v1/lookup/single"
-      bulk: "/_mxisd/identity/api/v1/lookup/bulk"
+      single: '/_mxisd/backend/api/v1/identity/lookup/single'
+      bulk: '/_mxisd/backend/api/v1/identity/lookup/bulk'
 
 ldap:
   enabled: false
