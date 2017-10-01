@@ -91,9 +91,13 @@ Content-type: JSON UTF-8
 #### Request Body
 ```
 {
+  "by": "<search type>",
   "search_term": "doe"
 }
 ```
+`by` can be:
+- `name`
+- `threepid`
 
 #### Response Body:
 If users found:
@@ -102,8 +106,8 @@ If users found:
   "limited": false,
   "results": [
     {
-      "display_name": "John Doe",
       "avatar_url": "http://domain.tld/path/to/avatar.png",
+      "display_name": "John Doe",
       "user_id": "UserIdLocalpart"
     },
     {

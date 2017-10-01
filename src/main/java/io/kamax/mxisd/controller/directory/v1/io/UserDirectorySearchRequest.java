@@ -22,10 +22,19 @@ package io.kamax.mxisd.controller.directory.v1.io;
 
 public class UserDirectorySearchRequest {
 
+    private String by;
     private String searchTerm;
 
     public UserDirectorySearchRequest(String searchTerm) {
         setSearchTerm(searchTerm);
+    }
+
+    public String getBy() {
+        return by;
+    }
+
+    public void setBy(String by) {
+        this.by = by;
     }
 
     public String getSearchTerm() {

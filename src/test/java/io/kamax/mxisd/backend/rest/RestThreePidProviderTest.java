@@ -53,7 +53,7 @@ public class RestThreePidProviderTest {
         cfg.setEnabled(true);
         cfg.setHost("http://localhost:65000");
         cfg.getEndpoints().getIdentity().setSingle(lookupSinglePath);
-        cfg.getEndpoints().getIdentity().setBulk("/lookup/bulk");
+        cfg.getEndpoints().getIdentity().setBulk(lookupBulkPath);
         cfg.build();
 
         p = new RestThreePidProvider(cfg, mxCfg);
