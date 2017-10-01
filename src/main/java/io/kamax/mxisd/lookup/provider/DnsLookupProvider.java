@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.lookup.provider;
 
+import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
@@ -83,7 +84,7 @@ class DnsLookupProvider implements IThreePidProvider {
 
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
-        if (!StringUtils.equals("threepids/email", request.getType())) { // TODO use enum
+        if (!ThreePidMedium.Email.is(request.getType())) { // TODO use enum
             log.info("Skipping unsupported type {} for {}", request.getType(), request.getThreePid());
             return Optional.empty();
         }
@@ -106,7 +107,7 @@ class DnsLookupProvider implements IThreePidProvider {
         Map<String, List<ThreePidMapping>> domains = new HashMap<>();
 
         for (ThreePidMapping mapping : mappings) {
-            if (!StringUtils.equals("threepids/email", mapping.getMedium())) {
+            if (!ThreePidMedium.Email.is(mapping.getMedium())) {
                 log.info("Skipping unsupported type {} for {}", mapping.getMedium(), mapping.getValue());
                 continue;
             }
