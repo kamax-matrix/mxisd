@@ -1,6 +1,6 @@
 package io.kamax.mxisd.config.sql;
 
-import com.google.gson.Gson;
+import io.kamax.mxisd.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -212,8 +212,9 @@ public abstract class SqlConfig {
             log.info("Type: {}", getType());
             log.info("Connection: {}", getConnection());
             log.info("Auth enabled: {}", getAuth().isEnabled());
+            log.info("Directory queries: {}", GsonUtil.build().toJson(getDirectory().getQuery()));
             log.info("Identity type: {}", getIdentity().getType());
-            log.info("Identity medium queries: {}", new Gson().toJson(getIdentity().getMedium()));
+            log.info("Identity medium queries: {}", GsonUtil.build().toJson(getIdentity().getMedium()));
         }
     }
 

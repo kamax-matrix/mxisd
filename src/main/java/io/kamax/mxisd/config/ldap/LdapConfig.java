@@ -32,6 +32,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @ConfigurationProperties(prefix = "ldap")
@@ -45,7 +47,30 @@ public class LdapConfig {
 
     public static class Directory {
 
+        public static class Attribute {
+
+            private List<String> other = new ArrayList<>();
+
+            public List<String> getOther() {
+                return other;
+            }
+
+            public void setOther(List<String> other) {
+                this.other = other;
+            }
+
+        }
+
+        private Attribute attribute = new Attribute();
         private String filter;
+
+        public Attribute getAttribute() {
+            return attribute;
+        }
+
+        public void setAttribute(Attribute attribute) {
+            this.attribute = attribute;
+        }
 
         public String getFilter() {
             return filter;

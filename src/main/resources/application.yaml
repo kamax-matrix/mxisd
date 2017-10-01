@@ -69,6 +69,8 @@ ldap:
   auth:
     filter: ''
   directory:
+    attribute:
+      other: []
     filter: ''
   identity:
     filter: ''
@@ -89,8 +91,10 @@ sql:
     enabled: false
     query:
       name:
+        type: 'localpart'
         value: 'SELECT 1'
       threepid:
+        type: 'localpart'
         value: 'SELECT 1'
   identity:
     type: 'mxid'

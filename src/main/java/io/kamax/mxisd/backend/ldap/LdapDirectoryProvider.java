@@ -40,7 +40,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -73,6 +72,7 @@ public class LdapDirectoryProvider extends LdapGenericBackend implements IDirect
             attributes.toArray(attArray);
 
             String searchQuery = buildOrQueryWithFilter(getCfg().getDirectory().getFilter(), "*" + query + "*", attArray);
+            log.debug("Query: {}", searchQuery);
             try (EntryCursor cursor = conn.search(getBaseDn(), searchQuery, SearchScope.SUBTREE, attArray)) {
                 while (cursor.next()) {
                     Entry entry = cursor.get();
@@ -102,13 +102,17 @@ public class LdapDirectoryProvider extends LdapGenericBackend implements IDirect
     @Override
     public UserDirectorySearchResult searchByDisplayName(String query) {
         log.info("Performing LDAP directory search on display name using '{}'", query);
-        return search(query, Collections.singletonList(getCfg().getAttribute().getName()));
+        List<String> attributes = new ArrayList<>();
+        attributes.add(getAt().getName());
+        attributes.addAll(getCfg().getDirectory().getAttribute().getOther());
+        return search(query, attributes);
     }
 
     @Override
     public UserDirectorySearchResult searchBy3pid(String query) {
         log.info("Performing LDAP directory search on 3PIDs using '{}'", query);
         List<String> attributes = new ArrayList<>();
+        attributes.add(getAt().getName());
         getCfg().getAttribute().getThreepid().forEach((k, v) -> attributes.addAll(v));
         return search(query, attributes);
     }
