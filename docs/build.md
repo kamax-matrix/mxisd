@@ -3,7 +3,7 @@
 - [Debian package](#debian-package)
 - [Docker image](#docker-image)
 
-## Binaires
+## Binaries
 ### Requirements
 - JDK 1.8
 
