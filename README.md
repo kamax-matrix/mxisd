@@ -7,7 +7,7 @@ mxisd - Federated Matrix Identity Server Daemon
 - [Why use mxisd](#why-use-mxisd)
 - [Quick start](#quick-start)
 - [Support](#support)
-- [Contribute](#contribute) 
+- [Contribute](#contribute)
 - [FAQ](#faq)
 - [Contact](#contact)
 
@@ -165,6 +165,25 @@ please visit [our website](https://www.kamax.io/) to get in touch with us and ge
 
 We offer affordable monthly/yearly support plans for mxisd, synapse or your full Matrix infrastructure.
 
+# Contribute
+First and foremost, the best way to contribute is to use mxisd and tell us about it!  
+We would love to hear about your experience and get your feedback on how to make it an awesome product. 
+
+You can contribute as a community member by:
+- Opening issues for any weird behaviour or bug. mxisd should feel natural, let us know if it doesn't!
+- Helping us improve the documentation: tell us what is good or not good (in an issue or in Matrix), or make a PR with
+changes you feel improve the doc
+- Contribute code directly: we love contributors! We are quite strict in our reviews but and we'll always review your PR
+in a timely fashion.
+- Donate! any donation is welcome, regardless how small or big. This will directly be used for the fixed costs and
+developer time.
+
+You can contribute as an organisation/corporation by:
+- Get a [support contract](#support-professional). This is the best way you can help us as it ensures mxisd is maintained regularly and you get
+direct access to the support team.
+- Sponsoring new features or bug fixes. We'll quote the cost of development, at a reduced rate, and maintain the code
+in future release of mxisd. (subject to approval of the feature on our end)
+
 # FAQ
 ### Do I need to use mxisd if I run a Homeserver?
 No, but it is recommended, even if you don't use any backends or integration.
@@ -211,25 +230,6 @@ the door to very nice enhancements and integrations.
 
 ### Should I use mxisd if I don't host my own Homeserver?
 No
-
-# Contribute
-First and foremost, the best way to contribute is to use mxisd and tell us about it!  
-We would love to hear about your experience and get your feedback on how to make it an awesome product. 
-
-You can contribute as a community member by:
-- Opening issues for any weird behaviour or bug. mxisd should feel natural, let us know if it doesn't!
-- Helping us improve the documentation: tell us what is good or not good (in an issue or in Matrix), or make a PR with
-changes you feel improve the doc
-- Contribute code directly: we love contributors! We are quite strict in our reviews but and we'll always review your PR
-in a timely fashion.
-- Donate! any donation is welcome, regardless how small or big. This will directly be used for the fixed costs and
-developer time.
-
-You can contribute as an organisation/corporation by:
-- Get a [support contract](#support-professional). This is the best way you can help us as it ensures mxisd is maintained regularly and you get
-direct access to the support team.
-- Sponsoring new features or bug fixes. We'll quote the cost of development, at a reduced rate, and maintain the code
-in future release of mxisd. (subject to approval of the feature on our end)
 
 # Contact
 Get in touch on Matrix: [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io)
