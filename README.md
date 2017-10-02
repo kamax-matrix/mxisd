@@ -157,7 +157,7 @@ Log in using your Matrix client and set `https://example.org` as your Identity s
 the relevant hostname which you configured in your reverse proxy.
 Try to invite `mxisd-lookup-test@kamax.io`, which should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`
   
-If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!
+If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  
 If it did not work, [get in touch](#support) and we'll do our best to get you started.  
 
 You can now integrate mxisd further with your infrastructure using the various [features](docs/README.md) guides.
