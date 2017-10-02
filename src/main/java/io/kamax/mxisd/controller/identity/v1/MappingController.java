@@ -66,9 +66,11 @@ public class MappingController {
     private void setRequesterInfo(ALookupRequest lookupReq, HttpServletRequest req) {
         lookupReq.setRequester(req.getRemoteAddr());
         String xff = req.getHeader("X-FORWARDED-FOR");
-        lookupReq.setRecursive(StringUtils.isNotBlank(xff));
-        if (lookupReq.isRecursive()) {
+        log.debug("XFF header: {}", xff);
+        lookupReq.setRecursive(StringUtils.isBlank(xff));
+        if (!lookupReq.isRecursive()) {
             lookupReq.setRecurseHosts(Arrays.asList(xff.split(",")));
+            lookupReq.setRequester(lookupReq.getRecurseHosts().get(lookupReq.getRecurseHosts().size() - 1));
         }
 
         lookupReq.setUserAgent(req.getHeader("USER-AGENT"));
@@ -106,7 +108,7 @@ public class MappingController {
     String bulkLookup(HttpServletRequest request) {
         BulkLookupRequest lookupRequest = new BulkLookupRequest();
         setRequesterInfo(lookupRequest, request);
-        log.info("Got single lookup request from {} with client {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.getUserAgent(), lookupRequest.isRecursive());
+        log.info("Got bulk lookup request from {} with client {} - Is recursive? {}", lookupRequest.getRequester(), lookupRequest.getUserAgent(), lookupRequest.isRecursive());
 
         try {
             ClientBulkLookupRequest input = parser.parse(request, ClientBulkLookupRequest.class);
