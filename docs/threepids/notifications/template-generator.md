@@ -64,7 +64,7 @@ This template is used when to user which added their 3PID address to their profi
 allows remote sessions.
 
 **NOTE:** 3PID session always require local validation of a token, even if a remote session is enforced.  
-One cannot bind a MXID to the session until both local and remote sessions have been validated.
+One cannot bind a Matrix ID to the session until both local and remote sessions have been validated.
 
 #### Placeholders
 | Placeholder          | Purpose                                                |

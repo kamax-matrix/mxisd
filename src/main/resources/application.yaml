@@ -5,10 +5,10 @@ spring:
 logging:
   level:
     org:
-      springframework: "WARN"
+      springframework: 'WARN'
       apache:
-        catalina: "WARN"
-        directory: "WARN"
+        catalina: 'WARN'
+        directory: 'WARN'
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:%5p} [%15.15t] %35.35logger{34} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}'
 
@@ -16,6 +16,7 @@ server:
   port: 8090
 
 matrix:
+  domain: ''
   identity:
     servers:
       root:
@@ -47,8 +48,12 @@ ldap:
   enabled: false
   filter: ''
   connection:
+    host: ''
     tls: false
     port: 389
+    bindDn: ''
+    bindPassword: ''
+    baseDn: ''
   attribute:
     uid:
       type: 'uid'
@@ -74,12 +79,14 @@ ldap:
     filter: ''
   identity:
     filter: ''
+    token: '%3pid'
     medium:
       email: ''
       msisdn: ''
 
 firebase:
   enabled: false
+
 
 sql:
   enabled: false
@@ -106,8 +113,8 @@ synapseSql:
 
 forward:
   servers:
-    - "https://matrix.org"
-    - "https://vector.im"
+    - 'https://matrix.org'
+    - 'https://vector.im'
 
 threepid:
   medium:

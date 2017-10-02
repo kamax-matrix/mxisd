@@ -1,11 +1,6 @@
-# Sample configuration file explaining all possible options, their default value and if they are required or not.
+# Sample configuration file explaining the minimum required keys to be set to run mxisd
 #
-# Any optional configuration item will be prefixed by # (comment character) with the configuration item following
-# directly without any whitespace character.
-# Default values for optional configuration item will also follow such item.
-#
-# Any mandatory configuration item will not be prefixed by # and will also contain a value as example that must be
-# changed. It is advised to re-create a clean config file with only the required configuration item.
+# For a complete list of options, see https://github.com/kamax-io/mxisd
 
 #######################
 # Matrix config items #
@@ -16,48 +11,9 @@
 matrix.domain: ''
 
 
-
-#######################
-# Server config items #
-#######################
-# Indicate on which port the Identity Server will listen.
-#
-# This is be default an unencrypted port.
-# HTTPS can be configured using Tomcat configuration properties.
-#
-#server.port: 8090
-
-
-# Public hostname of this identity server.
-#
-# This would be typically be the same as your Matrix domain.
-# In case it is not, set this value.
-#
-# This value is used in various signatures within the Matrix protocol and should be a reachable hostname.
-# You can validate by ensuring you see a JSON answer when calling (replace the domain):
-# https://example.org/_matrix/identity/status
-#
-#server.name: 'example.org'
-
-
-# Public URL to reach this identity server
-#
-# This is used with 3PID invites in room and other Homeserver key verification workflow.
-# If left unconfigured, it will be generated from the server name.
-#
-# You should typically set this value if you want to change the public port under which
-# this Identity server is reachable.
-#
-# %SERVER_NAME% placeholder is available to avoid configuration duplication.
-# e.g. 'https://%SERVER_NAME%:8443'
-#
-#server.publicUrl: 'https://example.org'
-
-
-
-#############################
-# Signing keys config items #
-#############################
+################
+# Signing keys #
+################
 # Absolute path for the Identity Server signing key.
 # During testing, /var/tmp/mxisd.key is a possible value
 #
@@ -65,278 +21,7 @@ matrix.domain: ''
 #   - /var/opt/mxisd/sign.key
 #   - /var/local/mxisd/sign.key
 #   - /var/lib/mxisd/sign.key
-key.path: '/path/to/sign.key'
-
-
-
-#################################
-# Recurisve lookup config items #
-#################################
-# Configuration items for recursion-type of lookup
-#
-# Lookup access are divided into two types:
-# - Local
-# - Remote
-#
-# This is similar to DNS lookup and recursion and is therefore prone to the same vulnerabilities.
-# By default, only non-public hosts are allowed to perform recursive lookup.
-#
-# This will also prevent very basic endless loops where host A ask host B, which in turn is configured to ask host A,
-# which would then ask host B again, etc.
-
-# Enable recursive lookup globally
-#
-#lookup.recursive.enabled: true
-
-
-# Whitelist of CIDR that will trigger a recursive lookup.
-# The default list includes all private IPv4 address and the IPv6 loopback.
-#
-#lookup.recursive.allowedCidr:
-#  - '127.0.0.0/8'
-#  - '10.0.0.0/8'
-#  - '172.16.0.0/12'
-#  - '192.168.0.0/16'
-#  - '::1/128'
-
-
-# In case no binding is found, query an application server which implements the single lookup end-point
-# to return bridge virtual user that would allow the user to be contacted directly by the said bridge.
-#
-# If a binding is returned, the application server is not expected to sign the message as it is not meant to be
-# reachable from the outside.
-# If a signature is provided, it will be discarded/replaced by this IS implementation (to be implemented).
-#
-# IMPORTANT: This bypass the regular Invite system of the Homeserver. It will be up to the Application Server
-# to handle such invite. Also, if the bridged user were to actually join Matrix later, or if a 3PID binding is found
-# room rights and history would not be transferred, as it would appear as a regular Matrix user to the Homeserver.
-#
-# This configuration is only helpful for Application Services that want to overwrite bridging for 3PID that are
-# handled by the Homeserver. Do not enable unless the Application Server specifically supports it!
-
-# Enable unknown 3PID bridging globally
-#
-#lookup.recursive.bridge.enabled: false
-
-
-# Enable unknown 3PID bridging for hosts that are allowed to perform recursive lookups.
-# Leaving this setting to true is highly recommended in a standard setup, unless this Identity Server
-# is meant to always return a virtual user MXID even for the outside world.
-#
-#lookup.recursive.bridge.recursiveOnly: true
-
-
-# This mechanism can handle the following scenarios:
-#
-# - Single Application Server for all 3PID types: only configure the server value, comment out the rest.
-#
-# - Specific Application Server for some 3PID types, default server for the rest: configure the server value and
-#          each specific 3PID type.
-#
-# - Only specific 3PID types: do not configure the server value or leave it empty/blank, configure each specific
-#          3PID type.
-
-# Default application server to use for all 3PID types. Remove config item or leave empty/blank to disable.
-#
-#lookup.recursive.bridge.server: ''
-
-
-# Configure each 3PID type with a specific application server. Remove config item or leave empty/blank to disable.
-#
-#lookup.recursive.bridge.mappings.email: 'http://localhost:8091'
-#lookup.recursive.bridge.mappings.msisdn: ''
-
-
-
-#####################
-# LDAP config items #
-#####################
-# Global enable/disable switch
-#
-#ldap.enabled: false
-
-
-#### Connection related config items
-# If the connection should be secure
-#
-#ldap.connection.tls: false
-
-
-# Host to connect to
-#
-#ldap.connection.host: 'localhost'
-
-
-# Port to connect to
-#
-#ldap.connection.port: 389
-
-
-# Bind DN for the connection.
-#
-# If Bind DN and password are empty, anonymous authentication is performed
-#
-#ldap.connection.bindDn: 'CN=Matrix Identity Server,CN=Users,DC=example,DC=org'
-
-
-# Bind password for the connection.
-#
-#ldap.connection.bindPassword: 'password'
-
-
-# Base DN used in all queries
-#
-#ldap.connection.baseDn: 'CN=Users,DC=example,DC=org'
-
-
-#### How to map Matrix attributes with LDAP attributes when performing lookup/auth
-#
-# How should we resolve the Matrix ID in case of a match using the attribute.
-#
-# The following type are supported:
-# - uid : the attribute only contains the UID part of the Matrix ID. e.g. 'john.doe' in @john.doe:example.org
-# - mxid : the attribute contains the full Matrix ID - e.g. '@john.doe:example.org'
-#
-#ldap.attribute.uid.type: 'uid'
-
-
-# The attribute containing the binding itself. This value will be used differently depending on the type.
-#
-# /!\ This should match the synapse LDAP Authenticator 'uid' configuration /!\
-#
-# Typical values:
-# - For type 'uid': 'userPrincipalName' or 'uid' or 'saMAccountName'
-# - For type 'mxid', regardless of the directory type, we recommend using 'pager' as it is a standard attribute and
-#   is typically not used.
-#
-#ldap.attribute.uid.value: 'userPrincipalName'
-
-
-# The display name of the user
-#
-#ldap.attribute.name: 'displayName'
-
-
-#### Configuration section relating the authentication of users performed via LDAP.
-#
-# This can be done using the REST Auth module for synapse and pointing it to the identity server.
-# See https://github.com/kamax-io/matrix-synapse-rest-auth
-#
-# During authentication, What to filter potential users by, typically by using a dedicated group.
-# If this value is not set, login check will be performed for all entities within the LDAP
-#
-# Example: (memberOf=CN=Matrix Users,CN=Users,DC=example,DC=org)
-#
-#ldap.auth.filter: ''
-
-
-#### Configuration section relating to identity lookups
-#
-# E-mail query
-#
-#ldap.identity.medium.email: "(|(mailPrimaryAddress=%3pid)(mail=%3pid)(otherMailbox=%3pid))"
-
-
-# Phone numbers query
-#
-# Phone numbers use the MSISDN format: https://en.wikipedia.org/wiki/MSISDN
-# This format does not include international prefix (+ or 00) and therefore has to be put in the query.
-# Adapt this to your needs for each attribute.
-#
-#ldap.identity.medium.msisdn: "(|(telephoneNumber=+%3pid)(mobile=+%3pid)(homePhone=+%3pid)(otherTelephone=+%3pid)(otherMobile=+%3pid)(otherHomePhone=+%3pid))"
-
-
-
-############################
-# SQL Provider config item #
-############################
-#
-# Example configuration to integrate with synapse SQLite DB (default configuration)
-#
-#sql.enabled: true
-#sql.type: 'sqlite'
-#sql.connection: '/var/lib/matrix-synapse/homeserver.db'
-
-
-#
-# Example configuration to integrate with synapse PostgreSQL DB
-#sql.enabled: true
-#sql.type: 'postgresql'
-#sql.connection: '//dnsOrIpToServer/dbName?user=synapseDbUser&password=synapseDbPassword'
-
-
-#
-# Configuration for an arbitrary server with arbitrary driver
-#
-# sql.identity.type possible values:
-# - uid       Returned value is the localpart of the Matrix ID
-# - mxid      Full Matrix ID, including domain
-#
-# sql.identity.query MUST contain a column with label 'uid'
-#
-# If you would like to overwrite the global lookup query for specific medium type,
-# add a config item (see below for example) in the following format
-# sql.identity.medium.theMediumIdYouWant: 'the query'
-
-#sql.enabled: true
-#sql.type: 'jdbcDriverName'
-#sql.connection: '//dnsOrIpToServer/dbName?user=synapseDbUser&password=synapseDbPassword'
-#sql.identity.type: 'mxid'
-#sql.identity.query: 'SELECT raw AS uid FROM table WHERE medium = ? AND address = ?'
-#sql.identity.medium.email: 'SELECT raw AS uid FROM emailTable WHERE address = ?'
-
-
-
-#######################################
-# Lookup queries forward config items #
-#######################################
-# List of forwarders to use to try to match a 3PID.
-#
-# Each server will be tried in the given order, going to the next if no binding was found or an error occurred.
-# These are the current root Identity Servers of the Matrix network.
-#
-#forward.servers:
-#  - "https://matrix.org"
-#  - "https://vector.im"
-
-
-
-###################################
-# 3PID notifications config items #
-###################################
-# If you would like to change the content, see https://github.com/kamax-io/mxisd/blob/master/docs/threepids/notifications/template-generator.md
-#
-#### E-mail invite sender
-#
-# SMTP host
-threepid.medium.email.connectors.smtp.host: "smtp.example.org"
-
-
-# SMTP port
-threepid.medium.email.connectors.smtp.port: 587
-
-
-# TLS mode for the connection.
-#
-# Possible values:
-#  0    Disable TLS entirely
-#  1    Enable TLS if supported by server
-#  2    Force TLS and fail if not available
-#
-#threepid.medium.email.connectors.smtp.tls: 1
-
-
-# Login for SMTP
-threepid.medium.email.connectors.smtp.login: "matrix-identity@example.org"
-
-
-# Password for the account
-threepid.medium.email.connectors.smtp.password: "ThePassword"
-
-
-# The e-mail to send as. If empty, will be the same as login
-threepid.medium.email.identity.from: "matrix-identity@example.org"
-
+key.path: ''
 
 
 ############################
@@ -349,10 +34,7 @@ threepid.medium.email.identity.from: "matrix-identity@example.org"
 #
 #storage.backend: 'sqlite'
 
-
-#### Generic SQLite provider config
-#
-# Path to the SQLite DB file, required if SQLite backend is chosen
+# Path to the SQLite DB file
 #
 # Examples:
 #  - /var/opt/mxisd/mxisd.db
@@ -362,22 +44,53 @@ threepid.medium.email.identity.from: "matrix-identity@example.org"
 storage.provider.sqlite.database: '/path/to/mxisd.db'
 
 
+################
+# LDAP Backend #
+################
+# If you would like to integrate with your AD/Samba/LDAP server,
+# see https://github.com/kamax-io/mxisd/blob/master/docs/backends/ldap.md
 
-######################
-# DNS-related config #
-######################
-# The domain to overwrite
+###############
+# SQL Backend #
+###############
+# If you would like to integrate with a MySQL/MariaDB/PostgreQL/SQLite DB,
+# see https://github.com/kamax-io/mxisd/blob/master/docs/backends/sql.md
+
+################
+# REST Backend #
+################
+# If you would like to integrate with an existing web service/webapp,
+# see https://github.com/kamax-io/mxisd/blob/master/docs/backends/rest.md
+
+
+#################################################
+# Notifications for invites/addition to profile #
+#################################################
+# If you would like to change the content,
+# see https://github.com/kamax-io/mxisd/blob/master/docs/threepids/notifications/template-generator.md
 #
-#dns.overwrite.homeserver.name: 'example.org'
-
-
-# - 'env' from environment variable specified by value
-# - any other value will use the value as-is as host
+#### E-mail invite sender
 #
-#dns.overwrite.homeserver.type: 'raw'
+# SMTP host
+threepid.medium.email.connectors.smtp.host: "smtp.example.org"
 
+# SMTP port
+threepid.medium.email.connectors.smtp.port: 587
 
-# The value to use, depending on the type.
-# Protocol will always be HTTPS
+# TLS mode for the connection.
 #
-#dns.overwrite.homeserver.value: 'localhost:8448'
+# Possible values:
+#  0    Disable TLS entirely
+#  1    Enable TLS if supported by server (default)
+#  2    Force TLS and fail if not available
+#
+#threepid.medium.email.connectors.smtp.tls: 1
+
+# Login for SMTP
+threepid.medium.email.connectors.smtp.login: "matrix-identity@example.org"
+
+# Password for the account
+threepid.medium.email.connectors.smtp.password: "ThePassword"
+
+# The e-mail to send as. If empty, will be the same as login
+threepid.medium.email.identity.from: "matrix-identity@example.org"

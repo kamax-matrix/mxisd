@@ -2,218 +2,155 @@ mxisd - Federated Matrix Identity Server Daemon
 -----
 ![Travis-CI build status](https://travis-ci.org/kamax-io/mxisd.svg?branch=master)  
 
-[Overview](#overview) | [Features](#features) | [Lookup process](#lookup-process) | [Packages](#packages) | 
-[From source](#from-source) | [Configuration](#configuration) | [Network Discovery](#network-discovery) | 
-[Integration](#integration) | [Support](#support)
+- [Overview](#overview)
+- [Features](#features)
+- [Why use mxisd](#why-use-mxisd)
+- [Quick start](#quick-start)
+- [Support](#support)
+- [Contribute](#contribute) 
+- [FAQ](#faq)
+- [Contact](#contact)
 
 # Overview
-mxisd is a Federated Matrix Identity server for self-hosted Matrix infrastructures.
+mxisd is a Federated Matrix Identity server for self-hosted Matrix infrastructures with enhanced features.
+  
+It is specifically designed to connect to an Identity store (AD/Samba/LDAP, SQL Database, Web services/application, ...)
+to ease integration of the Matrix ecosystem with an existing infrastructure, or to build a new one using lasting tools.
 
-mxisd uses a cascading lookup model which performs lookup from a more authoritative to a less authoritative source, usually doing:
-- Local identity stores: LDAP, etc.
-- Federated identity stores: another Identity Server in charge of a specific domain, if applicable
-- Configured identity stores: another Identity Server specifically configured, if part of some sort of group trust
-- Root identity store: vector.im/matrix.org central Identity Servers
+mxisd core principle is to map between Matrix IDs and 3PIDs (Thrid-party Identifiers) for the Homeserver and its users.
+3PIDs can be anything that identify a user, like:
+- Email address
+- Phone number
+- Skype/Live ID
+- Twitter handle
+- Facebook ID
+- ...
 
-mxisd provides an alternative to [sydent](https://github.com/matrix-org/sydent), while still connecting to the vector.im and matrix.org Identity servers, 
-by implementing the [Matrix Identity Service specification](https://matrix.org/docs/spec/identity_service/unstable.html).
-
-mxisd only aims to support workflows that do NOT break federation or basic lookup processes of the Matrix ecosystem.
+mxisd is an enhanced Identity service, which implements the [Matrix Identity service API](https://matrix.org/docs/spec/identity_service/unstable.html)
+but also several other features that greatly enhance user experience within Matrix.
 
 # Features
-- Single lookup of 3PID (E-mail, phone number, etc.) by the Matrix Client or Homeserver.
-- Bulk lookups when trying to find possible matches within contacts in Android and iOS clients.
-- Bind of 3PID by a Matrix user within a Matrix client - See [documentation](docs/sessions/3pid.md)
-- Support of invitation to rooms by e-mail with e-mail notification to invitee.
-- Authentication support in [synapse](https://github.com/matrix-org/synapse) via the [REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth).
+As a [regular Matrix Identity service](docs/features/identity.md):
+- Search for people by 3PID using its own Identity stores (LDAP, SQL, etc.)
+- Invite people to rooms by 3PID using its own Identity stores, with [notifications](docs/README.md)
+to the invitee (Email, SMS, etc.)
+- Allow users to add 3PIDs to their settings/profile
 
-In the pipe:
-- Support to proxy 3PID bindings in user profile to the central Matrix.org servers
+As an enhanced Identity service:
+- Use a recursive lookup mechanism when searching and inviting people by 3PID, allowing to fetch data from:
+  - Own Identity store
+  - Federated Identity servers, if applicable to the 3PID
+  - Arbitrary Identity servers
+  - Central Matrix Identity servers
+- [Extensive control of where 3PIDs are transmited](docs/sessions/3pid.md), so they are not leaked publicly by users 
+- [Authentication support](docs/features/authentication.md) for [synapse](https://github.com/matrix-org/synapse) via the
+[REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth).
+- [Directory integration](docs/features/directory-users.md) which allows you to search for users within your
+organisation, even without prior Matrix contact.
+- [Auto-fill of user profile](docs/features/authentication.md) (Display name, 3PIDs) via the
+[REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth)
 
-# Lookup Process
-Default Lookup strategy will use a priority order and a configurable recursive/local type of request.
+# Why use mxisd
+- Use your existing Identity store, do not duplicate information
+- Auto-fill user profiles with relevant info
+- As an organisation, stay in control of 3PIDs so they are not published to the central Matrix.org servers where they
+currently **cannot be removed**
+- Users can directly find each other using whatever attribute is relevant within your Identity store
+- Federate your Identity lookups so you can discover others and/or others can discover you, all with extensive ACLs
 
-## E-mail
-Given the 3PID `john.doe@example.org`, the following will be performed until a mapping is found:
-- LDAP: lookup the Matrix ID (partial or complete) from a configurable attribute using a dedicated query.
-- DNS: lookup another Identity Server using the domain part of an e-mail and:
-  - Look for a SRV record under `_matrix-identity._tcp.example.org`
-  - Lookup using the base domain name `example.org`
-- Forwarder: Proxy the request to other configurable identity servers.
+# Quick Start
+1. [Preparation](#preparation)
+2. [Install](#install)
+3. [Configure](#configure)
+4. [Integrate](#integrate)
+5. [Validate](#validate)
 
-## Phone number
-Given the phone number `+123456789`, the following lookup logic will be performed:
-- LDAP: lookup the Matrix ID (partial or complete) from a configurable attribute using a dedicated query.
-- Forwarder: Proxy the request to other configurable identity servers.
+Following these quick start instructions, you will have a basic setup that can perform recursive/federated lookups and
+talk to the central Matrix.org Identity service.  
+This will be a good ground work for further integration with your existing Identity stores.
 
-# Packages
-See [releases]((https://github.com/kamax-io/mxisd/releases)) for native installers of supported systems.  
-If none is available, please use other packages or build from source.
+## Preparation
+You will need:
+- Homeserver
+- Reverse proxy with regular TLS/SSL certificate (Let's encrypt) for your mxisd domain
 
-## Debian
-### Download
-See the [releases section](https://github.com/kamax-io/mxisd/releases).
+As synapse requires an HTTPS connection when talking to an Identity service, a reverse proxy is required as mxisd does
+not support HTTPS listener at this time.
 
-### Configure and run
-After installation:
-1. Copy the sample config file `/etc/mxisd/mxisd-sample.yaml` to `/etc/mxisd/mxisd.yaml`
-2. [Configure](#configuration)
-3. Start the service: `sudo systemctl start mxisd`
+For maximum integration, it is best to have your Homeserver and mxisd reachable via the same hostname.  
+You can also use a dedicated domain for mxisd, but will not have access to some features.
 
-### From source
-Requirements:
-- fakeroot
-- dpkg-deb
+Be aware of a [NAT/Reverse proxy gotcha](https://github.com/kamax-io/mxisd/wiki/Gotchas#nating) if you use the same
+hostname.
 
-Run:
-```
-./gradlew buildDeb 
-```
-You will find the debian package in `build/dist`
-
-## Docker
-```
-docker pull kamax/mxisd
-```
-
-For more info, see [the public repository](https://hub.docker.com/r/kamax/mxisd/)
-### From source
-[Build mxisd](#build) then build the docker image:
-```
-./gradlew dockerBuild
-```
-You can run a container of the given image and test it with the following command (adapt volumes host paths):
-```
-docker run -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -p 8090:8090 -t kamax/mxisd:latest-dev
-```
-
-# From Source
-## Requirements
-- JDK 1.8
-
-## Build
-```
-git clone https://github.com/kamax-io/mxisd.git
-cd mxisd
-./gradlew build
-```
-then see the [Configuration](#configuration) section.
-
-## Test build
-Start the server in foreground to validate the build:
-```
-java -jar build/libs/mxisd.jar
-```
-
-Ensure the signing key is available:
-```
-$ curl http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519:0
-{"public_key":"..."}
-```
-
-Test basic recursive lookup (requires Internet connection with access to TCP 443):
-```
-$ curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=mxisd-lookup-test@kamax.io'
-{"address":"mxisd-lookup-test@kamax.io","medium":"email","mxid":"@mxisd-lookup-test:kamax.io",...}
-```
-
-
-If you enabled LDAP, you can also validate your config with a similar request after replacing the `address` value with something present within your LDAP
-```
-curl "http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=john.doe@example.org"
-```
-
-If you plan on testing the integration with a homeserver, you will need to run an HTTPS reverse proxy in front of it
-as the reference Home Server implementation [synapse](https://github.com/matrix-org/synapse) requires a HTTPS connection
-to an ID server.  
-See the [Integration section](#integration) for more details.
+The following Quick Start guide assumes you will host the Homeserver and mxisd under the same hostname.
 
 ## Install
-After [building](#build) the software, run all the following commands as `root` or using `sudo`
-1. Prepare files and directories:
+Install via:
+- [Debian package](docs/install/debian.md)
+- [Docker image](docs/install/docker.md)
+- [Sources](docs/build.md)
+
+See the [Latest release](https://github.com/kamax-io/mxisd/releases/latest) for links to each.
+
+## Configure
+Create/edit a minimal configuration (see installer doc for the location):
 ```
-# Create a dedicated user
-useradd -r mxisd
+matrix.domain: 'MyMatrixDomain.org'
+key.path: '/path/to/signing.key.file'
+storage.provider.sqlite.database: '/path/to/mxisd.db'
+```  
+- `matrix.domain` should be set to your Homeserver domain
+- `key.path` will store the signing keys, which must be kept safe!
+- `storage.provider.sqlite.database` is the location of the SQLite Database file which will hold state (invites, etc.)
 
-# Create bin directory
-mkdir /opt/mxisd
+If your HS/mxisd hostname is not the same as your Matrix domain, configure `server.name`.  
+Complete configuration guide is available [here](docs/configure.md).
 
-# Create config directory and set ownership
-mkdir /etc/mxisd
-chown mxisd /etc/mxisd
-
-# Create data directory and set ownership
-mkdir /var/opt/mxisd
-chown mxisd /var/opt/mxisd
-
-# Copy <repo root>/build/libs/mxisd.jar to bin directory
-cp ./build/libs/mxisd.jar /opt/mxisd/
-chown mxisd /opt/mxisd/mxisd.jar
-chmod a+x /opt/mxisd/mxisd.jar
-
-# Create symlink for easy exec
-ln -s /opt/mxisd/mxisd.jar /usr/bin/mxisd
+## Integrate
+### Reverse proxy
+#### Apache2
+In the VirtualHost handling the domain with SSL, add the following line, replacing `0.0.0.0` by the right address/host.  
+**This line MUST be present before the one for the homeserver!**
 ```
-
-2. Copy the config file created earlier `./application.example.yaml` to `/etc/mxisd/mxisd.yaml`
-3. [Configure](#configuration)
-4. Copy `<repo root>/src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
-5. Enable service for auto-startup
-```
-systemctl enable mxisd
-```
-6. Start mxisd
-```
-systemctl start mxisd
+ProxyPass /_matrix/identity http://0.0.0.0:8090/_matrix/identity
 ```
 
-# Configuration
-After following the specific instructions to create a config file from the sample:
-1. Set the `matrix.domain` value to the domain value used in your Home Server configuration
-2. Set an absolute location for the signing keys using `key.path`
-3. Configure the E-mail notification sender following [the documentation](docs/threepids/medium/email/smtp-connector.md)
-4. If you would like to support Phone number validation, see the [Twilio configuration](docs/threepids/medium/msisdn/twilio-connector.md)
-
-In case your IS public domain does not match your Matrix domain, see `server.name` and `server.publicUrl` 
-config items.
-
-
-## Backends
-### LDAP (AD, Samba, LDAP)
-If you want to use LDAP backend as an Identity store:
-1. Enable it with `ldap.enabled`
-2. Configure connection options using items starting in `ldap.connection`
-3. You may want to valid default values for `ldap.attribute` items
-
-### SQL (SQLite, PostgreSQL)
-If you want to connect to use a synapse DB (SQLite or PostgreSQL) as Identity store, follow the example config for `sql` config items.
-
-### REST (Webapps/websites integration)
-If you want to use the REST backend as an Identity store:
-1. Enable it with `rest.enabled`
-2. Configure options starting with `rest` and see the dedicated documentation in `docs/backends/rest.md`
-
-# Network Discovery
-To allow other federated Identity Server to reach yours, the same algorithm used for Homeservers takes place:
-1. Check for the appropriate DNS SRV record
-2. If not found, use the base domain
- 
-If your Identity Server public hostname does not match your Matrix domain, configure the following DNS SRV entry 
-and replace `matrix.example.com` by your Identity server public hostname - **Make sure to end with a final dot!**
+Typical VirtualHost configuration would be:
 ```
-_matrix-identity._tcp.example.com. 3600 IN SRV 10 0 443 matrix.example.com.
-``` 
-This would only apply for 3PID that are DNS-based, like e-mails. For anything else, like phone numbers, no federation 
-is currently possible.  
+<VirtualHost *:443>
+    ServerName example.org
+    
+    ...
+    
+    ProxyPreserveHost on
+    ProxyPass /_matrix/identity/ http://10.1.2.3:8090/_matrix/identity/
+    ProxyPass /_matrix/ http://10.1.2.3:8008/_matrix/
+</VirtualHost>
+```
 
-The port must be HTTPS capable. Typically, the port `8090` of mxisd should be behind a reverse proxy which does HTTPS.
-See the [integration section](#integration) for more details.
+### Synapse
+Add your mxisd domain into the `homeserver.yaml` at `trusted_third_party_id_servers` and restart synapse.  
+In a typical configuration, you would end up with something similair to:
+```
+trusted_third_party_id_servers:
+    - matrix.org
+    - vector.im
+    - example.org
+```
+It is recommended to remove `matrix.org` and `vector.im` so only your own Identity server is allowed by synapse. 
 
-# Integration
-- [HTTPS and Reverse proxy](https://github.com/kamax-io/mxisd/wiki/HTTPS)
-- [synapse](https://github.com/kamax-io/mxisd/wiki/Homeserver-Integration) as Identity server
-- [synapse with REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth/blob/master/README.md) 
-as authentication module
+### Federation and network discovery
+See the [dedicated document](docs/features/federation.md).
+
+## Validate
+Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
+the relevant hostname which you configured in your reverse proxy.
+
+Try to invite `mxisd-lookup-test@kamax.io`, which should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`  
+If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!
+
+You can now integrate mxisd further with your infrastructure using the various [features](docs/README.md) guides.
 
 # Support
 ## Community
@@ -225,3 +162,74 @@ For more high-level discussion about the Identity Server architecture/API, go to
 ## Professional
 If you would prefer professional support/custom development for mxisd and/or for Matrix in general, including other open source technologies/products, 
 please visit [our website](https://www.kamax.io/) to get in touch with us and get a quote.
+
+We offer affordable monthly/yearly support plans for mxisd, synapse or your full Matrix infrastructure.
+
+# FAQ
+### Do I need to use mxisd if I run a Homeserver?
+No, but it is recommended, even if you don't use any backends or integration.
+
+mxisd in its default configuration will use federation and involve the central Matrix.org Identity servers when
+performing queries, giving you access to at least the same information than if you were not running it.
+
+It will also give your users a choice to make their 3PIDs available publicly, ensuring they are made aware of the
+privacy consequences, which is not the case with the central Matrix.org servers.
+
+So mxisd is like your gatekeeper and guardian angel. It doesn't change what you already know, just adds some nice
+simple features on top of it. 
+
+### I saw that sydent is the official Identity server implemenation of the Matrix team, I should use that!
+You can, but [sydent](https://github.com/matrix-org/sydent):
+- [was never meant to be self-hosted and should not be done](https://github.com/matrix-org/sydent/issues/22)
+- is not meant to be linked to a specific Homeserver / domain
+- cannot handle federation or proxy lookups, effectively isolating your users from the rest of the network
+- forces you to duplicate all your identity data, so people can be found by 3PIDs
+- forces users to enter all their emails and phone numbers manually in their profile
+
+So really, you should go with mxisd.
+
+### I'm not sure I understand what an "Identity server" is supposed to be or do
+The current Identity service API is more a placeholder, as the Matrix devs did not have time so far to really work on
+what they want to do with that part of the ecosystem. Therefore, "Identity" is a missleading word currently.  
+Given the scope of the current Identity Service API, their would be best called "Directory and Invitation service".
+
+Because the current scope is so limited and no integration is done with the Homeserver, there was a big lack of features
+for groups/corporations/organisation. This is where mxisd comes in.
+
+mxisd implements the Identity Service API and also a set of features which are expected by regular users, truely living
+up to its "Identity server" name.
+
+### So mxisd is just a big hack! I don't want to use non-official features!
+mxisd primary concern is to always be compatible with the Matrix ecosystem and the Identity service API.  
+Whenever the API will be updated and/or enchanced, mxisd will follow, remaining 100% compatible with the ecosystem.
+
+We also directly talk with the Matrix developers to ensure all features we implement have their approval, and that we
+are in line with their vision of Identity management within the Matrix ecosystem.
+
+Therefore, using mxisd is a safe choice. It will be like using the central Matrix.org Identity servers, yet not closing
+the door to very nice enhancements and integrations.
+
+### Should I use mxisd if I don't host my own Homeserver?
+No
+
+# Contribute
+First and foremost, the best way to contribute is to use mxisd and tell us about it!  
+We would love to hear about your experience and get your feedback on how to make it an awesome product. 
+
+You can contribute as a community member by:
+- Opening issues for any weird behaviour or bug. mxisd should feel natural, let us know if it doesn't!
+- Helping us improve the documentation: tell us what is good or not good (in an issue or in Matrix), or make a PR with
+changes you feel improve the doc
+- Contribute code directly: we love contributors! We are quite strict in our reviews but and we'll always review your PR
+in a timely fashion.
+- Donate! any donation is welcome, regardless how small or big. This will directly be used for the fixed costs and
+developer time.
+
+You can contribute as an organisation/corporation by:
+- Get a [support contract](#support-professional). This is the best way you can help us as it ensures mxisd is maintained regularly and you get
+direct access to the support team.
+- Sponsoring new features or bug fixes. We'll quote the cost of development, at a reduced rate, and maintain the code
+in future release of mxisd. (subject to approval of the feature on our end)
+
+# Contact
+Get in touch on Matrix: [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io)

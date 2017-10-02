@@ -32,7 +32,7 @@ import java.util.Optional;
 public class LdapIdentityConfig {
 
     private String filter;
-    private String token = "%3pid";
+    private String token;
     private Map<String, String> medium = new HashMap<>();
 
     public String getFilter() {

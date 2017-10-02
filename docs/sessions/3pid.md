@@ -17,7 +17,7 @@
     - [Sessions disabled](#sessions-disabled)
 
 ## Overview
-When adding an email, a phone number or any other kind of 3PID (Third-Party Identifier), 
+When adding an email, a phone number or any other kind of 3PID (Third-Party Identifier) in a Matrix client, 
 the identity server is called to validate the 3PID.
 
 Once this 3PID is validated, the Homeserver will publish the user Matrix ID on the Identity Server and

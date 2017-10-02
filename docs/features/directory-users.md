@@ -89,8 +89,7 @@ the `matrix.domain` configuration option and avoid duplicating it.
 
 ### Backends
 #### LDAP
-Configuration structure has been altered so queries are automatically built from a global or specific filter and a list
-of attributes. To ensure Directory feature works, here how the LDAP configuration should look like:
+To ensure Directory feature works, here's how the LDAP configuration should look like:
 ```
 ldap:
   enabled: false
@@ -123,12 +122,12 @@ ldap:
         - 'employeeNumber'
         - 'someOtherAttribute'
 ```
-Previous configuration entries that contained queries with the `%3pid` placeholder should not be used anymore, unless
-specifically overwritten. Instead, add all attributes to the relevant sections.
+Only include the `attribute` sub-sections if you would like to set another value. Else, it is best not to include them
+to inherit the default values.
 
 If you would like to include an attribute which is not a display name or a 3PID, you can use the
-`directory.attribute.other` to list any extra attributes you want included in searches.  
-If you do not want to include any extra attribute, that configuration section can be skipped. 
+`directory.attribute.other` to list any extra attributes you want included in searches. If you do not want to include
+any extra attribute, that configuration section can be skipped. 
 
 #### SQL
 If you plan to integrate directory search directly with synapse, use the `synapseSql` provider, based on the following
@@ -137,9 +136,9 @@ config:
 synapseSql:
   enabled: true
   type: <database ID>
-  connection: ``
+  connection: '<connection info>'
 ```
-`type` and `connection`, including any other configuration item, follow the same values as the regular `sql` backend.
+`type` and `connection`, including any other configuration item, follow the same values as the regular [SQL backend](../backends/sql.md).
 
 ---
 

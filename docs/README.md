@@ -1,0 +1,24 @@
+# Table of Contents
+
+- Installation
+  - [Debian package](install/debian.md)
+  - [Docker](install/docker.md)
+- [Build from source](build.md)
+- [Configuration](configure.md)
+- Features
+  - [Matrix Identity Service](features/identity.md)
+  - [Homeserver Authentication](features/authentication.md)
+  - [Directory seach](features/directory-users.md)
+  - [Identity server Federation](features/federation.md)
+  - [Bridge integration](features/bridge-integration.md)
+- Backends
+  - [LDAP](backends/ldap.md)
+  - [SQL](backends/sql.md)
+  - [REST](backends/rest.md)
+  - [Google Firebase](backends/firebase.md)
+- Notifications
+  - Handlers
+    - [Basic](threepids/notifications/basic-handler.md)
+    - [SendGrid](threepids/notifications/sendgrid-handler.md)
+- [Sessions](sessions/3pid.md)
+  - [Views](sessions/3pid-views.md)
