@@ -122,7 +122,7 @@ For an overview of a typical mxisd infrastructure, see the [dedicated document](
 In the VirtualHost handling the domain with SSL, add the following line and replace `0.0.0.0` by the right address/host.  
 **This line MUST be present before the one for the homeserver!**
 ```
-ProxyPass /_matrix/identity http://0.0.0.0:8090/_matrix/identity
+ProxyPass /_matrix/identity/ http://0.0.0.0:8090/_matrix/identity/
 ```
 
 Typical VirtualHost configuration would be:
@@ -154,11 +154,12 @@ See the [dedicated document](docs/features/federation.md).
 
 ## Validate
 Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
-the relevant hostname which you configured in your reverse proxy.
-Try to invite `mxisd-lookup-test@kamax.io`, which should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`
+the relevant hostname which you configured in your reverse proxy.  
+Invite `mxisd-lookup-test@kamax.io` to a room, which should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`.  
+**NOTE:** you might not see a Matrix suggestion for the e-mail address, which is normal. Still proceed with the invite.
   
 If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  
-If it did not work, [get in touch](#support) and we'll do our best to get you started.  
+If it did not work, [get in touch](#support) and we'll do our best to get you started.
 
 You can now integrate mxisd further with your infrastructure using the various [features](docs/README.md) guides.
 
