@@ -46,7 +46,7 @@ Client --> | Reverse proxy                                                      
 ```
 Steps:
 1. The intercepted request is directly sent to mxisd instead of the Homeserver.
-2. Enabled backends are queried for any math on the search value sent by the client.
+2. Enabled backends are queried for any match on the search value sent by the client.
 3. The Homeserver, from which the request was intercepted, is queried using the same request as the client.
 Its address is resolved using the DNS Overwrite feature to reach its internal address on a non-encrypted port.
 4. Results from backends and the Homeserver are merged together and sent back to the client, believing it was the HS

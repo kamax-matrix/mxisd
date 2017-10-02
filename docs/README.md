@@ -4,6 +4,7 @@
   - [Debian package](install/debian.md)
   - [Docker](install/docker.md)
 - [Build from source](build.md)
+- [Architecture overview](architecture.md)
 - [Configuration](configure.md)
 - Features
   - [Matrix Identity Service](features/identity.md)
