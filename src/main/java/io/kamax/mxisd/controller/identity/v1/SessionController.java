@@ -23,7 +23,6 @@ package io.kamax.mxisd.controller.identity.v1;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.ViewConfig;
 import io.kamax.mxisd.controller.identity.v1.remote.RemoteIdentityAPIv1;
-import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.session.SessionMananger;
 import io.kamax.mxisd.session.ValidationResult;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -71,13 +69,7 @@ class SessionController {
         if (r.getNextUrl().isPresent()) {
             String url = srvCfg.getPublicUrl() + r.getNextUrl().get();
             log.info("Session {} validation: next URL is present, redirecting to {}", sid, url);
-            try {
-                response.sendRedirect(url);
-                return "";
-            } catch (IOException e) {
-                log.warn("Unable to redirect user to {}", url);
-                throw new InternalServerError(e);
-            }
+            return "redirect:" + url;
         } else {
             if (r.isCanRemote()) {
                 String url = srvCfg.getPublicUrl() + RemoteIdentityAPIv1.getRequestToken(r.getSession().getId(), r.getSession().getSecret());
