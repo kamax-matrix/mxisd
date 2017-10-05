@@ -283,13 +283,17 @@ public class SessionMananger {
         body.addProperty("client_secret", remoteSecret);
         body.addProperty(session.getThreePid().getMedium(), session.getThreePid().getAddress());
         body.addProperty("send_attempt", session.increaseAndGetRemoteAttempt());
-        try {
-            Phonenumber.PhoneNumber msisdn = phoneUtil.parse("+" + session.getThreePid().getAddress(), null);
-            String country = phoneUtil.getRegionCodeForNumber(msisdn).toUpperCase();
-            body.addProperty("phone_number", phoneUtil.format(msisdn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL));
-            body.addProperty("country", country);
-        } catch (NumberParseException e) {
-            throw new InternalServerError(e);
+        if (ThreePidMedium.PhoneNumber.is(session.getThreePid().getMedium())) {
+            try {
+                Phonenumber.PhoneNumber msisdn = phoneUtil.parse("+" + session.getThreePid().getAddress(), null);
+                String country = phoneUtil.getRegionCodeForNumber(msisdn).toUpperCase();
+                body.addProperty("phone_number", phoneUtil.format(msisdn, PhoneNumberUtil.PhoneNumberFormat.NATIONAL));
+                body.addProperty("country", country);
+            } catch (NumberParseException e) {
+                throw new InternalServerError(e);
+            }
+        } else {
+            body.addProperty(session.getThreePid().getMedium(), session.getThreePid().getAddress());
         }
 
         log.info("Requesting remote session with attempt {}", session.getRemoteAttempt());
