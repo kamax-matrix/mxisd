@@ -31,6 +31,7 @@ import io.kamax.mxisd.exception.MatrixException;
 import io.kamax.mxisd.util.GsonUtil;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -88,7 +89,12 @@ public class DirectoryManager {
 
             if (status != 200) {
                 MatrixErrorInfo info = gson.fromJson(body, MatrixErrorInfo.class);
-                throw new MatrixException(status, info.getErrcode(), info.getError());
+                if (StringUtils.equals("M_UNRECOGNIZED", info.getErrcode())) { // FIXME no hardcoding, use Enum
+                    log.warn("Homeserver does not support Directory feature, skipping");
+                } else {
+                    log.error("Homeserver returned an error while performing directory search");
+                    throw new MatrixException(status, info.getErrcode(), info.getError());
+                }
             }
 
             UserDirectorySearchResult resultHs = gson.fromJson(body, UserDirectorySearchResult.class);
