@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -67,7 +69,13 @@ class SessionController {
         ValidationResult r = mgr.validate(sid, secret, token);
         log.info("Session {} was validated", sid);
         if (r.getNextUrl().isPresent()) {
-            String url = srvCfg.getPublicUrl() + r.getNextUrl().get();
+            String url = r.getNextUrl().get();
+            try {
+                url = new URL(url).toString();
+            } catch (MalformedURLException e) {
+                log.info("Session next URL {} is not a valid one, will prepend public URL {}", url, srvCfg.getPublicUrl());
+                url = srvCfg.getPublicUrl() + r.getNextUrl().get();
+            }
             log.info("Session {} validation: next URL is present, redirecting to {}", sid, url);
             return "redirect:" + url;
         } else {
