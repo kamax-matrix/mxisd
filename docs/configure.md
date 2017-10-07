@@ -37,7 +37,7 @@ server:
 **WARNING:** mxisd might overwrite/adapt some values during launch. Those changes will not be reflected into copied keys.
 
 ## Categories
-For each category below, the base configuration path will be given, which needs to be appened to every configuration
+For each category below, the base configuration path will be given, which needs to be appended to every configuration
 item described.
 
 Example: if the base path was `basePath` and the following table was given:
