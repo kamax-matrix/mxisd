@@ -65,6 +65,8 @@ of the Configuration below.
 No further configuration is needed to enable authentication with LDAP once globally enabled and configured.  
 You have the possiblity to use a different query filter if you wish, see Configuration below.
 
+Profile auto-fill is not yet supported but is a top priority.
+
 ## Directory
 No further configuration is needed to enable directory with LDAP once globally enabled and configured.
 
