@@ -55,20 +55,29 @@ public class DefaultExceptionHandler {
     }
 
     @ExceptionHandler(InternalServerError.class)
-    public String handle(HttpServletRequest req, InternalServerError e, HttpServletResponse response) {
+    public String handle(HttpServletRequest request, HttpServletResponse response, InternalServerError e) {
         if (StringUtils.isNotBlank(e.getInternalReason())) {
             log.error("Reference #{} - {}", e.getReference(), e.getInternalReason());
         } else {
             log.error("Reference #{}", e);
         }
 
-        return handleGeneric(req, e, response);
+        return handleGeneric(request, response, e);
+    }
+
+    @ExceptionHandler(FeatureNotAvailable.class)
+    public String handle(HttpServletRequest request, HttpServletResponse response, FeatureNotAvailable e) {
+        if (StringUtils.isNotBlank(e.getInternalReason())) {
+            log.error("Feature not available: {}", e.getInternalReason());
+        }
+
+        return handleGeneric(request, response, e);
     }
 
     @ExceptionHandler(MatrixException.class)
-    public String handleGeneric(HttpServletRequest req, MatrixException e, HttpServletResponse response) {
+    public String handleGeneric(HttpServletRequest request, HttpServletResponse response, MatrixException e) {
         response.setStatus(e.getStatus());
-        return handle(req, e.getErrorCode(), e.getError());
+        return handle(request, e.getErrorCode(), e.getError());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

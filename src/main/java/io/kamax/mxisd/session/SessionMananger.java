@@ -272,9 +272,13 @@ public class SessionMananger {
 
         List<String> servers = mxCfg.getIdentity().getServers(policy.getToRemote().getServer());
         if (servers.isEmpty()) {
-            throw new InternalServerError();
+            throw new FeatureNotAvailable("Remote 3PID sessions are enabled but server list is " +
+                    "misconstrued (invalid ID or empty list");
         }
-        String url = IdentityServerUtils.findIsUrlForDomain(servers.get(0)).orElseThrow(InternalServerError::new);
+
+        String is = servers.get(0);
+        String url = IdentityServerUtils.findIsUrlForDomain(is)
+                .orElseThrow(() -> new InternalServerError(is + " could not be resolved to an Identity server"));
         log.info("Will use IS endpoint {}", url);
 
         String remoteSecret = session.isRemote() ? session.getRemoteSecret() : RandomStringUtils.randomAlphanumeric(16);

@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.*;
@@ -28,6 +29,10 @@ public class IdentityServerUtils {
     private static JsonParser parser = new JsonParser();
 
     public static boolean isUsable(String remote) {
+        if (StringUtils.isBlank(remote)) {
+            return false;
+        }
+
         try {
             // FIXME use Apache HTTP client
             HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
@@ -54,7 +59,7 @@ public class IdentityServerUtils {
             }
 
             return true;
-        } catch (IOException | JsonParseException e) {
+        } catch (IllegalArgumentException | IOException | JsonParseException e) {
             log.info("{} is not a usable Identity Server: {}", remote, e.getMessage());
             return false;
         }

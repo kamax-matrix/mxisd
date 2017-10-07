@@ -26,11 +26,13 @@ import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.connector.EmailSendGridConfig;
+import io.kamax.mxisd.exception.FeatureNotAvailable;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.notification.INotificationHandler;
 import io.kamax.mxisd.threepid.notification.PlaceholderNotificationGenerator;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +120,11 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
     }
 
     private void send(String recipient, Email email) {
+        if (StringUtils.isBlank(cfg.getIdentity().getFrom())) {
+            throw new FeatureNotAvailable("3PID Email identity: sender address is empty - " +
+                    "You must set a value for notifications to work");
+        }
+
         try {
             email.addTo(recipient);
             email.setFrom(cfg.getIdentity().getFrom());

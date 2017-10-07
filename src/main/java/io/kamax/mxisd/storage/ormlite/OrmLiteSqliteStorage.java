@@ -146,8 +146,8 @@ public class OrmLiteSqliteStorage implements IStorage {
         return withCatcher(() -> {
             List<ThreePidSessionDao> daoList = sessionDao.queryForMatchingArgs(new ThreePidSessionDao(tpid, secret));
             if (daoList.size() > 1) {
-                log.error("Lookup for 3PID Session {}:{} returned more than one result");
-                throw new InternalServerError();
+                throw new InternalServerError("Lookup for 3PID Session " +
+                        tpid + " returned more than one result");
             }
 
             if (daoList.isEmpty()) {

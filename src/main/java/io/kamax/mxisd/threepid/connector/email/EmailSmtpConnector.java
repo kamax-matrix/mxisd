@@ -23,6 +23,7 @@ package io.kamax.mxisd.threepid.connector.email;
 import com.sun.mail.smtp.SMTPTransport;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
+import io.kamax.mxisd.exception.FeatureNotAvailable;
 import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -66,6 +67,11 @@ public class EmailSmtpConnector implements IEmailConnector {
 
     @Override
     public void send(String senderAddress, String senderName, String recipient, String content) {
+        if (StringUtils.isBlank(senderAddress)) {
+            throw new FeatureNotAvailable("3PID Email identity: sender address is empty - " +
+                    "You must set a value for notifications to work");
+        }
+
         if (StringUtils.isBlank(content)) {
             throw new InternalServerError("Notification content is empty");
         }
