@@ -1,4 +1,4 @@
-# LAP (Samba / Active Directory / OpenLDAP)
+# LDAP (Samba / Active Directory / OpenLDAP)
 ## Getting started
 To use your LDAP backend, add the bare minimum configuration in mxisd config file:
 ```
