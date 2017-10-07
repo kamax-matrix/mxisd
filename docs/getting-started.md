@@ -84,9 +84,6 @@ trusted_third_party_id_servers:
 ```
 It is recommended to remove `matrix.org` and `vector.im` so only your own Identity server is allowed by synapse. 
 
-### Federation and network discovery
-See the [dedicated document](docs/features/federation.md).
-
 ## Validate
 Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
 the relevant hostname which you configured in your reverse proxy.  
@@ -102,10 +99,12 @@ You can now integrate mxisd further with your infrastructure using the various [
 Once your mxisd server is up and running, here are the next steps to further enhance and integrate your installation:
 
 Enable extra features:
-- Authenticate with synapse, profile auto-provisioning if you wish
-- Directory search
+- [Federation](features/federation.md)
+- [Authenticate with synapse](features/authentication.md), profile auto-provisioning if you wish
+- [Directory search](features/directory-users.md)
 
 Use your Identity stores:
-- LDAP / Samba / Active directory
-- SQL Database
-- Website / Web service / Web app
+- [LDAP / Samba / Active directory](backends/ldap.md)
+- [SQL Database](backends/sql.md)
+- [Website / Web service / Web app](backends/rest.md)
+- [Google Firebase](backends/firebase.md)
