@@ -91,8 +91,8 @@ You can contribute as a community member by:
 - Helping us improve the documentation: tell us what is good or not good (in an issue or in Matrix), or make a PR with
 changes you feel improve the doc.
 - Contribute code directly: we love contributors! All your contributions will be licensed under AGPLv3.
-- Donate! any donation is welcome, regardless how small or big. This will directly be used for the fixed costs and
-developer time.
+- [Donate!](https://liberapay.com/maximusdor/) Any donation is welcome, regardless how small or big, and will directly
+be used for the fixed costs and developer time of mxisd.
 
 You can contribute as an organisation/corporation by:
 - Get a [support contract](#support-professional). This is the best way you can help us as it ensures mxisd is
