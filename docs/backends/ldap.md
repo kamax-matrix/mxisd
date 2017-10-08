@@ -24,7 +24,7 @@ You can also set a default global filter on any LDAP queries:
 ```
 ldap.filter: '(memberOf=CN=My Matrix Users,OU=Groups,DC=example,DC=org)'
 ```
-This example would only return users part of the group called `My Matrux Users`.
+This example would only return users part of the group called `My Matrix Users`.
 This can be overwritten or append in each specific flow describe below.
 
 ---

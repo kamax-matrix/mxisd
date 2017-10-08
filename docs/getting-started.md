@@ -26,13 +26,13 @@ hostname.
 
 The following Quick Start guide assumes you will host the Homeserver and mxisd under the same hostname.  
 If you would like a high-level view of the infrastructure and how each feature is integrated, see the
-[dedicated document](docs/architecture.md)
+[dedicated document](architecture.md)
 
 ## Install
 Install via:
-- [Debian package](docs/install/debian.md)
-- [Docker image](docs/install/docker.md)
-- [Sources](docs/build.md)
+- [Debian package](install/debian.md)
+- [Docker image](install/docker.md)
+- [Sources](build.md)
 
 See the [Latest release](https://github.com/kamax-io/mxisd/releases/latest) for links to each.
 
@@ -48,10 +48,10 @@ storage.provider.sqlite.database: '/path/to/mxisd.db'
 - `storage.provider.sqlite.database` is the location of the SQLite Database file which will hold state (invites, etc.)
 
 If your HS/mxisd hostname is not the same as your Matrix domain, configure `server.name`.  
-Complete configuration guide is available [here](docs/configure.md).
+Complete configuration guide is available [here](configure.md).
 
 ## Integrate
-For an overview of a typical mxisd infrastructure, see the [dedicated document](docs/architecture.md)
+For an overview of a typical mxisd infrastructure, see the [dedicated document](architecture.md)
 ### Reverse proxy
 #### Apache2
 In the VirtualHost handling the domain with SSL, add the following line and replace `0.0.0.0` by the right address/host.  
@@ -93,7 +93,7 @@ Invite `mxisd-lookup-test@kamax.io` to a room, which should be turned into a Mat
 If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  
 If it did not work, [get in touch](#support) and we'll do our best to get you started.
 
-You can now integrate mxisd further with your infrastructure using the various [features](docs/README.md) guides.
+You can now integrate mxisd further with your infrastructure using the various [features](README.md) guides.
 
 ## Next steps
 Once your mxisd server is up and running, here are the next steps to further enhance and integrate your installation:
