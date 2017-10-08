@@ -20,7 +20,11 @@
 
 package io.kamax.mxisd.backend.ldap;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
+import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
@@ -41,11 +45,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class LdapAuthProvider extends LdapGenericBackend implements AuthenticatorProvider {
 
     private Logger log = LoggerFactory.getLogger(LdapAuthProvider.class);
+
+    private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
     @Autowired
     public LdapAuthProvider(LdapConfig cfg, MatrixConfig mxCfg) {
@@ -55,6 +64,21 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
     @Override
     public boolean isEnabled() {
         return getCfg().isEnabled();
+    }
+
+    private Optional<String> getMsisdn(String phoneNumber) {
+        try { // FIXME export into dedicated ThreePid class within SDK (copy from Firebase Auth)
+            return Optional.of(phoneUtil.format(
+                    phoneUtil.parse(
+                            phoneNumber,
+                            null // No default region
+                    ),
+                    PhoneNumberUtil.PhoneNumberFormat.E164
+            ).substring(1)); // We want without the leading +
+        } catch (NumberParseException e) {
+            log.warn("Invalid phone number: {}", phoneNumber);
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -74,7 +98,15 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
 
             String userFilter = "(" + getUidAtt() + "=" + userFilterValue + ")";
             userFilter = buildWithFilter(userFilter, getCfg().getAuth().getFilter());
-            try (EntryCursor cursor = conn.search(getBaseDn(), userFilter, SearchScope.SUBTREE, getUidAtt(), getAt().getName())) {
+
+            Set<String> attributes = new HashSet<>();
+            attributes.add(getUidAtt());
+            attributes.add(getAt().getName());
+            getAt().getThreepid().forEach((k, v) -> attributes.addAll(v));
+            String[] attArray = new String[attributes.size()];
+            attributes.toArray(attArray);
+
+            try (EntryCursor cursor = conn.search(getBaseDn(), userFilter, SearchScope.SUBTREE, attArray)) {
                 while (cursor.next()) {
                     Entry entry = cursor.get();
                     String dn = entry.getDn().getName();
@@ -99,7 +131,18 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                     log.info("DN {} is a valid match", dn);
 
                     // TODO should we canonicalize the MXID?
-                    return BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, name);
+                    BackendAuthResult result = BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, name);
+                    log.info("Processing 3PIDs for profile");
+                    getAt().getThreepid().forEach((k, v) -> v.forEach(attId -> {
+                        getAttribute(entry, attId).ifPresent(tpidValue -> {
+                            if (ThreePidMedium.PhoneNumber.is(k)) {
+                                tpidValue = getMsisdn(tpidValue).orElse(tpidValue);
+                            }
+                            result.withThreePid(new ThreePid(k, tpidValue));
+                        });
+                    }));
+                    log.info("Found {} 3PIDs", result.getProfile().getThreePids().size());
+                    return result;
                 }
             } catch (CursorLdapReferralException e) {
                 log.warn("Entity for {} is only available via referral, skipping", mxid);
