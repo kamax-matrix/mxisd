@@ -43,7 +43,8 @@ ldap.attribute.name: 'cn'
 ```
 
 You can also change the attribute lists for 3PID, like email or phone numbers.  
-The following example would overwrite the [default list of attributes](../../src/main/resources/application.yaml#L67) for emails and phone number:
+The following example would overwrite the [default list of attributes](../../src/main/resources/application.yaml#L67)
+for emails and phone number:
 ```
 ldap.attribute.threepid.email:
   - 'mail'
@@ -65,7 +66,8 @@ of the Configuration below.
 No further configuration is needed to enable authentication with LDAP once globally enabled and configured.  
 You have the possiblity to use a different query filter if you wish, see Configuration below.
 
-Profile auto-fill is not yet supported but is a top priority.
+Profile auto-fill is enabled by default. It will use the `name` and `threepid` configuration options to get a lit of
+attributes to be used to build the user profile to pass on to synapse during authentication.
 
 ## Directory
 No further configuration is needed to enable directory with LDAP once globally enabled and configured.
