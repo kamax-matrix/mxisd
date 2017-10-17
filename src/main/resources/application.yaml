@@ -233,4 +233,4 @@ spring:
 
 logging:
   pattern:
-    console: '%d{.SSS}${LOG_LEVEL_PATTERN:%5p} [%15.15t] %35.35logger{34} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}'
+    console: '%d{.SSS} ${LOG_LEVEL_PATTERN:%5p} [%15.15t] %35.35logger{34} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}'
