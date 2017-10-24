@@ -47,7 +47,7 @@ String gitVersion() {
     def versionPattern = Pattern.compile("v(\\d+\\.)?(\\d+\\.)?(\\d+)(-.*)?")
     ByteArrayOutputStream out = new ByteArrayOutputStream()
     exec {
-        commandLine = ['git', 'describe', '--always', '--dirty']
+        commandLine = ['git', 'describe', '--tags', '--always', '--dirty']
         standardOutput = out
     }
     def v = out.toString().replace(System.lineSeparator(), '')
