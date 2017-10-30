@@ -22,7 +22,7 @@ package io.kamax.mxisd.backend.sql;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.sql.SqlProviderConfig;
+import io.kamax.mxisd.config.sql.SqlConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
@@ -30,8 +30,6 @@ import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,18 +39,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Component
-public class SqlThreePidProvider implements IThreePidProvider {
+public abstract class SqlThreePidProvider implements IThreePidProvider {
 
     private Logger log = LoggerFactory.getLogger(SqlThreePidProvider.class);
 
-    private SqlProviderConfig cfg;
+    private SqlConfig cfg;
     private MatrixConfig mxCfg;
 
     private SqlConnectionPool pool;
 
-    @Autowired
-    public SqlThreePidProvider(SqlProviderConfig cfg, MatrixConfig mxCfg) {
+    public SqlThreePidProvider(SqlConfig cfg, MatrixConfig mxCfg) {
         this.cfg = cfg;
         this.pool = new SqlConnectionPool(cfg);
         this.mxCfg = mxCfg;

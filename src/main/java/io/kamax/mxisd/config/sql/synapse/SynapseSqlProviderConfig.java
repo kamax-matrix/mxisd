@@ -21,6 +21,7 @@
 package io.kamax.mxisd.config.sql.synapse;
 
 import io.kamax.mxisd.config.sql.SqlConfig;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,10 +37,23 @@ public class SynapseSqlProviderConfig extends SqlConfig {
     }
 
     @PostConstruct
-    public void build() {
-        super.build();
+    public void doBuild() {
+        super.doBuild();
         // FIXME check that the DB is not the mxisd one
         // See https://matrix.to/#/!NPRUEisLjcaMtHIzDr:kamax.io/$1509377583327omXkC:kamax.io
+
+        getAuth().setEnabled(false); // Synapse does the auth, we only act as a directory/identity service.
+
+        if (getDirectory().isEnabled()) {
+            //FIXME set default queries for name and threepid
+        }
+
+        if (getIdentity().isEnabled()) {
+            if (StringUtils.isBlank(getIdentity().getType())) {
+                getIdentity().setType("mxid");
+                getIdentity().setQuery("SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?");
+            }
+        }
     }
 
 }

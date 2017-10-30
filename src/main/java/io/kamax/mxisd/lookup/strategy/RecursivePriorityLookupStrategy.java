@@ -53,7 +53,10 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
     public RecursivePriorityLookupStrategy(RecursiveLookupConfig cfg, List<IThreePidProvider> providers, IBridgeFetcher bridge) {
         this.cfg = cfg;
         this.bridge = bridge;
-        this.providers = providers.stream().filter(IThreePidProvider::isEnabled).collect(Collectors.toList());
+        this.providers = providers.stream().filter(p -> {
+            log.info("3PID Provider {} is enabled: {}", p.getClass().getSimpleName(), p.isEnabled());
+            return p.isEnabled();
+        }).collect(Collectors.toList());
     }
 
     @PostConstruct

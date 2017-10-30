@@ -22,8 +22,8 @@ package io.kamax.mxisd.backend.sql;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.sql.GenericSqlProviderConfig;
 import io.kamax.mxisd.config.sql.SqlConfig;
-import io.kamax.mxisd.config.sql.SqlProviderConfig;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
@@ -39,16 +39,16 @@ import java.util.Optional;
 
 import static io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult.Result;
 
-public abstract class SqlDirectoryProvider implements IDirectoryProvider {
+public abstract class GenericSqlDirectoryProvider implements IDirectoryProvider {
 
-    private Logger log = LoggerFactory.getLogger(SqlDirectoryProvider.class);
+    private Logger log = LoggerFactory.getLogger(GenericSqlDirectoryProvider.class);
 
     protected SqlConfig cfg;
     private MatrixConfig mxCfg;
 
     private SqlConnectionPool pool;
 
-    public SqlDirectoryProvider(SqlConfig cfg, MatrixConfig mxCfg) {
+    public GenericSqlDirectoryProvider(SqlConfig cfg, MatrixConfig mxCfg) {
         this.cfg = cfg;
         this.pool = new SqlConnectionPool(cfg);
         this.mxCfg = mxCfg;
@@ -72,7 +72,7 @@ public abstract class SqlDirectoryProvider implements IDirectoryProvider {
         return Optional.of(item);
     }
 
-    public UserDirectorySearchResult search(String searchTerm, SqlProviderConfig.Query query) {
+    public UserDirectorySearchResult search(String searchTerm, GenericSqlProviderConfig.Query query) {
         try (Connection conn = pool.get()) {
             log.info("Will execute query: {}", query.getValue());
             try (PreparedStatement stmt = conn.prepareStatement(query.getValue())) {

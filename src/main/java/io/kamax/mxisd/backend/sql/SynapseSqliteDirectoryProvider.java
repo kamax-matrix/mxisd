@@ -21,7 +21,7 @@
 package io.kamax.mxisd.backend.sql;
 
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.sql.SqlProviderConfig;
+import io.kamax.mxisd.config.sql.GenericSqlProviderConfig;
 import io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
@@ -32,9 +32,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 @Component
-public class SynapseSqliteDirectoryProvider extends SqlDirectoryProvider {
-
-    private SynapseSqlProviderConfig cfg;
+public class SynapseSqliteDirectoryProvider extends GenericSqlDirectoryProvider {
 
     @Autowired
     public SynapseSqliteDirectoryProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg) {
@@ -42,7 +40,7 @@ public class SynapseSqliteDirectoryProvider extends SqlDirectoryProvider {
 
         if (StringUtils.equals("sqlite", cfg.getType())) {
             String userId = "'@' || p.user_id || ':" + mxCfg.getDomain() + "'";
-            SqlProviderConfig.Type queries = cfg.getDirectory().getQuery();
+            GenericSqlProviderConfig.Type queries = cfg.getDirectory().getQuery();
             queries.getName().setValue(
                     "select " + userId + ", displayname from profiles p where displayname like ?");
             queries.getThreepid().setValue(
@@ -51,7 +49,7 @@ public class SynapseSqliteDirectoryProvider extends SqlDirectoryProvider {
                             "where t.address like ?");
         } else if (StringUtils.equals("postgresql", cfg.getType())) {
             String userId = "concat('@',p.user_id,':" + mxCfg.getDomain() + "')";
-            SqlProviderConfig.Type queries = cfg.getDirectory().getQuery();
+            GenericSqlProviderConfig.Type queries = cfg.getDirectory().getQuery();
             queries.getName().setValue(
                     "select " + userId + ", displayname from profiles p where displayname ilike ?");
             queries.getThreepid().setValue(

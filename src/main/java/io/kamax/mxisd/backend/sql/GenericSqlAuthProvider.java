@@ -24,7 +24,7 @@ import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.config.sql.SqlProviderConfig;
+import io.kamax.mxisd.config.sql.GenericSqlProviderConfig;
 import io.kamax.mxisd.invitation.InvitationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +32,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SqlAuthProvider implements AuthenticatorProvider {
+public class GenericSqlAuthProvider implements AuthenticatorProvider {
 
-    private Logger log = LoggerFactory.getLogger(SqlAuthProvider.class);
+    private Logger log = LoggerFactory.getLogger(GenericSqlAuthProvider.class);
 
     @Autowired
     private ServerConfig srvCfg;
 
     @Autowired
-    private SqlProviderConfig cfg;
+    private GenericSqlProviderConfig cfg;
 
     @Autowired
     private InvitationManager invMgr;

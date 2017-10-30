@@ -18,27 +18,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.sql;
+package io.kamax.mxisd.backend.sql;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.sql.GenericSqlProviderConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+@Component
+public class GenericSqlThreePidProvider extends SqlThreePidProvider {
 
-@Configuration
-@ConfigurationProperties("sql")
-@Primary
-public class SqlProviderConfig extends SqlConfig {
-
-    @Override
-    protected String getProviderName() {
-        return "Generic SQL";
-    }
-
-    @PostConstruct
-    public void build() {
-        super.build();
+    @Autowired
+    public GenericSqlThreePidProvider(GenericSqlProviderConfig cfg, MatrixConfig mxCfg) {
+        super(cfg, mxCfg);
     }
 
 }

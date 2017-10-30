@@ -4,6 +4,7 @@ import io.kamax.mxisd.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,22 +37,22 @@ public abstract class SqlConfig {
 
     public static class Type {
 
-        private SqlProviderConfig.Query name = new SqlProviderConfig.Query();
-        private SqlProviderConfig.Query threepid = new SqlProviderConfig.Query();
+        private GenericSqlProviderConfig.Query name = new GenericSqlProviderConfig.Query();
+        private GenericSqlProviderConfig.Query threepid = new GenericSqlProviderConfig.Query();
 
-        public SqlProviderConfig.Query getName() {
+        public GenericSqlProviderConfig.Query getName() {
             return name;
         }
 
-        public void setName(SqlProviderConfig.Query name) {
+        public void setName(GenericSqlProviderConfig.Query name) {
             this.name = name;
         }
 
-        public SqlProviderConfig.Query getThreepid() {
+        public GenericSqlProviderConfig.Query getThreepid() {
             return threepid;
         }
 
-        public void setThreepid(SqlProviderConfig.Query threepid) {
+        public void setThreepid(GenericSqlProviderConfig.Query threepid) {
             this.threepid = threepid;
         }
 
@@ -74,7 +75,7 @@ public abstract class SqlConfig {
     public static class Directory {
 
         private Boolean enabled;
-        private SqlProviderConfig.Type query = new SqlProviderConfig.Type();
+        private GenericSqlProviderConfig.Type query = new GenericSqlProviderConfig.Type();
 
         public Boolean isEnabled() {
             return enabled;
@@ -84,11 +85,11 @@ public abstract class SqlConfig {
             this.enabled = enabled;
         }
 
-        public SqlProviderConfig.Type getQuery() {
+        public GenericSqlProviderConfig.Type getQuery() {
             return query;
         }
 
-        public void setQuery(SqlProviderConfig.Type query) {
+        public void setQuery(GenericSqlProviderConfig.Type query) {
             this.query = query;
         }
 
@@ -138,9 +139,9 @@ public abstract class SqlConfig {
     private boolean enabled;
     private String type;
     private String connection;
-    private SqlProviderConfig.Auth auth = new SqlProviderConfig.Auth();
-    private SqlProviderConfig.Directory directory = new SqlProviderConfig.Directory();
-    private SqlProviderConfig.Identity identity = new SqlProviderConfig.Identity();
+    private GenericSqlProviderConfig.Auth auth = new GenericSqlProviderConfig.Auth();
+    private GenericSqlProviderConfig.Directory directory = new GenericSqlProviderConfig.Directory();
+    private GenericSqlProviderConfig.Identity identity = new GenericSqlProviderConfig.Identity();
 
     public boolean isEnabled() {
         return enabled;
@@ -166,35 +167,33 @@ public abstract class SqlConfig {
         this.connection = connection;
     }
 
-    public SqlProviderConfig.Auth getAuth() {
+    public GenericSqlProviderConfig.Auth getAuth() {
         return auth;
     }
 
-    public void setAuth(SqlProviderConfig.Auth auth) {
+    public void setAuth(GenericSqlProviderConfig.Auth auth) {
         this.auth = auth;
     }
 
-    public SqlProviderConfig.Directory getDirectory() {
+    public GenericSqlProviderConfig.Directory getDirectory() {
         return directory;
     }
 
-    public void setDirectory(SqlProviderConfig.Directory directory) {
+    public void setDirectory(GenericSqlProviderConfig.Directory directory) {
         this.directory = directory;
     }
 
-    public SqlProviderConfig.Identity getIdentity() {
+    public GenericSqlProviderConfig.Identity getIdentity() {
         return identity;
     }
 
-    public void setIdentity(SqlProviderConfig.Identity identity) {
+    public void setIdentity(GenericSqlProviderConfig.Identity identity) {
         this.identity = identity;
     }
 
     protected abstract String getProviderName();
 
-    public void build() {
-        log.info("--- " + getProviderName() + " Provider config ---");
-
+    protected void doBuild() {
         if (getAuth().isEnabled() == null) {
             getAuth().setEnabled(isEnabled());
         }
@@ -206,6 +205,13 @@ public abstract class SqlConfig {
         if (getIdentity().isEnabled() == null) {
             getIdentity().setEnabled(isEnabled());
         }
+    }
+
+    @PostConstruct
+    public void build() {
+        log.info("--- " + getProviderName() + " Provider config ---");
+
+        doBuild();
 
         log.info("Enabled: {}", isEnabled());
         if (isEnabled()) {
@@ -214,6 +220,7 @@ public abstract class SqlConfig {
             log.info("Auth enabled: {}", getAuth().isEnabled());
             log.info("Directory queries: {}", GsonUtil.build().toJson(getDirectory().getQuery()));
             log.info("Identity type: {}", getIdentity().getType());
+            log.info("3PID mapping query: {}", getIdentity().getQuery());
             log.info("Identity medium queries: {}", GsonUtil.build().toJson(getIdentity().getMedium()));
         }
     }
