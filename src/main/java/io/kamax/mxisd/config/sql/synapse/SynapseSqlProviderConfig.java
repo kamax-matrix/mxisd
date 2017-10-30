@@ -38,6 +38,8 @@ public class SynapseSqlProviderConfig extends SqlConfig {
     @PostConstruct
     public void build() {
         super.build();
+        // FIXME check that the DB is not the mxisd one
+        // See https://matrix.to/#/!NPRUEisLjcaMtHIzDr:kamax.io/$1509377583327omXkC:kamax.io
     }
 
 }
