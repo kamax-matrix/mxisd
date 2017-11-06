@@ -227,6 +227,10 @@ view:
 storage:
   backend: 'sqlite'
 
+directory:
+  exclude:
+    homeserver: false
+
 ---
 spring:
   profiles: systemd

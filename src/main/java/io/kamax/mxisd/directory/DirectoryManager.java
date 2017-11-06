@@ -23,6 +23,7 @@ package io.kamax.mxisd.directory;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import io.kamax.matrix.MatrixErrorInfo;
+import io.kamax.mxisd.config.DirectoryConfig;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
@@ -54,6 +55,7 @@ public class DirectoryManager {
 
     private Logger log = LoggerFactory.getLogger(DirectoryManager.class);
 
+    private DirectoryConfig cfg;
     private List<IDirectoryProvider> providers;
 
     private ClientDnsOverwrite dns;
@@ -61,7 +63,8 @@ public class DirectoryManager {
     private Gson gson;
 
     @Autowired
-    public DirectoryManager(List<IDirectoryProvider> providers, ClientDnsOverwrite dns) {
+    public DirectoryManager(DirectoryConfig cfg, List<IDirectoryProvider> providers, ClientDnsOverwrite dns) {
+        this.cfg = cfg;
         this.dns = dns;
         this.client = HttpClients.custom().setUserAgent("mxisd").build(); //FIXME centralize
         this.gson = GsonUtil.build();
@@ -76,37 +79,41 @@ public class DirectoryManager {
         log.info("Original request URL: {}", target);
         UserDirectorySearchResult result = new UserDirectorySearchResult();
 
-        URIBuilder builder = dns.transform(target);
-        log.info("Querying HS at {}", builder);
-        builder.setParameter("access_token", accessToken);
-        HttpPost req = RestClientUtils.post(
-                builder.toString(),
-                new UserDirectorySearchRequest(query));
-        try (CloseableHttpResponse res = client.execute(req)) {
-            int status = res.getStatusLine().getStatusCode();
-            Charset charset = ContentType.getOrDefault(res.getEntity()).getCharset();
-            String body = IOUtils.toString(res.getEntity().getContent(), charset);
+        if (cfg.getExclude().getHomeserver()) {
+            log.info("Skipping HS directory data, disabled in config");
+        } else {
+            URIBuilder builder = dns.transform(target);
+            log.info("Querying HS at {}", builder);
+            builder.setParameter("access_token", accessToken);
+            HttpPost req = RestClientUtils.post(
+                    builder.toString(),
+                    new UserDirectorySearchRequest(query));
+            try (CloseableHttpResponse res = client.execute(req)) {
+                int status = res.getStatusLine().getStatusCode();
+                Charset charset = ContentType.getOrDefault(res.getEntity()).getCharset();
+                String body = IOUtils.toString(res.getEntity().getContent(), charset);
 
-            if (status != 200) {
-                MatrixErrorInfo info = gson.fromJson(body, MatrixErrorInfo.class);
-                if (StringUtils.equals("M_UNRECOGNIZED", info.getErrcode())) { // FIXME no hardcoding, use Enum
-                    log.warn("Homeserver does not support Directory feature, skipping");
-                } else {
-                    log.error("Homeserver returned an error while performing directory search");
-                    throw new MatrixException(status, info.getErrcode(), info.getError());
+                if (status != 200) {
+                    MatrixErrorInfo info = gson.fromJson(body, MatrixErrorInfo.class);
+                    if (StringUtils.equals("M_UNRECOGNIZED", info.getErrcode())) { // FIXME no hardcoding, use Enum
+                        log.warn("Homeserver does not support Directory feature, skipping");
+                    } else {
+                        log.error("Homeserver returned an error while performing directory search");
+                        throw new MatrixException(status, info.getErrcode(), info.getError());
+                    }
                 }
-            }
 
-            UserDirectorySearchResult resultHs = gson.fromJson(body, UserDirectorySearchResult.class);
-            log.info("Found {} match(es) in HS for '{}'", resultHs.getResults().size(), query);
-            result.getResults().addAll(resultHs.getResults());
-            if (resultHs.isLimited()) {
-                result.setLimited(true);
+                UserDirectorySearchResult resultHs = gson.fromJson(body, UserDirectorySearchResult.class);
+                log.info("Found {} match(es) in HS for '{}'", resultHs.getResults().size(), query);
+                result.getResults().addAll(resultHs.getResults());
+                if (resultHs.isLimited()) {
+                    result.setLimited(true);
+                }
+            } catch (JsonSyntaxException e) {
+                throw new InternalServerError("Invalid JSON reply from the HS: " + e.getMessage());
+            } catch (IOException e) {
+                throw new InternalServerError("Unable to query the HS: I/O error: " + e.getMessage());
             }
-        } catch (JsonSyntaxException e) {
-            throw new InternalServerError("Invalid JSON reply from the HS: " + e.getMessage());
-        } catch (IOException e) {
-            throw new InternalServerError("Unable to query the HS: I/O error: " + e.getMessage());
         }
 
         for (IDirectoryProvider provider : providers) {
