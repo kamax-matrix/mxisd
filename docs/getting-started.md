@@ -54,7 +54,8 @@ Complete configuration guide is available [here](configure.md).
 For an overview of a typical mxisd infrastructure, see the [dedicated document](architecture.md)
 ### Reverse proxy
 #### Apache2
-In the VirtualHost handling the domain with SSL, add the following line and replace `0.0.0.0` by the right address/host.  
+In the VirtualHost handling the domain with SSL, add the following line and replace `0.0.0.0` by the internal IP/hostname
+pointing to mxisd.  
 **This line MUST be present before the one for the homeserver!**
 ```
 ProxyPass /_matrix/identity/ http://0.0.0.0:8090/_matrix/identity/
@@ -82,7 +83,7 @@ trusted_third_party_id_servers:
     - vector.im
     - example.org
 ```
-It is recommended to remove `matrix.org` and `vector.im` so only your own Identity server is allowed by synapse. 
+It is recommended to remove `matrix.org` and `vector.im` so only your own Identity server is authoritative for your HS.
 
 ## Validate
 Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
