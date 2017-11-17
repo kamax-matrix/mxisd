@@ -25,6 +25,7 @@ import io.kamax.mxisd.config.ldap.LdapAttributeConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.entry.Attribute;
+import org.apache.directory.api.ldap.model.entry.AttributeUtils;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.ldap.client.api.LdapConnection;
@@ -32,6 +33,9 @@ import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -124,7 +128,6 @@ public abstract class LdapGenericBackend {
     public Optional<String> getAttribute(Entry entry, String attName) {
         Attribute attribute = entry.get(attName);
         if (attribute == null) {
-            log.info("DN {}: no attribute {}, skipping", entry.getDn(), attName);
             return Optional.empty();
         }
 
@@ -135,6 +138,24 @@ public abstract class LdapGenericBackend {
         }
 
         return Optional.of(value);
+    }
+
+    public List<String> getAttributes(Entry entry, String attName) {
+        List<String> values = new ArrayList<>();
+        javax.naming.directory.Attribute att = AttributeUtils.toAttributes(entry).get(attName);
+        if (att == null) {
+            return values;
+        }
+
+        try {
+            NamingEnumeration<?> list = att.getAll();
+            while (list.hasMore()) {
+                values.add(list.next().toString());
+            }
+        } catch (NamingException e) {
+            log.warn("Error while processing LDAP attribute {}, result could be incomplete!", attName, e);
+        }
+        return values;
     }
 
 }

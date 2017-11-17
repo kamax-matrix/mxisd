@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -133,14 +134,20 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
                     // TODO should we canonicalize the MXID?
                     BackendAuthResult result = BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, name);
                     log.info("Processing 3PIDs for profile");
-                    getAt().getThreepid().forEach((k, v) -> v.forEach(attId -> {
-                        getAttribute(entry, attId).ifPresent(tpidValue -> {
-                            if (ThreePidMedium.PhoneNumber.is(k)) {
-                                tpidValue = getMsisdn(tpidValue).orElse(tpidValue);
-                            }
-                            result.withThreePid(new ThreePid(k, tpidValue));
+                    getAt().getThreepid().forEach((k, v) -> {
+                        log.info("Processing 3PID type {}", k);
+                        v.forEach(attId -> {
+                            List<String> values = getAttributes(entry, attId);
+                            log.info("\tAttribute {} has {} value(s)", attId, values.size());
+                            getAttributes(entry, attId).forEach(tpidValue -> {
+                                if (ThreePidMedium.PhoneNumber.is(k)) {
+                                    tpidValue = getMsisdn(tpidValue).orElse(tpidValue);
+                                }
+                                result.withThreePid(new ThreePid(k, tpidValue));
+                            });
                         });
-                    }));
+                    });
+
                     log.info("Found {} 3PIDs", result.getProfile().getThreePids().size());
                     return result;
                 }
