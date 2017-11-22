@@ -9,6 +9,7 @@
     - [LDAP](#ldap)
     - [SQL](#sql)
     - [REST](#rest)
+- [Next steps](#next-steps)
 
 ## Description
 This feature allows you to search for existing and/or potential users that are already present in your Identity backend
@@ -165,3 +166,11 @@ For each query, `type` can be used to tell mxisd how to process the ID column:
 
 #### REST
 See the [dedicated document](../backends/rest.md)
+
+## Next steps
+### Homeserver results
+You can configure if the Homeserver should be queried at all when doing a directory search.  
+To disable Homeserver results, set the following in mxisd config file:
+```
+directory.exclude.homeserever: true
+```
