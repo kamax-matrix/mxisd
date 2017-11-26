@@ -47,15 +47,14 @@ public class NotificationManager {
         handlers.forEach(h -> {
             log.info("Found handler {} for medium {}", h.getId(), h.getMedium());
             String handlerId = cfg.getHandler().get(h.getMedium());
-            if (StringUtils.isBlank(handlerId) || StringUtils.equals(handlerId, h.getId())) {
+            if (StringUtils.isBlank(handlerId) && StringUtils.equals("raw", h.getId()) ||
+                    StringUtils.equals(handlerId, h.getId())) {
                 this.handlers.put(h.getMedium(), h);
             }
         });
 
         log.info("--- Notification handler ---");
-        this.handlers.forEach((k, v) -> {
-            log.info("\tHandler for {}: {}", k, v.getId());
-        });
+        this.handlers.forEach((k, v) -> log.info("\tHandler for {}: {}", k, v.getId()));
     }
 
     private INotificationHandler ensureMedium(String medium) {
