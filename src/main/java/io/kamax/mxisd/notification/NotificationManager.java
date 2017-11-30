@@ -46,9 +46,8 @@ public class NotificationManager {
         this.handlers = new HashMap<>();
         handlers.forEach(h -> {
             log.info("Found handler {} for medium {}", h.getId(), h.getMedium());
-            String handlerId = cfg.getHandler().get(h.getMedium());
-            if (StringUtils.isBlank(handlerId) && StringUtils.equals("raw", h.getId()) ||
-                    StringUtils.equals(handlerId, h.getId())) {
+            String handlerId = cfg.getHandler().getOrDefault(h.getMedium(), "raw");
+            if (StringUtils.equals(handlerId, h.getId())) {
                 this.handlers.put(h.getMedium(), h);
             }
         });
