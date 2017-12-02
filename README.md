@@ -18,7 +18,7 @@ It is specifically designed to connect to an Identity store (AD/Samba/LDAP, SQL 
 and ease the integration of the Matrix ecosystem with an existing infrastructure, or to build a new one using lasting
 tools.
 
-The core principle of mxisd is to map between Matrix IDs and 3PIDs (Thrid-party Identifiers) for the Homeserver and its
+The core principle of mxisd is to map between Matrix IDs and 3PIDs (Third-party Identifiers) for the Homeserver and its
 users. 3PIDs can be anything that identify a user, like:
 - Full name
 - Email address
