@@ -162,10 +162,13 @@ public class LdapConfig {
             throw new IllegalStateException("LDAP port is not valid");
         }
 
+        if (StringUtils.isBlank(conn.getBaseDn())) {
+            throw new ConfigurationException("ldap.connection.baseDn");
+        }
+
         if (StringUtils.isBlank(attribute.getUid().getType())) {
             throw new IllegalStateException("Attribute UID Type cannot be empty");
         }
-
 
         if (StringUtils.isBlank(attribute.getUid().getValue())) {
             throw new IllegalStateException("Attribute UID value cannot be empty");
