@@ -37,6 +37,8 @@ Install via:
 See the [Latest release](https://github.com/kamax-io/mxisd/releases/latest) for links to each.
 
 ## Configure
+**NOTE**: please view the install instruction for your platform, as this step might be optional/handled for you.
+
 Create/edit a minimal configuration (see installer doc for the location):
 ```
 matrix.domain: 'MyMatrixDomain.org'

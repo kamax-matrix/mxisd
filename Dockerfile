@@ -6,6 +6,11 @@ EXPOSE 8090
 
 ADD build/libs/mxisd.jar /mxisd.jar
 ADD src/docker/start.sh /start.sh
+RUN mkdir -p /var/mxisd
 
 ENV JAVA_OPTS=""
+ENV CONF_FILE_PATH="/etc/mxisd/mxisd.yaml"
+ENV SIGN_KEY_PATH="/var/mxisd/sign.key"
+ENV SQLITE_DATABASE_PATH="/var/mxisd/mxisd.db"
+
 CMD [ "/start.sh" ]
