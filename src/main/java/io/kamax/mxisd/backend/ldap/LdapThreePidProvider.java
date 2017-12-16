@@ -68,13 +68,16 @@ public class LdapThreePidProvider extends LdapGenericBackend implements IThreePi
     }
 
     private Optional<String> lookup(LdapConnection conn, String medium, String value) {
-        Optional<String> queryOpt = getCfg().getIdentity().getQuery(medium);
-        if (!queryOpt.isPresent()) {
+        Optional<String> tPidQueryOpt = getCfg().getIdentity().getQuery(medium);
+        if (!tPidQueryOpt.isPresent()) {
             log.warn("{} is not a configured 3PID type for LDAP lookup", medium);
             return Optional.empty();
         }
 
-        String searchQuery = queryOpt.get().replaceAll(getCfg().getIdentity().getToken(), value);
+        // we merge 3PID specific query with global/specific filter, if one exists.
+        String tPidQuery = tPidQueryOpt.get().replaceAll(getCfg().getIdentity().getToken(), value);
+        String searchQuery = buildWithFilter(tPidQuery, getCfg().getIdentity().getFilter());
+
         try (EntryCursor cursor = conn.search(getBaseDn(), searchQuery, SearchScope.SUBTREE, getUidAtt())) {
             while (cursor.next()) {
                 Entry entry = cursor.get();
