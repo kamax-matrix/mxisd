@@ -6,7 +6,8 @@ EXPOSE 8090
 
 ADD build/libs/mxisd.jar /mxisd.jar
 ADD src/docker/start.sh /start.sh
-RUN mkdir -p /var/mxisd
+RUN apk update && apk add bash && rm -rf /var/lib/apk/* /var/cache/apk/* \
+    && mkdir -p /var/mxisd
 
 ENV JAVA_OPTS=""
 ENV CONF_FILE_PATH="/etc/mxisd/mxisd.yaml"
