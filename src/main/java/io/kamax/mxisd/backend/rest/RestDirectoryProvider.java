@@ -31,10 +31,12 @@ import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@Component
 public class RestDirectoryProvider extends RestProvider implements IDirectoryProvider {
 
     private MatrixConfig mxCfg;
