@@ -379,7 +379,7 @@ public class SessionMananger {
 
             if (o.has("validated_at")) {
                 ThreePid remoteThreePid = new ThreePid(o.get("medium").getAsString(), o.get("address").getAsString());
-                if (session.getThreePid().equals(remoteThreePid)) { // sanity check
+                if (!session.getThreePid().equals(remoteThreePid)) { // sanity check
                     throw new InternalServerError("Local 3PID " + session.getThreePid() + " and remote 3PID " + remoteThreePid + " do not match for session " + session.getId());
                 }
 
