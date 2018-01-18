@@ -276,14 +276,14 @@ session:
 **IMPORTANT**: When using local-only mode, you will also need to link mxisd to synapse if you want user searches and invites to work.
 To do so, add/edit the following configuration keys:
 ```
-sql:
+synapseSql:
   enabled: true
-  type: 'postgresql'
-  connection: ''
+  type: 'SET TO PROPER VALUE'
+  connection: 'SET TO PROPER VALUE'
 ```
-- `sql.enabled` set to `true` to activate the SQL backend.
-- `sql.type` can be set to `sqlite` or `postgresql`, depending on your synapse setup.
-- `sql.connection` use a JDBC format which is appened after the `jdbc:type:` connection URI.
+- `synapseSql.enabled` set to `true` to activate the SQL backend.
+- `synapseSql.type` can be set to `sqlite` or `postgresql`, depending on your synapse setup.
+- `synapseSql.connection` use a JDBC format which is appened after the `jdbc:type:` connection URI.
 Example values for each type:
   - `sqlite`: `/path/to/homeserver.db`
   - `postgresql`: `//localhost/database?user=synapse&password=synapse`
