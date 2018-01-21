@@ -56,14 +56,14 @@ Complete configuration guide is available [here](configure.md).
 For an overview of a typical mxisd infrastructure, see the [dedicated document](architecture.md)
 ### Reverse proxy
 #### Apache2
-In the VirtualHost handling the domain with SSL, add the following line and replace `0.0.0.0` by the internal IP/hostname
-pointing to mxisd.  
+In the `VirtualHost` section handling the domain with SSL, add the following and replace `0.0.0.0` by the internal
+hostname/IP pointing to mxisd.  
 **This line MUST be present before the one for the homeserver!**
 ```
 ProxyPass /_matrix/identity/ http://0.0.0.0:8090/_matrix/identity/
 ```
 
-Typical VirtualHost configuration would be:
+Typical configuration would look like:
 ```
 <VirtualHost *:443>
     ServerName example.org
@@ -71,9 +71,41 @@ Typical VirtualHost configuration would be:
     ...
     
     ProxyPreserveHost on
-    ProxyPass /_matrix/identity/ http://10.1.2.3:8090/_matrix/identity/
-    ProxyPass /_matrix/ http://10.1.2.3:8008/_matrix/
+    ProxyPass /_matrix/identity/ http://localhost:8090/_matrix/identity/
+    ProxyPass /_matrix/ http://localhost:8008/_matrix/
 </VirtualHost>
+```
+
+#### nginx
+In the `server` section handling the domain with SSL, add the following and replace `0.0.0.0` with the internal
+hostname/IP pointing to mxisd.
+**This line MUST be present before the one for the homeserver!**
+```
+location /_matrix/identity {
+    proxy_pass http://0.0.0.0:8090/_matrix/identity;
+}
+```
+
+Typical configuration would look like:
+```
+server {
+    listen 443 ssl;
+    server_name example.org;
+    
+    ...
+    
+    location /_matrix/identity {
+        proxy_pass http://localhost:8090/_matrix/identity;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+    
+    location /_matrix {
+        proxy_pass http://localhost:8008/_matrix;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+}
 ```
 
 ### Synapse

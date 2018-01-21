@@ -4,6 +4,8 @@
 - [Requirements](#requirements)
 - [Configuration](#configuration)
   - [Reverse Proxy](#reverse-proxy)
+    - [Apache2](#apache2)
+    - [nginx](#nginx)
   - [DNS Overwrite](#dns-overwrite)
   - [Backends](#backends)
     - [LDAP](#ldap)
@@ -62,15 +64,65 @@ which directly answered the request.
   
 ## Configuration
 ### Reverse Proxy
-Apache2 configuration to put under the relevant virtual domain:
+#### Apache2
+The specific configuration to put under the relevant `VirtualHost`:
 ```
-ProxyPreserveHost on
-ProxyPass /_matrix/identity/ http://mxisdInternalIpAddress:8090/_matrix/identity/
-ProxyPass /_matrix/client/r0/user_directory/ http://mxisdInternalIpAddress:8090/_matrix/client/r0/user_directory/
-ProxyPass /_matrix/ http://HomeserverInternalIpAddress:8008/_matrix/
+ProxyPass /_matrix/client/r0/user_directory/ http://0.0.0.0:8090/_matrix/client/r0/user_directory/
 ```
 `ProxyPreserveHost` or equivalent must be enabled to detect to which Homeserver mxisd should talk to when building
 results.
+
+Your `VirtualHost` should now look like this:
+```
+<VirtualHost *:443>
+    ServerName example.org
+    
+    ...
+    
+    ProxyPreserveHost on
+    ProxyPass /_matrix/client/r0/user_directory/ http://localhost:8090/_matrix/client/r0/user_directory/
+    ProxyPass /_matrix/identity/ http://localhost:8090/_matrix/identity/
+    ProxyPass /_matrix/ http://localhost:8008/_matrix/
+</VirtualHost>
+```
+
+#### nginx
+The specific configuration to add under your `server` section is:
+```
+location /_matrix/client/r0/user_directory {
+    proxy_pass http://0.0.0.0:8090/_matrix/client/r0/user_directory;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+}
+```
+
+Your `server` section should now look like this:
+```
+server {
+    listen 443 ssl;
+    server_name example.org;
+    
+    ...
+    
+    location /_matrix/client/r0/user_directory {
+        proxy_pass http://localhost:8090/_matrix/client/r0/user_directory;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+    
+    location /_matrix/identity {
+        proxy_pass http://localhost:8090/_matrix/identity;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+    
+    location /_matrix {
+        proxy_pass http://localhost:8008/_matrix;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+}
+```
 
 ### DNS Overwrite
 Just like you need to configure a reverse proxy to send client requests to mxisd, you also need to configure mxisd with
