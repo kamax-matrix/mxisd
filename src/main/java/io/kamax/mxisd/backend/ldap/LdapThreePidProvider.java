@@ -27,6 +27,7 @@ import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
+import io.kamax.mxisd.util.GsonUtil;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
@@ -77,6 +78,10 @@ public class LdapThreePidProvider extends LdapGenericBackend implements IThreePi
         // we merge 3PID specific query with global/specific filter, if one exists.
         String tPidQuery = tPidQueryOpt.get().replaceAll(getCfg().getIdentity().getToken(), value);
         String searchQuery = buildWithFilter(tPidQuery, getCfg().getIdentity().getFilter());
+
+        log.debug("Base DN: {}", getBaseDn());
+        log.debug("Query: {}", searchQuery);
+        log.debug("Attributes: {}", GsonUtil.build().toJson(getUidAtt()));
 
         try (EntryCursor cursor = conn.search(getBaseDn(), searchQuery, SearchScope.SUBTREE, getUidAtt())) {
             while (cursor.next()) {

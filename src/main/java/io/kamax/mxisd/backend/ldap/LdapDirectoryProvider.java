@@ -26,6 +26,7 @@ import io.kamax.mxisd.config.ldap.LdapConfig;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
+import io.kamax.mxisd.util.GsonUtil;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
@@ -70,9 +71,12 @@ public class LdapDirectoryProvider extends LdapGenericBackend implements IDirect
             attributes.add(getUidAtt());
             String[] attArray = new String[attributes.size()];
             attributes.toArray(attArray);
-
             String searchQuery = buildOrQueryWithFilter(getCfg().getDirectory().getFilter(), "*" + query + "*", attArray);
+
+            log.debug("Base DN: {}", getBaseDn());
             log.debug("Query: {}", searchQuery);
+            log.debug("Attributes: {}", GsonUtil.build().toJson(attArray));
+
             try (EntryCursor cursor = conn.search(getBaseDn(), searchQuery, SearchScope.SUBTREE, attArray)) {
                 while (cursor.next()) {
                     Entry entry = cursor.get();

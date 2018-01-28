@@ -30,6 +30,7 @@ import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
+import io.kamax.mxisd.util.GsonUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException;
@@ -106,6 +107,10 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
             getAt().getThreepid().forEach((k, v) -> attributes.addAll(v));
             String[] attArray = new String[attributes.size()];
             attributes.toArray(attArray);
+
+            log.debug("Base DN: {}", getBaseDn());
+            log.debug("Query: {}", userFilter);
+            log.debug("Attributes: {}", GsonUtil.build().toJson(attArray));
 
             try (EntryCursor cursor = conn.search(getBaseDn(), userFilter, SearchScope.SUBTREE, attArray)) {
                 while (cursor.next()) {
