@@ -1,6 +1,6 @@
 # Architecture
 ## Overview
-### Basic setup without integration or federation
+### Basic setup without integration or incoming federation
 ```
  Client
    |
