@@ -6,6 +6,7 @@
 # Matrix config items #
 #######################
 # Matrix domain, same as the domain configure in your Homeserver configuration.
+# (note: Homeserver domain may be defined as 'server_name' in configuration file).
 #
 # This is used to build the various identifiers for identity, auth and directory.
 matrix.domain: ''
@@ -15,13 +16,14 @@ matrix.domain: ''
 # Signing keys #
 ################
 # Absolute path for the Identity Server signing key.
-# During testing, /var/tmp/mxisd.key is a possible value
 #
-# For production, use a stable location like:
+# For production, recommended location shall be one of the following:
 #   - /var/opt/mxisd/sign.key
 #   - /var/local/mxisd/sign.key
 #   - /var/lib/mxisd/sign.key
-key.path: ''
+#
+# The signing key is auto-generated during execution time if not present.
+key.path: '/var/tmp/mxisd.key'
 
 
 ############################
@@ -92,5 +94,5 @@ threepid.medium.email.connectors.smtp.login: "matrix-identity@example.org"
 # Password for the account
 threepid.medium.email.connectors.smtp.password: "ThePassword"
 
-# The e-mail to send as. If empty, will be the same as login
+# The e-mail to send as.
 threepid.medium.email.identity.from: "matrix-identity@example.org"
