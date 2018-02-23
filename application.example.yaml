@@ -6,7 +6,7 @@
 # Matrix config items #
 #######################
 # Matrix domain, same as the domain configure in your Homeserver configuration.
-# (note: Homeserver domain may be defined as 'server_name' in configuration file).
+# (note: in Synapse Homeserver, the Matrix domain may be defined as 'server_name' in configuration file).
 #
 # This is used to build the various identifiers for identity, auth and directory.
 matrix.domain: ''
@@ -16,6 +16,7 @@ matrix.domain: ''
 # Signing keys #
 ################
 # Absolute path for the Identity Server signing key.
+# During testing, /var/tmp/mxisd.key is a possible value
 #
 # For production, recommended location shall be one of the following:
 #   - /var/opt/mxisd/sign.key
@@ -23,7 +24,7 @@ matrix.domain: ''
 #   - /var/lib/mxisd/sign.key
 #
 # The signing key is auto-generated during execution time if not present.
-key.path: '/var/tmp/mxisd.key'
+key.path: ''
 
 
 ############################
