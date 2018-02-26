@@ -26,9 +26,19 @@ import com.google.gson.JsonObject;
 import io.kamax.mxisd.auth.AuthManager;
 import io.kamax.mxisd.auth.UserAuthResult;
 import io.kamax.mxisd.controller.auth.v1.io.CredentialsValidationResponse;
+import io.kamax.mxisd.controller.auth.v1.io.LoginRequestJson;
+import io.kamax.mxisd.controller.auth.v1.io.LoginResponseJson;
 import io.kamax.mxisd.exception.JsonMemberNotFoundException;
+import io.kamax.mxisd.lookup.SingleLookupReply;
+import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.GsonUtil;
+import io.kamax.mxisd.util.RestClientUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin
@@ -53,6 +64,9 @@ public class AuthController {
 
     @Autowired
     private AuthManager mgr;
+
+    @Autowired
+    private LookupStrategy strategy;
 
     @RequestMapping(value = "/_matrix-internal/identity/v1/check_credentials", method = RequestMethod.POST)
     public String checkCredentials(HttpServletRequest req) {
@@ -79,6 +93,53 @@ public class AuthController {
             obj.add("auth", authObj);
             obj.add("authentication", authObj); // TODO remove later, legacy support
             return gson.toJson(obj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @RequestMapping(value = "/_matrix-internal/identity/v1/login", method = RequestMethod.POST)
+    public String login(HttpServletRequest req) {
+        try {
+            log.info("LOGIN CALLED");
+
+            LoginRequestJson loginRequestJson = parser.parse(req, LoginRequestJson.class);
+            log.info("REQUEST: {}", loginRequestJson.toString());
+
+            // find 3PID locally (if requested)
+            if (StringUtils.isNotBlank(loginRequestJson.getAddress()) && StringUtils.isNotBlank(loginRequestJson.getMedium())) {
+                log.info("finding 3PID locally...");
+                Optional<SingleLookupReply> lookupDataOpt = strategy.findLocal(loginRequestJson.getMedium(), loginRequestJson.getAddress());
+                if (lookupDataOpt.isPresent()) {
+                    log.info("found 3PID: " + lookupDataOpt.toString());
+                    SingleLookupReply lookupReply = lookupDataOpt.get();
+                    loginRequestJson.setUser(lookupReply.getMxid().getId());
+                } else {
+                    log.warn("3PID not found");
+                    // todo
+                }
+            }
+
+            // todo login user
+            LoginResponseJson loginResponseJson;
+            // todo get existing hs url
+            HttpPost httpPost = RestClientUtils.post("http://localhost:8008/_matrix/client/r0/login", gson.toJson(loginRequestJson));
+            CloseableHttpClient client = HttpClients.createDefault();
+            try (CloseableHttpResponse httpResponse = client.execute(httpPost)) {
+                int status = httpResponse.getStatusLine().getStatusCode();
+                log.info("http status = {}", status);
+                if (status < 200 || status >= 300) {
+                    // todo - throw new InternalServerError ?
+                }
+                loginResponseJson = parser.parse(httpResponse, LoginResponseJson.class);
+            } catch (IOException e) {
+                // todo - throw new InternalServerError ?
+                throw e;
+            }
+
+            log.info("LOGIN RESPONSE: {}", loginResponseJson.toString());
+            String resp = gson.toJson(loginResponseJson);
+            return resp;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
