@@ -20,15 +20,15 @@
 
 package io.kamax.mxisd.controller.auth.v1;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import io.kamax.mxisd.auth.AuthManager;
 import io.kamax.mxisd.auth.UserAuthResult;
 import io.kamax.mxisd.controller.auth.v1.io.CredentialsValidationResponse;
 import io.kamax.mxisd.controller.auth.v1.io.LoginRequestJson;
 import io.kamax.mxisd.controller.auth.v1.io.LoginResponseJson;
+import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.exception.JsonMemberNotFoundException;
+import io.kamax.mxisd.exception.RemoteLoginException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.util.GsonParser;
@@ -37,8 +37,10 @@ import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
 
 @RestController
@@ -67,6 +70,9 @@ public class AuthController {
 
     @Autowired
     private LookupStrategy strategy;
+
+    @Autowired
+    private ClientDnsOverwrite dns;
 
     @RequestMapping(value = "/_matrix-internal/identity/v1/check_credentials", method = RequestMethod.POST)
     public String checkCredentials(HttpServletRequest req) {
@@ -98,46 +104,101 @@ public class AuthController {
         }
     }
 
-    @RequestMapping(value = "/_matrix-internal/identity/v1/login", method = RequestMethod.POST)
+    @RequestMapping(value = "/_matrix/client/r0/login", method = RequestMethod.GET)
+    public String getLogin(HttpServletRequest req) {
+        /**
+         * This GET method on 'login' is to prevent Riot to display error message at login page.
+         *
+         * todo: shall be implemented appropriately
+         *
+         * Current implementation returns:
+         *
+         *  {
+         *      "flows": [
+         *          {
+         *             "type": "m.login.password"
+         *          }
+         *      ]
+         *  }
+         *
+         */
+        JsonObject flowsJson = new JsonObject();
+        JsonArray flowsArray = new JsonArray();
+        JsonObject typeJson = new JsonObject();
+        typeJson.addProperty("type", "m.login.password");
+        flowsArray.add(typeJson);
+        flowsJson.add("flows", flowsArray);
+        String response = gson.toJson(flowsJson);
+        return response;
+    }
+
+    @RequestMapping(value = "/_matrix/client/r0/login", method = RequestMethod.POST)
     public String login(HttpServletRequest req) {
         try {
-            log.info("LOGIN CALLED");
-
             LoginRequestJson loginRequestJson = parser.parse(req, LoginRequestJson.class);
-            log.info("REQUEST: {}", loginRequestJson.toString());
 
-            // find 3PID locally (if requested)
+            // find 3PID locally (only if 'medium' and 'address' are defined in request)
             if (StringUtils.isNotBlank(loginRequestJson.getAddress()) && StringUtils.isNotBlank(loginRequestJson.getMedium())) {
-                log.info("finding 3PID locally...");
+                log.info("Searching for 3PID locally...");
                 Optional<SingleLookupReply> lookupDataOpt = strategy.findLocal(loginRequestJson.getMedium(), loginRequestJson.getAddress());
                 if (lookupDataOpt.isPresent()) {
-                    log.info("found 3PID: " + lookupDataOpt.toString());
                     SingleLookupReply lookupReply = lookupDataOpt.get();
-                    loginRequestJson.setUser(lookupReply.getMxid().getId());
+                    loginRequestJson.setUser(lookupReply.getMxid().getLocalPart());
+                    log.info("Found 3PID mapping: {medium: '" + loginRequestJson.getMedium()
+                            + "', address: '" + loginRequestJson.getAddress() + "', user: '" + loginRequestJson.getUser() + "'}");
+                    // must remove 'medium' and 'address' to invoke login using 'user' property
+                    loginRequestJson.setMedium(null);
+                    loginRequestJson.setAddress(null);
                 } else {
                     log.warn("3PID not found");
-                    // todo
                 }
             }
 
-            // todo login user
+            // obtain url to homeserver 'login' operation using "dns overwrite"
+            URI target = URI.create(req.getRequestURL().toString());
+            log.info("Url from request: {}", target.toString());
+            URIBuilder builder = dns.transform(target);
+            String urlToLogin = builder.toString();
+            log.info("Querying HS at: {}", urlToLogin);
+
+            // invoke 'login' on homeserver
             LoginResponseJson loginResponseJson;
-            // todo get existing hs url
-            HttpPost httpPost = RestClientUtils.post("http://localhost:8008/_matrix/client/r0/login", gson.toJson(loginRequestJson));
+            HttpPost httpPost = RestClientUtils.post(urlToLogin, gson.toJson(loginRequestJson));
             CloseableHttpClient client = HttpClients.createDefault();
             try (CloseableHttpResponse httpResponse = client.execute(httpPost)) {
+
+                // check http status
                 int status = httpResponse.getStatusLine().getStatusCode();
                 log.info("http status = {}", status);
-                if (status < 200 || status >= 300) {
-                    // todo - throw new InternalServerError ?
+                if (status == 200) {
+                    loginResponseJson = parser.parse(httpResponse, LoginResponseJson.class);
+                } else {
+
+                    // try to get possible json error message from response
+                    // otherwise just get returned plain error message
+                    String errcode = String.valueOf(httpResponse.getStatusLine().getStatusCode());
+                    String error = EntityUtils.toString(httpResponse.getEntity());
+                    if (httpResponse.getEntity() != null) {
+                        try {
+                            JsonObject bodyJson = new JsonParser().parse(error).getAsJsonObject();
+                            if (bodyJson.has("errcode")) {
+                                errcode = bodyJson.get("errcode").getAsString();
+                            }
+                            if (bodyJson.has("error")) {
+                                error = bodyJson.get("error").getAsString();
+                            }
+                            throw new RemoteLoginException(status, errcode, error, bodyJson);
+                        } catch (JsonSyntaxException e) {
+                            log.warn("Response body is not JSON");
+                        }
+                    }
+                    throw new RemoteLoginException(status, errcode, error);
                 }
-                loginResponseJson = parser.parse(httpResponse, LoginResponseJson.class);
             } catch (IOException e) {
-                // todo - throw new InternalServerError ?
-                throw e;
+                throw new RuntimeException(e);
             }
 
-            log.info("LOGIN RESPONSE: {}", loginResponseJson.toString());
+            // return 'login' response
             String resp = gson.toJson(loginResponseJson);
             return resp;
         } catch (IOException e) {

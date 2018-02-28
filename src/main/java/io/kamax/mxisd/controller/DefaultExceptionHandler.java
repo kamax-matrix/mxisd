@@ -54,6 +54,16 @@ public class DefaultExceptionHandler {
         return gson.toJson(obj);
     }
 
+    @ExceptionHandler(RemoteLoginException.class)
+    public String handle(HttpServletRequest request, HttpServletResponse response, RemoteLoginException e) {
+        if (e.getErrorBodyMsgResp() != null) {
+            response.setStatus(e.getStatus());
+            log.info("Request {} {} - Error {}: {}", request.getMethod(), request.getRequestURL(), e.getErrorCode(), e.getError());
+            return gson.toJson(e.getErrorBodyMsgResp());
+        }
+        return handleGeneric(request, response, e);
+    }
+
     @ExceptionHandler(InternalServerError.class)
     public String handle(HttpServletRequest request, HttpServletResponse response, InternalServerError e) {
         if (StringUtils.isNotBlank(e.getInternalReason())) {
