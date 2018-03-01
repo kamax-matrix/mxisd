@@ -144,8 +144,8 @@ public class AuthController {
                 if (lookupDataOpt.isPresent()) {
                     SingleLookupReply lookupReply = lookupDataOpt.get();
                     loginRequestJson.setUser(lookupReply.getMxid().getLocalPart());
-                    log.info("Found 3PID mapping: {medium: '" + loginRequestJson.getMedium()
-                            + "', address: '" + loginRequestJson.getAddress() + "', user: '" + loginRequestJson.getUser() + "'}");
+                    log.info("Found 3PID mapping: {medium: '{}', address: '{}', user: '{}'}",
+                            loginRequestJson.getMedium(), loginRequestJson.getAddress(), loginRequestJson.getUser());
                     // must remove 'medium' and 'address' to invoke login using 'user' property
                     loginRequestJson.setMedium(null);
                     loginRequestJson.setAddress(null);
