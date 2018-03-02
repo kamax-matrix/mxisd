@@ -89,6 +89,46 @@ ldap:
       email: ''
       msisdn: ''
 
+netiq:
+  enabled: false
+  filter: ''
+  connection:
+    host: ''
+    tls: false
+    port: 389
+    bindDn: ''
+    bindPassword: ''
+    baseDn: ''
+  attribute:
+    uid:
+      type: 'uid'
+      value: 'userPrincipalName'
+    name: 'displayName'
+    threepid:
+      email:
+        - 'mailPrimaryAddress'
+        - 'mail'
+        - 'otherMailbox'
+      msisdn:
+        - 'telephoneNumber'
+        - 'mobile'
+        - 'homePhone'
+        - 'otherTelephone'
+        - 'otherMobile'
+        - 'otherHomePhone'
+  auth:
+    filter: ''
+  directory:
+    attribute:
+      other: []
+    filter: ''
+  identity:
+    filter: ''
+    token: '%3pid'
+    medium:
+      email: ''
+      msisdn: ''
+
 firebase:
   enabled: false
 

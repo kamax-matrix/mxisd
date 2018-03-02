@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2018 Kamax Sàrl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,23 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.ldap;
+package io.kamax.mxisd.config.ldap.netiq;
 
+import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "ldap.auth")
-public class LdapAuthConfig {
-
-    private String filter;
-
-    public String getFilter() {
-        return filter;
-    }
-
-    public void setFilter(String filter) {
-        this.filter = filter;
-    }
+@ConfigurationProperties(prefix = "netiq")
+public class NetIqLdapConfig extends GenericLdapConfig {
 
 }

@@ -29,7 +29,7 @@ import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ldap.LdapConfig;
+import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
 import io.kamax.mxisd.util.GsonUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
@@ -52,14 +52,14 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class LdapAuthProvider extends LdapGenericBackend implements AuthenticatorProvider {
+public class LdapAuthProvider extends LdapBackend implements AuthenticatorProvider {
 
     private Logger log = LoggerFactory.getLogger(LdapAuthProvider.class);
 
     private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
     @Autowired
-    public LdapAuthProvider(LdapConfig cfg, MatrixConfig mxCfg) {
+    public LdapAuthProvider(GenericLdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 
@@ -92,7 +92,7 @@ public class LdapAuthProvider extends LdapGenericBackend implements Authenticato
             bind(conn);
 
             String uidType = getAt().getUid().getType();
-            String userFilterValue = StringUtils.equals(LdapGenericBackend.UID, uidType) ? mxid.getLocalPart() : mxid.getId();
+            String userFilterValue = StringUtils.equals(LdapBackend.UID, uidType) ? mxid.getLocalPart() : mxid.getId();
             if (StringUtils.isBlank(userFilterValue)) {
                 log.warn("Username is empty, failing auth");
                 return BackendAuthResult.failure();

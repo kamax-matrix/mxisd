@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2018 Kamax Sàrl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,45 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.ldap;
+package io.kamax.mxisd.config.ldap.generic;
 
+import io.kamax.mxisd.config.ldap.LdapConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
-@ConfigurationProperties(prefix = "ldap.attribute")
-public class LdapAttributeConfig {
-
-    private LdapAttributeUidConfig uid;
-    private String name;
-    private Map<String, List<String>> threepid = new HashMap<>();
-
-    public LdapAttributeUidConfig getUid() {
-        return uid;
-    }
-
-    public void setUid(LdapAttributeUidConfig uid) {
-        this.uid = uid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Map<String, List<String>> getThreepid() {
-        return threepid;
-    }
-
-    public void setThreepid(Map<String, List<String>> threepid) {
-        this.threepid = threepid;
-    }
+@ConfigurationProperties(prefix = "ldap")
+@Primary
+public class GenericLdapConfig extends LdapConfig {
 
 }

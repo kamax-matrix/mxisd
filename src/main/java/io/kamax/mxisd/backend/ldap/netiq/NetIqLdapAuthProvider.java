@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2018 Kamax Sàrl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,32 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.ldap;
+package io.kamax.mxisd.backend.ldap.netiq;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import io.kamax.mxisd.backend.ldap.LdapAuthProvider;
+import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.ldap.netiq.NetIqLdapConfig;
+import org.springframework.stereotype.Component;
 
-@Configuration
-@ConfigurationProperties(prefix = "ldap.attribute.uid")
-public class LdapAttributeUidConfig {
+@Component
+public class NetIqLdapAuthProvider extends LdapAuthProvider {
 
-    private String type;
-    private String value;
-
-    public String getType() {
-        return type;
+    public NetIqLdapAuthProvider(NetIqLdapConfig cfg, MatrixConfig mxCfg) {
+        super(cfg, mxCfg);
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
+    // FIXME this is duplicated in the other NetIQ classes, due to the Matrix ID generation code that was not abstracted
+    @Override
+    public String buildMatrixIdFromUid(String uid) {
+        return super.buildMatrixIdFromUid(uid).toLowerCase();
     }
 
 }

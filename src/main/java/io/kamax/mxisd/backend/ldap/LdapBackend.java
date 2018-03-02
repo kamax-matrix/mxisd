@@ -21,7 +21,6 @@
 package io.kamax.mxisd.backend.ldap;
 
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ldap.LdapAttributeConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.entry.Attribute;
@@ -40,17 +39,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class LdapGenericBackend {
+public abstract class LdapBackend {
 
     public static final String UID = "uid";
     public static final String MATRIX_ID = "mxid";
 
-    private Logger log = LoggerFactory.getLogger(LdapGenericBackend.class);
+    private Logger log = LoggerFactory.getLogger(LdapBackend.class);
 
     private LdapConfig cfg;
     private MatrixConfig mxCfg;
 
-    public LdapGenericBackend(LdapConfig cfg, MatrixConfig mxCfg) {
+    public LdapBackend(LdapConfig cfg, MatrixConfig mxCfg) {
         this.cfg = cfg;
         this.mxCfg = mxCfg;
     }
@@ -60,10 +59,10 @@ public abstract class LdapGenericBackend {
     }
 
     protected String getBaseDn() {
-        return cfg.getConn().getBaseDn();
+        return cfg.getConnection().getBaseDn();
     }
 
-    protected LdapAttributeConfig getAt() {
+    protected LdapConfig.Attribute getAt() {
         return cfg.getAttribute();
     }
 
@@ -72,14 +71,14 @@ public abstract class LdapGenericBackend {
     }
 
     protected synchronized LdapConnection getConn() throws LdapException {
-        return new LdapNetworkConnection(cfg.getConn().getHost(), cfg.getConn().getPort(), cfg.getConn().isTls());
+        return new LdapNetworkConnection(cfg.getConnection().getHost(), cfg.getConnection().getPort(), cfg.getConnection().isTls());
     }
 
     protected void bind(LdapConnection conn) throws LdapException {
-        if (StringUtils.isBlank(cfg.getConn().getBindDn()) && StringUtils.isBlank(cfg.getConn().getBindPassword())) {
+        if (StringUtils.isBlank(cfg.getConnection().getBindDn()) && StringUtils.isBlank(cfg.getConnection().getBindPassword())) {
             conn.anonymousBind();
         } else {
-            conn.bind(cfg.getConn().getBindDn(), cfg.getConn().getBindPassword());
+            conn.bind(cfg.getConnection().getBindDn(), cfg.getConnection().getBindPassword());
         }
     }
 
