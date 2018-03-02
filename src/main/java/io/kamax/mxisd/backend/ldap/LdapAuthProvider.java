@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.ldap.generic;
+package io.kamax.mxisd.backend.ldap;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -28,7 +28,6 @@ import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
-import io.kamax.mxisd.backend.ldap.LdapBackend;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
 import io.kamax.mxisd.util.GsonUtil;
@@ -53,14 +52,14 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class GenericLdapAuthProvider extends LdapBackend implements AuthenticatorProvider {
+public class LdapAuthProvider extends LdapBackend implements AuthenticatorProvider {
 
-    private Logger log = LoggerFactory.getLogger(GenericLdapAuthProvider.class);
+    private Logger log = LoggerFactory.getLogger(LdapAuthProvider.class);
 
     private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
     @Autowired
-    public GenericLdapAuthProvider(GenericLdapConfig cfg, MatrixConfig mxCfg) {
+    public LdapAuthProvider(GenericLdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 

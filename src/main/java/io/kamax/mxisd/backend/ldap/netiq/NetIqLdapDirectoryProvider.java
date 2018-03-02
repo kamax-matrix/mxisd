@@ -20,15 +20,15 @@
 
 package io.kamax.mxisd.backend.ldap.netiq;
 
-import io.kamax.mxisd.backend.ldap.generic.GenericLdapDirectoryProvider;
+import io.kamax.mxisd.backend.ldap.LdapDirectoryProvider;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.netiq.NetIqLdapConfig;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NetIqDirectoryProvider extends GenericLdapDirectoryProvider {
+public class NetIqLdapDirectoryProvider extends LdapDirectoryProvider {
 
-    public NetIqDirectoryProvider(NetIqLdapConfig cfg, MatrixConfig mxCfg) {
+    public NetIqLdapDirectoryProvider(NetIqLdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 
