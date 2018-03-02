@@ -104,12 +104,19 @@ public class SessionRestController {
 
         if (ThreePidMedium.PhoneNumber.is(medium)) {
             SessionPhoneTokenRequestJson req = parser.parse(request, SessionPhoneTokenRequestJson.class);
-            return gson.toJson(new Sid(mgr.create(
+            ThreePid threepid = new ThreePid(req.getMedium(), req.getValue());
+
+            String sessionId = mgr.create(
                     request.getRemoteHost(),
-                    new ThreePid(req.getMedium(), req.getValue()),
+                    threepid,
                     req.getSecret(),
                     req.getAttempt(),
-                    req.getNextLink())));
+                    req.getNextLink());
+
+            JsonObject res = new JsonObject();
+            res.addProperty("sid", sessionId);
+            res.addProperty(threepid.getMedium(), threepid.getAddress());
+            return gson.toJson(res);
         }
 
         JsonObject obj = new JsonObject();
