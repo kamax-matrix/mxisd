@@ -196,7 +196,7 @@ public class SessionMananger {
         storage.updateThreePidSession(session.getDao());
         log.info("Session {} has been validated locally", session.getId());
 
-        if (ThreePidMedium.PhoneNumber.is(session.getThreePid().getMedium()) && session.isValidated()) {
+        if (ThreePidMedium.PhoneNumber.is(session.getThreePid().getMedium()) && session.isValidated() && policy.toRemote()) {
             createRemote(sid, secret);
             // FIXME make the message configurable/customizable (templates?)
             throw new MessageForClientException("You will receive a NEW code from another number. Enter it below");
