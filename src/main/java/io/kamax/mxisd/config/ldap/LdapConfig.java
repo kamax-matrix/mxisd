@@ -22,28 +22,148 @@ package io.kamax.mxisd.config.ldap;
 
 import com.google.gson.Gson;
 import io.kamax.matrix.ThreePidMedium;
-import io.kamax.mxisd.backend.ldap.LdapGenericBackend;
+import io.kamax.mxisd.backend.ldap.LdapBackend;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Configuration
 @ConfigurationProperties(prefix = "ldap")
 public class LdapConfig {
 
-    private Logger log = LoggerFactory.getLogger(LdapConfig.class);
-    private static Gson gson = new Gson();
+    public static class UID {
 
-    private boolean enabled;
-    private String filter;
+        private String type;
+        private String value;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+    }
+
+    public static class Attribute {
+
+        private UID uid;
+        private String name;
+        private Map<String, List<String>> threepid = new HashMap<>();
+
+        public UID getUid() {
+            return uid;
+        }
+
+        public void setUid(UID uid) {
+            this.uid = uid;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Map<String, List<String>> getThreepid() {
+            return threepid;
+        }
+
+        public void setThreepid(Map<String, List<String>> threepid) {
+            this.threepid = threepid;
+        }
+
+    }
+
+    public static class Auth {
+
+        private String filter;
+
+        public String getFilter() {
+            return filter;
+        }
+
+        public void setFilter(String filter) {
+            this.filter = filter;
+        }
+
+    }
+
+    public static class Connection {
+
+        private boolean tls;
+        private String host;
+        private int port;
+        private String bindDn;
+        private String bindPassword;
+        private String baseDn;
+
+        public boolean isTls() {
+            return tls;
+        }
+
+        public void setTls(boolean tls) {
+            this.tls = tls;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String getBindDn() {
+            return bindDn;
+        }
+
+        public void setBindDn(String bindDn) {
+            this.bindDn = bindDn;
+        }
+
+        public String getBindPassword() {
+            return bindPassword;
+        }
+
+        public void setBindPassword(String bindPassword) {
+            this.bindPassword = bindPassword;
+        }
+
+        public String getBaseDn() {
+            return baseDn;
+        }
+
+        public void setBaseDn(String baseDn) {
+            this.baseDn = baseDn;
+        }
+
+    }
 
     public static class Directory {
 
@@ -82,12 +202,54 @@ public class LdapConfig {
 
     }
 
-    @Autowired
-    private LdapConnectionConfig conn;
-    private LdapAttributeConfig attribute;
-    private LdapAuthConfig auth;
+    public static class Identity {
+
+        private String filter;
+        private String token;
+        private Map<String, String> medium = new HashMap<>();
+
+        public String getFilter() {
+            return filter;
+        }
+
+        public void setFilter(String filter) {
+            this.filter = filter;
+        }
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
+
+        public Map<String, String> getMedium() {
+            return medium;
+        }
+
+        public Optional<String> getQuery(String key) {
+            return Optional.ofNullable(medium.get(key));
+        }
+
+        public void setMedium(Map<String, String> medium) {
+            this.medium = medium;
+        }
+
+    }
+
+
+    private Logger log = LoggerFactory.getLogger(LdapConfig.class);
+    private static Gson gson = new Gson();
+
+    private boolean enabled;
+    private String filter;
+
+    private Connection connection;
+    private Attribute attribute;
+    private Auth auth;
     private Directory directory;
-    private LdapIdentityConfig identity;
+    private Identity identity;
 
     public boolean isEnabled() {
         return enabled;
@@ -105,27 +267,27 @@ public class LdapConfig {
         this.filter = filter;
     }
 
-    public LdapConnectionConfig getConn() {
-        return conn;
+    public Connection getConnection() {
+        return connection;
     }
 
-    public void setConn(LdapConnectionConfig conn) {
-        this.conn = conn;
+    public void setConnection(Connection conn) {
+        this.connection = conn;
     }
 
-    public LdapAttributeConfig getAttribute() {
+    public Attribute getAttribute() {
         return attribute;
     }
 
-    public void setAttribute(LdapAttributeConfig attribute) {
+    public void setAttribute(Attribute attribute) {
         this.attribute = attribute;
     }
 
-    public LdapAuthConfig getAuth() {
+    public Auth getAuth() {
         return auth;
     }
 
-    public void setAuth(LdapAuthConfig auth) {
+    public void setAuth(Auth auth) {
         this.auth = auth;
     }
 
@@ -137,11 +299,11 @@ public class LdapConfig {
         this.directory = directory;
     }
 
-    public LdapIdentityConfig getIdentity() {
+    public Identity getIdentity() {
         return identity;
     }
 
-    public void setIdentity(LdapIdentityConfig identity) {
+    public void setIdentity(Identity identity) {
         this.identity = identity;
     }
 
@@ -154,15 +316,15 @@ public class LdapConfig {
             return;
         }
 
-        if (StringUtils.isBlank(conn.getHost())) {
+        if (StringUtils.isBlank(connection.getHost())) {
             throw new IllegalStateException("LDAP Host must be configured!");
         }
 
-        if (conn.getPort() < 1 || conn.getPort() > 65535) {
+        if (connection.getPort() < 1 || connection.getPort() > 65535) {
             throw new IllegalStateException("LDAP port is not valid");
         }
 
-        if (StringUtils.isBlank(conn.getBaseDn())) {
+        if (StringUtils.isBlank(connection.getBaseDn())) {
             throw new ConfigurationException("ldap.connection.baseDn");
         }
 
@@ -175,7 +337,7 @@ public class LdapConfig {
         }
 
         String uidType = attribute.getUid().getType();
-        if (!StringUtils.equals(LdapGenericBackend.UID, uidType) && !StringUtils.equals(LdapGenericBackend.MATRIX_ID, uidType)) {
+        if (!StringUtils.equals(LdapBackend.UID, uidType) && !StringUtils.equals(LdapBackend.MATRIX_ID, uidType)) {
             throw new IllegalArgumentException("Unsupported LDAP UID type: " + uidType);
         }
 
@@ -187,9 +349,9 @@ public class LdapConfig {
         attribute.getThreepid().forEach((k, v) -> {
             if (StringUtils.isBlank(identity.getMedium().get(k))) {
                 if (ThreePidMedium.PhoneNumber.is(k)) {
-                    identity.getMedium().put(k, LdapGenericBackend.buildOrQuery("+" + getIdentity().getToken(), v));
+                    identity.getMedium().put(k, LdapBackend.buildOrQuery("+" + getIdentity().getToken(), v));
                 } else {
-                    identity.getMedium().put(k, LdapGenericBackend.buildOrQuery(getIdentity().getToken(), v));
+                    identity.getMedium().put(k, LdapBackend.buildOrQuery(getIdentity().getToken(), v));
                 }
             }
         });
@@ -198,10 +360,10 @@ public class LdapConfig {
         getDirectory().setFilter(StringUtils.defaultIfBlank(getDirectory().getFilter(), getFilter()));
         getIdentity().setFilter(StringUtils.defaultIfBlank(getIdentity().getFilter(), getFilter()));
 
-        log.info("Host: {}", conn.getHost());
-        log.info("Port: {}", conn.getPort());
-        log.info("Bind DN: {}", conn.getBindDn());
-        log.info("Base DN: {}", conn.getBaseDn());
+        log.info("Host: {}", connection.getHost());
+        log.info("Port: {}", connection.getPort());
+        log.info("Bind DN: {}", connection.getBindDn());
+        log.info("Base DN: {}", connection.getBaseDn());
 
         log.info("Attribute: {}", gson.toJson(attribute));
         log.info("Auth: {}", gson.toJson(auth));

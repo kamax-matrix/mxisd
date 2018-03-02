@@ -18,11 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.ldap;
+package io.kamax.mxisd.backend.ldap.generic;
 
+import io.kamax.mxisd.backend.ldap.LdapBackend;
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ldap.LdapAttributeConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
+import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
@@ -44,12 +45,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class LdapDirectoryProvider extends LdapGenericBackend implements IDirectoryProvider {
+public class GenericLdapDirectoryProvider extends LdapBackend implements IDirectoryProvider {
 
-    private Logger log = LoggerFactory.getLogger(LdapDirectoryProvider.class);
+    private Logger log = LoggerFactory.getLogger(GenericLdapDirectoryProvider.class);
 
     @Autowired
-    public LdapDirectoryProvider(LdapConfig cfg, MatrixConfig mxCfg) {
+    public GenericLdapDirectoryProvider(GenericLdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 
@@ -65,7 +66,7 @@ public class LdapDirectoryProvider extends LdapGenericBackend implements IDirect
         try (LdapConnection conn = getConn()) {
             bind(conn);
 
-            LdapAttributeConfig atCfg = getCfg().getAttribute();
+            LdapConfig.Attribute atCfg = getCfg().getAttribute();
 
             attributes = new ArrayList<>(attributes);
             attributes.add(getUidAtt());

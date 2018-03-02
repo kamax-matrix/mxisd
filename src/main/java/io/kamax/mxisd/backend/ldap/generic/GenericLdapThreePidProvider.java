@@ -18,10 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.ldap;
+package io.kamax.mxisd.backend.ldap.generic;
 
+import io.kamax.mxisd.backend.ldap.LdapBackend;
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ldap.LdapConfig;
+import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
@@ -45,11 +46,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class LdapThreePidProvider extends LdapGenericBackend implements IThreePidProvider {
+public class GenericLdapThreePidProvider extends LdapBackend implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(LdapThreePidProvider.class);
+    private Logger log = LoggerFactory.getLogger(GenericLdapThreePidProvider.class);
 
-    public LdapThreePidProvider(LdapConfig cfg, MatrixConfig mxCfg) {
+    public GenericLdapThreePidProvider(GenericLdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 
