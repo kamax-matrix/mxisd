@@ -137,18 +137,21 @@ public class AuthController {
         try {
             LoginRequestJson loginRequestJson = parser.parse(req, LoginRequestJson.class);
 
-            // find 3PID locally (only if 'medium' and 'address' are defined in request)
-            if (StringUtils.isNotBlank(loginRequestJson.getAddress()) && StringUtils.isNotBlank(loginRequestJson.getMedium())) {
-                log.info("Searching for 3PID locally...");
-                Optional<SingleLookupReply> lookupDataOpt = strategy.findLocal(loginRequestJson.getMedium(), loginRequestJson.getAddress());
+            // try to find 3PID locally (considering possible 'medium' and 'address' in request)
+            log.info("Searching for 3PID locally...");
+            if (loginRequestJson.getIdentifier() != null) {
+                Optional<SingleLookupReply> lookupDataOpt = strategy.findLocal(
+                        loginRequestJson.getIdentifier().getMedium(),
+                        loginRequestJson.getIdentifier().getAddress());
                 if (lookupDataOpt.isPresent()) {
                     SingleLookupReply lookupReply = lookupDataOpt.get();
-                    loginRequestJson.setUser(lookupReply.getMxid().getLocalPart());
-                    log.info("Found 3PID mapping: {medium: '" + loginRequestJson.getMedium()
-                            + "', address: '" + loginRequestJson.getAddress() + "', user: '" + loginRequestJson.getUser() + "'}");
+                    loginRequestJson.getIdentifier().setUser(lookupReply.getMxid().getLocalPart());
+                    log.info("Found 3PID mapping: {medium: '" + loginRequestJson.getIdentifier().getMedium()
+                            + "', address: '" + loginRequestJson.getIdentifier().getAddress()
+                            + "', user: '" + loginRequestJson.getIdentifier().getUser() + "'}");
                     // must remove 'medium' and 'address' to invoke login using 'user' property
-                    loginRequestJson.setMedium(null);
-                    loginRequestJson.setAddress(null);
+                    loginRequestJson.getIdentifier().setMedium(null);
+                    loginRequestJson.getIdentifier().setAddress(null);
                 } else {
                     log.warn("3PID not found");
                 }

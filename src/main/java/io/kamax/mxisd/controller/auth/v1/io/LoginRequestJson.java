@@ -3,9 +3,7 @@ package io.kamax.mxisd.controller.auth.v1.io;
 public class LoginRequestJson {
 
     private String type;
-    private String user;
-    private String medium;
-    private String address;
+    private AuthenticationDataRequestJson identifier;
     private String password;
     private String token;
     private String device_id;
@@ -14,11 +12,9 @@ public class LoginRequestJson {
     public LoginRequestJson() {
     }
 
-    public LoginRequestJson(String type, String user, String medium, String address, String password, String token, String device_id, String initial_device_display_name) {
+    public LoginRequestJson(String type, AuthenticationDataRequestJson identifier, String password, String token, String device_id, String initial_device_display_name) {
         this.type = type;
-        this.user = user;
-        this.medium = medium;
-        this.address = address;
+        this.identifier = identifier;
         this.password = password;
         this.token = token;
         this.device_id = device_id;
@@ -33,28 +29,12 @@ public class LoginRequestJson {
         this.type = type;
     }
 
-    public String getUser() {
-        return user;
+    public AuthenticationDataRequestJson getIdentifier() {
+        return identifier;
     }
 
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public String getMedium() {
-        return medium;
-    }
-
-    public void setMedium(String medium) {
-        this.medium = medium;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public void setIdentifier(AuthenticationDataRequestJson identifier) {
+        this.identifier = identifier;
     }
 
     public String getPassword() {
@@ -93,13 +73,12 @@ public class LoginRequestJson {
     public String toString() {
         return "LoginRequestJson{" +
                 "type='" + type + '\'' +
-                ", user='" + user + '\'' +
-                ", medium='" + medium + '\'' +
-                ", address='" + address + '\'' +
-                ", password='" + password + '\'' +
+                ", identifier=" + identifier +
+                ", password='" + "**********" + '\'' +
                 ", token='" + token + '\'' +
                 ", device_id='" + device_id + '\'' +
                 ", initial_device_display_name='" + initial_device_display_name + '\'' +
                 '}';
     }
+
 }
