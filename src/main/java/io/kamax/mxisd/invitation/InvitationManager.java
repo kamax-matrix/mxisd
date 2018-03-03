@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
+import io.kamax.mxisd.config.InvitationConfig;
 import io.kamax.mxisd.dns.FederationDnsOverwrite;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
@@ -71,6 +72,9 @@ public class InvitationManager {
     private Logger log = LoggerFactory.getLogger(InvitationManager.class);
 
     private Map<String, IThreePidInviteReply> invitations = new ConcurrentHashMap<>();
+
+    @Autowired
+    private InvitationConfig cfg;
 
     @Autowired
     private IStorage storage;
@@ -137,7 +141,7 @@ public class InvitationManager {
                     log.error("Error when running background mapping refresh", t);
                 }
             }
-        }, 5000L, TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES)); // FIXME make configurable
+        }, 5000L, TimeUnit.MILLISECONDS.convert(cfg.getResolution().getTimer(), TimeUnit.MINUTES));
     }
 
     @PreDestroy
@@ -223,7 +227,7 @@ public class InvitationManager {
             return reply;
         }
 
-        Optional<?> result = lookupMgr.find(invitation.getMedium(), invitation.getAddress(), true);
+        Optional<?> result = lookupMgr.find(invitation.getMedium(), invitation.getAddress(), cfg.getResolution().isRecursive());
         if (result.isPresent()) {
             log.info("Mapping for {}:{} already exists, refusing to store invite", invitation.getMedium(), invitation.getAddress());
             throw new MappingAlreadyExistsException();
@@ -333,7 +337,7 @@ public class InvitationManager {
         public void run() {
             try {
                 log.info("Searching for mapping created since invite {} was created", getIdForLog(reply));
-                Optional<SingleLookupReply> result = lookupMgr.find(reply.getInvite().getMedium(), reply.getInvite().getAddress(), true);
+                Optional<SingleLookupReply> result = lookupMgr.find(reply.getInvite().getMedium(), reply.getInvite().getAddress(), cfg.getResolution().isRecursive());
                 if (result.isPresent()) {
                     SingleLookupReply lookup = result.get();
                     log.info("Found mapping for pending invite {}", getIdForLog(reply));

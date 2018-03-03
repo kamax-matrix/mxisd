@@ -264,6 +264,11 @@ view:
         success: 'session/remote/checkSuccess'
         failure: 'session/remote/checkFailure'
 
+invite:
+  resolution:
+    recursive: true
+    timer: 1
+
 storage:
   backend: 'sqlite'
 
