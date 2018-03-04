@@ -208,6 +208,14 @@ public class InvitationManager {
         return "https://" + domain + ":8448";
     }
 
+    private Optional<SingleLookupReply> lookup3pid(String medium, String address) {
+        if (!cfg.getResolution().isRecursive()) {
+            log.warn("/!\\ /!\\ --- RECURSIVE INVITE RESOLUTION HAS BEEN DISABLED --- /!\\ /!\\");
+        }
+
+        return lookupMgr.find(medium, address, cfg.getResolution().isRecursive());
+    }
+
     public synchronized IThreePidInviteReply storeInvite(IThreePidInvite invitation) { // TODO better sync
         if (!notifMgr.isMediumSupported(invitation.getMedium())) {
             throw new BadRequestException("Medium type " + invitation.getMedium() + " is not supported");
@@ -227,7 +235,7 @@ public class InvitationManager {
             return reply;
         }
 
-        Optional<?> result = lookupMgr.find(invitation.getMedium(), invitation.getAddress(), cfg.getResolution().isRecursive());
+        Optional<SingleLookupReply> result = lookup3pid(invitation.getMedium(), invitation.getAddress());
         if (result.isPresent()) {
             log.info("Mapping for {}:{} already exists, refusing to store invite", invitation.getMedium(), invitation.getAddress());
             throw new MappingAlreadyExistsException();
@@ -337,7 +345,7 @@ public class InvitationManager {
         public void run() {
             try {
                 log.info("Searching for mapping created since invite {} was created", getIdForLog(reply));
-                Optional<SingleLookupReply> result = lookupMgr.find(reply.getInvite().getMedium(), reply.getInvite().getAddress(), cfg.getResolution().isRecursive());
+                Optional<SingleLookupReply> result = lookup3pid(reply.getInvite().getMedium(), reply.getInvite().getAddress());
                 if (result.isPresent()) {
                     SingleLookupReply lookup = result.get();
                     log.info("Found mapping for pending invite {}", getIdForLog(reply));
