@@ -6,15 +6,19 @@ public class AuthenticationDataRequestJson {
     private String user;
     private String medium;
     private String address;
+    private String country;
+    private String number;
 
     public AuthenticationDataRequestJson() {
     }
 
-    public AuthenticationDataRequestJson(String type, String user, String medium, String address) {
+    public AuthenticationDataRequestJson(String type, String user, String medium, String address, String country, String number) {
         this.type = type;
         this.user = user;
         this.medium = medium;
         this.address = address;
+        this.country = country;
+        this.number = number;
     }
 
     public String getType() {
@@ -49,6 +53,22 @@ public class AuthenticationDataRequestJson {
         this.address = address;
     }
 
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
     @Override
     public String toString() {
         return "AuthenticationDataRequestJson{" +
@@ -56,6 +76,8 @@ public class AuthenticationDataRequestJson {
                 ", user='" + user + '\'' +
                 ", medium='" + medium + '\'' +
                 ", address='" + address + '\'' +
+                ", country='" + country + '\'' +
+                ", number='" + number + '\'' +
                 '}';
     }
 

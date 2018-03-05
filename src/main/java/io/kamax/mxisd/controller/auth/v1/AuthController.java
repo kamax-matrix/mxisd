@@ -23,9 +23,7 @@ package io.kamax.mxisd.controller.auth.v1;
 import com.google.gson.*;
 import io.kamax.mxisd.auth.AuthManager;
 import io.kamax.mxisd.auth.UserAuthResult;
-import io.kamax.mxisd.controller.auth.v1.io.CredentialsValidationResponse;
-import io.kamax.mxisd.controller.auth.v1.io.LoginRequestJson;
-import io.kamax.mxisd.controller.auth.v1.io.LoginResponseJson;
+import io.kamax.mxisd.controller.auth.v1.io.*;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.exception.JsonMemberNotFoundException;
 import io.kamax.mxisd.exception.RemoteLoginException;
@@ -135,23 +133,48 @@ public class AuthController {
     @RequestMapping(value = "/_matrix/client/r0/login", method = RequestMethod.POST)
     public String login(HttpServletRequest req) {
         try {
-            LoginRequestJson loginRequestJson = parser.parse(req, LoginRequestJson.class);
 
-            // try to find 3PID locally (considering possible 'medium' and 'address' in request)
-            log.info("Searching for 3PID locally...");
-            if (loginRequestJson.getIdentifier() != null) {
-                Optional<SingleLookupReply> lookupDataOpt = strategy.findLocal(
-                        loginRequestJson.getIdentifier().getMedium(),
-                        loginRequestJson.getIdentifier().getAddress());
+            log.info("CHECK REQUEST");
+            JsonObject rawRequestJsonObject = parser.parse(req.getInputStream());
+            boolean identifierExists = rawRequestJsonObject.has("identifier");
+            log.info("JSON REQ DATA: {}", gson.toJson(rawRequestJsonObject));
+            log.info("REQUEST HAS 'identifier' ? - {}", (identifierExists? "yes" : "no"));
+            ALoginRequest loginRequestJson;
+            String mediumToLookup;
+            String addressToLookup;
+            if (identifierExists) {
+                LoginRequestV2Json loginReqV2 = gson.fromJson(rawRequestJsonObject, LoginRequestV2Json.class);
+                // if phone defined in 'identifier', no 'medium' property
+                if (loginReqV2.getIdentifier().getType().equals("m.id.phone")) {
+                    // todo canonise the phone number with country code !!!
+                    mediumToLookup = "msisdn";
+                    addressToLookup = loginReqV2.getIdentifier().getNumber();
+                } else {
+                    mediumToLookup = loginReqV2.getMedium();
+                    addressToLookup = loginReqV2.getAddress();
+                }
+                loginRequestJson = loginReqV2;
+            } else {
+                loginRequestJson = gson.fromJson(rawRequestJsonObject, LoginRequestV1Json.class);
+                mediumToLookup = loginRequestJson.getMedium();
+                addressToLookup = loginRequestJson.getAddress();
+            }
+            log.info("PARSED LoginRequest, medium to lookup = {}", mediumToLookup);
+
+
+            // try to find 3PID locally if any 'medium' exists in request
+            boolean userIdFound = false;
+            if (mediumToLookup != null) {
+                log.info("Searching for 3PID locally...");
+                Optional<SingleLookupReply> lookupDataOpt = strategy.findLocal(mediumToLookup, addressToLookup);
                 if (lookupDataOpt.isPresent()) {
                     SingleLookupReply lookupReply = lookupDataOpt.get();
-                    loginRequestJson.getIdentifier().setUser(lookupReply.getMxid().getLocalPart());
+                    loginRequestJson.setUser(lookupReply.getMxid().getLocalPart());
                     log.info("Found 3PID mapping: {medium: '{}', address: '{}', user: '{}'}",
-                            loginRequestJson.getIdentifier().getMedium(), loginRequestJson.getIdentifier().getAddress(),
-                            loginRequestJson.getIdentifier().getUser());
-                    // must remove 'medium' and 'address' to invoke login using 'user' property
-                    loginRequestJson.getIdentifier().setMedium(null);
-                    loginRequestJson.getIdentifier().setAddress(null);
+                            mediumToLookup, addressToLookup, loginRequestJson.getUser());
+                    // must remove thirdparty id to be able to invoke login using user id
+                    loginRequestJson.removeThirdpartyId();
+                    userIdFound = true;
                 } else {
                     log.warn("3PID not found");
                 }
@@ -166,7 +189,10 @@ public class AuthController {
 
             // invoke 'login' on homeserver
             LoginResponseJson loginResponseJson;
-            HttpPost httpPost = RestClientUtils.post(urlToLogin, gson.toJson(loginRequestJson));
+            // todo
+            String theReq = userIdFound? gson.toJson(loginRequestJson) : gson.toJson(rawRequestJsonObject);
+            log.info("DATA TO POST : {}", theReq);
+            HttpPost httpPost = RestClientUtils.post(urlToLogin, theReq);
             CloseableHttpClient client = HttpClients.createDefault();
             try (CloseableHttpResponse httpResponse = client.execute(httpPost)) {
 
@@ -205,6 +231,7 @@ public class AuthController {
             String resp = gson.toJson(loginResponseJson);
             return resp;
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
