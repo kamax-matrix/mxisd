@@ -133,52 +133,58 @@ public class AuthController {
     @RequestMapping(value = "/_matrix/client/r0/login", method = RequestMethod.POST)
     public String login(HttpServletRequest req) {
         try {
+            JsonObject reqJsonObject = parser.parse(req.getInputStream());
 
-            log.info("CHECK REQUEST");
-            JsonObject rawRequestJsonObject = parser.parse(req.getInputStream());
-            boolean identifierExists = rawRequestJsonObject.has("identifier");
-            log.info("JSON REQ DATA: {}", gson.toJson(rawRequestJsonObject));
-            log.info("REQUEST HAS 'identifier' ? - {}", (identifierExists? "yes" : "no"));
-            ALoginRequest loginRequestJson;
-            String mediumToLookup;
-            String addressToLookup;
-            if (identifierExists) {
-                LoginRequestV2Json loginReqV2 = gson.fromJson(rawRequestJsonObject, LoginRequestV2Json.class);
-                // if phone defined in 'identifier', no 'medium' property
-                if (loginReqV2.getIdentifier().getType().equals("m.id.phone")) {
-                    // todo canonise the phone number with country code !!!
-                    mediumToLookup = "msisdn";
-                    addressToLookup = loginReqV2.getIdentifier().getNumber();
-                } else {
-                    mediumToLookup = loginReqV2.getMedium();
-                    addressToLookup = loginReqV2.getAddress();
-                }
-                loginRequestJson = loginReqV2;
-            } else {
-                loginRequestJson = gson.fromJson(rawRequestJsonObject, LoginRequestV1Json.class);
-                mediumToLookup = loginRequestJson.getMedium();
-                addressToLookup = loginRequestJson.getAddress();
-            }
-            log.info("PARSED LoginRequest, medium to lookup = {}", mediumToLookup);
+            // find the 3PID in the request data to perform lookup
+            // then add the user returned by the lookup result
+            // and remove the 3PID info from the request
 
+            // find 3PID in main object
+            GsonUtil.findPrimitive(reqJsonObject, "medium").ifPresent(medium -> {
+                GsonUtil.findPrimitive(reqJsonObject, "address").ifPresent(address -> {
+                    log.info("Request has medium '{}' and address '{}'", medium, address);
+                    strategy.findLocal(medium.getAsString(), address.getAsString()).ifPresent(lookupDataOpt -> {
+                        log.info("Found 3PID mapping: {medium: '{}', address: '{}', user: '{}'}",
+                                medium.getAsString(), address.getAsString(), lookupDataOpt.getMxid().getLocalPart());
+                        reqJsonObject.addProperty("user", lookupDataOpt.getMxid().getLocalPart());
+                        reqJsonObject.remove("medium");
+                        reqJsonObject.remove("address");
+                    });
+                });
+            });
 
-            // try to find 3PID locally if any 'medium' exists in request
-            boolean userIdFound = false;
-            if (mediumToLookup != null) {
-                log.info("Searching for 3PID locally...");
-                Optional<SingleLookupReply> lookupDataOpt = strategy.findLocal(mediumToLookup, addressToLookup);
-                if (lookupDataOpt.isPresent()) {
-                    SingleLookupReply lookupReply = lookupDataOpt.get();
-                    loginRequestJson.setUser(lookupReply.getMxid().getLocalPart());
-                    log.info("Found 3PID mapping: {medium: '{}', address: '{}', user: '{}'}",
-                            mediumToLookup, addressToLookup, loginRequestJson.getUser());
-                    // must remove thirdparty id to be able to invoke login using user id
-                    loginRequestJson.removeThirdpartyId();
-                    userIdFound = true;
-                } else {
-                    log.warn("3PID not found");
-                }
-            }
+            // find 3PID in 'identifier' object
+            GsonUtil.findObj(reqJsonObject, "identifier").ifPresent(identifier -> {
+                GsonUtil.findPrimitive(identifier, "type").ifPresent(type -> {
+
+                    if (StringUtils.equals(type.getAsString(), "m.id.thirdparty")) {
+                        GsonUtil.findPrimitive(identifier, "medium").ifPresent(medium -> {
+                            GsonUtil.findPrimitive(identifier, "address").ifPresent(address -> {
+                                log.info("Request has medium '{}' and address '{}'", medium, address);
+                                strategy.findLocal(medium.getAsString(), address.getAsString()).ifPresent(lookupDataOpt -> {
+                                    log.info("Found 3PID mapping: {medium: '{}', address: '{}', user: '{}'}",
+                                            medium.getAsString(), address.getAsString(), lookupDataOpt.getMxid().getLocalPart());
+                                    identifier.addProperty("type", "m.id.user");
+                                    identifier.addProperty("user", lookupDataOpt.getMxid().getLocalPart());
+                                    identifier.remove("medium");
+                                    identifier.remove("address");
+                                });
+                            });
+                        });
+                    }
+
+                    if (StringUtils.equals(type.getAsString(), "m.id.phone")) {
+                        GsonUtil.findPrimitive(identifier, "number").ifPresent(number -> {
+                            log.info("found identifier.number = {}", number);
+                            GsonUtil.findPrimitive(identifier, "country").ifPresent(country -> {
+                                log.info("found identifier.country = {}", number);
+                                log.info("todo: find 3PID phone: {}", country.getAsString().concat(number.getAsString()));
+                            });
+                        });
+                    }
+                });
+            });
+            //log.info("request is now = {}", reqJsonObject.toString());
 
             // obtain url to homeserver 'login' operation using "dns overwrite"
             URI target = URI.create(req.getRequestURL().toString());
@@ -188,21 +194,13 @@ public class AuthController {
             log.info("Querying HS at: {}", urlToLogin);
 
             // invoke 'login' on homeserver
-            LoginResponseJson loginResponseJson;
-            // todo
-            String theReq = userIdFound? gson.toJson(loginRequestJson) : gson.toJson(rawRequestJsonObject);
-            log.info("DATA TO POST : {}", theReq);
-            HttpPost httpPost = RestClientUtils.post(urlToLogin, theReq);
+            HttpPost httpPost = RestClientUtils.post(urlToLogin, gson, reqJsonObject);
             CloseableHttpClient client = HttpClients.createDefault();
             try (CloseableHttpResponse httpResponse = client.execute(httpPost)) {
-
                 // check http status
                 int status = httpResponse.getStatusLine().getStatusCode();
                 log.info("http status = {}", status);
-                if (status == 200) {
-                    loginResponseJson = parser.parse(httpResponse, LoginResponseJson.class);
-                } else {
-
+                if (status != 200) {
                     // try to get possible json error message from response
                     // otherwise just get returned plain error message
                     String errcode = String.valueOf(httpResponse.getStatusLine().getStatusCode());
@@ -223,15 +221,14 @@ public class AuthController {
                     }
                     throw new RemoteLoginException(status, errcode, error);
                 }
+
+                /// return response
+                JsonObject responseJsonObject = parser.parseOptional(httpResponse).get();
+                return gson.toJson(responseJsonObject);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-            // return 'login' response
-            String resp = gson.toJson(loginResponseJson);
-            return resp;
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

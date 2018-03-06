@@ -20,14 +20,26 @@
 
 package io.kamax.mxisd.util;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
+
+import java.util.Optional;
 
 public class GsonUtil {
 
     public static Gson build() {
         return new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+    }
+
+    public static Optional<JsonElement> findElement(JsonObject o, String key) {
+        return Optional.ofNullable(o.get(key));
+    }
+
+    public static Optional<JsonObject> findObj(JsonObject o, String key) {
+        return findElement(o, key).map(el -> el.isJsonObject() ? el.getAsJsonObject() : null);
+    }
+
+    public static Optional<JsonPrimitive> findPrimitive(JsonObject o, String key) {
+        return findElement(o, key).map(el -> el.isJsonPrimitive() ? el.getAsJsonPrimitive() : null);
     }
 
 }
