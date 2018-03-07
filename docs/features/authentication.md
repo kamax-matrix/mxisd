@@ -1,9 +1,38 @@
 # Authentication
+
+- [General](#general)
+- [Advanced Authentication](#advanced-authentication)
+  - [Overview](#overview)
+  - [Getting started](#getting-started)
+    - [Synapse](#synapse)
+    - [mxisd](#mxisd)
+    - [Validate](#validate)
+  - [Next steps](#next-steps)
+    - [Profile auto-fil](#profile-auto-fill)
+- [3PID Authentication](#3pid-authentication)
+  - [Description](#description)
+  - [Overview](#overview)
+  - [Requirements](#requirements)
+  - [Configuration](#configuration)
+    - [Reverse Proxy](#reverse-proxy)
+      - [Apache2](#apache2)
+    - [DNS Overwrite](#dns-overwrite)
+    - [Backends](#backends) 
+
+## General
+mxisd provides two features to enhance the default authentication system provided by the Homeserver.
+On one hand, the Advanced Authentication feature allows to authenticate users by using a dedicated Identity store; 
+On the other hand, the 3PID Authentication feature allows users to login on the Homeserver using their 
+thirdparty identities provided by this Identity store. 
+
+
+
+## Advanced Authentication
 Authentication is an enchanced Identity feature of mxisd to ensure coherent and centralized identity management.
 
 It allows to use Identity stores configured in mxisd to authenticate users on your Homeserver.
 
-## Overview
+### Overview
 ```
                                                                                     Backends
  Client                                                                             +------+
@@ -26,11 +55,11 @@ It allows to use Identity stores configured in mxisd to authenticate users on yo
 ```
 Performed on [synapse with REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth/blob/master/README.md)
 
-## Getting started
+### Getting started
 Authentication is possible by linking synapse and mxisd together using the REST auth module
 (also known as password provider).
 
-### Synapse
+#### Synapse
 - Install the [REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth).
 - Edit your synapse configuration:
   - As described by the auth module documentation
@@ -39,16 +68,117 @@ Authentication is possible by linking synapse and mxisd together using the REST 
   This **MUST NOT** be a public address, and SHOULD NOT go through a reverse proxy.
 - Restart synapse
 
-### mxisd
+#### mxisd
 - Configure and enable at least one [Identity store](../backends/)
 - Restart mxisd
 
-### Validate
+#### Validate
 Login on the Homeserver using credentials present in your backend.
 
-## Next steps
-### Profile auto-fill
+### Next steps
+#### Profile auto-fill
 Auto-filling user profile depends on two conditions:
 - The REST auth module is configured for it, which is the case by default
 - Your Identity store is configured to provide profile data. See your Identity store [documentation](../backends/) on
 how to enable the feature.
+
+
+
+## 3PID Authentication
+
+### Description
+This features allows you to login to Homeserver by using a third party identifier (3PID) that is registered on your Identity backend.
+
+### Overview
+This is performed by intercepting the Homeserver endpoint `/_matrix/client/r0/login` as depicted below:
+
+```
+             +----------------+
+             | Reverse Proxy
+             |
+             |                           Step 1                                    Step 2
+             |                                   +---------------------------+
+Client+--->  |/_matrix/client/r0/login +-------> |                           | Look up address  +---------+
+             |                                   |  mxisd - Identity server  | +--------------> | Backend |
+             |                         <-------+ |                           |                  +---------+
+             |/_matrix/*                 Step 4  +---------------------------+
+             |    +
+             |    |                                            +    Step 3
+             +    |                                            |
+                  |                                            |    /_matrix/client/r0/login
+                  |                                            |
+                  |                                            |
+                  |                                            v
+                  |
+                  |                              +---------------------------+
+                  |                              |                           |
+                  +----------------------------> |        Homeserver         |
+                                                 |                           |
+                                                 +---------------------------+
+```
+
+Steps:
+1. The intercepted login request is directly sent to mxisd instead of the Homeserver.
+2. If the request uses a third party identifier, enabled backends are queried for a matching user identity, and then the request is rewritten to use the user name from the result.
+3. The Homeserver, from which the request was intercepted, is queried using the request from step 2. Its address is resolved using the DNS Overwrite feature to reach its internal addresss on a non-encrypted port.
+4. The response from the Homeserver is sent back to the client, believing it was the HS which directly answered.
+
+### Requirements
+- Reverse proxy setup
+- Homeserver
+- Compatible Identity backends:
+	- LDAP
+	- SQL
+	- REST
+
+### Configuration
+
+#### Reverse Proxy
+
+##### Apache2
+The specific configuration to put under the relevant `VirtualHost`:
+```
+ProxyPass /_matrix/client/r0/login http://localhost:8090/_matrix/client/r0/login
+```
+`ProxyPreserveHost` or equivalent must be enabled to detect to which Homeserver mxisd should talk to when building results.
+
+Your VirtualHost should now look like this:
+```
+<VirtualHost *:443>
+    ServerName example.org
+    
+    ...
+    
+    ProxyPreserveHost on
+    ProxyPass /_matrix/client/r0/login http://localhost:8090/_matrix/client/r0/login
+    ProxyPass /_matrix/identity/ http://localhost:8090/_matrix/identity/
+    ProxyPass /_matrix/ http://localhost:8008/_matrix/
+</VirtualHost>
+```
+
+#### DNS Overwrite
+Just like you need to configure a reverse proxy to send client requests to mxisd, you also need to configure mxisd with the internal IP of the Homeserver so it can talk to it directly to integrate its directory search.
+
+
+To do so, put the following configuration in your `application.yaml`:
+```
+dns.overwrite.homeserver.client:
+  - name: 'example.org'
+    value: 'http://localhost:8008'
+```
+`name` must be the hostname of the URL that clients use when connecting to the Homeserver.
+In case the hostname is the same as your Matrix domain, you can use `${matrix.domain}` to auto-populate the value using the `matrix.domain` configuration option and avoid duplicating it.
+
+value is the base internal URL of the Homeserver, without any /_matrix/.. or trailing /.
+
+#### Backends
+The Backends should be configured as described in the documentation of the [Directory User](directory-users.md) feature. 
+
+
+
+
+
+
+
+
+
