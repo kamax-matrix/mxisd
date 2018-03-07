@@ -21,7 +21,7 @@ Authentication is an enhanced Identity feature of mxisd to ensure coherent and c
 
 It allows to use Identity stores configured in mxisd to authenticate users on your Homeserver.
 
-This feature can also provide the ability to users to login on the Homeserver using their thirdparty identities provided by this Identity store.
+This feature can also provide the ability to users to login on the Homeserver using their third party identities (3PIDs) provided by an Identity store.
 
 ## Overview
 An overview of the Authentication process is depicted below: 
@@ -77,7 +77,7 @@ how to enable the feature.
 
 
 ## Advanced Authentication
-The Authentication feature offers users to login to your Homeserver by using their third party identifier (3PID) registered in your Identity store.
+The Authentication feature allows users to login to their Homeserver by using their 3PIDs registered in an available Identity store.
 
 This is performed by intercepting the Homeserver endpoint `/_matrix/client/r0/login` as depicted below:
 
@@ -104,7 +104,7 @@ Client+---->| /_matrix/client/r0/login +---------------->|                      
 
 ```
 
-Steps of user authentication using a third party identifier:
+Steps of user authentication using a 3PID:
 1. The intercepted login request is directly sent to mxisd instead of the Homeserver.
 2. Enabled backends are queried for a matching user identity in order to modify the request to use the user name.
 3. The Homeserver, from which the request was intercepted, is queried using the request at previous step. Its address is resolved using the DNS Overwrite feature to reach its internal address on a non-encrypted port.
@@ -154,7 +154,7 @@ dns.overwrite.homeserver.client:
     value: 'http://localhost:8008'
 ```
 `name` must be the hostname of the URL that clients use when connecting to the Homeserver.
-In case the hostname is the same as your Matrix domain, you can use `${matrix.domain}` to auto-populate the value using the `matrix.domain` configuration option and avoid duplicating it.
+In case the hostname is the same as your Matrix domain, you can use `${matrix.domain}` to auto-populate the `value` using the `matrix.domain` configuration option and avoid duplicating it.
 
 value is the base internal URL of the Homeserver, without any /_matrix/.. or trailing /.
 
