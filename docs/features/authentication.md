@@ -82,28 +82,26 @@ The Authentication feature offers users to login to your Homeserver by using the
 This is performed by intercepting the Homeserver endpoint `/_matrix/client/r0/login` as depicted below:
 
 ```
-             +----------------+
-             | Reverse Proxy
-             |
-             |                           Step 1                                    Step 2
-             |                                   +---------------------------+
-Client+--->  |/_matrix/client/r0/login +-------> |                           | Look up address  +----------+
-             |                                   |  mxisd - Identity server  | +--------------> | Backends |
-             |                         <-------+ |                           |                  +----------+
-             |/_matrix/*                 Step 4  +---------------------------+
-             |    +
-             |    |                                            +    Step 3
-             +    |                                            |
-                  |                                            |    /_matrix/client/r0/login
-                  |                                            |
-                  |                                            |
-                  |                                            v
-                  |
-                  |                              +---------------------------+
-                  |                              |                           |
-                  +----------------------------> |        Homeserver         |
-                                                 |                           |
-                                                 +---------------------------+
+            +----------------------------+
+            |  Reverse Proxy             |
+            |                            |
+            |                            |     Step 1    +---------------------------+     Step 2
+            |                            |               |                           |
+Client+---->| /_matrix/client/r0/login +---------------->|                           | Look up address  +---------+
+            |                      ^     |               |  mxisd - Identity server  +----------------->| Backend |
+            |                      |     |               |                           |                  +---------+
+            | /_matrix/* +--+      +---------------------+                           |
+            |               |            |               +---------------+-----------+
+            |               |            |     Step 4                    |
+            |               |            |                               | Step 3
+            +---------------|------------+                               |
+                            |                                            | /_matrix/client/r0/login
+                            |                       +--------------+     |
+                            |                       |              |     |
+                            +---------------------->|  Homeserver  |<----+
+                                                    |              |
+                                                    +--------------+
+
 ```
 
 Steps of user authentication using a third party identifier:
