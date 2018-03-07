@@ -1,17 +1,14 @@
 # Authentication
 
-- [General](#general)
+- [Description](#description)
+- [Overview](#overview)
+- [Getting started](#getting-started)
+  - [Synapse](#synapse)
+  - [mxisd](#mxisd)
+  - [Validate](#validate)
+- [Next steps](#next-steps)
+  - [Profile auto-fil](#profile-auto-fill)
 - [Advanced Authentication](#advanced-authentication)
-  - [Overview](#overview)
-  - [Getting started](#getting-started)
-    - [Synapse](#synapse)
-    - [mxisd](#mxisd)
-    - [Validate](#validate)
-  - [Next steps](#next-steps)
-    - [Profile auto-fil](#profile-auto-fill)
-- [3PID Authentication](#3pid-authentication)
-  - [Description](#description)
-  - [Overview](#overview)
   - [Requirements](#requirements)
   - [Configuration](#configuration)
     - [Reverse Proxy](#reverse-proxy)
@@ -19,20 +16,16 @@
     - [DNS Overwrite](#dns-overwrite)
     - [Backends](#backends) 
 
-## General
-mxisd provides two features to enhance the default authentication system provided by the Homeserver.
-On one hand, the Advanced Authentication feature allows to authenticate users by using a dedicated Identity store; 
-On the other hand, the 3PID Authentication feature allows users to login on the Homeserver using their 
-thirdparty identities provided by this Identity store. 
-
-
-
-## Advanced Authentication
-Authentication is an enchanced Identity feature of mxisd to ensure coherent and centralized identity management.
+## Description
+Authentication is an enhanced Identity feature of mxisd to ensure coherent and centralized identity management.
 
 It allows to use Identity stores configured in mxisd to authenticate users on your Homeserver.
 
-### Overview
+This feature can also provide the ability to users to login on the Homeserver using their thirdparty identities provided by this Identity store.
+
+## Overview
+An overview of the Authentication process is depicted below: 
+
 ```
                                                                                     Backends
  Client                                                                             +------+
@@ -40,7 +33,7 @@ It allows to use Identity stores configured in mxisd to authenticate users on yo
    |   +---------------+  /_matrix/identity     | mxisd                   |    |    +------+
    +-> | Reverse proxy | >------------------+   |                         |    |
        +--|------------+                    |   |                         |    |    +--------+
-          |                                 +-----> Check wiht backends >------+--> | SQL DB |
+          |                                 +-----> Check with backends >------+--> | SQL DB |
      Login request                          |   |                         |    |    +--------+
           |                                 |   |     |                   |    |
           |   +--------------------------+  |   +-----|-------------------+    +-->  Others
@@ -55,11 +48,11 @@ It allows to use Identity stores configured in mxisd to authenticate users on yo
 ```
 Performed on [synapse with REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth/blob/master/README.md)
 
-### Getting started
+## Getting started
 Authentication is possible by linking synapse and mxisd together using the REST auth module
 (also known as password provider).
 
-#### Synapse
+### Synapse
 - Install the [REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth).
 - Edit your synapse configuration:
   - As described by the auth module documentation
@@ -68,28 +61,24 @@ Authentication is possible by linking synapse and mxisd together using the REST 
   This **MUST NOT** be a public address, and SHOULD NOT go through a reverse proxy.
 - Restart synapse
 
-#### mxisd
+### mxisd
 - Configure and enable at least one [Identity store](../backends/)
 - Restart mxisd
 
-#### Validate
+### Validate
 Login on the Homeserver using credentials present in your backend.
 
-### Next steps
-#### Profile auto-fill
+## Next steps
+### Profile auto-fill
 Auto-filling user profile depends on two conditions:
 - The REST auth module is configured for it, which is the case by default
 - Your Identity store is configured to provide profile data. See your Identity store [documentation](../backends/) on
 how to enable the feature.
 
 
+## Advanced Authentication
+The Authentication feature offers users to login to your Homeserver by using their third party identifier (3PID) registered in your Identity store.
 
-## 3PID Authentication
-
-### Description
-This features allows you to login to Homeserver by using a third party identifier (3PID) that is registered on your Identity backend.
-
-### Overview
 This is performed by intercepting the Homeserver endpoint `/_matrix/client/r0/login` as depicted below:
 
 ```
@@ -98,9 +87,9 @@ This is performed by intercepting the Homeserver endpoint `/_matrix/client/r0/lo
              |
              |                           Step 1                                    Step 2
              |                                   +---------------------------+
-Client+--->  |/_matrix/client/r0/login +-------> |                           | Look up address  +---------+
-             |                                   |  mxisd - Identity server  | +--------------> | Backend |
-             |                         <-------+ |                           |                  +---------+
+Client+--->  |/_matrix/client/r0/login +-------> |                           | Look up address  +----------+
+             |                                   |  mxisd - Identity server  | +--------------> | Backends |
+             |                         <-------+ |                           |                  +----------+
              |/_matrix/*                 Step 4  +---------------------------+
              |    +
              |    |                                            +    Step 3
@@ -117,10 +106,10 @@ Client+--->  |/_matrix/client/r0/login +-------> |                           | L
                                                  +---------------------------+
 ```
 
-Steps:
+Steps of user authentication using a third party identifier:
 1. The intercepted login request is directly sent to mxisd instead of the Homeserver.
-2. If the request uses a third party identifier, enabled backends are queried for a matching user identity, and then the request is rewritten to use the user name from the result.
-3. The Homeserver, from which the request was intercepted, is queried using the request from step 2. Its address is resolved using the DNS Overwrite feature to reach its internal addresss on a non-encrypted port.
+2. Enabled backends are queried for a matching user identity in order to modify the request to use the user name.
+3. The Homeserver, from which the request was intercepted, is queried using the request at previous step. Its address is resolved using the DNS Overwrite feature to reach its internal address on a non-encrypted port.
 4. The response from the Homeserver is sent back to the client, believing it was the HS which directly answered.
 
 ### Requirements
