@@ -159,6 +159,8 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
         for (IThreePidProvider provider : providers) {
             Optional<SingleLookupReply> lookupDataOpt = provider.find(request);
             if (lookupDataOpt.isPresent()) {
+                log.info("Found 3PID mapping: {medium: '{}', address: '{}', mxid: '{}'}",
+                        request.getType(), request.getThreePid(), lookupDataOpt.get().getMxid().getId());
                 return lookupDataOpt;
             }
         }
@@ -169,9 +171,13 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
                         (!cfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))
                 ) {
             log.info("Using bridge failover for lookup");
-            return bridge.find(request);
+            Optional<SingleLookupReply> lookupDataOpt = bridge.find(request);
+            log.info("Found 3PID mapping: {medium: '{}', address: '{}', mxid: '{}'}",
+                    request.getThreePid(), request.getId(), lookupDataOpt.get().getMxid().getId());
+            return lookupDataOpt;
         }
 
+        log.info("No 3PID mapping found");
         return Optional.empty();
     }
 

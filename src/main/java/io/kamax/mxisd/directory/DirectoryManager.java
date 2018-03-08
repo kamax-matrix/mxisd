@@ -38,7 +38,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,14 +58,15 @@ public class DirectoryManager {
     private List<IDirectoryProvider> providers;
 
     private ClientDnsOverwrite dns;
-    private CloseableHttpClient client;
     private Gson gson;
+
+    @Autowired
+    private CloseableHttpClient client;
 
     @Autowired
     public DirectoryManager(DirectoryConfig cfg, List<IDirectoryProvider> providers, ClientDnsOverwrite dns) {
         this.cfg = cfg;
         this.dns = dns;
-        this.client = HttpClients.custom().setUserAgent("mxisd").build(); //FIXME centralize
         this.gson = GsonUtil.build();
         this.providers = providers.stream().filter(IDirectoryProvider::isEnabled).collect(Collectors.toList());
 

@@ -18,28 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.util;
+package io.kamax.mxisd.exception;
 
-import com.google.gson.*;
 
-import java.util.Optional;
+import com.google.gson.JsonObject;
 
-public class GsonUtil {
+public class RemoteLoginException extends MatrixException {
 
-    public static Gson build() {
-        return new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+    private JsonObject errorBodyMsgResp;
+
+    public RemoteLoginException(int status, String errorCode, String error) {
+        super(status, errorCode, error);
+        this.errorBodyMsgResp = null;
     }
 
-    public static Optional<JsonElement> findElement(JsonObject o, String key) {
-        return Optional.ofNullable(o.get(key));
+    public RemoteLoginException(int status, String errorCode, String error, JsonObject errorBodyMsgResp) {
+        super(status, errorCode, error);
+        this.errorBodyMsgResp = errorBodyMsgResp;
     }
 
-    public static Optional<JsonObject> findObj(JsonObject o, String key) {
-        return findElement(o, key).map(el -> el.isJsonObject() ? el.getAsJsonObject() : null);
+    public JsonObject getErrorBodyMsgResp() {
+        return errorBodyMsgResp;
     }
-
-    public static Optional<JsonPrimitive> findPrimitive(JsonObject o, String key) {
-        return findElement(o, key).map(el -> el.isJsonPrimitive() ? el.getAsJsonPrimitive() : null);
-    }
-
 }
