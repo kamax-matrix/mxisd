@@ -36,10 +36,10 @@ import io.kamax.mxisd.util.GsonUtil;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 
@@ -58,6 +59,9 @@ import java.net.URI;
 @CrossOrigin
 @RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class AuthController {
+
+    // TODO export into SDK
+    private static final String logV1Url = "/_matrix/client/r0/login";
 
     private Logger log = LoggerFactory.getLogger(AuthController.class);
 
@@ -72,6 +76,17 @@ public class AuthController {
 
     @Autowired
     private ClientDnsOverwrite dns;
+
+    @Autowired
+    private CloseableHttpClient client;
+
+    private String resolveProxyUrl(HttpServletRequest req) {
+        URI target = URI.create(req.getRequestURL().toString());
+        URIBuilder builder = dns.transform(target);
+        String urlToLogin = builder.toString();
+        log.info("Proxy resolution: {} to {}", target.toString(), urlToLogin);
+        return urlToLogin;
+    }
 
     @RequestMapping(value = "/_matrix-internal/identity/v1/check_credentials", method = RequestMethod.POST)
     public String checkCredentials(HttpServletRequest req) {
@@ -103,39 +118,20 @@ public class AuthController {
         }
     }
 
-    @RequestMapping(value = "/_matrix/client/r0/login", method = RequestMethod.GET)
-    public String getLogin(HttpServletRequest req) {
-        /**
-         * This GET method on 'login' is to prevent Riot to display error message at login page.
-         *
-         * todo: shall be implemented appropriately
-         *
-         * Current implementation returns:
-         *
-         *  {
-         *      "flows": [
-         *          {
-         *             "type": "m.login.password"
-         *          }
-         *      ]
-         *  }
-         *
-         */
-        JsonObject flowsJson = new JsonObject();
-        JsonArray flowsArray = new JsonArray();
-        JsonObject typeJson = new JsonObject();
-        typeJson.addProperty("type", "m.login.password");
-        flowsArray.add(typeJson);
-        flowsJson.add("flows", flowsArray);
-        String response = gson.toJson(flowsJson);
-        return response;
+    @RequestMapping(value = logV1Url, method = RequestMethod.GET)
+    public String getLogin(HttpServletRequest req, HttpServletResponse res) {
+        try (CloseableHttpResponse hsResponse = client.execute(new HttpGet(resolveProxyUrl(req)))) {
+            res.setStatus(hsResponse.getStatusLine().getStatusCode());
+            return EntityUtils.toString(hsResponse.getEntity());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @RequestMapping(value = "/_matrix/client/r0/login", method = RequestMethod.POST)
+    @RequestMapping(value = logV1Url, method = RequestMethod.POST)
     public String login(HttpServletRequest req) {
         try {
             JsonObject reqJsonObject = parser.parse(req.getInputStream());
-//            log.info("Request is: {}", reqJsonObject.toString());
 
             // find 3PID in main object
             GsonUtil.findPrimitive(reqJsonObject, "medium").ifPresent(medium -> {
@@ -190,18 +186,9 @@ public class AuthController {
                     }
                 });
             });
-//            log.info("Request is now: {}", reqJsonObject.toString());
-
-            // obtain url to homeserver 'login' operation using "dns overwrite"
-            URI target = URI.create(req.getRequestURL().toString());
-            log.info("Url from request: {}", target.toString());
-            URIBuilder builder = dns.transform(target);
-            String urlToLogin = builder.toString();
-            log.info("Querying HS at: {}", urlToLogin);
 
             // invoke 'login' on homeserver
-            HttpPost httpPost = RestClientUtils.post(urlToLogin, gson, reqJsonObject);
-            CloseableHttpClient client = HttpClients.createDefault();
+            HttpPost httpPost = RestClientUtils.post(resolveProxyUrl(req), gson, reqJsonObject);
             try (CloseableHttpResponse httpResponse = client.execute(httpPost)) {
                 // check http status
                 int status = httpResponse.getStatusLine().getStatusCode();
@@ -230,7 +217,6 @@ public class AuthController {
 
                 /// return response
                 JsonObject respJsonObject = parser.parseOptional(httpResponse).get();
-//                log.info("Response is: {}", respJsonObject.toString());
                 return gson.toJson(respJsonObject);
             } catch (IOException e) {
                 throw new RuntimeException(e);
