@@ -52,7 +52,7 @@ public class AuthManager {
     private InvitationManager invMgr;
 
     public UserAuthResult authenticate(String id, String password) {
-        _MatrixID mxid = new MatrixID(id);
+        _MatrixID mxid = MatrixID.asAcceptable(id);
         for (AuthenticatorProvider provider : providers) {
             if (!provider.isEnabled()) {
                 continue;
@@ -63,9 +63,9 @@ public class AuthManager {
 
                 String mxId;
                 if (UserIdType.Localpart.is(result.getId().getType())) {
-                    mxId = new MatrixID(result.getId().getValue(), mxCfg.getDomain()).getId();
+                    mxId = MatrixID.from(result.getId().getValue(), mxCfg.getDomain()).acceptable().getId();
                 } else if (UserIdType.MatrixID.is(result.getId().getType())) {
-                    mxId = new MatrixID(result.getId().getValue()).getId();
+                    mxId = MatrixID.asAcceptable(result.getId().getValue()).getId();
                 } else {
                     log.warn("Unsupported User ID type {} for backend {}", result.getId().getType(), provider.getClass().getSimpleName());
                     continue;
