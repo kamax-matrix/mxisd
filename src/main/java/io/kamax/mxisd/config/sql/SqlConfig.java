@@ -37,22 +37,22 @@ public abstract class SqlConfig {
 
     public static class Type {
 
-        private GenericSqlProviderConfig.Query name = new GenericSqlProviderConfig.Query();
-        private GenericSqlProviderConfig.Query threepid = new GenericSqlProviderConfig.Query();
+        private Query name = new Query();
+        private Query threepid = new Query();
 
-        public GenericSqlProviderConfig.Query getName() {
+        public Query getName() {
             return name;
         }
 
-        public void setName(GenericSqlProviderConfig.Query name) {
+        public void setName(Query name) {
             this.name = name;
         }
 
-        public GenericSqlProviderConfig.Query getThreepid() {
+        public Query getThreepid() {
             return threepid;
         }
 
-        public void setThreepid(GenericSqlProviderConfig.Query threepid) {
+        public void setThreepid(Query threepid) {
             this.threepid = threepid;
         }
 
@@ -75,7 +75,7 @@ public abstract class SqlConfig {
     public static class Directory {
 
         private Boolean enabled;
-        private GenericSqlProviderConfig.Type query = new GenericSqlProviderConfig.Type();
+        private Type query = new Type();
 
         public Boolean isEnabled() {
             return enabled;
@@ -85,11 +85,11 @@ public abstract class SqlConfig {
             this.enabled = enabled;
         }
 
-        public GenericSqlProviderConfig.Type getQuery() {
+        public Type getQuery() {
             return query;
         }
 
-        public void setQuery(GenericSqlProviderConfig.Type query) {
+        public void setQuery(Type query) {
             this.query = query;
         }
 
@@ -136,12 +136,41 @@ public abstract class SqlConfig {
 
     }
 
+    public static class ProfileThreepids {
+
+        private String query;
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
+        }
+
+    }
+
+    public static class Profile {
+
+        private ProfileThreepids threepid = new ProfileThreepids();
+
+        public ProfileThreepids getThreepid() {
+            return threepid;
+        }
+
+        public void setThreepid(ProfileThreepids threepid) {
+            this.threepid = threepid;
+        }
+
+    }
+
     private boolean enabled;
     private String type;
     private String connection;
-    private GenericSqlProviderConfig.Auth auth = new GenericSqlProviderConfig.Auth();
-    private GenericSqlProviderConfig.Directory directory = new GenericSqlProviderConfig.Directory();
-    private GenericSqlProviderConfig.Identity identity = new GenericSqlProviderConfig.Identity();
+    private Auth auth = new Auth();
+    private Directory directory = new Directory();
+    private Identity identity = new Identity();
+    private Profile profile = new Profile();
 
     public boolean isEnabled() {
         return enabled;
@@ -167,28 +196,36 @@ public abstract class SqlConfig {
         this.connection = connection;
     }
 
-    public GenericSqlProviderConfig.Auth getAuth() {
+    public Auth getAuth() {
         return auth;
     }
 
-    public void setAuth(GenericSqlProviderConfig.Auth auth) {
+    public void setAuth(Auth auth) {
         this.auth = auth;
     }
 
-    public GenericSqlProviderConfig.Directory getDirectory() {
+    public Directory getDirectory() {
         return directory;
     }
 
-    public void setDirectory(GenericSqlProviderConfig.Directory directory) {
+    public void setDirectory(Directory directory) {
         this.directory = directory;
     }
 
-    public GenericSqlProviderConfig.Identity getIdentity() {
+    public Identity getIdentity() {
         return identity;
     }
 
-    public void setIdentity(GenericSqlProviderConfig.Identity identity) {
+    public void setIdentity(Identity identity) {
         this.identity = identity;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
     protected abstract String getProviderName();
@@ -222,6 +259,7 @@ public abstract class SqlConfig {
             log.info("Identity type: {}", getIdentity().getType());
             log.info("3PID mapping query: {}", getIdentity().getQuery());
             log.info("Identity medium queries: {}", GsonUtil.build().toJson(getIdentity().getMedium()));
+            log.info("Profile 3PID query: {}", getProfile().getThreepid().getQuery());
         }
     }
 
