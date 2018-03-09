@@ -102,6 +102,9 @@ dependencies {
     compile 'com.sun.mail:javax.mail:1.5.6'
     compile 'javax.mail:javax.mail-api:1.5.6'
 
+    // Google Client APIs
+    compile 'com.google.api-client:google-api-client:1.23.0'
+
     // Google Firebase Authentication backend
     compile 'com.google.firebase:firebase-admin:5.3.0'
 
