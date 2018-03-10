@@ -45,13 +45,17 @@ public class GsonParser {
         this.gson = gson;
     }
 
-    public JsonObject parse(InputStream stream) throws IOException {
-        JsonElement el = parser.parse(IOUtils.toString(stream, StandardCharsets.UTF_8));
+    public JsonObject parse(String raw) {
+        JsonElement el = parser.parse(raw);
         if (!el.isJsonObject()) {
             throw new InvalidResponseJsonException("Response body is not a JSON object");
         }
 
         return el.getAsJsonObject();
+    }
+
+    public JsonObject parse(InputStream stream) throws IOException {
+        return parse(IOUtils.toString(stream, StandardCharsets.UTF_8));
     }
 
     public <T> T parse(HttpServletRequest req, Class<T> type) throws IOException {
