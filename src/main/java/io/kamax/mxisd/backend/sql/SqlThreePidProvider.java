@@ -59,6 +59,10 @@ public abstract class SqlThreePidProvider implements IThreePidProvider, ProfileP
         this.mxCfg = mxCfg;
     }
 
+    protected Connection getConnection() throws SQLException {
+        return pool.get();
+    }
+
     @Override
     public boolean isEnabled() {
         return cfg.isEnabled();
@@ -119,7 +123,7 @@ public abstract class SqlThreePidProvider implements IThreePidProvider, ProfileP
         List<_ThreePid> threepids = new ArrayList<>();
 
         String stmtSql = cfg.getProfile().getThreepid().getQuery();
-        try (Connection conn = pool.get()) {
+        try (Connection conn = getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(stmtSql);
             stmt.setString(1, mxid.getId());
 

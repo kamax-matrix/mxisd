@@ -1,8 +1,32 @@
+/*
+ * mxisd - Matrix Identity Server Daemon
+ * Copyright (C) 2018 Kamax Sàrl
+ *
+ * https://www.kamax.io/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package io.kamax.mxisd.controller.auth.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.kamax.matrix.MatrixID;
+import io.kamax.matrix.ThreePid;
+import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
+import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.GsonUtil;
 import io.kamax.mxisd.util.RestClientUtils;
@@ -26,6 +50,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -37,13 +63,15 @@ public class RegistrationController {
 
     private final String registerV1Url = "/_matrix/client/r0/register";
 
+    private ProfileManager pMgr;
     private ClientDnsOverwrite dns;
     private CloseableHttpClient client;
     private Gson gson;
     private GsonParser parser;
 
     @Autowired
-    public RegistrationController(ClientDnsOverwrite dns, CloseableHttpClient client) {
+    public RegistrationController(ProfileManager pMgr, ClientDnsOverwrite dns, CloseableHttpClient client) {
+        this.pMgr = pMgr;
         this.dns = dns;
         this.client = client;
         this.gson = GsonUtil.build();
@@ -70,6 +98,7 @@ public class RegistrationController {
 
     @RequestMapping(path = registerV1Url, method = RequestMethod.POST)
     public String register(HttpServletRequest req, HttpServletResponse res) {
+        List<String> ids = new ArrayList<>();
         try {
             JsonObject reqJsonObject = parser.parse(req.getInputStream());
             GsonUtil.findObj(reqJsonObject, "auth").ifPresent(auth -> {
@@ -82,6 +111,7 @@ public class RegistrationController {
 
                         String gId = auth.get("googleId").getAsString();
                         log.info("Google ID: {}", gId);
+                        ids.add(gId);
                         auth.addProperty("type", "m.login.dummy");
                         auth.remove("googleId");
                         reqJsonObject.addProperty("password", UUID.randomUUID().toString());
@@ -97,8 +127,8 @@ public class RegistrationController {
                 JsonObject json = parser.parse(body);
                 if (sc == 200 && json.has("user_id")) {
                     log.info("User was registered, adding 3PID");
-                    String userId = json.get("user_id").getAsString();
-
+                    _MatrixID mxid = new MatrixID(json.get("user_id").getAsString());
+                    pMgr.addThreepid(mxid, new ThreePid("io.kamax.google.id", ids.get(0)));
                 }
                 res.setStatus(sc);
                 return body;

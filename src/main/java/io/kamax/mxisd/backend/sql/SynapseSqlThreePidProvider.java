@@ -20,17 +20,50 @@
 
 package io.kamax.mxisd.backend.sql;
 
+import io.kamax.matrix.ThreePid;
+import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig;
+import io.kamax.mxisd.profile.ProfileWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.Instant;
+
 @Component
-public class SynapseSqlThreePidProvider extends SqlThreePidProvider {
+public class SynapseSqlThreePidProvider extends SqlThreePidProvider implements ProfileWriter {
+
+    private final Logger log = LoggerFactory.getLogger(SynapseSqlThreePidProvider.class);
 
     @Autowired
     public SynapseSqlThreePidProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
+    }
+
+    @Override
+    public boolean addThreepid(_MatrixID mxid, ThreePid tpid) {
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO user_threepids (user_id, medium, address, validated_at, added_at) values (?,?,?,?,?)");
+            stmt.setString(1, mxid.getId());
+            stmt.setString(2, tpid.getMedium());
+            stmt.setString(3, tpid.getAddress());
+            stmt.setLong(4, Instant.now().toEpochMilli());
+            stmt.setLong(5, Instant.now().toEpochMilli());
+
+            int rows = stmt.executeUpdate();
+            if (rows != 1) {
+                log.error("Unable to update 3PID info. Modified row(s): {}", rows);
+            }
+
+            return true;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

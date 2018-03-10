@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.profile;
 
+import io.kamax.matrix.ThreePid;
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
 import org.springframework.stereotype.Component;
@@ -32,16 +33,21 @@ import java.util.stream.Collectors;
 @Component
 public class ProfileManager {
 
-    private List<ProfileProvider> providers;
+    private List<ProfileProvider> readers;
+    private List<ProfileWriter> writers;
 
-    public ProfileManager(List<ProfileProvider> providers) {
-        this.providers = providers.stream()
+    public ProfileManager(List<ProfileProvider> providers, List<ProfileWriter> writers) {
+        this.readers = providers.stream()
                 .filter(ProfileProvider::isEnabled)
+                .collect(Collectors.toList());
+
+        this.writers = writers.stream()
+                .filter(ProfileWriter::isEnabled)
                 .collect(Collectors.toList());
     }
 
     public <T> List<T> get(Function<ProfileProvider, List<T>> function) {
-        return providers.stream()
+        return readers.stream()
                 .map(function)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
@@ -53,6 +59,10 @@ public class ProfileManager {
 
     public List<String> getRoles(_MatrixID mxid) {
         return get(p -> p.getRoles(mxid));
+    }
+
+    public void addThreepid(_MatrixID mxid, ThreePid tpid) {
+        writers.forEach(w -> w.addThreepid(mxid, tpid));
     }
 
 }
