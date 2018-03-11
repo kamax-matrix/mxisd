@@ -31,7 +31,6 @@ import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.GoogleConfig;
-import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,21 +40,24 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Optional;
 
 @Component
 public class GoogleProviderBackend implements AuthenticatorProvider {
 
     private final Logger log = LoggerFactory.getLogger(GoogleProviderBackend.class);
     private final GoogleConfig cfg;
-    private final MatrixConfig mxCfg;
     private final LookupStrategy lookup;
 
     private GoogleIdTokenVerifier verifier;
 
+    public Optional<GoogleIdToken> extractToken(String data) throws GeneralSecurityException, IOException {
+        return Optional.ofNullable(verifier.verify(data));
+    }
+
     @Autowired
-    public GoogleProviderBackend(GoogleConfig cfg, MatrixConfig mxCfg, LookupStrategy lookup) {
+    public GoogleProviderBackend(GoogleConfig cfg, LookupStrategy lookup) {
         this.cfg = cfg;
-        this.mxCfg = mxCfg;
         this.lookup = lookup;
 
         if (isEnabled()) {
@@ -80,8 +82,7 @@ public class GoogleProviderBackend implements AuthenticatorProvider {
     @Override
     public BackendAuthResult authenticate(_MatrixID mxid, String password) {
         try {
-            GoogleIdToken idToken = verifier.verify(password);
-            if (idToken != null) {
+            return extractToken(password).map(idToken -> {
                 GoogleIdToken.Payload payload = idToken.getPayload();
                 if (!payload.getEmailVerified()) { // We only want users who validated their email
                     return BackendAuthResult.failure();
@@ -101,10 +102,7 @@ public class GoogleProviderBackend implements AuthenticatorProvider {
 
                     return BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, name);
                 }).orElse(BackendAuthResult.failure());
-            } else {
-                log.info("Not a valid Google token");
-                return BackendAuthResult.failure();
-            }
+            }).orElse(BackendAuthResult.failure());
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

@@ -20,11 +20,13 @@
 
 package io.kamax.mxisd.controller.auth.v1;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.ThreePid;
 import io.kamax.matrix._MatrixID;
+import io.kamax.mxisd.backend.google.GoogleProviderBackend;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.util.GsonParser;
@@ -50,9 +52,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @CrossOrigin
@@ -63,6 +65,7 @@ public class RegistrationController {
 
     private final String registerV1Url = "/_matrix/client/r0/register";
 
+    private GoogleProviderBackend google;
     private ProfileManager pMgr;
     private ClientDnsOverwrite dns;
     private CloseableHttpClient client;
@@ -70,7 +73,8 @@ public class RegistrationController {
     private GsonParser parser;
 
     @Autowired
-    public RegistrationController(ProfileManager pMgr, ClientDnsOverwrite dns, CloseableHttpClient client) {
+    public RegistrationController(GoogleProviderBackend google, ProfileManager pMgr, ClientDnsOverwrite dns, CloseableHttpClient client) {
+        this.google = google;
         this.pMgr = pMgr;
         this.dns = dns;
         this.client = client;
@@ -110,11 +114,22 @@ public class RegistrationController {
                         }
 
                         String gId = auth.get("googleId").getAsString();
-                        log.info("Google ID: {}", gId);
-                        ids.add(gId);
-                        auth.addProperty("type", "m.login.dummy");
-                        auth.remove("googleId");
-                        reqJsonObject.addProperty("password", UUID.randomUUID().toString());
+                        try {
+                            GoogleIdToken token = google.extractToken(reqJsonObject.get("password").getAsString()).orElseThrow(() -> new IllegalArgumentException("Google ID Token is missing or invalid"));
+                            if (!StringUtils.equals(gId, token.getPayload().getSubject())) {
+                                throw new IllegalArgumentException("Google ID does not match token");
+                            }
+                            log.info("Google ID: {}", gId);
+
+                            ids.add(gId);
+
+                            auth.addProperty("type", "m.login.dummy");
+                            auth.remove("googleId");
+                            reqJsonObject.addProperty("username", "g-" + gId);
+                            reqJsonObject.addProperty("password", "");
+                        } catch (IOException | GeneralSecurityException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 });
             });
@@ -126,7 +141,7 @@ public class RegistrationController {
                 String body = EntityUtils.toString(httpResponse.getEntity());
                 JsonObject json = parser.parse(body);
                 if (sc == 200 && json.has("user_id")) {
-                    log.info("User was registered, adding 3PID");
+                    log.info("User was registered, adding 3PID"); // FIXME we should do this in the backend really
                     _MatrixID mxid = new MatrixID(json.get("user_id").getAsString());
                     pMgr.addThreepid(mxid, new ThreePid("io.kamax.google.id", ids.get(0)));
                 }
