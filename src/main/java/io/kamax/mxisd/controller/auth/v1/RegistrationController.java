@@ -102,7 +102,7 @@ public class RegistrationController {
 
     @RequestMapping(path = registerV1Url, method = RequestMethod.POST)
     public String register(HttpServletRequest req, HttpServletResponse res) {
-        List<String> ids = new ArrayList<>();
+        List<ThreePid> ids = new ArrayList<>();
         try {
             JsonObject reqJsonObject = parser.parse(req.getInputStream());
             GsonUtil.findObj(reqJsonObject, "auth").ifPresent(auth -> {
@@ -121,7 +121,7 @@ public class RegistrationController {
                             }
                             log.info("Google ID: {}", gId);
 
-                            ids.add(gId);
+                            ids.addAll(google.extractThreepids(token));
 
                             auth.addProperty("type", "m.login.dummy");
                             auth.remove("googleId");
@@ -141,9 +141,12 @@ public class RegistrationController {
                 String body = EntityUtils.toString(httpResponse.getEntity());
                 JsonObject json = parser.parse(body);
                 if (sc == 200 && json.has("user_id")) {
-                    log.info("User was registered, adding 3PID"); // FIXME we should do this in the backend really
+                    // Required here as synapse doesn't call pass provider on register
+                    log.info("User was registered, adding 3PIDs");
                     _MatrixID mxid = new MatrixID(json.get("user_id").getAsString());
-                    pMgr.addThreepid(mxid, new ThreePid("io.kamax.google.id", ids.get(0)));
+                    for (ThreePid tpid : ids) {
+                        pMgr.addThreepid(mxid, tpid);
+                    }
                 }
                 res.setStatus(sc);
                 return body;

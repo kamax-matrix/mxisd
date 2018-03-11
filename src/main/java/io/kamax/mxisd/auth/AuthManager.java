@@ -43,14 +43,17 @@ public class AuthManager {
 
     private Logger log = LoggerFactory.getLogger(AuthManager.class);
 
-    @Autowired
-    private List<AuthenticatorProvider> providers = new ArrayList<>();
+    private List<AuthenticatorProvider> providers;
 
     @Autowired
     private MatrixConfig mxCfg;
 
     @Autowired
     private InvitationManager invMgr;
+
+    public AuthManager(List<AuthenticatorProvider> providers) {
+        this.providers = new ArrayList<>(providers);
+    }
 
     public UserAuthResult authenticate(String id, String password) {
         _MatrixID mxid = MatrixID.asAcceptable(id);

@@ -49,8 +49,9 @@ public class BackendAuthResult {
         return r;
     }
 
-    public void fail() {
+    public BackendAuthResult fail() {
         success = false;
+        return this;
     }
 
     public static BackendAuthResult success(String id, UserIdType type, String displayName) {
@@ -63,10 +64,11 @@ public class BackendAuthResult {
         return r;
     }
 
-    public void succeed(String id, String type, String displayName) {
+    public BackendAuthResult succeed(String id, String type, String displayName) {
         this.success = true;
         this.id = new UserID(type, id);
         this.profile.displayName = displayName;
+        return this;
     }
 
     private Boolean success;
