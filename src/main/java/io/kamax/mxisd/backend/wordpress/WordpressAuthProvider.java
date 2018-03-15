@@ -21,14 +21,20 @@
 package io.kamax.mxisd.backend.wordpress;
 
 import io.kamax.matrix._MatrixID;
+import io.kamax.mxisd.ThreePid;
+import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
-import io.kamax.mxisd.exception.NotImplementedException;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class WordpressAuthProvider implements AuthenticatorProvider {
+
+    private final Logger log = LoggerFactory.getLogger(WordpressAuthProvider.class);
 
     private WordpressBackend wordpress;
 
@@ -44,8 +50,19 @@ public class WordpressAuthProvider implements AuthenticatorProvider {
 
     @Override
     public BackendAuthResult authenticate(_MatrixID mxid, String password) {
-        // TODO
-        throw new NotImplementedException(WordpressAuthProvider.class.getName());
+        try {
+            WordpressAuthData data = wordpress.authenticate(mxid.getLocalPart(), password);
+            BackendAuthResult result = new BackendAuthResult();
+            if (StringUtils.isNotBlank(data.getUserEmail())) {
+                result.withThreePid(new ThreePid("email", data.getUserEmail()));
+            }
+            result.succeed(mxid.getId(), UserIdType.MatrixID.getId(), data.getUserDisplayName());
+            return result;
+        } catch (IllegalArgumentException e) {
+            log.error("Authentication failed for {}: {}", mxid.getId(), e.getMessage());
+            return BackendAuthResult.failure();
+        }
+
     }
 
 }

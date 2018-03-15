@@ -20,9 +20,7 @@
 
 package io.kamax.mxisd.util;
 
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -31,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 
 public class RestClientUtils {
 
-    private static Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+    private static Gson gson = GsonUtil.build();
 
     public static HttpPost post(String url, String body) {
         StringEntity entity = new StringEntity(body, StandardCharsets.UTF_8);

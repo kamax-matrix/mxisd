@@ -24,9 +24,12 @@ import com.google.gson.JsonObject;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.matrix.json.InvalidJsonException;
 import io.kamax.mxisd.config.wordpress.WordpressConfig;
+import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -40,9 +43,16 @@ import java.io.IOException;
 public class WordpressBackend {
 
     private final Logger log = LoggerFactory.getLogger(WordpressBackend.class);
+    private final String jsonPath = "/wp-json";
+    private final String jwtPath = "/jwt-auth/v1";
 
     private WordpressConfig cfg;
     private CloseableHttpClient client;
+
+    private String jsonEndpoint;
+    private String jwtEndpoint;
+
+    private String token;
 
     @Autowired
     public WordpressBackend(WordpressConfig cfg, CloseableHttpClient client) {
@@ -53,12 +63,14 @@ public class WordpressBackend {
             return;
         }
 
+        jsonEndpoint = cfg.getEndpoint().getBase() + jsonPath;
+        jwtEndpoint = jsonEndpoint + jwtPath;
         validateConfig();
     }
 
     private void validateConfig() {
         log.info("Validating JWT auth endpoint");
-        try (CloseableHttpResponse res = client.execute(new HttpGet(cfg.getEndpoint().getBase() + "/wp-json/jwt-auth/api/v1"))) {
+        try (CloseableHttpResponse res = client.execute(new HttpGet(jwtEndpoint))) {
             int status = res.getStatusLine().getStatusCode();
             if (status != 200) {
                 log.warn("JWT auth endpoint check failed: Got status code {}", status);
@@ -74,6 +86,8 @@ public class WordpressBackend {
             if (!body.has("namespace")) {
                 log.warn("JWT auth endpoint check failed: invalid namespace");
             }
+
+            log.info("JWT auth endpoint check succeeded");
         } catch (InvalidJsonException e) {
             log.warn("JWT auth endpoint check failed: Invalid JSON response: {}", e.getMessage());
         } catch (IOException e) {
@@ -83,6 +97,45 @@ public class WordpressBackend {
 
     public boolean isEnabled() {
         return cfg.isEnabled();
+    }
+
+    protected WordpressAuthData authenticate(String username, String password) {
+        JsonObject body = new JsonObject();
+        body.addProperty("username", username);
+        body.addProperty("password", password);
+        HttpPost req = RestClientUtils.post(jwtEndpoint + "/token", body);
+        try (CloseableHttpResponse res = client.execute(req)) {
+            int status = res.getStatusLine().getStatusCode();
+            String bodyRes = EntityUtils.toString(res.getEntity());
+            if (status != 200) {
+                throw new IllegalArgumentException(bodyRes);
+            }
+
+            return GsonUtil.get().fromJson(bodyRes, WordpressAuthData.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void authenticate() {
+        WordpressAuthData data = authenticate(cfg.getCredential().getUsername(), cfg.getCredential().getPassword());
+        log.info("Internal authentication: success, logged in as " + data.getUserNicename());
+        token = data.getToken();
+    }
+
+    protected CloseableHttpResponse runRequest(HttpRequestBase request) throws IOException {
+        request.setHeader("Authorization", "Bearer " + token);
+        return client.execute(request);
+    }
+
+    public CloseableHttpResponse withAuthentication(HttpRequestBase request) throws IOException {
+        CloseableHttpResponse response = runRequest(request);
+        if (response.getStatusLine().getStatusCode() == 403) { //FIXME we should check the JWT expiration time
+            authenticate();
+            response = runRequest(request);
+        }
+
+        return response;
     }
 
 }

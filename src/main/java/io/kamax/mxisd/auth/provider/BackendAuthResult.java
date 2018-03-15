@@ -66,7 +66,6 @@ public class BackendAuthResult {
     public void succeed(String id, String type, String displayName) {
         this.success = true;
         this.id = new UserID(type, id);
-        this.profile = new BackendAuthProfile();
         this.profile.displayName = displayName;
     }
 

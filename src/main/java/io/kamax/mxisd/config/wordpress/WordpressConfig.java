@@ -20,9 +20,12 @@
 
 package io.kamax.mxisd.config.wordpress;
 
+import io.kamax.mxisd.exception.ConfigurationException;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import java.net.URL;
 
 @Configuration
@@ -52,8 +55,40 @@ public class WordpressConfig {
 
     }
 
-    private Endpoint endpoint;
+    public static class Credential {
+
+        private String username;
+        private String password;
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+    }
+
     private boolean enabled;
+    private Endpoint endpoint = new Endpoint();
+    private Credential credential = new Credential();
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public Endpoint getEndpoint() {
         return endpoint;
@@ -63,12 +98,23 @@ public class WordpressConfig {
         this.endpoint = endpoint;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public Credential getCredential() {
+        return credential;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setCredential(Credential credential) {
+        this.credential = credential;
+    }
+
+    @PostConstruct
+    public void build() {
+        if (!isEnabled()) {
+            return;
+        }
+
+        if (StringUtils.isBlank(getEndpoint().getBase())) {
+            throw new ConfigurationException("wordpress.endpoint.base");
+        }
     }
 
 }
