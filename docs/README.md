@@ -17,6 +17,7 @@
   - [SQL](backends/sql.md)
   - [REST](backends/rest.md)
   - [Google Firebase](backends/firebase.md)
+  - [Wordpress](backends/wordpress.md)
 - Notifications
   - Handlers
     - [Basic](threepids/notifications/basic-handler.md)
