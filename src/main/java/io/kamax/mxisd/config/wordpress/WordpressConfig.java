@@ -26,34 +26,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.net.URL;
 
 @Configuration
 @ConfigurationProperties("wordpress")
 public class WordpressConfig {
-
-    public static class Endpoint {
-
-        private String base;
-        private transient URL baseUrl;
-
-        public String getBase() {
-            return base;
-        }
-
-        public void setBase(String base) {
-            this.base = base;
-        }
-
-        public URL getBaseUrl() {
-            return baseUrl;
-        }
-
-        public void setBaseUrl(URL baseUrl) {
-            this.baseUrl = baseUrl;
-        }
-
-    }
 
     public static class Credential {
 
@@ -78,9 +54,87 @@ public class WordpressConfig {
 
     }
 
+    public static class Rest {
+
+        private Credential credential = new Credential();
+        private String base;
+
+        public String getBase() {
+            return base;
+        }
+
+        public void setBase(String base) {
+            this.base = base;
+        }
+
+        public Credential getCredential() {
+            return credential;
+        }
+
+        public void setCredential(Credential credential) {
+            this.credential = credential;
+        }
+
+    }
+
+    public static class Query {
+
+        private String threepid;
+        private String directory;
+
+        public String getThreepid() {
+            return threepid;
+        }
+
+        public void setThreepid(String threepid) {
+            this.threepid = threepid;
+        }
+
+        public String getDirectory() {
+            return directory;
+        }
+
+        public void setDirectory(String directory) {
+            this.directory = directory;
+        }
+
+    }
+
+    public static class Sql {
+
+        private String type;
+        private String connection;
+        private Query query;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getConnection() {
+            return connection;
+        }
+
+        public void setConnection(String connection) {
+            this.connection = connection;
+        }
+
+        public Query getQuery() {
+            return query;
+        }
+
+        public void setQuery(Query query) {
+            this.query = query;
+        }
+
+    }
+
     private boolean enabled;
-    private Endpoint endpoint = new Endpoint();
-    private Credential credential = new Credential();
+    private Rest rest = new Rest();
+    private Sql sql = new Sql();
 
     public boolean isEnabled() {
         return enabled;
@@ -90,20 +144,20 @@ public class WordpressConfig {
         this.enabled = enabled;
     }
 
-    public Endpoint getEndpoint() {
-        return endpoint;
+    public Rest getRest() {
+        return rest;
     }
 
-    public void setEndpoint(Endpoint endpoint) {
-        this.endpoint = endpoint;
+    public void setRest(Rest rest) {
+        this.rest = rest;
     }
 
-    public Credential getCredential() {
-        return credential;
+    public Sql getSql() {
+        return sql;
     }
 
-    public void setCredential(Credential credential) {
-        this.credential = credential;
+    public void setSql(Sql sql) {
+        this.sql = sql;
     }
 
     @PostConstruct
@@ -112,8 +166,8 @@ public class WordpressConfig {
             return;
         }
 
-        if (StringUtils.isBlank(getEndpoint().getBase())) {
-            throw new ConfigurationException("wordpress.endpoint.base");
+        if (StringUtils.isBlank(getRest().getBase())) {
+            throw new ConfigurationException("wordpress.rest.base");
         }
     }
 

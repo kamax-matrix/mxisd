@@ -40,9 +40,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class WordpressBackend {
+public class WordpressRestBackend {
 
-    private final Logger log = LoggerFactory.getLogger(WordpressBackend.class);
+    private final Logger log = LoggerFactory.getLogger(WordpressRestBackend.class);
     private final String jsonPath = "/wp-json";
     private final String jwtPath = "/jwt-auth/v1";
 
@@ -55,7 +55,7 @@ public class WordpressBackend {
     private String token;
 
     @Autowired
-    public WordpressBackend(WordpressConfig cfg, CloseableHttpClient client) {
+    public WordpressRestBackend(WordpressConfig cfg, CloseableHttpClient client) {
         this.cfg = cfg;
         this.client = client;
 
@@ -63,7 +63,7 @@ public class WordpressBackend {
             return;
         }
 
-        jsonEndpoint = cfg.getEndpoint().getBase() + jsonPath;
+        jsonEndpoint = cfg.getRest().getBase() + jsonPath;
         jwtEndpoint = jsonEndpoint + jwtPath;
         validateConfig();
     }
@@ -118,7 +118,9 @@ public class WordpressBackend {
     }
 
     protected void authenticate() {
-        WordpressAuthData data = authenticate(cfg.getCredential().getUsername(), cfg.getCredential().getPassword());
+        WordpressAuthData data = authenticate(
+                cfg.getRest().getCredential().getUsername(),
+                cfg.getRest().getCredential().getPassword());
         log.info("Internal authentication: success, logged in as " + data.getUserNicename());
         token = data.getToken();
     }

@@ -34,10 +34,10 @@ import java.util.Optional;
 @Component
 public class WordpressThreePidProvider implements IThreePidProvider {
 
-    private WordpressBackend wordpress;
+    private WordpressRestBackend wordpress;
 
     @Autowired
-    public WordpressThreePidProvider(WordpressBackend wordpress) {
+    public WordpressThreePidProvider(WordpressRestBackend wordpress) {
         this.wordpress = wordpress;
     }
 

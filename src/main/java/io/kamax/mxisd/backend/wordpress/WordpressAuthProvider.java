@@ -36,10 +36,10 @@ public class WordpressAuthProvider implements AuthenticatorProvider {
 
     private final Logger log = LoggerFactory.getLogger(WordpressAuthProvider.class);
 
-    private WordpressBackend wordpress;
+    private WordpressRestBackend wordpress;
 
     @Autowired
-    public WordpressAuthProvider(WordpressBackend wordpress) {
+    public WordpressAuthProvider(WordpressRestBackend wordpress) {
         this.wordpress = wordpress;
     }
 

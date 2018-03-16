@@ -20,36 +20,38 @@
 
 package io.kamax.mxisd.backend.wordpress;
 
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
-import io.kamax.mxisd.directory.IDirectoryProvider;
-import io.kamax.mxisd.exception.NotImplementedException;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import io.kamax.mxisd.config.wordpress.WordpressConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
-public class WordpressDirectoryProvider implements IDirectoryProvider {
+import java.sql.Connection;
+import java.sql.SQLException;
 
-    private WordpressRestBackend wordpress;
+@Component
+public class WordressSqlBackend {
+
+    private Logger log = LoggerFactory.getLogger(WordressSqlBackend.class);
+
+    private WordpressConfig cfg;
+
+    private ComboPooledDataSource ds;
 
     @Autowired
-    public WordpressDirectoryProvider(WordpressRestBackend wordpress) {
-        this.wordpress = wordpress;
+    public WordressSqlBackend(WordpressConfig cfg) {
+        this.cfg = cfg;
+
+        ds = new ComboPooledDataSource();
+        ds.setJdbcUrl("jdbc:" + cfg.getSql().getType() + ":" + cfg.getSql().getConnection());
+        ds.setMinPoolSize(1);
+        ds.setMaxPoolSize(10);
+        ds.setAcquireIncrement(2);
     }
 
-    @Override
-    public boolean isEnabled() {
-        return wordpress.isEnabled();
+    public Connection getConnection() throws SQLException {
+        return ds.getConnection();
     }
 
-    @Override
-    public UserDirectorySearchResult searchByDisplayName(String query) {
-        // TODO
-        throw new NotImplementedException(WordpressDirectoryProvider.class.getName());
-    }
-
-    @Override
-    public UserDirectorySearchResult searchBy3pid(String query) {
-        // TODO
-        throw new NotImplementedException(WordpressDirectoryProvider.class.getName());
-    }
 }
