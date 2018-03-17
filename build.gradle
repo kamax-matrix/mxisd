@@ -119,6 +119,9 @@ dependencies {
     // PostgreSQL
     compile 'org.postgresql:postgresql:42.1.4'
 
+    // MariaDB/MySQL
+    compile 'org.mariadb.jdbc:mariadb-java-client:2.1.2'
+
     // Twilio SDK for SMS
     compile 'com.twilio.sdk:twilio:7.14.5'
 

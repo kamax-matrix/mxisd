@@ -50,6 +50,10 @@ public class WordressSqlBackend {
         ds.setAcquireIncrement(2);
     }
 
+    public boolean isEnabled() {
+        return cfg.isEnabled();
+    }
+
     public Connection getConnection() throws SQLException {
         return ds.getConnection();
     }

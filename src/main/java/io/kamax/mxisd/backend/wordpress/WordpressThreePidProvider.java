@@ -20,24 +20,40 @@
 
 package io.kamax.mxisd.backend.wordpress;
 
-import io.kamax.mxisd.exception.NotImplementedException;
+import io.kamax.matrix.MatrixID;
+import io.kamax.matrix._MatrixID;
+import io.kamax.mxisd.ThreePid;
+import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.wordpress.WordpressConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 public class WordpressThreePidProvider implements IThreePidProvider {
 
-    private WordpressRestBackend wordpress;
+    private final Logger log = LoggerFactory.getLogger(WordpressThreePidProvider.class);
+
+    private MatrixConfig mxCfg;
+    private WordpressConfig cfg;
+    private WordressSqlBackend wordpress;
 
     @Autowired
-    public WordpressThreePidProvider(WordpressRestBackend wordpress) {
+    public WordpressThreePidProvider(MatrixConfig mxCfg, WordpressConfig cfg, WordressSqlBackend wordpress) {
+        this.mxCfg = mxCfg;
+        this.cfg = cfg;
         this.wordpress = wordpress;
     }
 
@@ -56,16 +72,38 @@ public class WordpressThreePidProvider implements IThreePidProvider {
         return 15;
     }
 
+    protected Optional<_MatrixID> find(ThreePid tpid) {
+        try (Connection conn = wordpress.getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement(cfg.getSql().getQuery().getThreepid());
+            stmt.setString(1, tpid.getAddress());
+            // stmt.setString(2, tpid.getMedium());
+
+            try (ResultSet rSet = stmt.executeQuery()) {
+                while (rSet.next()) {
+                    String uid = rSet.getString("uid");
+                    log.info("Found match: {}", uid);
+                    return Optional.of(MatrixID.from(uid, mxCfg.getDomain()).valid());
+                }
+
+                log.info("No match found in SQL");
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
-        // TODO
-        throw new NotImplementedException(WordpressThreePidProvider.class.getName());
+        return find(new ThreePid(request.getType(), request.getThreePid())).map(mxid -> new SingleLookupReply(request, mxid));
     }
 
     @Override
     public List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
-        // TODO
-        throw new NotImplementedException(WordpressThreePidProvider.class.getName());
+        for (ThreePidMapping tpidMap : mappings) {
+            find(new ThreePid(tpidMap.getMedium(), tpidMap.getValue())).ifPresent(mxid -> tpidMap.setMxid(mxid.getId()));
+        }
+        return mappings;
     }
 
 }
