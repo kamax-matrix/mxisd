@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+import java.util.Map;
 
 @Configuration
 @ConfigurationProperties("wordpress")
@@ -79,22 +80,22 @@ public class WordpressConfig {
 
     public static class Query {
 
-        private String threepid;
-        private String directory;
+        private Map<String, String> threepid;
+        private Map<String, String> directory;
 
-        public String getThreepid() {
+        public Map<String, String> getThreepid() {
             return threepid;
         }
 
-        public void setThreepid(String threepid) {
+        public void setThreepid(Map<String, String> threepid) {
             this.threepid = threepid;
         }
 
-        public String getDirectory() {
+        public Map<String, String> getDirectory() {
             return directory;
         }
 
-        public void setDirectory(String directory) {
+        public void setDirectory(Map<String, String> directory) {
             this.directory = directory;
         }
 

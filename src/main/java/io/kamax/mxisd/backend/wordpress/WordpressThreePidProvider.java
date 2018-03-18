@@ -39,6 +39,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -73,10 +74,14 @@ public class WordpressThreePidProvider implements IThreePidProvider {
     }
 
     protected Optional<_MatrixID> find(ThreePid tpid) {
+        String query = cfg.getSql().getQuery().getThreepid().get(tpid.getMedium());
+        if (Objects.isNull(query)) {
+            return Optional.empty();
+        }
+
         try (Connection conn = wordpress.getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement(cfg.getSql().getQuery().getThreepid());
+            PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setString(1, tpid.getAddress());
-            // stmt.setString(2, tpid.getMedium());
 
             try (ResultSet rSet = stmt.executeQuery()) {
                 while (rSet.next()) {
@@ -85,7 +90,7 @@ public class WordpressThreePidProvider implements IThreePidProvider {
                     return Optional.of(MatrixID.from(uid, mxCfg.getDomain()).valid());
                 }
 
-                log.info("No match found in SQL");
+                log.info("No match found in Wordpress");
                 return Optional.empty();
             }
         } catch (SQLException e) {
