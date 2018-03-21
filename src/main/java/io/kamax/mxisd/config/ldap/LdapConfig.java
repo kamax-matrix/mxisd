@@ -20,22 +20,18 @@
 
 package io.kamax.mxisd.config.ldap;
 
-import com.google.gson.Gson;
 import io.kamax.matrix.ThreePidMedium;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.backend.ldap.LdapBackend;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 
-@Configuration
-@ConfigurationProperties(prefix = "ldap")
-public class LdapConfig {
+public abstract class LdapConfig {
 
     public static class UID {
 
@@ -240,7 +236,6 @@ public class LdapConfig {
 
 
     private Logger log = LoggerFactory.getLogger(LdapConfig.class);
-    private static Gson gson = new Gson();
 
     private boolean enabled;
     private String filter;
@@ -250,6 +245,8 @@ public class LdapConfig {
     private Auth auth;
     private Directory directory;
     private Identity identity;
+
+    protected abstract String getConfigName();
 
     public boolean isEnabled() {
         return enabled;
@@ -309,7 +306,7 @@ public class LdapConfig {
 
     @PostConstruct
     public void build() {
-        log.info("--- LDAP Config ---");
+        log.info("--- " + getConfigName() + " Config ---");
         log.info("Enabled: {}", isEnabled());
 
         if (!isEnabled()) {
@@ -365,10 +362,10 @@ public class LdapConfig {
         log.info("Bind DN: {}", connection.getBindDn());
         log.info("Base DN: {}", connection.getBaseDn());
 
-        log.info("Attribute: {}", gson.toJson(attribute));
-        log.info("Auth: {}", gson.toJson(auth));
-        log.info("Directory: {}", gson.toJson(directory));
-        log.info("Identity: {}", gson.toJson(identity));
+        log.info("Attribute: {}", GsonUtil.get().toJson(attribute));
+        log.info("Auth: {}", GsonUtil.get().toJson(auth));
+        log.info("Directory: {}", GsonUtil.get().toJson(directory));
+        log.info("Identity: {}", GsonUtil.get().toJson(identity));
     }
 
 }

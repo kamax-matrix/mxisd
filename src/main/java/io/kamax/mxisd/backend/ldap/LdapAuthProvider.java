@@ -29,7 +29,7 @@ import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
+import io.kamax.mxisd.config.ldap.LdapConfig;
 import io.kamax.mxisd.util.GsonUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
@@ -59,7 +59,7 @@ public class LdapAuthProvider extends LdapBackend implements AuthenticatorProvid
     private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
     @Autowired
-    public LdapAuthProvider(GenericLdapConfig cfg, MatrixConfig mxCfg) {
+    public LdapAuthProvider(LdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 

@@ -21,7 +21,7 @@
 package io.kamax.mxisd.backend.ldap;
 
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
+import io.kamax.mxisd.config.ldap.LdapConfig;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
@@ -49,7 +49,7 @@ public class LdapThreePidProvider extends LdapBackend implements IThreePidProvid
 
     private Logger log = LoggerFactory.getLogger(LdapThreePidProvider.class);
 
-    public LdapThreePidProvider(GenericLdapConfig cfg, MatrixConfig mxCfg) {
+    public LdapThreePidProvider(LdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 

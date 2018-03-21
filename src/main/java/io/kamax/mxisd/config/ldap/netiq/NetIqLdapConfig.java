@@ -20,12 +20,17 @@
 
 package io.kamax.mxisd.config.ldap.netiq;
 
-import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
+import io.kamax.mxisd.config.ldap.LdapConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "netiq")
-public class NetIqLdapConfig extends GenericLdapConfig {
+public class NetIqLdapConfig extends LdapConfig {
+
+    @Override
+    protected String getConfigName() {
+        return "NetIQ eDirectory";
+    }
 
 }

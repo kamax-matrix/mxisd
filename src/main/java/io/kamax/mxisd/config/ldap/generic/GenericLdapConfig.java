@@ -30,4 +30,9 @@ import org.springframework.context.annotation.Primary;
 @Primary
 public class GenericLdapConfig extends LdapConfig {
 
+    @Override
+    protected String getConfigName() {
+        return "Generic LDAP";
+    }
+
 }

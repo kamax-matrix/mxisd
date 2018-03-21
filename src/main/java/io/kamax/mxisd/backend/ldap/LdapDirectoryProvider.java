@@ -22,7 +22,6 @@ package io.kamax.mxisd.backend.ldap;
 
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
-import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
@@ -49,7 +48,7 @@ public class LdapDirectoryProvider extends LdapBackend implements IDirectoryProv
     private Logger log = LoggerFactory.getLogger(LdapDirectoryProvider.class);
 
     @Autowired
-    public LdapDirectoryProvider(GenericLdapConfig cfg, MatrixConfig mxCfg) {
+    public LdapDirectoryProvider(LdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 
