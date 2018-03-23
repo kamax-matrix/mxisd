@@ -143,3 +143,4 @@ Use your Identity stores:
 - [SQL Database](backends/sql.md)
 - [Website / Web service / Web app](backends/rest.md)
 - [Google Firebase](backends/firebase.md)
+- [Wordpress](backends/wordpress.md)

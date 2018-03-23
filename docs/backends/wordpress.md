@@ -4,10 +4,10 @@ Two types of connections are required for full support:
 - [REST API](https://developer.wordpress.org/rest-api/) with JWT authentication
 - Direct SQL access
 
-This Identity store supports:
-- Authentication
-- Directory
-- Identity
+This Identity store supports the following features:
+- [Authentication](../features/authentication.md)
+- [Directory](../features/directory-users.md)
+- [Identity](../features/identity.md)
 
 ## Requirements
 - [Wordpress](https://wordpress.org/download/) >= 4.4

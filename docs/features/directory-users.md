@@ -219,6 +219,9 @@ For each query, `type` can be used to tell mxisd how to process the ID column:
 #### REST
 See the [dedicated document](../backends/rest.md)
 
+#### Wordpress
+See the [dedicated document](../backends/wordpress.md)
+
 ## Next steps
 ### Homeserver results
 You can configure if the Homeserver should be queried at all when doing a directory search.  

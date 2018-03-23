@@ -115,8 +115,8 @@ Steps of user authentication using a 3PID:
 - Homeserver
 - Compatible Identity backends:
 	- LDAP
-	- SQL
 	- REST
+	- Wordpress
 
 ### Configuration
 
@@ -160,12 +160,3 @@ value is the base internal URL of the Homeserver, without any /_matrix/.. or tra
 
 #### Backends
 The Backends should be configured as described in the documentation of the [Directory User](directory-users.md) feature. 
-
-
-
-
-
-
-
-
-
