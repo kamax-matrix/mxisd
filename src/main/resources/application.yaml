@@ -156,6 +156,17 @@ synapseSql:
   enabled: false
   type: 'sqlite'
 
+wordpress:
+  enabled: false
+  sql:
+    type: 'mysql'
+    query:
+      threepid:
+        email: 'SELECT user_login as uid FROM wp_users WHERE user_email = ?'
+      directory:
+        name: "SELECT DISTINCT user_login, display_name FROM wp_users u LEFT JOIN wp_usermeta m ON m.user_id = u.id WHERE u.display_name LIKE ? OR (m.meta_key = 'nickname' AND m.meta_value = ?) OR (m.meta_key = 'first_name' AND m.meta_value = ?) OR (m.meta_key = 'last_name' AND m.meta_value = ?);"
+        threepid: 'SELECT DISTINCT user_login, display_name FROM wp_users WHERE user_email LIKE ?'
+
 forward:
   servers:
     - 'https://matrix.org'
