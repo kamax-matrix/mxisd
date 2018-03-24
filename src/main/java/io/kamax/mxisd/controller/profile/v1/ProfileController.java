@@ -25,7 +25,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.kamax.matrix.MatrixID;
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix._ThreePid;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.util.GsonUtil;
@@ -82,10 +82,10 @@ public class ProfileController {
 
     @RequestMapping("/{userId:.+}")
     public String getProfile(HttpServletRequest req, HttpServletResponse res, @PathVariable String userId) {
-        try (CloseableHttpResponse hsResponse = client.execute(new HttpGet(resolveProxyUrl(req)))) { //
+        try (CloseableHttpResponse hsResponse = client.execute(new HttpGet(resolveProxyUrl(req)))) {
             res.setStatus(hsResponse.getStatusLine().getStatusCode());
             JsonElement el = parser.parse(EntityUtils.toString(hsResponse.getEntity()));
-            List<ThreePid> list = mgr.getThreepids(new MatrixID(userId));
+            List<_ThreePid> list = mgr.getThreepids(MatrixID.asAcceptable(userId));
             if (!list.isEmpty() && el.isJsonObject()) {
                 JsonObject obj = el.getAsJsonObject();
                 obj.add("threepids", GsonUtil.build().toJsonTree(list));

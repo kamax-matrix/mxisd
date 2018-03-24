@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.threepid.session;
 
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 
 import java.time.Instant;
 import java.util.Optional;

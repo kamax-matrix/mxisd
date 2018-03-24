@@ -21,8 +21,8 @@
 package io.kamax.mxisd.auth;
 
 import io.kamax.matrix.MatrixID;
+import io.kamax.matrix.ThreePid;
 import io.kamax.matrix._MatrixID;
-import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;

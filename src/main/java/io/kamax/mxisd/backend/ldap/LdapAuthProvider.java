@@ -22,9 +22,9 @@ package io.kamax.mxisd.backend.ldap;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import io.kamax.matrix.ThreePid;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
-import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;

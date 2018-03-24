@@ -21,8 +21,9 @@
 package io.kamax.mxisd.backend.sql;
 
 import io.kamax.matrix.MatrixID;
+import io.kamax.matrix.ThreePid;
 import io.kamax.matrix._MatrixID;
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix._ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.SqlConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
@@ -39,6 +40,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,8 +115,8 @@ public abstract class SqlThreePidProvider implements IThreePidProvider, ProfileP
     }
 
     @Override
-    public List<ThreePid> getThreepids(_MatrixID mxid) {
-        List<ThreePid> threepids = new ArrayList<>();
+    public List<_ThreePid> getThreepids(_MatrixID mxid) {
+        List<_ThreePid> threepids = new ArrayList<>();
 
         String stmtSql = cfg.getProfile().getThreepid().getQuery();
         try (Connection conn = pool.get()) {
@@ -132,6 +134,11 @@ public abstract class SqlThreePidProvider implements IThreePidProvider, ProfileP
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<String> getRoles(_MatrixID mxid) {
+        return Collections.emptyList();
     }
 
 }

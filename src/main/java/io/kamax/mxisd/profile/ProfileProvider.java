@@ -21,7 +21,7 @@
 package io.kamax.mxisd.profile;
 
 import io.kamax.matrix._MatrixID;
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix._ThreePid;
 
 import java.util.List;
 
@@ -29,6 +29,8 @@ public interface ProfileProvider {
 
     boolean isEnabled();
 
-    List<ThreePid> getThreepids(_MatrixID mxid);
+    List<_ThreePid> getThreepids(_MatrixID mxid);
+
+    List<String> getRoles(_MatrixID mxid);
 
 }

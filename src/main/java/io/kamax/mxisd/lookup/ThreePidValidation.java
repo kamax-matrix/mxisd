@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.lookup;
 
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 
 import java.time.Instant;
 
@@ -29,7 +29,7 @@ public class ThreePidValidation extends ThreePid {
     private Instant validation;
 
     public ThreePidValidation(ThreePid tpid, Instant validation) {
-        super(tpid);
+        super(tpid.getMedium(), tpid.getAddress());
         this.validation = validation;
     }
 

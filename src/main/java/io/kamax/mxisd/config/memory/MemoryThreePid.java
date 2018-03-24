@@ -20,14 +20,16 @@
 
 package io.kamax.mxisd.config.memory;
 
+import io.kamax.matrix._ThreePid;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MemoryThreePid {
+public class MemoryThreePid implements _ThreePid {
 
     private String medium;
     private String address;
 
+    @Override
     public String getMedium() {
         return medium;
     }
@@ -36,6 +38,7 @@ public class MemoryThreePid {
         this.medium = medium;
     }
 
+    @Override
     public String getAddress() {
         return address;
     }

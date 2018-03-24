@@ -26,7 +26,7 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.storage.IStorage;

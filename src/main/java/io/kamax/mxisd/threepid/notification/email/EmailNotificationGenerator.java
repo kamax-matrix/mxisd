@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.threepid.notification.email;
 
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;

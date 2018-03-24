@@ -31,6 +31,7 @@ public class MemoryIdentityConfig {
     private String username;
     private String password;
     private List<MemoryThreePid> threepids = new ArrayList<>();
+    private List<String> roles = new ArrayList<>();
 
     public String getUsername() {
         return username;
@@ -54,6 +55,14 @@ public class MemoryIdentityConfig {
 
     public void setThreepids(List<MemoryThreePid> threepids) {
         this.threepids = threepids;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 
 }

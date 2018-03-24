@@ -22,7 +22,7 @@ package io.kamax.mxisd.storage.ormlite.dao;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
 
 @DatabaseTable(tableName = "session_3pid")

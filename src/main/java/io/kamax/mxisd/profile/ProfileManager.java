@@ -21,11 +21,12 @@
 package io.kamax.mxisd.profile;
 
 import io.kamax.matrix._MatrixID;
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix._ThreePid;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,13 +35,24 @@ public class ProfileManager {
     private List<ProfileProvider> providers;
 
     public ProfileManager(List<ProfileProvider> providers) {
-        this.providers = providers.stream().filter(ProfileProvider::isEnabled).collect(Collectors.toList());
+        this.providers = providers.stream()
+                .filter(ProfileProvider::isEnabled)
+                .collect(Collectors.toList());
     }
 
-    public List<ThreePid> getThreepids(_MatrixID mxid) {
-        List<ThreePid> threepids = new ArrayList<>();
-        providers.forEach(p -> threepids.addAll(p.getThreepids(mxid)));
-        return threepids;
+    public <T> List<T> get(Function<ProfileProvider, List<T>> function) {
+        return providers.stream()
+                .map(function)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    public List<_ThreePid> getThreepids(_MatrixID mxid) {
+        return get(p -> p.getThreepids(mxid));
+    }
+
+    public List<String> getRoles(_MatrixID mxid) {
+        return get(p -> p.getRoles(mxid));
     }
 
 }
