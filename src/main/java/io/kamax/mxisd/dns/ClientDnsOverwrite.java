@@ -22,6 +22,7 @@ package io.kamax.mxisd.dns;
 
 import io.kamax.mxisd.config.DnsOverwriteConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
+import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class ClientDnsOverwrite {
         URIBuilder builder = new URIBuilder(initial);
         Entry mapping = mappings.get(initial.getHost());
         if (mapping == null) {
-            return builder;
+            throw new InternalServerError("No DNS client override for " + initial.getHost());
         }
 
         try {
