@@ -31,6 +31,8 @@ import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.memory.MemoryIdentityConfig;
 import io.kamax.mxisd.config.memory.MemoryStoreConfig;
 import io.kamax.mxisd.config.memory.MemoryThreePid;
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
+import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
@@ -46,9 +48,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Component
-public class MemoryIdentityStore implements AuthenticatorProvider, IThreePidProvider, ProfileProvider {
+public class MemoryIdentityStore implements AuthenticatorProvider, IDirectoryProvider, IThreePidProvider, ProfileProvider {
 
     private final Logger logger = LoggerFactory.getLogger(MemoryIdentityStore.class);
 
@@ -70,6 +74,42 @@ public class MemoryIdentityStore implements AuthenticatorProvider, IThreePidProv
     @Override
     public boolean isEnabled() {
         return cfg.isEnabled();
+    }
+
+    private UserDirectorySearchResult search(
+            Predicate<MemoryIdentityConfig> predicate,
+            Function<MemoryIdentityConfig, UserDirectorySearchResult.Result> mapper
+    ) {
+        UserDirectorySearchResult search = new UserDirectorySearchResult();
+        cfg.getIdentities().stream().filter(predicate).map(mapper).forEach(search::addResult);
+        return search;
+    }
+
+    @Override
+    public UserDirectorySearchResult searchByDisplayName(String query) {
+        return search(
+                entry -> StringUtils.containsIgnoreCase(entry.getUsername(), query),
+                entry -> {
+                    UserDirectorySearchResult.Result result = new UserDirectorySearchResult.Result();
+                    result.setUserId(MatrixID.from(entry.getUsername(), mxCfg.getDomain()).acceptable().getId());
+                    result.setDisplayName(entry.getUsername());
+                    return result;
+                }
+        );
+    }
+
+    @Override
+    public UserDirectorySearchResult searchBy3pid(String query) {
+        return search(
+                entry -> entry.getThreepids().stream()
+                        .anyMatch(tpid -> StringUtils.containsIgnoreCase(tpid.getAddress(), query)),
+                entry -> {
+                    UserDirectorySearchResult.Result result = new UserDirectorySearchResult.Result();
+                    result.setUserId(MatrixID.from(entry.getUsername(), mxCfg.getDomain()).acceptable().getId());
+                    result.setDisplayName(entry.getUsername());
+                    return result;
+                }
+        );
     }
 
     @Override
