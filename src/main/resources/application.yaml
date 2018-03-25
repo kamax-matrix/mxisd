@@ -151,10 +151,16 @@ sql:
   identity:
     type: 'mxid'
     query: 'SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?'
+  profile:
+    threepid:
+      query: 'SELECT medium, address FROM user_threepids WHERE user_id = ?'
 
 synapseSql:
   enabled: false
   type: 'sqlite'
+  profile:
+      threepid:
+        query: 'SELECT medium, address FROM user_threepids WHERE user_id = ?'
 
 wordpress:
   enabled: false

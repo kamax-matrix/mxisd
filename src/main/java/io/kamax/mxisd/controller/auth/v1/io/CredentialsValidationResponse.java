@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.controller.auth.v1.io;
 
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 
 import java.util.HashSet;
 import java.util.Set;

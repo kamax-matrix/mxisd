@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2018 Maxime Dor
+ * Copyright (C) 2018 Kamax Sàrl
  *
  * https://www.kamax.io/
  *
@@ -18,33 +18,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.memory;
+package io.kamax.mxisd.profile;
 
+import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
-import org.springframework.stereotype.Component;
 
-@Component
-public class MemoryThreePid implements _ThreePid {
+import java.util.List;
 
-    private String medium;
-    private String address;
+public interface ProfileProvider {
 
-    @Override
-    public String getMedium() {
-        return medium;
-    }
+    boolean isEnabled();
 
-    public void setMedium(String medium) {
-        this.medium = medium;
-    }
+    List<_ThreePid> getThreepids(_MatrixID mxid);
 
-    @Override
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    List<String> getRoles(_MatrixID mxid);
 
 }

@@ -22,8 +22,8 @@ package io.kamax.mxisd.controller.identity.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.kamax.matrix.ThreePid;
 import io.kamax.matrix.ThreePidMedium;
-import io.kamax.mxisd.ThreePid;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.ViewConfig;
 import io.kamax.mxisd.controller.identity.v1.io.SessionEmailTokenRequestJson;

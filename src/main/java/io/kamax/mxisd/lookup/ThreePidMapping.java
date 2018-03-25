@@ -21,7 +21,7 @@
 package io.kamax.mxisd.lookup;
 
 import com.google.gson.Gson;
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 
 public class ThreePidMapping {
 

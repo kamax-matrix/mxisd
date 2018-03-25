@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.auth.provider;
 
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.UserID;
 import io.kamax.mxisd.UserIdType;
 

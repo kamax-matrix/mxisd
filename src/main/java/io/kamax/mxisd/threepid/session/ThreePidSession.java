@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.threepid.session;
 
-import io.kamax.mxisd.ThreePid;
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.InvalidCredentialsException;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
@@ -76,7 +76,7 @@ public class ThreePidSession implements IThreePidSession {
     public ThreePidSession(String id, String server, ThreePid tPid, String secret, int attempt, String nextLink, String token) {
         this.id = id;
         this.server = server;
-        this.tPid = new ThreePid(tPid);
+        this.tPid = new ThreePid(tPid.getMedium(), tPid.getAddress());
         this.secret = secret;
         this.attempt = attempt;
         this.nextLink = nextLink;
