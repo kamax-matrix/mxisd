@@ -32,10 +32,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 @Component
-public class SynapseSqliteDirectoryProvider extends GenericSqlDirectoryProvider {
+public class SynapseSqlDirectoryProvider extends GenericSqlDirectoryProvider {
 
     @Autowired
-    public SynapseSqliteDirectoryProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg) {
+    public SynapseSqlDirectoryProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
 
         if (StringUtils.equals("sqlite", cfg.getType())) {
