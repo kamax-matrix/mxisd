@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.exception;
 
-public class SessionUnknownException extends MatrixException {
+public class SessionUnknownException extends HttpMatrixException {
 
     public SessionUnknownException() {
         this("No valid session was found matching that sid and client secret");

@@ -23,7 +23,7 @@ package io.kamax.mxisd.exception;
 
 import com.google.gson.JsonObject;
 
-public class RemoteLoginException extends MatrixException {
+public class RemoteLoginException extends HttpMatrixException {
 
     private JsonObject errorBodyMsgResp;
 

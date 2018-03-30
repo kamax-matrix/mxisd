@@ -23,7 +23,7 @@ package io.kamax.mxisd.exception;
 
 import org.apache.http.HttpStatus;
 
-public class NotAllowedException extends MatrixException {
+public class NotAllowedException extends HttpMatrixException {
 
     public NotAllowedException(String s) {
         super(HttpStatus.SC_FORBIDDEN, "M_FORBIDDEN", s);

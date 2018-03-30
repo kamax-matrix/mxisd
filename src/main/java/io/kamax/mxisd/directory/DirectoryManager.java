@@ -27,8 +27,8 @@ import io.kamax.mxisd.config.DirectoryConfig;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
+import io.kamax.mxisd.exception.HttpMatrixException;
 import io.kamax.mxisd.exception.InternalServerError;
-import io.kamax.mxisd.exception.MatrixException;
 import io.kamax.mxisd.util.GsonUtil;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.io.IOUtils;
@@ -99,7 +99,7 @@ public class DirectoryManager {
                         log.warn("Homeserver does not support Directory feature, skipping");
                     } else {
                         log.error("Homeserver returned an error while performing directory search");
-                        throw new MatrixException(status, info.getErrcode(), info.getError());
+                        throw new HttpMatrixException(status, info.getErrcode(), info.getError());
                     }
                 }
 

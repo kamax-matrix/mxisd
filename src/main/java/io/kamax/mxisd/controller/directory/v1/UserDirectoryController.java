@@ -21,6 +21,7 @@
 package io.kamax.mxisd.controller.directory.v1;
 
 import com.google.gson.Gson;
+import io.kamax.mxisd.controller.ProxyController;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.DirectoryManager;
@@ -28,7 +29,10 @@ import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.GsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -37,7 +41,7 @@ import java.net.URI;
 @RestController
 @CrossOrigin
 @RequestMapping(path = "/_matrix/client/r0/user_directory", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-public class UserDirectoryController {
+public class UserDirectoryController extends ProxyController {
 
     private Gson gson = GsonUtil.build();
     private GsonParser parser = new GsonParser(gson);
@@ -46,7 +50,8 @@ public class UserDirectoryController {
     private DirectoryManager mgr;
 
     @RequestMapping(path = "/search", method = RequestMethod.POST)
-    public String search(HttpServletRequest request, @RequestParam("access_token") String accessToken) throws IOException {
+    public String search(HttpServletRequest request) throws IOException {
+        String accessToken = getAccessToken(request);
         UserDirectorySearchRequest searchQuery = parser.parse(request, UserDirectorySearchRequest.class);
         URI target = URI.create(request.getRequestURL().toString());
         UserDirectorySearchResult result = mgr.search(target, accessToken, searchQuery.getSearchTerm());

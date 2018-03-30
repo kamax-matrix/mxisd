@@ -22,7 +22,7 @@ package io.kamax.mxisd.exception;
 
 import org.apache.http.HttpStatus;
 
-public class MessageForClientException extends MatrixException {
+public class MessageForClientException extends HttpMatrixException {
 
     public MessageForClientException(String error) {
         super(HttpStatus.SC_OK, "M_MESSAGE_FOR_CLIENT", error);

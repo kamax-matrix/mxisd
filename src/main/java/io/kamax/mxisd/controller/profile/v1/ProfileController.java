@@ -26,6 +26,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._ThreePid;
+import io.kamax.mxisd.controller.ProxyController;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.util.GsonUtil;
@@ -49,11 +50,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin
 @RequestMapping(path = "/_matrix/client/r0/profile", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-public class ProfileController {
+public class ProfileController extends ProxyController {
 
     private final Logger log = LoggerFactory.getLogger(ProfileController.class);
     private final ProfileManager mgr;
@@ -82,7 +84,11 @@ public class ProfileController {
 
     @RequestMapping("/{userId:.+}")
     public String getProfile(HttpServletRequest req, HttpServletResponse res, @PathVariable String userId) {
-        try (CloseableHttpResponse hsResponse = client.execute(new HttpGet(resolveProxyUrl(req)))) {
+        Optional<String> accessTokenOpt = findAccessToken(req);
+        HttpGet reqOut = new HttpGet(resolveProxyUrl(req));
+        accessTokenOpt.ifPresent(accessToken -> reqOut.addHeader("Authorization", "Bearer " + accessToken));
+
+        try (CloseableHttpResponse hsResponse = client.execute(reqOut)) {
             res.setStatus(hsResponse.getStatusLine().getStatusCode());
             JsonElement el = parser.parse(EntityUtils.toString(hsResponse.getEntity()));
             List<_ThreePid> list = mgr.getThreepids(MatrixID.asAcceptable(userId));

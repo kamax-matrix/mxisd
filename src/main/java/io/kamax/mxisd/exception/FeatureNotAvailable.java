@@ -22,7 +22,7 @@ package io.kamax.mxisd.exception;
 
 import org.apache.http.HttpStatus;
 
-public class FeatureNotAvailable extends MatrixException {
+public class FeatureNotAvailable extends HttpMatrixException {
 
     private String internalReason;
 
