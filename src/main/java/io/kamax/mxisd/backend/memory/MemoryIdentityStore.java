@@ -162,7 +162,10 @@ public class MemoryIdentityStore implements AuthenticatorProvider, IDirectoryPro
             if (!StringUtils.equals(id.getUsername(), mxid.getLocalPart())) {
                 return BackendAuthResult.failure();
             } else {
-                return BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, "");
+                BackendAuthResult result = new BackendAuthResult();
+                id.getThreepids().forEach(result::withThreePid);
+                result.succeed(mxid.getId(), UserIdType.MatrixID.getId(), "");
+                return result;
             }
         }).orElseGet(BackendAuthResult::failure);
     }

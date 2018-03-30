@@ -23,6 +23,7 @@ package io.kamax.mxisd.auth;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.ThreePid;
 import io.kamax.matrix._MatrixID;
+import io.kamax.matrix._ThreePid;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
@@ -72,7 +73,7 @@ public class AuthManager {
                 }
 
                 UserAuthResult authResult = new UserAuthResult().success(result.getProfile().getDisplayName());
-                for (ThreePid pid : result.getProfile().getThreePids()) {
+                for (_ThreePid pid : result.getProfile().getThreePids()) {
                     authResult.withThreePid(pid.getMedium(), pid.getAddress());
                 }
                 log.info("{} was authenticated by {}, publishing 3PID mappings, if any", id, provider.getClass().getSimpleName());
