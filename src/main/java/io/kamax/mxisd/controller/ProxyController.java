@@ -21,6 +21,7 @@
 package io.kamax.mxisd.controller;
 
 import io.kamax.mxisd.exception.AccessTokenNotFoundException;
+import io.kamax.mxisd.util.OptionalUtil;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,12 +29,22 @@ import java.util.Optional;
 
 public class ProxyController {
 
-    private final static String accessTokenPrefix = "Bearer ";
+    private final static String headerName = "Authorization";
+    private final static String headerValuePrefix = "Bearer ";
+    private final static String parameterName = "access_token";
+
+    Optional<String> findAccessTokenInHeaders(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(headerName))
+                .filter(header -> StringUtils.startsWith(header, headerValuePrefix))
+                .map(header -> header.substring(headerValuePrefix.length()));
+    }
+
+    Optional<String> findAccessTokenInQuery(HttpServletRequest request) {
+        return Optional.ofNullable(request.getParameter(parameterName));
+    }
 
     public Optional<String> findAccessToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader("Authorization"))
-                .filter(header -> StringUtils.startsWith(header, accessTokenPrefix))
-                .map(header -> header.substring(accessTokenPrefix.length()));
+        return OptionalUtil.findFirst(() -> findAccessTokenInHeaders(request), () -> findAccessTokenInQuery(request));
     }
 
     public String getAccessToken(HttpServletRequest request) {
