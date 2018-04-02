@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2018 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,14 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.exception;
+package io.kamax.mxisd.util;
 
-import org.apache.http.HttpStatus;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-public class SessionNotValidatedException extends HttpMatrixException {
+public class OptionalUtil {
 
-    public SessionNotValidatedException() {
-        super(HttpStatus.SC_OK, "M_SESSION_NOT_VALIDATED", "This validation session has not yet been completed");
+    public static <T> Optional<T> findFirst(Supplier<Optional<T>>... suppliers) {
+        return Stream.of(suppliers).map(Supplier::get).filter(Optional::isPresent).map(Optional::get).findFirst();
     }
 
 }

@@ -24,7 +24,7 @@ import org.apache.http.HttpStatus;
 
 import java.time.Instant;
 
-public class InternalServerError extends MatrixException {
+public class InternalServerError extends HttpMatrixException {
 
     private String reference = Long.toString(Instant.now().toEpochMilli());
     private String internalReason;

@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2018 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,28 +20,10 @@
 
 package io.kamax.mxisd.exception;
 
-public class MatrixException extends MxisdException {
+public class AccessTokenNotFoundException extends HttpMatrixException {
 
-    private int status;
-    private String errorCode;
-    private String error;
-
-    public MatrixException(int status, String errorCode, String error) {
-        this.status = status;
-        this.errorCode = errorCode;
-        this.error = error;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public String getError() {
-        return error;
+    public AccessTokenNotFoundException() {
+        super(401, "M_UNKNOWN_TOKEN", "An access token is required to access this resource");
     }
 
 }

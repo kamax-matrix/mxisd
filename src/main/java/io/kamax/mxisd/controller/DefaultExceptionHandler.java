@@ -84,8 +84,8 @@ public class DefaultExceptionHandler {
         return handleGeneric(request, response, e);
     }
 
-    @ExceptionHandler(MatrixException.class)
-    public String handleGeneric(HttpServletRequest request, HttpServletResponse response, MatrixException e) {
+    @ExceptionHandler(HttpMatrixException.class)
+    public String handleGeneric(HttpServletRequest request, HttpServletResponse response, HttpMatrixException e) {
         response.setStatus(e.getStatus());
         return handle(request, e.getErrorCode(), e.getError());
     }

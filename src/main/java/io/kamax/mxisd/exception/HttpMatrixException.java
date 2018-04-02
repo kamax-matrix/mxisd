@@ -20,12 +20,19 @@
 
 package io.kamax.mxisd.exception;
 
-import org.apache.http.HttpStatus;
+import io.kamax.matrix.MatrixException;
 
-public class SessionNotValidatedException extends HttpMatrixException {
+public class HttpMatrixException extends MatrixException {
 
-    public SessionNotValidatedException() {
-        super(HttpStatus.SC_OK, "M_SESSION_NOT_VALIDATED", "This validation session has not yet been completed");
+    private int status;
+
+    public HttpMatrixException(int status, String errorCode, String error) {
+        super(errorCode, error);
+        this.status = status;
+    }
+
+    public int getStatus() {
+        return status;
     }
 
 }
