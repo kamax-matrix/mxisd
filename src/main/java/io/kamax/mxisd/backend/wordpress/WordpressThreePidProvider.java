@@ -87,10 +87,14 @@ public class WordpressThreePidProvider implements IThreePidProvider {
                 while (rSet.next()) {
                     String uid = rSet.getString("uid");
                     log.info("Found match: {}", uid);
-                    return Optional.of(MatrixID.from(uid, mxCfg.getDomain()).valid());
+                    try {
+                        return Optional.of(MatrixID.from(uid, mxCfg.getDomain()).valid());
+                    } catch (IllegalArgumentException ex) {
+                        log.warn("Ignoring match {} - Invalid characters for a Matrix ID", uid);
+                    }
                 }
 
-                log.info("No match found in Wordpress");
+                log.info("No valid match found in Wordpress");
                 return Optional.empty();
             }
         } catch (SQLException e) {

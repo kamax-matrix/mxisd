@@ -83,8 +83,12 @@ public class WordpressDirectoryProvider implements IDirectoryProvider {
 
                     while (rSet.next()) {
                         processRow(rSet).ifPresent(e -> {
-                            e.setUserId(MatrixID.from(e.getUserId(), mxCfg.getDomain()).valid().getId());
-                            result.addResult(e);
+                            try {
+                                e.setUserId(MatrixID.from(e.getUserId(), mxCfg.getDomain()).valid().getId());
+                                result.addResult(e);
+                            } catch (IllegalArgumentException ex) {
+                                log.warn("Ignoring result {} - Invalid characters for a Matrix ID", e.getUserId());
+                            }
                         });
                     }
 
