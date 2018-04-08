@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.auth.provider;
 
-import io.kamax.matrix._ThreePid;
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.UserID;
 import io.kamax.mxisd.UserIdType;
 
@@ -32,13 +32,13 @@ public class BackendAuthResult {
     public static class BackendAuthProfile {
 
         private String displayName;
-        private Set<_ThreePid> threePids = new HashSet<>();
+        private Set<ThreePid> threePids = new HashSet<>();
 
         public String getDisplayName() {
             return displayName;
         }
 
-        public Set<_ThreePid> getThreePids() {
+        public Set<ThreePid> getThreePids() {
             return threePids;
         }
     }
@@ -85,7 +85,7 @@ public class BackendAuthResult {
         return profile;
     }
 
-    public BackendAuthResult withThreePid(_ThreePid threePid) {
+    public BackendAuthResult withThreePid(ThreePid threePid) {
         this.profile.threePids.add(threePid);
 
         return this;

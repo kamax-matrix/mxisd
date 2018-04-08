@@ -163,7 +163,7 @@ public class MemoryIdentityStore implements AuthenticatorProvider, IDirectoryPro
                 return BackendAuthResult.failure();
             } else {
                 BackendAuthResult result = new BackendAuthResult();
-                id.getThreepids().forEach(result::withThreePid);
+                id.getThreepids().forEach(tpid -> result.withThreePid(new ThreePid(tpid.getMedium(), tpid.getAddress())));
                 result.succeed(mxid.getId(), UserIdType.MatrixID.getId(), "");
                 return result;
             }
