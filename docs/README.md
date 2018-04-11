@@ -1,23 +1,19 @@
 # Table of Contents
 
+- [Build from sources](build.md) (Optional)
 - Installation
   - [Debian package](install/debian.md)
   - [Docker](install/docker.md)
-- [Build from source](build.md)
+  - [From source](install/source.md)
 - [Architecture overview](architecture.md)
 - [Configuration](configure.md)
 - Features
-  - [Matrix Identity Service](features/identity.md)
-  - [Homeserver Authentication](features/authentication.md)
+  - [Authentication](features/authentication.md)
   - [Directory seach](features/directory-users.md)
-  - [Identity server Federation](features/federation.md)
+  - [Identity Service](features/identity.md)
+  - [Federation](features/federation.md)
   - [Bridge integration](features/bridge-integration.md)
-- Backends
-  - [LDAP](backends/ldap.md)
-  - [SQL](backends/sql.md)
-  - [REST](backends/rest.md)
-  - [Google Firebase](backends/firebase.md)
-  - [Wordpress](backends/wordpress.md)
+- [Identity Stores](backends/README.md)
 - Notifications
   - Handlers
     - [Basic](threepids/notifications/basic-handler.md)

@@ -120,8 +120,9 @@ your own Identity server is authoritative for your HS.
 ## Validate
 Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
 the relevant hostname which you configured in your reverse proxy.  
-Invite `mxisd-lookup-test@kamax.io` to a room, which should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`.  
-**NOTE:** you might not see a Matrix suggestion for the e-mail address, which is normal. Still proceed with the invite.
+Invite `mxisd-federation-test@kamax.io` to a room, which should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`.
+At this point, the test user will join the room, send a congratulation message and leave.  
+**NOTE:** You might not see a Matrix suggestion for the e-mail address, which is normal. Still proceed with the invite.
   
 If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  
 If it did not work, [get in touch](../README.md#support) and we'll do our best to get you started.
@@ -132,14 +133,5 @@ You can now integrate mxisd further with your infrastructure using the various [
 Once your mxisd server is up and running, there are several ways you can enhance and integrate further with your
 infrastructure:
 
-Enable extra features:
-- [Authenticate your users](features/authentication.md) with profile auto-provisioning
-- [Enhanced directory search](features/directory-users.md)
-- [Federation](features/federation.md)
-
-Use your Identity stores:
-- [LDAP / Samba / Active directory](backends/ldap.md)
-- [SQL Database](backends/sql.md)
-- [Website / Web service / Web app](backends/rest.md)
-- [Google Firebase](backends/firebase.md)
-- [Wordpress](backends/wordpress.md)
+- [Enable extra features](features/README.md)
+- [Use your own Identity stores](backends/README.md)

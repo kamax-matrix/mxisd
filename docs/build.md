@@ -1,7 +1,11 @@
 # From source
 - [Binaries](#binaries)
+  - [Requirements](#requirements)
+  - [Build](#build)
+  - [Install](#install)
 - [Debian package](#debian-package)
 - [Docker image](#docker-image)
+- [Next steps](#next-steps)
 
 ## Binaries
 ### Requirements
@@ -30,8 +34,8 @@ $ curl 'http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519:0'
 
 Test basic recursive lookup (requires Internet connection with access to TCP 443):
 ```
-$ curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=mxisd-lookup-test@kamax.io'
-{"address":"mxisd-lookup-test@kamax.io","medium":"email","mxid":"@mxisd-lookup-test:kamax.io",...}
+$ curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=mxisd-federation-test@kamax.io'
+{"address":"mxisd-federation-test@kamax.io","medium":"email","mxid":"@mxisd-lookup-test:kamax.io",...}
 ```
 
 If you enabled LDAP, you can also validate your config with a similar request after replacing the `address` value with
@@ -43,63 +47,27 @@ curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=
 If you plan on testing the integration with a homeserver, you will need to run an HTTPS reverse proxy in front of it
 as the reference Home Server implementation [synapse](https://github.com/matrix-org/synapse) requires a HTTPS connection
 to an ID server.  
-See the [Integration section](#integration) for more details.
 
-### Install
-1. Prepare files and directories:
-```
-# Create a dedicated user
-useradd -r mxisd
-
-# Create bin directory
-mkdir /opt/mxisd
-
-# Create config directory and set ownership
-mkdir /etc/opt/mxisd
-chown mxisd /etc/opt/mxisd
-
-# Create data directory and set ownership
-mkdir /var/opt/mxisd
-chown mxisd /var/opt/mxisd
-
-# Copy <repo root>/build/libs/mxisd.jar to bin directory
-cp ./build/libs/mxisd.jar /opt/mxisd/
-chown mxisd /opt/mxisd/mxisd.jar
-chmod a+x /opt/mxisd/mxisd.jar
-
-# Create symlink for easy exec
-ln -s /opt/mxisd/mxisd.jar /usr/bin/mxisd
-```
-
-2. Copy the sample config file `./application.example.yaml` to `/etc/opt/mxisd/mxisd.yaml`, edit to your needs
-4. Copy `<repo root>/src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
-5. Enable service for auto-startup
-```
-systemctl enable mxisd
-```
-6. Start mxisd
-```
-systemctl start mxisd
-```
+Next step: [Install your compiled binaries](install/source.md)
 
 ## Debian package
-### Requirements
+Requirements:
 - fakeroot
 - dpkg-deb
 
-### Build
 [Build mxisd](#build) then:
 ```
 ./gradlew buildDeb 
 ```
-You will find the debian package in `build/dist`
+You will find the debian package in `build/dist`.  
+Then follow the instruction in the [Debian package](install/debian.md) document.
 
 ## Docker image
 [Build mxisd](#build) then:
 ```
 ./gradlew dockerBuild
 ```
-You can run a container of the given image and test it with the following command (adapt volumes host paths):
-```
-docker run -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -p 8090:8090 -t kamax/mxisd:latest-dev
-```
+Then follow the instructions in the [Docker install](install/docker.md#configure) document.
+
+## Next steps
+- [Integrate with your infrastructure](getting-started.md#integrate)

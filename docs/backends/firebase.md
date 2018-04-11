@@ -11,9 +11,9 @@ If your client is Riot, you will need a custom version.
 
 ## Configuration
 To be completed. For now, see default structure and values:
-```
+```yaml
 firebase:
-  enabled: false
+  enabled: true
   credentials: '/path/to/firebase/credentials.json'
   database: 'https://my-project.firebaseio.com/'
 ```

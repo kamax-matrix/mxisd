@@ -6,7 +6,7 @@
   - [Session scope](#session-scope)
 - [Notifications](#notifications)
   - [Email](#email)
-  - [Phone numbers](#msisdn-phone-numbers)
+  - [Phone numbers](#msisdn-(phone-numbers))
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Web views](#web-views)
@@ -274,19 +274,7 @@ session:
 ```
 
 **IMPORTANT**: When using local-only mode, you will also need to link mxisd to synapse if you want user searches and invites to work.
-To do so, add/edit the following configuration keys:
-```
-synapseSql:
-  enabled: true
-  type: 'SET TO PROPER VALUE'
-  connection: 'SET TO PROPER VALUE'
-```
-- `synapseSql.enabled` set to `true` to activate the SQL backend.
-- `synapseSql.type` can be set to `sqlite` or `postgresql`, depending on your synapse setup.
-- `synapseSql.connection` use a JDBC format which is appened after the `jdbc:type:` connection URI.
-Example values for each type:
-  - `sqlite`: `/path/to/homeserver.db`
-  - `postgresql`: `//localhost/database?user=synapse&password=synapse`
+To do so, see the [dedicated document](../backends/synapse.md).
 
 #### Remote sessions only
 This configuration ensures all 3PID are made public for maximum compatibility and reach within the Matrix ecosystem, at

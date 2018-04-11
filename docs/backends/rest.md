@@ -36,7 +36,7 @@ HTTP method: `POST`
 Content-type: JSON UTF-8
   
 #### Request Body
-```
+```json
 {
   "auth": {
     "mxid": "@john.doe:example.org",
@@ -49,7 +49,7 @@ Content-type: JSON UTF-8
 
 #### Response Body
 If the authentication fails:
-```
+```json
 {
   "auth": {
     "success": false
@@ -60,7 +60,7 @@ If the authentication fails:
 If the authentication succeed:
 - `auth.id` supported values: `localpart`, `mxid`
 - `auth.profile` and any sub-member are all optional
-```
+```json
 {
   "auth": {
     "success": true,
@@ -90,7 +90,7 @@ HTTP method: `POST`
 Content-type: JSON UTF-8
 
 #### Request Body
-```
+```json
 {
   "by": "<search type>",
   "search_term": "doe"
@@ -102,7 +102,7 @@ Content-type: JSON UTF-8
 
 #### Response Body:
 If users found:
-```
+```json
 {
   "limited": false,
   "results": [
@@ -119,7 +119,7 @@ If users found:
 ```
 
 If no user found:
-```
+```json
 {
   "limited": false,
   "results": []
@@ -132,7 +132,7 @@ HTTP method: `POST`
 Content-type: JSON UTF-8  
   
 #### Request Body
-```
+```json
 {
   "lookup": {
     "medium": "email",
@@ -144,7 +144,7 @@ Content-type: JSON UTF-8
 #### Response Body
 If a match was found:
 - `lookup.id.type` supported values: `localpart`, `mxid`
-```
+```json
 {
   "lookup": {
     "medium": "email",
@@ -158,7 +158,7 @@ If a match was found:
 ```
 
 If no match was found:
-```
+```json
 {}
 ```
 
@@ -167,7 +167,7 @@ HTTP method: `POST`
 Content-type: JSON UTF-8  
   
 #### Request Body
-```
+```json
 {
   "lookup": [
     {
@@ -185,7 +185,7 @@ Content-type: JSON UTF-8
 #### Response Body
 For all entries where a match was found:
 - `lookup[].id.type` supported values: `localpart`, `mxid`
-```
+```json
 {
   "lookup": [
     {
@@ -209,7 +209,7 @@ For all entries where a match was found:
 ```
 
 If no match was found:
-```
+```json
 {
   "lookup": []
 }

@@ -36,7 +36,7 @@ ldap.connection.port: 12345
 
 ### Filter results
 You can also set a default global filter on any LDAP queries:
-```
+```yaml
 ldap.filter: '(memberOf=CN=My Matrix Users,OU=Groups,DC=example,DC=org)'
 ```
 This example would only return users part of the group called `My Matrix Users`.

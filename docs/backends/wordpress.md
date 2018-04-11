@@ -21,7 +21,7 @@ Two types of connections are required for full support:
 ### Wordpress
 #### JWT Auth
 Set a JWT secret into `wp-config.php` like so:
-```
+```php
 define('JWT_AUTH_SECRET_KEY', 'your-top-secret-key');
 ```
 `your-top-secret-key` should be set to a randomly generated value which is kept secret.
@@ -32,23 +32,23 @@ If this is not the case for your installation, the mxisd URL will need to be app
 
 ### mxisd
 Enable in the configuration:
-```
+```yaml
 wordpress.enabled: true
 ```
 Configure the URL to your Wordpress installation - see above about added `/index.php`:
-```
+```yaml
 wordpress.rest.base: 'http://localhost:8080'
 ```
 Configure the SQL connection to your Wordpress database:
-```
+```yaml
 wordpress.sql.connection: '//127.0.0.1/wordpress?user=root&password=example'
 ```
 
 ---
 
 By default, MySQL database is expected. If you use another database, use:
-```
-wordpress.sql.type: 'jdbc-scheme'
+```yaml
+wordpress.sql.type: <string>
 ```
 With possible values:
 - `mysql`
