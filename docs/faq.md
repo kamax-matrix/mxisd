@@ -11,6 +11,17 @@ privacy consequences, which is not the case with the central Matrix.org servers.
 So mxisd is like your gatekeeper and guardian angel. It does not change what you already know, just adds some nice
 simple features on top of it.
 
+### I'm not sure I understand what an "Identity server" is supposed to be or do
+The current Identity service API is more a placeholder, as the Matrix devs did not have time so far to really work on
+what they want to do with that part of the ecosystem. Therefore, "Identity" is a misleading word currently.
+Given the scope of the current Identity Service API, it would be best called "Invitation service".
+
+Because the current scope is so limited and no integration is done with the Homeserver, there was a big lack of features
+for groups/corporations/organisation. This is where mxisd comes in.
+
+mxisd implements the Identity Service API and also a set of features which are expected by regular users, truly living
+up to its "Identity server" name.
+
 ### I already use the synapse LDAP3 auth provider, why should I care about mxisd?
 The [synapse LDAP3 auth provider](https://github.com/matrix-org/matrix-synapse-ldap3) is not longer maintained and
 only handles on specific flow: validate credentials at login.
@@ -19,9 +30,8 @@ It does not:
 - Auto-provision user profiles
 - Integrate with Identity management
 - Integrate with Directory searches
-- Protect you against the username case sensitivites issues in synapse
 
-mxisd is a replacement and enhancement of it, offering coherent results in all areas, which LDAP3 auth provider
+mxisd is a replacement and enhancement of it, offering coherent results in all areas, which the LDAP3 auth provider
 does not.
 
 ### Sydent is the official Identity server implementation of the Matrix team, why not use that?
@@ -40,17 +50,6 @@ behaviour than if you were using them directly. There is no downside in using mx
 
 mxisd can also be configured not to talk to the central Identity servers if you wish.
 
-### I'm not sure I understand what an "Identity server" is supposed to be or do
-The current Identity service API is more a placeholder, as the Matrix devs did not have time so far to really work on
-what they want to do with that part of the ecosystem. Therefore, "Identity" is a misleading word currently.  
-Given the scope of the current Identity Service API, it would be best called "Invitation service".
-
-Because the current scope is so limited and no integration is done with the Homeserver, there was a big lack of features
-for groups/corporations/organisation. This is where mxisd comes in.
-
-mxisd implements the Identity Service API and also a set of features which are expected by regular users, truly living
-up to its "Identity server" name.
-
 ### So mxisd is just a big hack! I don't want to use non-official features!
 mxisd primary concern is to always be compatible with the Matrix ecosystem and the Identity service API.  
 Whenever the API will be updated and/or enhanced, mxisd will follow, remaining 100% compatible with the ecosystem.
@@ -62,4 +61,5 @@ Therefore, using mxisd is a safe choice. It will be like using the central Matri
 the door to very nice enhancements and integrations.
 
 ### Should I use mxisd if I don't host my own Homeserver?
-No
+No. It is possible, but it is not supported and the scope of features will be extremely limited.
+Please consider hosting your own Homeserver and using mxisd alongside it.

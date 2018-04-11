@@ -49,11 +49,11 @@ An overview of the Authentication process is depicted below:
 Performed on [synapse with REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth/blob/master/README.md)
 
 ## Getting started
-Authentication is possible by linking synapse and mxisd together using the REST auth module
-(also known as password provider).
+Authentication is possible by linking synapse and mxisd together using a specific module for synapse, also known as
+password provider.
 
 ### Synapse
-- Install the [REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth).
+- Install the [password provider](https://github.com/kamax-io/matrix-synapse-rest-auth)
 - Edit your synapse configuration:
   - As described by the auth module documentation
   - Set `endpoint` to `http://mxisdAddress:8090` - Replace `mxisdAddress` by an IP/host name that provides a direct
@@ -62,7 +62,7 @@ Authentication is possible by linking synapse and mxisd together using the REST 
 - Restart synapse
 
 ### mxisd
-- Configure and enable at least one [Identity store](../backends/)
+- Configure and enable at least one [Identity store](../backends/README.md)
 - Restart mxisd
 
 ### Validate
@@ -113,10 +113,7 @@ Steps of user authentication using a 3PID:
 ### Requirements
 - Reverse proxy setup
 - Homeserver
-- Compatible Identity backends:
-	- LDAP
-	- REST
-	- Wordpress
+- Compatible [Identity store](../backends/README.md)
 
 ### Configuration
 

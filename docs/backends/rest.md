@@ -5,13 +5,14 @@ The REST backend allows you to query identity data in existing webapps, like:
 - CRMs (Wordpress, ...)
 - self-hosted clouds (Nextcloud, ownCloud, ...)
 
-It supports the following mxisd flows:
-- [Authentication](#authentication)
-- [Directory](#directory)
-- [Identity](#identity)
-
 To integrate this backend with your webapp, you will need to implement three specific REST endpoints detailed below.
 
+## Features
+|      Name      | Supported? |
+|----------------|------------|
+| Authentication | Yes        |
+| Directory      | Yes        |
+| Identity       | Yes        |
 
 ## Configuration
 | Key                            | Default                                      | Description                                          |

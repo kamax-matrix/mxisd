@@ -1,10 +1,10 @@
-mxisd - Federated Matrix Identity Server Daemon
------
+mxisd - Federated Matrix Identity Server
+----------------------------------------
 ![Travis-CI build status](https://travis-ci.org/kamax-io/mxisd.svg?branch=master)  
 
 - [Overview](#overview)
 - [Features](#features)
-- [Why use mxisd](#why-use-mxisd)
+- [Use cases](#use-cases)
 - [Getting Started](#getting-started)
 - [Support](#support)
 - [Contribute](#contribute)
@@ -13,28 +13,21 @@ mxisd - Federated Matrix Identity Server Daemon
 
 # Overview
 mxisd is a Federated Matrix Identity server for self-hosted Matrix infrastructures with [enhanced features](#features).
+It is an enhanced Identity service, which implements the [Matrix Identity service API](https://kamax.io/matrix/api/identity_service/unstable.html)
+but also several [other features](#features) that greatly enhance user experience within Matrix.
+It is the one stop shop for anything regarding Authentication, Directory and Identity management in Matrix built as a
+single coherent product.
   
-It is specifically designed to connect to an Identity store (AD/Samba/LDAP, SQL Database, Web services/application, ...)
-and ease the integration of the Matrix ecosystem with an existing infrastructure, or to build a new one using lasting
-tools.
+mxisd is specifically designed to connect to an existing on-remise Identity store (AD/Samba/LDAP, SQL Database,
+Web services/app, etc.) and ease the integration of a Matrix infrastructure within an existing one.
 
-The core principle of mxisd is to map between Matrix IDs and 3PIDs (Third-party Identifiers) for the Homeserver and its
-users. 3PIDs can be anything that identify a user, like:
-- Full name
+The core principle of mxisd is to map between Matrix IDs and 3PIDs (Third-Party IDentifiers) for the Homeserver and its
+users. 3PIDs can be anything that uniquely and globally identify a user, like:
 - Email address
 - Phone number
-- Employee number
 - Skype/Live ID
 - Twitter handle
 - Facebook ID
-- ...
-
-mxisd is an enhanced Identity service, which implements the
-[Matrix Identity service API](https://matrix.org/docs/spec/identity_service/unstable.html) but also several
-[other features](#features) that greatly enhance user experience within Matrix.
-
-mxisd is the one stop shop for anything regarding Authentication, Directory and Identity management in Matrix built as a
-single coherent product.
 
 # Features
 As a [regular Matrix Identity service](docs/features/identity.md):
@@ -53,11 +46,10 @@ As an enhanced Identity service:
 - [Authentication support](docs/features/authentication.md) for [synapse](https://github.com/matrix-org/synapse) via the
 [REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth)
 - [Directory integration](docs/features/directory-users.md) which allows you to search for users within your
-organisation, even without prior Matrix contact
-- [Auto-fill of user profile](docs/features/authentication.md) (Display name, 3PIDs) via the
-[REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth)
+organisation, even without prior contact within Matrix
+- [Auto-fill of user profile](docs/features/authentication.md) (Display name, 3PIDs)
 
-# Why use mxisd
+# Use cases
 - Use your existing Identity store, do not duplicate information
 - Auto-fill user profiles with relevant information
 - As an organisation, stay in control of 3PIDs so they are not published to the central Matrix.org servers where they
@@ -76,11 +68,9 @@ If you need help, want to report a bug or just say hi, you can reach us on Matri
 For more high-level discussion about the Identity Server architecture/API, go to 
 [#matrix-identity:matrix.org](https://matrix.to/#/#matrix-identity:matrix.org)
 
-## Professional
+## Commercial
 If you would prefer professional support/custom development for mxisd and/or for Matrix in general, including other open
 source technologies/products, please visit [our website](https://www.kamax.io/) to get in touch with us and get a quote.
-
-We offer affordable monthly/yearly support plans for mxisd, synapse or your full Matrix infrastructure.
 
 # Contribute
 First and foremost, the best way to contribute is to use mxisd and tell us about it!  
@@ -95,7 +85,7 @@ changes you feel improve the doc.
 be used for the fixed costs and developer time of mxisd.
 
 You can contribute as an organisation/corporation by:
-- Get a [support contract](#support-professional). This is the best way you can help us as it ensures mxisd is
+- Get a [support contract](#support-commercial). This is the best way you can help us as it ensures mxisd is
 maintained regularly and you get direct access to the support team.
 - Sponsoring new features or bug fixes. [Get in touch](#contact) so we can discuss it further.
 
@@ -104,5 +94,5 @@ See the [dedicated document](docs/faq.md)
 
 # Contact
 Get in touch via:
-- Matrix at [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io)
-- Email, see our website: [Kamax.io](https://www.kamax.io)
+- Matrix: [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io)
+- Email: see our website: [Kamax.io](https://www.kamax.io)

@@ -21,8 +21,6 @@ my:
 These can also be combined within the same file.  
 Both syntax will be used interchangeably in these documents.
 
-Default values for each possible option are documented [here](../src/main/resources/application.yaml)
-
 ## Variables
 It is possible to copy the value of a configuration item into another using the syntax `${config.key.item}`.  
 Example that will copy the value of `matrix.domain` into `server.name`:
@@ -93,91 +91,61 @@ basePath:
 ```
 
 ### Matrix
-Base path: `matrix`
-
-| Name | Purpose |
-|------|---------|
-| `domain` | Matrix domain name, same as the Homeserver, used to build appropriate Matrix IDs |
+`matrix.domain`
+Matrix domain name, same as the Homeserver, used to build appropriate Matrix IDs |
 
 ---
 
-Relative base path: `identity`
-
-| Name | Purpose |
-|------|---------|
-| `servers` | Namespace to create arbitrary list of Identity servers, usable in other parts of the configuration |
+`matrix.identity.servers`
+Namespace to create arbitrary list of Identity servers, usable in other parts of the configuration |
 
 Example:
 ```
 matrix.identity.servers:
-  root:
-    - 'https://matrix.org'
+  myOtherServers:
+    - 'https://other1.example.org'
+    - 'https://other2.example.org'
 ```
 Create a list under the label `root` containing a single Identity server, `https://matrix.org`
+
 ### Server
-| Name | Purpose |
-|------|---------|
-| `name` | Public hostname of mxisd, if different from the Matrix domain |
-| `port` | HTTP port to listen on (unencrypted) |
-| `publicUrl` | Defaults to `https://${server.name}` |
+- `server.name`: Public hostname of mxisd, if different from the Matrix domain.
+- `server.port`: HTTP port to listen on (unencrypted)
+- `server.publicUrl`: Defaults to `https://${server.name}`
 
 ### Storage
-Base path: `storage`
-
-| Name | Purpose |
-|------|---------|
-| `backend` | Specify which SQL backend to use. only `sqlite` is currently supported. |
-
----
-Relative base path: `provider.sqlite`
-
-| Name | Purpose |
-|------|---------|
-| `database` | Absolute location of the SQLite database |
+#### SQLite
+`storage.provider.sqlite.database`: Absolute location of the SQLite database
 
 ### Backends
-- [LDAP](backends/ldap.md)
-- [SQL](backends/sql.md)
-- [REST](backends/rest.md)
-- [Google Firebase](backends/firebase.md)
+See the [Backends section](backends/README.md) for specific configuration
 
-### Lookups
-work in progress, should not be configured.
-
-### Sessions
-See the [dedicated document](sessions/3pid.md)
+### 3PID Validation sessions
+See the dedicated documents:
+- [Flow](sessions/3pid.md)
+- [Branding](sessions/3pid-views.md)
 
 ### Notifications
-Base path: `notification`
+- `notification.handler.<3PID medium>`: Handler to use for the given 3PID medium. Repeatable.
 
-| Name | Purpose |
-|------|---------|
-| handler | Namespace to specify the handler to use for each 3PID |
-| handlers | Namespace used by individual handlers for their own configuration |
 
 Example:
+```yaml
+notification.handler.email: 'sendgrid'
+notification.handler.msisdn: 'raw'
 ```
-notification:
-  handler:
-    email: 'sendgrid'
-    msisdn: 'raw'
-  handlers:
-    raw:
-      ...
-    sendgrid:
-      ...
-```
-- Emails notifications would use the `sendgrid` handler, which define its own configuration user `handlers.sendgrid`
+- Emails notifications would use the `sendgrid` handler, which define its own configuration under `notification.handlers.sendgrid`
 - Phone notification would use the `raw` handler, basic default built-in handler of mxisd
+
 #### Handlers
-Relative base path: `handlers`
+- `notification.handers.<handler ID>`: Handler-specific configuration for the given handler ID. Repeatable.
+
+Example:
+```yaml
+notification.handlers.raw: ...
+notification.handlers.sendgrid: ...
+```
 
 Built-in:
-- [Basic](threepids/notifications/basic-handler.md)
+- [Raw](threepids/notifications/basic-handler.md)
 - [SendGrid](threepids/notifications/sendgrid-handler.md)
-
-### Views
-See the [dedicated document](sessions/3pid-views.md)
-
-### DNS Overwite
-Specific to other features.

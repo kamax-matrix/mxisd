@@ -15,11 +15,10 @@ You will need:
 - Homeserver
 - Reverse proxy with regular TLS/SSL certificate (Let's encrypt) for your mxisd domain
 
-As synapse requires an HTTPS connection when talking to an Identity service, a reverse proxy is required as mxisd does
+As synapse requires an HTTPS connection when talking to an Identity service, **a reverse proxy is required** as mxisd does
 not support HTTPS listener at this time.
 
-For maximum integration, it is best to have your Homeserver and mxisd reachable via the same hostname.  
-You can also use a dedicated domain for mxisd, but will not have access to some features.
+For maximum integration, it is best to have your Homeserver and mxisd reachable via the same hostname.
 
 Be aware of a [NAT/Reverse proxy gotcha](https://github.com/kamax-io/mxisd/wiki/Gotchas#nating) if you use the same
 hostname.
@@ -37,16 +36,16 @@ Install via:
 See the [Latest release](https://github.com/kamax-io/mxisd/releases/latest) for links to each.
 
 ## Configure
-**NOTE**: please view the install instruction for your platform, as this step might be optional/handled for you.
+**NOTE**: please view the install instruction for your platform, as this step might be optional or already handled for you.
 
 Create/edit a minimal configuration (see installer doc for the location):
 ```
-matrix.domain: 'MyMatrixDomain.org'
+matrix.domain: 'example.org'
 key.path: '/path/to/signing.key.file'
 storage.provider.sqlite.database: '/path/to/mxisd.db'
 ```  
 - `matrix.domain` should be set to your Homeserver domain
-- `key.path` will store the signing keys, which must be kept safe!
+- `key.path` will store the signing keys, which must be kept safe! If the file does not exist, keys will be generated for you.
 - `storage.provider.sqlite.database` is the location of the SQLite Database file which will hold state (invites, etc.)
 
 If your HS/mxisd hostname is not the same as your Matrix domain, configure `server.name`.  
@@ -71,8 +70,8 @@ Typical configuration would look like:
     ...
     
     ProxyPreserveHost on
-    ProxyPass /_matrix/identity/ http://localhost:8090/_matrix/identity/
-    ProxyPass /_matrix/ http://localhost:8008/_matrix/
+    ProxyPass /_matrix/identity http://localhost:8090/_matrix/identity
+    ProxyPass /_matrix http://localhost:8008/_matrix
 </VirtualHost>
 ```
 
@@ -113,11 +112,10 @@ Add your mxisd domain into the `homeserver.yaml` at `trusted_third_party_id_serv
 In a typical configuration, you would end up with something similair to:
 ```
 trusted_third_party_id_servers:
-    - matrix.org
-    - vector.im
     - example.org
 ```
-It is recommended to remove `matrix.org` and `vector.im` so only your own Identity server is authoritative for your HS.
+It is recommended to remove `matrix.org` and `vector.im` (or any other default entry) from your configuration so only
+your own Identity server is authoritative for your HS.
 
 ## Validate
 Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
@@ -126,17 +124,18 @@ Invite `mxisd-lookup-test@kamax.io` to a room, which should be turned into a Mat
 **NOTE:** you might not see a Matrix suggestion for the e-mail address, which is normal. Still proceed with the invite.
   
 If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  
-If it did not work, [get in touch](#support) and we'll do our best to get you started.
+If it did not work, [get in touch](../README.md#support) and we'll do our best to get you started.
 
 You can now integrate mxisd further with your infrastructure using the various [features](README.md) guides.
 
 ## Next steps
-Once your mxisd server is up and running, here are the next steps to further enhance and integrate your installation:
+Once your mxisd server is up and running, there are several ways you can enhance and integrate further with your
+infrastructure:
 
 Enable extra features:
+- [Authenticate your users](features/authentication.md) with profile auto-provisioning
+- [Enhanced directory search](features/directory-users.md)
 - [Federation](features/federation.md)
-- [Authenticate with synapse](features/authentication.md), profile auto-provisioning if you wish
-- [Directory search](features/directory-users.md)
 
 Use your Identity stores:
 - [LDAP / Samba / Active directory](backends/ldap.md)
