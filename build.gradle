@@ -66,6 +66,7 @@ buildscript {
 
 repositories {
     maven { url "https://kamax.io/maven/releases/" }
+    maven { url "https://kamax.io/maven/snapshots/" }
     mavenCentral()
 }
 
@@ -80,7 +81,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-thymeleaf:1.5.10.RELEASE"
 
     // Matrix Java SDK
-    compile 'io.kamax:matrix-java-sdk:0.0.8'
+    compile 'io.kamax:matrix-java-sdk:0.0.11'
 
     // ed25519 handling
     compile 'net.i2p.crypto:eddsa:0.1.0'
@@ -93,9 +94,6 @@ dependencies {
 
     // HTTP connections
     compile 'org.apache.httpcomponents:httpclient:4.5.3'
-
-    // JSON
-    compile 'com.google.code.gson:gson:2.8.1'
 
     // Phone numbers validation
     compile 'com.googlecode.libphonenumber:libphonenumber:8.7.1'

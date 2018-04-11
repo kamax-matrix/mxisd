@@ -33,7 +33,6 @@ public class SingleLookupReply {
     private static Gson gson = new Gson();
 
     private boolean isRecursive;
-    private boolean isSigned;
     private String body;
     private SingleLookupRequest request;
     private _MatrixID mxid;
@@ -53,7 +52,6 @@ public class SingleLookupReply {
             reply.notAfter = Instant.ofEpochMilli(json.getNot_after());
             reply.notBefore = Instant.ofEpochMilli(json.getNot_before());
             reply.timestamp = Instant.ofEpochMilli(json.getTs());
-            reply.isSigned = json.isSigned();
         } catch (JsonSyntaxException e) {
             // stub - we only want to try, nothing more
         }
@@ -83,10 +81,6 @@ public class SingleLookupReply {
 
     public boolean isRecursive() {
         return isRecursive;
-    }
-
-    public boolean isSigned() {
-        return isSigned;
     }
 
     public String getBody() {

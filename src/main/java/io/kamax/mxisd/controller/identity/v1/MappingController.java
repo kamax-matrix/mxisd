@@ -22,11 +22,14 @@ package io.kamax.mxisd.controller.identity.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.kamax.matrix.crypto.SignatureManager;
+import io.kamax.matrix.event.EventKey;
+import io.kamax.matrix.json.MatrixJson;
+import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.controller.identity.v1.io.SingeLookupReplyJson;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.lookup.*;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
-import io.kamax.mxisd.signature.SignatureManager;
 import io.kamax.mxisd.util.GsonParser;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -56,6 +59,9 @@ public class MappingController {
     private Logger log = LoggerFactory.getLogger(MappingController.class);
     private Gson gson = new Gson();
     private GsonParser parser = new GsonParser(gson);
+
+    @Autowired
+    private MatrixConfig mxCfg;
 
     @Autowired
     private LookupStrategy strategy;
@@ -92,16 +98,12 @@ public class MappingController {
         }
 
         SingleLookupReply lookup = lookupOpt.get();
-        if (lookup.isSigned()) {
-            log.info("Lookup is already signed, sending as-is");
-            return lookup.getBody();
-        } else {
-            log.info("Lookup is not signed, signing");
-            JsonObject obj = gson.toJsonTree(new SingeLookupReplyJson(lookup)).getAsJsonObject();
-            obj.add("signatures", signMgr.signMessageGson(gson.toJson(obj)));
 
-            return gson.toJson(obj);
-        }
+        // FIXME signing should be done in the business model, not in the controller
+        JsonObject obj = gson.toJsonTree(new SingeLookupReplyJson(lookup)).getAsJsonObject();
+        obj.add(EventKey.Signatures.get(), signMgr.signMessageGson(MatrixJson.encodeCanonical(obj)));
+
+        return gson.toJson(obj);
     }
 
     @RequestMapping(value = "/bulk_lookup", method = POST)

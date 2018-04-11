@@ -22,9 +22,6 @@ package io.kamax.mxisd.controller.identity.v1.io;
 
 import io.kamax.mxisd.lookup.SingleLookupReply;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class SingeLookupReplyJson {
 
     private String address;
@@ -33,7 +30,6 @@ public class SingeLookupReplyJson {
     private long not_after;
     private long not_before;
     private long ts;
-    private Map<String, Map<String, String>> signatures = new HashMap<>();
 
     public SingeLookupReplyJson(SingleLookupReply reply) {
         this.address = reply.getRequest().getThreePid();
@@ -66,10 +62,6 @@ public class SingeLookupReplyJson {
 
     public long getTs() {
         return ts;
-    }
-
-    public boolean isSigned() {
-        return signatures != null && !signatures.isEmpty();
     }
 
 }

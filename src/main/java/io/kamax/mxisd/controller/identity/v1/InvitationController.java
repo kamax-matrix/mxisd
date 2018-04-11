@@ -22,13 +22,13 @@ package io.kamax.mxisd.controller.identity.v1;
 
 import com.google.gson.Gson;
 import io.kamax.matrix.MatrixID;
+import io.kamax.matrix.crypto.KeyManager;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.controller.identity.v1.io.ThreePidInviteReplyIO;
 import io.kamax.mxisd.invitation.IThreePidInvite;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.invitation.InvitationManager;
 import io.kamax.mxisd.invitation.ThreePidInvite;
-import io.kamax.mxisd.key.KeyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

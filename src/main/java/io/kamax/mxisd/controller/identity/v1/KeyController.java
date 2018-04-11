@@ -22,9 +22,9 @@ package io.kamax.mxisd.controller.identity.v1;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.kamax.matrix.crypto.KeyManager;
 import io.kamax.mxisd.controller.identity.v1.io.KeyValidityJson;
 import io.kamax.mxisd.exception.BadRequestException;
-import io.kamax.mxisd.key.KeyManager;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,7 @@ public class KeyController {
 
     @RequestMapping(value = "/pubkey/ephemeral/isvalid", method = GET)
     public String checkEphemeralKeyValidity(HttpServletRequest request) {
-        log.warn("Ephemeral key was request but no ephemeral key are generated, replying not valid");
+        log.warn("Ephemeral key was requested but no ephemeral key are generated, replying not valid");
 
         return invalidKey;
     }
