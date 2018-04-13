@@ -1,26 +1,22 @@
 # Table of Contents
-
+- [Build from sources](build.md) (Optional)
 - Installation
   - [Debian package](install/debian.md)
+  - [ArchLinux](install/archlinux.md)
   - [Docker](install/docker.md)
-- [Build from source](build.md)
+  - [From source](install/source.md)
 - [Architecture overview](architecture.md)
 - [Configuration](configure.md)
 - Features
-  - [Matrix Identity Service](features/identity.md)
-  - [Homeserver Authentication](features/authentication.md)
-  - [Directory seach](features/directory-users.md)
-  - [Identity server Federation](features/federation.md)
+  - [Authentication](features/authentication.md)
+  - [Directory search](features/directory.md)
+  - [Identity](features/identity.md)
+  - [Federation](features/federation.md)
   - [Bridge integration](features/bridge-integration.md)
-- Backends
-  - [LDAP](backends/ldap.md)
-  - [SQL](backends/sql.md)
-  - [REST](backends/rest.md)
-  - [Google Firebase](backends/firebase.md)
-  - [Wordpress](backends/wordpress.md)
+- [Identity Stores](stores/README.md)
 - Notifications
   - Handlers
-    - [Basic](threepids/notifications/basic-handler.md)
-    - [SendGrid](threepids/notifications/sendgrid-handler.md)
-- [Sessions](sessions/3pid.md)
-  - [Views](sessions/3pid-views.md)
+    - [Basic](threepids/notification/basic-handler.md)
+    - [SendGrid](threepids/notification/sendgrid-handler.md)
+- [Sessions](threepids/session/session.md)
+  - [Views](threepids/session/session-views.md)

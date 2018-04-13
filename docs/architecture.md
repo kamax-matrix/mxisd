@@ -1,6 +1,6 @@
 # Architecture
 ## Overview
-### Basic setup without integration or incoming federation
+### Basic setup with default settings
 ```
  Client
    |
@@ -14,17 +14,17 @@ TCP 443
        +--|------------------+            +---|-----------------------+
           |                                   |
           +<---------------------------------<+
-          |                                          Backends
-          |   +-------------------+                  +------+    +--------+
- TCP 8090 +-> | mxisd             |          +-----> | LDAP | -> | SQL DB |
-              |                   |          |       +------+    +--------+ ....
-              | - Profile's 3PIDs >----+     |
-              | - 3PID Invites    |    |     |
-              +-|-----------------+    +>----+
-                |                      |     |       +--------------------------+
-                |                      |     |       | Central Identity service |
-                +>-------------------->+     +-----> | Matrix.org / Vector.im   |
-                |                            TCP 443 +--------------------------+
+          |
+          |   +-------------------+
+ TCP 8090 +-> | mxisd             |
+              |                   |
+              | - Profile's 3PIDs >----+
+              | - 3PID Invites    |    |             +--------------------------+
+              +-|-----------------+    +>----------> | Central Identity service |
+                |                      |   TCP 443   | Matrix.org / Vector.im   |
+                |                      |             +--------------------------+
+                +>-------------------->+
+                |
              TCP 443
                 |  +------------------------+
                 |  | Remote Federated       |
@@ -37,7 +37,7 @@ TCP 443
 See the [dedicated document](features/authentication.md).
 
 ### With Directory
-See the [dedicated document](features/directory-users.md).
+See the [dedicated document](features/directory.md).
 
 ### With Federation
 See the [dedicated document](features/federation.md).

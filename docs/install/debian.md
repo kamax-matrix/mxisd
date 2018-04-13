@@ -1,28 +1,28 @@
 # Debian package
 ## Install
-1. Donwload the [latest release](https://github.com/kamax-io/mxisd/releases/latest)
+1. Download the [latest release](https://github.com/kamax-io/mxisd/releases/latest)
 2. Run:
-```
+```bash
 dpkg -i /path/to/downloaded/mxisd.deb
 ```
 ## Files
-| Location                          | Purpose                                      |
-|-----------------------------------|----------------------------------------------|
-| /etc/mxisd                        | Configuration directory                      |
-| /etc/mxisd/mxisd.yaml             | Main configuration file                      |
-| /etc/mxisd/signing.key            | Default location for mxisd signing keys      |
-| /etc/systemd/system/mxisd.service | Systemd configuration file for mxisd service |
-| /usr/lib/mxisd                    | Binairies                                    |
-| /var/lib/mxisd                    | Data                                         |
+| Location                            | Purpose                                      |
+|-------------------------------------|----------------------------------------------|
+| `/etc/mxisd`                        | Configuration directory                      |
+| `/etc/mxisd/mxisd.yaml`             | Main configuration file                      |
+| `/etc/systemd/system/mxisd.service` | Systemd configuration file for mxisd service |
+| `/usr/lib/mxisd`                    | Binaries                                     |
+| `/var/lib/mxisd`                    | Data                                         |
+| `/var/lib/mxisd/signing.key`        | Default location for mxisd signing keys      |
 
 ## Control
 Start mxisd using:
-```
+```bash
 sudo systemctl start mxisd
 ```
 
 Stop mxisd using:
-```
+```bash
 sudo systemctl stop mxisd
 ```
 
@@ -35,5 +35,5 @@ tail -n 99 -f /var/log/syslog | grep mxisd
 ```
 - use Systemd's journal:
 ```
-journalctl -f n 99 -u mxisd
+journalctl -f -n 99 -u mxisd
 ```

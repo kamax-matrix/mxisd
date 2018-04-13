@@ -1,27 +1,28 @@
-# REST backend
+# REST Identity store
 The REST backend allows you to query identity data in existing webapps, like:
 - Forums (phpBB, Discourse, etc.)
 - Custom Identity stores (Keycloak, ...)
 - CRMs (Wordpress, ...)
 - self-hosted clouds (Nextcloud, ownCloud, ...)
 
-It supports the following mxisd flows:
-- [Authentication](#authentication)
-- [Directory](#directory)
-- [Identity](#identity)
-
 To integrate this backend with your webapp, you will need to implement three specific REST endpoints detailed below.
 
+## Features
+|      Name      | Supported? |
+|----------------|------------|
+| Authentication | Yes        |
+| Directory      | Yes        |
+| Identity       | Yes        |
 
 ## Configuration
-| Key                            | Default                                      | Description                                          |
----------------------------------|----------------------------------------------|------------------------------------------------------|
-| rest.enabled                   | false                                        | Globally enable/disable the REST backend             |
-| rest.host                      | *empty*                                      | Default base URL to use for the different endpoints. |
-| rest.endpoints.auth            | /_mxisd/backend/api/v1/auth/login            | Validate credentials and get user profile            |
-| rest.endpoints.directory       | /_mxisd/backend/api/v1/directory/user/search | Search for users by arbitrary input                  |
-| rest.endpoints.identity.single | /_mxisd/backend/api/v1/identity/single       | Endpoint to query a single 3PID                      |
-| rest.endpoints.identity.bulk   | /_mxisd/backend/api/v1/identity/bulk         | Endpoint to query a list of 3PID                     |
+| Key                              | Default                                        | Description                                          |
+|----------------------------------|------------------------------------------------|------------------------------------------------------|
+| `rest.enabled`                   | `false`                                        | Globally enable/disable the REST backend             |
+| `rest.host`                      | *None*                                        | Default base URL to use for the different endpoints. |
+| `rest.endpoints.auth`            | `/_mxisd/backend/api/v1/auth/login`            | Validate credentials and get user profile            |
+| `rest.endpoints.directory`       | `/_mxisd/backend/api/v1/directory/user/search` | Search for users by arbitrary input                  |
+| `rest.endpoints.identity.single` | `/_mxisd/backend/api/v1/identity/single`       | Endpoint to query a single 3PID                      |
+| `rest.endpoints.identity.bulk`   | `/_mxisd/backend/api/v1/identity/bulk`         | Endpoint to query a list of 3PID                     |
 
 Endpoint values can handle two formats:
 - URL Path starting with `/` that gets happened to the `rest.host`
@@ -35,7 +36,7 @@ HTTP method: `POST`
 Content-type: JSON UTF-8
   
 #### Request Body
-```
+```json
 {
   "auth": {
     "mxid": "@john.doe:example.org",
@@ -48,7 +49,7 @@ Content-type: JSON UTF-8
 
 #### Response Body
 If the authentication fails:
-```
+```json
 {
   "auth": {
     "success": false
@@ -59,7 +60,7 @@ If the authentication fails:
 If the authentication succeed:
 - `auth.id` supported values: `localpart`, `mxid`
 - `auth.profile` and any sub-member are all optional
-```
+```json
 {
   "auth": {
     "success": true,
@@ -89,7 +90,7 @@ HTTP method: `POST`
 Content-type: JSON UTF-8
 
 #### Request Body
-```
+```json
 {
   "by": "<search type>",
   "search_term": "doe"
@@ -101,7 +102,7 @@ Content-type: JSON UTF-8
 
 #### Response Body:
 If users found:
-```
+```json
 {
   "limited": false,
   "results": [
@@ -118,7 +119,7 @@ If users found:
 ```
 
 If no user found:
-```
+```json
 {
   "limited": false,
   "results": []
@@ -131,7 +132,7 @@ HTTP method: `POST`
 Content-type: JSON UTF-8  
   
 #### Request Body
-```
+```json
 {
   "lookup": {
     "medium": "email",
@@ -143,7 +144,7 @@ Content-type: JSON UTF-8
 #### Response Body
 If a match was found:
 - `lookup.id.type` supported values: `localpart`, `mxid`
-```
+```json
 {
   "lookup": {
     "medium": "email",
@@ -157,7 +158,7 @@ If a match was found:
 ```
 
 If no match was found:
-```
+```json
 {}
 ```
 
@@ -166,7 +167,7 @@ HTTP method: `POST`
 Content-type: JSON UTF-8  
   
 #### Request Body
-```
+```json
 {
   "lookup": [
     {
@@ -184,7 +185,7 @@ Content-type: JSON UTF-8
 #### Response Body
 For all entries where a match was found:
 - `lookup[].id.type` supported values: `localpart`, `mxid`
-```
+```json
 {
   "lookup": [
     {
@@ -208,7 +209,7 @@ For all entries where a match was found:
 ```
 
 If no match was found:
-```
+```json
 {
   "lookup": []
 }

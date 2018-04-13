@@ -1,26 +1,30 @@
-# Web pages for the 3PID session processes
+# Web pages for the 3PID sessions
 You can customize the various pages used during a 3PID validation using [Thymeleaf templates](http://www.thymeleaf.org/).
 
 ## Configuration
+Pseudo-configuration to illustrate the structure:
+```yaml
+# CONFIGURATION EXAMPLE
+# DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
+view.session.local:
+  onTokenSubmit:
+    success: '/path/to/session/local/tokenSubmitSuccess-page.html'
+    failure: '/path/to/session/local/tokenSubmitFailure-page.html'
+view.session.localRemote:
+  onTokenSubmit:
+    success: '/path/to/session/localRemote/tokenSubmitSuccess-page.html'
+    failure: '/path/to/session/local/tokenSubmitFailure-page.html'
+view.session.remote:
+  onRequest:
+    success: '/path/to/session/remote/requestSuccess-page.html'
+    failure: '/path/to/session/remote/requestFailure-page.html'
+  onCheck:
+    success: '/path/to/session/remote/checkSuccess-page.html'
+    failure: '/path/to/session/remote/checkFailure-page.html'
+# CONFIGURATION EXAMPLE
+# DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
 ```
-view:
-  session:
-    local:
-      onTokenSubmit:
-        success: '/path/to/session/local/tokenSubmitSuccess-page.html'
-        failure: '/path/to/session/local/tokenSubmitFailure-page.html'
-    localRemote:
-      onTokenSubmit:
-        success: '/path/to/session/localRemote/tokenSubmitSuccess-page.html'
-        failure: '/path/to/session/local/tokenSubmitFailure-page.html'
-    remote:
-      onRequest:
-        success: '/path/to/session/remote/requestSuccess-page.html'
-        failure: '/path/to/session/remote/requestFailure-page.html'
-      onCheck:
-        success: '/path/to/session/remote/checkSuccess-page.html'
-        failure: '/path/to/session/remote/checkFailure-page.html'
-```
+
 3PID session are divided into three config sections:
 - `local` for local-only 3PID sessions
 - `localRemote` for local 3PID sessions that can also be turned into remote sessions, if the user so desires

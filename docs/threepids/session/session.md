@@ -6,7 +6,7 @@
   - [Session scope](#session-scope)
 - [Notifications](#notifications)
   - [Email](#email)
-  - [Phone numbers](#msisdn-phone-numbers)
+  - [Phone numbers](#msisdn-(phone-numbers))
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Web views](#web-views)
@@ -47,7 +47,7 @@ To ensure lookup works consistency within the current Matrix network, the centra
 used to store *remote* sessions and binds.
 
 On the flip side, at the time of writing, the Matrix specification and the central Matrix.org servers do not allow to
-remote a 3PID bind. This means that once a 3PID is published (email, phone number, etc.), it cannot be easily remove
+remote a 3PID bind. This means that once a 3PID is published (email, phone number, etc.), it cannot be easily removed
 and would require contacting the Matrix.org administrators for each bind individually.  
 This poses a privacy, control and security concern, especially for groups/corporations that want to keep a tight control
 on where such identifiers can be made publicly visible.
@@ -80,9 +80,8 @@ Sessions can be scoped as:
 
 **IMPORTANT NOTE:** mxisd does not store bindings directly. While a user can see its email, phone number or any other
 3PID in its settings/profile, it does **NOT** mean it is published anywhere and can be used to invite/search the user.
-Identity backends (LDAP, REST, SQL) are the ones holding such data.  
-If you still want added arbitrary 3PIDs to be discoverable on your local server, you will need to link mxisd to your
-synapse DB to make it an Identity backend.
+Identity stores are the ones holding such data.  
+If you still want added arbitrary 3PIDs to be discoverable on a synapse Homeserver, use the corresponding [Identity store](../../stores/synapse.md).
 
 See the [Scenarios](#scenarios) for more info on how and why.
 
@@ -99,93 +98,41 @@ Built-in generators and connectors for supported 3PID types:
 
 ### Email
 Generators:
-- [Template](../threepids/notifications/template-generator.md)
+- [Template](../notification/template-generator.md)
 
 Connectors:
-- [SMTP](../threepids/medium/email/smtp-connector.md)
+- [SMTP](../medium/email/smtp-connector.md)
 
 #### MSISDN (Phone numbers)
 Generators:
-- [Template](../threepids/notifications/template-generator.md)
+- [Template](../notification/template-generator.md)
 
 Connectors:
- - [Twilio](../threepids/medium/msisdn/twilio-connector.md) with SMS
+ - [Twilio](../medium/msisdn/twilio-connector.md) with SMS
 
 ## Usage
 ### Configuration
 The following example of configuration (incomplete extract) shows which items are relevant for 3PID sessions.
 
 **IMPORTANT:** Most configuration items shown have default values and should not be included in your own configuration
-file unless you want to specifically overwrite them.  
-Please refer to the full example config file to see which keys are mandatory and to be included in your configuration.
+file unless you want to specifically overwrite them.
+```yaml
+# DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
+session.policy.validation.enabled: true
+session.policy.validation.forLocal:
+  enabled: true
+  toLocal: true
+  toRemote:
+    enabled: true
+    server: 'configExample'  # Not to be included in config! Already present in default config!
+session.policy.validation.forRemote:
+  enabled: true
+  toLocal: true
+  toRemote:
+    enabled: true
+    server: 'configExample'  # Not to be included in config! Already present in default config!
+# DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
 ```
-matrix:
-  identity:
-    servers:
-      configExample: # Not to be included in config! Already present in default config!
-        - 'https://example.org'
-
-
-threepid:
-  medium:
-    email:
-      connector: 'example1' # Not to be included in config! Already present in default config! 
-      generator: 'example2' # Not to be included in config! Already present in default config!
-      connectors:
-        example1:
-      generators:
-        example1:
-          key: "value"
-        example2:
-          key: "value"
-
-session:
-  policy:
-    validation:
-      enabled: true
-      forLocal:
-        enabled: true
-        toLocal: true
-        toRemote:
-          enabled: true
-          server: 'configExample'  # Not to be included in config! Already present in default config!
-      forRemote:
-        enabled: true
-        toLocal: false
-        toRemote:
-          enabled: true
-          server: 'configExample'  # Not to be included in config! Already present in default config!
-```
-
-`matrix.identity.servers` is the namespace to configure arbitrary list of Identity servers with a label as parent key.  
-In the above example, the list with label `configExample` contains a single server entry pointing to `https://example.org`.  
-
-**NOTE:** The server list is set to `root` by default and should typically NOT be included in your config.  
-
-Identity server entry can be of two format:
-- URL, bypassing any kind of domain and port discovery
-- Domain name as `string`, allowing federated discovery to take place.
-
-The label can be used in other places of the configuration, allowing you to only declare Identity servers once.
-
----
-
-`threepid.medium.<3PID>` is the namespace to configure 3PID specific items, not directly tied to any other component of
-mxisd.  
-In the above example, only `email` is defined as 3PID type.
-
-Each 3PID namespace comes with 4 configuration key allowing you to configure generators and connectors for notifications:
-- `connectors` is a configuration namespace to be used for any connector configuration. Child keys represent the unique
-ID for each connector.
-- `generators` is a configuration namespace to be used for any generator configuration. Child keys represent the unique
-ID for each generator.
-- `connector` is given the ID of the connector to be used at runtime.
-- `generator` is given the ID of the generator to be used at runtime.
-
-In the above example, emails notifications are generated by the `example2` module and sent with the `example1` module.  
-By default, `template` is used as generator and `smtp` as connector.
-
----
 
 `session.policy.validation` is the core configuration to control what users configured to use your Identity server
 are allowed to do in terms of 3PID sessions.
@@ -203,16 +150,16 @@ If both `toLocal` and `toRemote` are enabled, the user will be offered to initia
 locally validated.
 
 ### Web views
-Once a user click on a validation link, it is taken to the Identity Server validation page where the token is submited.  
+Once a user click on a validation link, it is taken to the Identity Server validation page where the token is submitted.  
 If the session or token is invalid, an error page is displayed.  
 Workflow pages are also available for the remote 3PID session process.
 
-See [the dedicated document](3pid-views.md)
+See [the dedicated document](session-views.md)
 on how to configure/customize/brand those pages to your liking.
 
 ### Scenarios
 It is important to keep in mind that mxisd does not create bindings, irrelevant if a user added a 3PID to their profile.  
-Instead, when queried for bindings, mxisd will query Identity backends which are responsible to store this kind of information.
+Instead, when queried for bindings, mxisd will query Identity stores which are responsible to store this kind of information.
 
 This has the side effect that any 3PID added to a user profile which is NOT within a configured and enabled Identity backend
 will simply not be usable for search or invites, **even on the same Homeserver!**  
@@ -220,18 +167,17 @@ mxisd does not store binds on purpose, as one of its primary goal is to ensure m
 and the rest of the Matrix ecosystem is preserved.
 
 Nonetheless, because mxisd also aims at offering support for tight control over identity data, it is possible to have
-such 3PID bindings available for search and invite queries on the local Homeserver by using the `SQL` backend and
-configuring it to use the synapse database. Support for `SQLite` and `PostgreSQL` is available.
+such 3PID bindings available for search and invite queries on synapse with the corresponding [Identity store](../../stores/synapse.md).
 
 See the [Local sessions only](#local-sessions-only) use case for more information on how to configure.
 
 #### Default
 By default, mxisd allows the following:
 
-|  | Local Session | Remote Session |
-|----------------|-------|--------|
-| **Local 3PID** | Yes | Yes, offered |
-| **Remote 3PID** | No, Remote forced | Yes |
+|                 | Local Session     | Remote Session |
+|-----------------|-------------------|----------------|
+| **Local 3PID**  | Yes               | Yes, offered   |
+| **Remote 3PID** | No, Remote forced | Yes            |
 
 This is usually what people expect and will feel natural to users and does not involve further integration.
 
@@ -243,8 +189,8 @@ Other e-mail addresses and phone number will be redirected to remote sessions to
 ecosystem and other federated servers.
 
 #### Local sessions only
-**NOTE:** This does not affect 3PID lookups (queries to find Matrix IDs) which will remain public due to limitation
-in the Matrix protocol.
+**NOTE:** This does not affect 3PID lookups (queries to find Matrix IDs). See [Federation](../../features/federation.md)
+to disable remote lookup for those.
 
 This configuration ensures maximum confidentiality and privacy.
 Typical use cases:
@@ -256,37 +202,22 @@ No 3PID will be sent to a remote Identity server and all validation will be perf
 On the flip side, people with *Remote* 3PID scopes will not be found from other servers.
 
 Use the following values:
-```
-session:
-  policy:
-    validation:
-      enabled: true
-      forLocal:
-        enabled: true
-        toLocal: true
-        toRemote:
-          enabled: false
-      forRemote:
-        enabled: true
-        toLocal: true
-        toRemote:
-          enabled: false
+```yaml
+session.policy.validation.enabled: true
+session.policy.validation.forLocal:
+  enabled: true
+  toLocal: true
+  toRemote:
+    enabled: false
+session.policy.validation.forRemote:
+  enabled: true
+  toLocal: true
+  toRemote:
+    enabled: false
 ```
 
-**IMPORTANT**: When using local-only mode, you will also need to link mxisd to synapse if you want user searches and invites to work.
-To do so, add/edit the following configuration keys:
-```
-synapseSql:
-  enabled: true
-  type: 'SET TO PROPER VALUE'
-  connection: 'SET TO PROPER VALUE'
-```
-- `synapseSql.enabled` set to `true` to activate the SQL backend.
-- `synapseSql.type` can be set to `sqlite` or `postgresql`, depending on your synapse setup.
-- `synapseSql.connection` use a JDBC format which is appened after the `jdbc:type:` connection URI.
-Example values for each type:
-  - `sqlite`: `/path/to/homeserver.db`
-  - `postgresql`: `//localhost/database?user=synapse&password=synapse`
+**IMPORTANT**: When using local-only mode and if you are using synapse, you will also need to enable its dedicated Identity
+store if you want user searches and invites to work. To do so, see the [dedicated document](../../stores/synapse.md).
 
 #### Remote sessions only
 This configuration ensures all 3PID are made public for maximum compatibility and reach within the Matrix ecosystem, at
@@ -297,31 +228,25 @@ Typical use cases:
 - Homeserver with registration enabled
 
 Use the following values:
-```
-session:
-  policy:
-    validation:
-      enabled: true
-      forLocal:
-        enabled: true
-        toLocal: false
-        toRemote:
-          enabled: true
-      forRemote:
-        enabled: true
-        toLocal: false
-        toRemote:
-          enabled: true
+```yaml
+session.policy.validation.enabled: true
+session.policy.validation.forLocal:
+  enabled: true
+  toLocal: false
+  toRemote:
+    enabled: true
+session.policy.validation.forRemote:
+  enabled: true
+  toLocal: false
+  toRemote:
+    enabled: true
 ```
 
 #### Sessions disabled
 This configuration would disable 3PID session altogether, preventing users from adding emails and/or phone numbers to
 their profiles.  
 This would be used if mxisd is also performing authentication for the Homeserver, typically with synapse and the
-[REST Auth module](https://github.com/kamax-io/matrix-synapse-rest-auth).
-
-While this feature is not yet ready in the REST auth module, you would use this configuration mode to auto-populate 3PID
-at user login and prevent any further add.
+[REST password provider](https://github.com/kamax-io/matrix-synapse-rest-auth).
 
 **This mode comes with several important restrictions:**
 - This does not prevent users from removing 3PID from their profile. They would be unable to add them back!
@@ -330,9 +255,6 @@ at user login and prevent any further add.
 It is therefore recommended to not fully disable sessions but instead restrict specific set of 3PID and Session scopes.
 
 Use the following values to enable this mode:
-```
-session:
-  policy:
-    validation:
-      enabled: false
+```yaml
+session.policy.validation.enabled: false
 ```
