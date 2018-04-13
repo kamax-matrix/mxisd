@@ -8,7 +8,7 @@
   - [Next steps](#next-steps)
     - [Profile auto-fil](#profile-auto-fill)
 - [Advanced](#advanced)
-  - [Overview](#overview)
+  - [Overview](#overview-1)
   - [Requirements](#requirements)
   - [Configuration](#configuration)
     - [Reverse Proxy](#reverse-proxy)
@@ -70,7 +70,7 @@ Login on the Homeserver using credentials present in one of your Identity stores
 ## Next steps
 ### Profile auto-fill
 Auto-filling user profile depends on its support by your configured Identity stores.  
-See your Identity store [documentation](../stores/) on how to enable the feature.
+See your Identity store [documentation](../stores/README.md) on how to enable the feature.
 
 
 ## Advanced

@@ -4,12 +4,11 @@ Matrix is still a very young protocol and there are a whole lot of rough edges.
 Identity in Matrix is one of the most difficult topic, mainly as it has not received much love in the past years.
 
 We have tried our best to put together documentation that requires almost no knowledge of Matrix inner workings to get a
-first basic setup running and it is important you read the documentation in the right order:
+first basic setup running which relies on you reading the documentation in the right order:
 - [The  Concepts](concepts.md) in few words.
 - [Getting Started](getting-started.md) step-by-step to a minimal working install.
-- [Architecture](architecture.md) overview to see how components fit together.
 - [Identity stores](stores/README.md) you wish to fetch data from.
-- [Features](features) you are interested of enabling that will use your Identity store data.
+- [Features](features) you are interested in that will use your Identity store(s) data.
 
 **IMPORTANT**: Be aware that mxisd tries to fit within the current protocol and existing products and basic understanding
 of the Matrix protocol is required for some advanced features.
@@ -29,7 +28,7 @@ privacy consequences, which is not the case with the central Matrix.org servers.
 So mxisd is like your gatekeeper and guardian angel. It does not change what you already know, just adds some nice
 simple features on top of it.
 
-### I'm not sure I understand what an "Identity server" is supposed to be or do
+### I'm not sure I understand what an "Identity server" is supposed to be or do...
 The current Identity service API is more a placeholder, as the Matrix devs did not have time so far to really work on
 what they want to do with that part of the ecosystem. Therefore, "Identity" is currently a misleading word and concept.
 Given the scope of the current Identity Service API, it would be best called "Invitation service".
@@ -46,7 +45,7 @@ No.
 Accounts cannot currently migrate/move from one server to another.  
 See a [brief explanation document](concepts.md) about Matrix and mxisd concepts and vocabulary.
 
-### I already use the synapse LDAP3 auth provider, why should I care about mxisd?
+### I already use the synapse LDAP3 auth provider. Why should I care about mxisd?
 The [synapse LDAP3 auth provider](https://github.com/matrix-org/matrix-synapse-ldap3) is not longer maintained and
 only handles on specific flow: validate credentials at login.
 
@@ -58,7 +57,7 @@ It does not:
 mxisd is a replacement and enhancement of it, offering coherent results in all areas, which the LDAP3 auth provider
 does not.
 
-### Sydent is the official Identity server implementation of the Matrix team, why not use that?
+### Sydent is the official Identity server implementation of the Matrix team. Why not use that?
 You can, but [sydent](https://github.com/matrix-org/sydent):
 - [should not be used and/or self-hosted](https://github.com/matrix-org/sydent/issues/22)
 - is not meant to be linked to a specific Homeserver / domain

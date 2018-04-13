@@ -52,7 +52,7 @@ As an enhanced Identity service:
 - [Session Control](docs/threepids/session/session.md): Extensive control of where 3PIDs are transmitted so they are not
   leaked publicly by users
 - [Authentication](docs/features/authentication.md): Use your Identity stores to perform authentication in [synapse](https://github.com/matrix-org/synapse)
-  via the [REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth)
+  via the [REST password provider](https://github.com/kamax-io/matrix-synapse-rest-auth)
 - [Directory search](docs/features/directory.md) which allows you to search for users within your organisation,
   even without prior contact within Matrix using arbitrary search terms
 - [Auto-fill of user profile](docs/features/authentication.md#profile-auto-fill) (Display name, 3PIDs)

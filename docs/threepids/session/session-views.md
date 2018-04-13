@@ -1,4 +1,4 @@
-# Web pages for the 3PID session processes
+# Web pages for the 3PID sessions
 You can customize the various pages used during a 3PID validation using [Thymeleaf templates](http://www.thymeleaf.org/).
 
 ## Configuration
