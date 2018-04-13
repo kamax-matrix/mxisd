@@ -277,8 +277,7 @@ public class SessionMananger {
         }
 
         String is = servers.get(0);
-        String url = IdentityServerUtils.findIsUrlForDomain(is)
-                .orElseThrow(() -> new InternalServerError(is + " could not be resolved to an Identity server"));
+        String url = IdentityServerUtils.findIsUrlForDomain(is).orElse(is);
         log.info("Will use IS endpoint {}", url);
 
         String remoteSecret = session.isRemote() ? session.getRemoteSecret() : RandomStringUtils.randomAlphanumeric(16);

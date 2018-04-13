@@ -23,6 +23,7 @@ package io.kamax.mxisd.lookup.provider;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.controller.identity.v1.ClientBulkLookupRequest;
 import io.kamax.mxisd.exception.InvalidResponseJsonException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
@@ -33,18 +34,20 @@ import io.kamax.mxisd.matrix.IdentityServerUtils;
 import io.kamax.mxisd.util.GsonParser;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +62,9 @@ public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher
     private Gson gson = new Gson();
     private GsonParser parser = new GsonParser(gson);
 
+    @Autowired
+    private CloseableHttpClient client;
+
     @Override
     public boolean isUsable(String remote) {
         return IdentityServerUtils.isUsable(remote);
@@ -69,23 +75,39 @@ public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher
         log.info("Looking up {} 3PID {} using {}", request.getType(), request.getThreePid(), remote);
 
         try {
-            HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(
-                    remote + "/_matrix/identity/api/v1/lookup?medium=" + request.getType() + "&address=" + request.getThreePid()
-            ).openConnection();
-            JsonObject obj = parser.parse(rootSrvConn.getInputStream());
-            if (obj.has("address")) {
-                log.info("Found 3PID mapping: {}", gson.toJson(obj));
+            URIBuilder b = new URIBuilder(remote);
+            b.setPath("/_matrix/identity/api/v1/lookup");
+            b.addParameter("medium", request.getType());
+            b.addParameter("address", request.getThreePid());
+            HttpGet req = new HttpGet(b.build());
 
-                return Optional.of(SingleLookupReply.fromRecursive(request, gson.toJson(obj)));
+            try (CloseableHttpResponse res = client.execute(req)) {
+                int statusCode = res.getStatusLine().getStatusCode();
+                String body = EntityUtils.toString(res.getEntity());
+
+                if (statusCode != 200) {
+                    log.warn("Remote returned status code {}", statusCode);
+                    log.warn("Body: {}", body);
+                    return Optional.empty();
+                }
+
+                JsonObject obj = GsonUtil.parseObj(body);
+                if (obj.has("address")) {
+                    log.debug("Found 3PID mapping: {}", gson.toJson(obj));
+                    return Optional.of(SingleLookupReply.fromRecursive(request, gson.toJson(obj)));
+                }
+
+                log.info("Empty 3PID mapping from {}", remote);
+                return Optional.empty();
             }
-
-            log.info("Empty 3PID mapping from {}", remote);
-            return Optional.empty();
         } catch (IOException e) {
             log.warn("Error looking up 3PID mapping {}: {}", request.getThreePid(), e.getMessage());
             return Optional.empty();
         } catch (JsonParseException e) {
             log.warn("Invalid JSON answer from {}", remote);
+            return Optional.empty();
+        } catch (URISyntaxException e) {
+            log.warn("Invalid remote address: {}", e.getMessage(), e);
             return Optional.empty();
         }
     }
@@ -98,12 +120,15 @@ public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher
         mappingRequest.setMappings(mappings);
 
         String url = remote + "/_matrix/identity/api/v1/bulk_lookup";
-        CloseableHttpClient client = HttpClients.createDefault();
         try {
             HttpPost request = RestClientUtils.post(url, mappingRequest);
             try (CloseableHttpResponse response = client.execute(request)) {
-                if (response.getStatusLine().getStatusCode() != 200) {
-                    log.info("Could not perform lookup at {} due to HTTP return code: {}", url, response.getStatusLine().getStatusCode());
+                int statusCode = response.getStatusLine().getStatusCode();
+                String body = EntityUtils.toString(response.getEntity());
+
+                if (statusCode != 200) {
+                    log.warn("Could not perform lookup at {} due to HTTP return code: {}", url, statusCode);
+                    log.warn("Body: {}", body);
                     return mappingsFound;
                 }
 

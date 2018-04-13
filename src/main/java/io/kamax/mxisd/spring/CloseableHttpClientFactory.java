@@ -30,7 +30,11 @@ public class CloseableHttpClientFactory {
 
     @Bean
     public CloseableHttpClient getClient() {
-        return HttpClients.custom().setUserAgent("mxisd").build();
+        return HttpClients.custom()
+                .setUserAgent("mxisd")
+                .setMaxConnPerRoute(Integer.MAX_VALUE)
+                .setMaxConnTotal(Integer.MAX_VALUE)
+                .build();
     }
 
 }
