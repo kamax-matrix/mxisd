@@ -1,4 +1,4 @@
-# SQL Identity stores
+# SQL Identity store
 ## Supported Databases
 - PostgreSQL
 - MariaDB
@@ -60,6 +60,9 @@ This follow the JDBC URI syntax. See [official website](https://docs.oracle.com/
 sql.directory.enabled: false
 ```
 
+
+---
+
 ```yaml
 sql.directory.query:
   name:
@@ -68,6 +71,24 @@ sql.directory.query:
   threepid:
     type: <string>
     value: <string>
+```
+For each query, `type` can be used to tell mxisd how to process the ID column:
+- `localpart` will append the `matrix.domain` to it
+- `mxid` will use the ID as-is. If it is not a valid Matrix ID, the search will fail.
+
+`value` is the SQL query and must return two columns:
+- The first being the User ID
+- The second being its display name
+
+Example:
+```yaml
+sql.directory.query:
+  name:
+    type: 'localpart'
+    value: 'SELECT idColumn, displayNameColumn FROM table WHERE displayNameColumn LIKE ?'
+  threepid:
+    type: 'localpart'
+    value: 'SELECT idColumn, displayNameColumn FROM table WHERE threepidColumn LIKE ?'
 ```
 
 ### Identity

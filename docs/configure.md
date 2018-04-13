@@ -11,15 +11,15 @@
 
 ## Concepts
 ### Syntax
-The configuration file is YAML based, allowing two types of syntax.
+The configuration file is [YAML](http://yaml.org/) based, allowing two types of syntax.
 
 Properties-like:
-```
+```yaml
 my.config.item: 'value'
 ```
 
 Object-like:
-```
+```yaml
 my:
   config:
     item: 'value'
@@ -31,7 +31,7 @@ Both syntax will be used interchangeably in these documents.
 ### Variables
 It is possible to copy the value of a configuration item into another using the syntax `${config.key.item}`.  
 Example that will copy the value of `matrix.domain` into `server.name`:
-```
+```yaml
 matrix:
   domain: 'example.org'
 
@@ -52,7 +52,7 @@ Matrix domain name, same as the Homeserver, used to build appropriate Matrix IDs
 Namespace to create arbitrary list of Identity servers, usable in other parts of the configuration |
 
 Example:
-```
+```yaml
 matrix.identity.servers:
   myOtherServers:
     - 'https://other1.example.org'
@@ -70,12 +70,12 @@ Create a list under the label `root` containing a single Identity server, `https
 `storage.provider.sqlite.database`: Absolute location of the SQLite database
 
 ## Identity stores
-See the [Identity stores](backends/README.md) for specific configuration
+See the [Identity stores](stores/README.md) for specific configuration
 
 ## 3PID Validation sessions
 See the dedicated documents:
-- [Flow](sessions/3pid.md)
-- [Branding](sessions/3pid-views.md)
+- [Flow](threepids/session/session.md)
+- [Branding](threepids/session/session-views.md)
 
 ## Notifications
 - `notification.handler.<3PID medium>`: Handler to use for the given 3PID medium. Repeatable.
@@ -98,5 +98,5 @@ notification.handlers.sendgrid: ...
 ```
 
 Built-in:
-- [Raw](threepids/notifications/basic-handler.md)
-- [SendGrid](threepids/notifications/sendgrid-handler.md)
+- [Raw](threepids/notification/basic-handler.md)
+- [SendGrid](threepids/notification/sendgrid-handler.md)

@@ -1,7 +1,7 @@
 # Docker
 ## Fetch
 Pull the latest stable image:
-```
+```bash
 docker pull kamax/mxisd
 ```
 
@@ -15,7 +15,7 @@ Use the following command after adapting to your needs:
 - The `MATRIX_DOMAIN` environment variable to yours
 - The volumes host paths
 
-```
+```bash
 docker run --rm -e MATRIX_DOMAIN=example.org -v /data/mxisd/etc:/etc/mxisd -v /data/mxisd/var:/var/mxisd -p 8090:8090 -t kamax/mxisd
 ```
 

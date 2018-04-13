@@ -1,7 +1,6 @@
 # Architecture
-
 ## Overview
-### Basic setup without integration or incoming federation
+### Basic setup with default settings
 ```
  Client
    |
@@ -38,7 +37,7 @@ TCP 443
 See the [dedicated document](features/authentication.md).
 
 ### With Directory
-See the [dedicated document](features/directory-users.md).
+See the [dedicated document](features/directory.md).
 
 ### With Federation
 See the [dedicated document](features/federation.md).

@@ -1,9 +1,9 @@
-# Matrix Identity Service
+# Identity
 **WARNING**: This document is incomplete and can be missleading.
 
 Implementation of the [Unofficial Matrix Identity Service API](https://kamax.io/matrix/api/identity_service/unstable.html).
 
-## Invitation
+## Room Invitations
 Resolution can be customized using the following configuration:
 
 `invite.resolution.recursive`  
@@ -16,3 +16,6 @@ Resolution can be customized using the following configuration:
 `invite.resolution.timer`  
 - Default value: `1`  
 - Description: How often, in minutes, mxisd should try to resolve pending invites.
+
+## 3PID addition to user profile
+See the [3PID session documents](../threepids/session)

@@ -1,6 +1,24 @@
-# FAQ
+# Frequently Asked Questions
+### This is all very complicated and I'm getting confused with all the words, concepts and diagrams - Help!
+Matrix is still a very young protocol and there are a whole lot of rough edges.  
+Identity in Matrix is one of the most difficult topic, mainly as it has not received much love in the past years.
+
+We have tried our best to put together documentation that requires almost no knowledge of Matrix inner workings to get a
+first basic setup running and it is important you read the documentation in the right order:
+- [The  Concepts](concepts.md) in few words.
+- [Getting Started](getting-started.md) step-by-step to a minimal working install.
+- [Architecture](architecture.md) overview to see how components fit together.
+- [Identity stores](stores/README.md) you wish to fetch data from.
+- [Features](features) you are interested of enabling that will use your Identity store data.
+
+**IMPORTANT**: Be aware that mxisd tries to fit within the current protocol and existing products and basic understanding
+of the Matrix protocol is required for some advanced features.
+
+If all fails, come over to [the project room](https://matrix.to/#/#mxisd:kamax.io) and we'll do our best to get you
+started and answer questions you might have.
+
 ### Do I need to use mxisd if I run a Homeserver?
-No, but it is recommended, even if you don't use any backends or integration.
+No, but it is strongly recommended, even if you don't use any Identity store or integration.
 
 In its default configuration, mxisd will talk to the central Matrix Identity servers and use other federated public
 servers when performing queries, giving you access to at least the same information as if you were not running it.
@@ -13,7 +31,7 @@ simple features on top of it.
 
 ### I'm not sure I understand what an "Identity server" is supposed to be or do
 The current Identity service API is more a placeholder, as the Matrix devs did not have time so far to really work on
-what they want to do with that part of the ecosystem. Therefore, "Identity" is a misleading word currently.
+what they want to do with that part of the ecosystem. Therefore, "Identity" is currently a misleading word and concept.
 Given the scope of the current Identity Service API, it would be best called "Invitation service".
 
 Because the current scope is so limited and no integration is done with the Homeserver, there was a big lack of features
@@ -21,6 +39,12 @@ for groups/corporations/organisation. This is where mxisd comes in.
 
 mxisd implements the Identity Service API and also a set of features which are expected by regular users, truly living
 up to its "Identity server" name.
+
+### Can I migrate my existing account on another Matrix server with mxisd?
+No.
+
+Accounts cannot currently migrate/move from one server to another.  
+See a [brief explanation document](concepts.md) about Matrix and mxisd concepts and vocabulary.
 
 ### I already use the synapse LDAP3 auth provider, why should I care about mxisd?
 The [synapse LDAP3 auth provider](https://github.com/matrix-org/matrix-synapse-ldap3) is not longer maintained and
@@ -45,6 +69,8 @@ You can, but [sydent](https://github.com/matrix-org/sydent):
 So really, you should go with mxisd.
 
 ### Will I loose access to the central Matrix.org/Vector.im Identity data if I use mxisd?
+No.
+
 In its default configuration, mxisd act as a proxy to Matrix.org/Vector.im. You will have access to the same data and
 behaviour than if you were using them directly. There is no downside in using mxisd with the default configuration.
 
@@ -54,12 +80,11 @@ mxisd can also be configured not to talk to the central Identity servers if you 
 mxisd primary concern is to always be compatible with the Matrix ecosystem and the Identity service API.  
 Whenever the API will be updated and/or enhanced, mxisd will follow, remaining 100% compatible with the ecosystem.
 
-We also directly talk with the Matrix developers to ensure all features we implement have their approval, and that we
-are in line with their vision of Identity management within the Matrix ecosystem.
-
 Therefore, using mxisd is a safe choice. It will be like using the central Matrix.org Identity servers, yet not closing
-the door to very nice enhancements and integrations.
+the door to a growing list of enhancements and integrations.
 
 ### Should I use mxisd if I don't host my own Homeserver?
-No. It is possible, but it is not supported and the scope of features will be extremely limited.
+No.
+
+It is possible, but it is not supported and the scope of features will be extremely limited.
 Please consider hosting your own Homeserver and using mxisd alongside it.

@@ -1,4 +1,4 @@
-# Identity Stores (Backends)
+# Identity Stores
 - [Synapse](synapse.md)
 - [LDAP-based](ldap.md)
 - [SQL Databases](sql.md)

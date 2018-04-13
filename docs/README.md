@@ -1,22 +1,22 @@
 # Table of Contents
-
 - [Build from sources](build.md) (Optional)
 - Installation
   - [Debian package](install/debian.md)
+  - [ArchLinux](install/archlinux.md)
   - [Docker](install/docker.md)
   - [From source](install/source.md)
 - [Architecture overview](architecture.md)
 - [Configuration](configure.md)
 - Features
   - [Authentication](features/authentication.md)
-  - [Directory seach](features/directory-users.md)
-  - [Identity Service](features/identity.md)
+  - [Directory search](features/directory.md)
+  - [Identity](features/identity.md)
   - [Federation](features/federation.md)
   - [Bridge integration](features/bridge-integration.md)
-- [Identity Stores](backends/README.md)
+- [Identity Stores](stores/README.md)
 - Notifications
   - Handlers
-    - [Basic](threepids/notifications/basic-handler.md)
-    - [SendGrid](threepids/notifications/sendgrid-handler.md)
-- [Sessions](sessions/3pid.md)
-  - [Views](sessions/3pid-views.md)
+    - [Basic](threepids/notification/basic-handler.md)
+    - [SendGrid](threepids/notification/sendgrid-handler.md)
+- [Sessions](threepids/session/session.md)
+  - [Views](threepids/session/session-views.md)

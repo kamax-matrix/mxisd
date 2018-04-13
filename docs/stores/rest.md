@@ -1,4 +1,4 @@
-# REST backend
+# REST Identity store
 The REST backend allows you to query identity data in existing webapps, like:
 - Forums (phpBB, Discourse, etc.)
 - Custom Identity stores (Keycloak, ...)
@@ -15,14 +15,14 @@ To integrate this backend with your webapp, you will need to implement three spe
 | Identity       | Yes        |
 
 ## Configuration
-| Key                            | Default                                      | Description                                          |
----------------------------------|----------------------------------------------|------------------------------------------------------|
-| rest.enabled                   | false                                        | Globally enable/disable the REST backend             |
-| rest.host                      | *empty*                                      | Default base URL to use for the different endpoints. |
-| rest.endpoints.auth            | /_mxisd/backend/api/v1/auth/login            | Validate credentials and get user profile            |
-| rest.endpoints.directory       | /_mxisd/backend/api/v1/directory/user/search | Search for users by arbitrary input                  |
-| rest.endpoints.identity.single | /_mxisd/backend/api/v1/identity/single       | Endpoint to query a single 3PID                      |
-| rest.endpoints.identity.bulk   | /_mxisd/backend/api/v1/identity/bulk         | Endpoint to query a list of 3PID                     |
+| Key                              | Default                                        | Description                                          |
+|----------------------------------|------------------------------------------------|------------------------------------------------------|
+| `rest.enabled`                   | `false`                                        | Globally enable/disable the REST backend             |
+| `rest.host`                      | *None*                                        | Default base URL to use for the different endpoints. |
+| `rest.endpoints.auth`            | `/_mxisd/backend/api/v1/auth/login`            | Validate credentials and get user profile            |
+| `rest.endpoints.directory`       | `/_mxisd/backend/api/v1/directory/user/search` | Search for users by arbitrary input                  |
+| `rest.endpoints.identity.single` | `/_mxisd/backend/api/v1/identity/single`       | Endpoint to query a single 3PID                      |
+| `rest.endpoints.identity.bulk`   | `/_mxisd/backend/api/v1/identity/bulk`         | Endpoint to query a list of 3PID                     |
 
 Endpoint values can handle two formats:
 - URL Path starting with `/` that gets happened to the `rest.host`

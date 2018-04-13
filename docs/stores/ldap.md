@@ -1,4 +1,4 @@
-# LDAP
+# LDAP Identity store
 ## Supported products:
 - Samba
 - Active Directory
@@ -42,6 +42,8 @@ ldap.filter: '(memberOf=CN=My Matrix Users,OU=Groups,DC=example,DC=org)'
 This example would only return users part of the group called `My Matrix Users`.
 This can be overwritten or append in each specific flow describe below.
 
+For supported syntax, see the [LDAP library documentation](http://directory.apache.org/api/user-guide/2.3-searching.html#filter).
+
 ### Attribute mapping
 LDAP features are based on mapping LDAP attributes to Matrix concepts, like a Matrix ID, its localpart, the user display
 name, their email(s) and/or phone number(s).
@@ -58,8 +60,8 @@ most certainly configure those mappings.
 
 The following example would set the `sAMAccountName` attribute as a Matrix User ID localpart:
 ```yaml
-ldap.attribute.uid.type: 'sAMAccountName'
-ldap.attribute.uid.value: 'uid'
+ldap.attribute.uid.type: 'uid'
+ldap.attribute.uid.value: 'sAMAccountName'
 ```
 
 #### Display name
@@ -95,7 +97,7 @@ configuration item is needed to get started.
 - `ldap.identity.medium`: Namespace to overwrite generated queries from the list of attributes for each 3PID medium.
 
 ### Authentication
-No further configuration is needed to enable authentication with LDAP once globally enabled and configured.
+No further configuration is needed to use the Authentication feature with LDAP once globally enabled and configured.
 
 Profile auto-fill is enabled by default. It will use the `ldap.attribute.name` and `ldap.attribute.threepid` configuration
 options to get a lit of attributes to be used to build the user profile to pass on to synapse during authentication.
@@ -104,7 +106,7 @@ options to get a lit of attributes to be used to build the user profile to pass 
 - `ldap.auth.filter`: Specific user filter applied during identity search. Global filter is used if blank/not set.
 
 ### Directory
-No further configuration is needed to enable directory with LDAP once globally enabled and configured.
+No further configuration is needed to use the Directory feature with LDAP once globally enabled and configured.
 
 #### Configuration
 To set a specific filter applied during directory search, use `ldap.directory.filter`

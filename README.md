@@ -13,12 +13,12 @@ mxisd - Federated Matrix Identity Server
 
 # Overview
 mxisd is a Federated Matrix Identity server for self-hosted Matrix infrastructures with [enhanced features](#features).
-It is an enhanced Identity service, which implements the [Matrix Identity service API](https://kamax.io/matrix/api/identity_service/unstable.html)
-but also several [other features](#features) that greatly enhance user experience within Matrix.
-It is the one stop shop for anything regarding Authentication, Directory and Identity management in Matrix built as a
+As an enhanced Identity service, it implements the [Matrix Identity service API](https://kamax.io/matrix/api/identity_service/unstable.html)
+and several [extra features](#features) that greatly enhance user experience within Matrix.
+It is the one stop shop for anything regarding Authentication, Directory and Identity management in Matrix built in a
 single coherent product.
   
-mxisd is specifically designed to connect to an existing on-remise Identity store (AD/Samba/LDAP, SQL Database,
+mxisd is specifically designed to connect to an existing on-premise Identity store (AD/Samba/LDAP, SQL Database,
 Web services/app, etc.) and ease the integration of a Matrix infrastructure within an existing one.
 
 The core principle of mxisd is to map between Matrix IDs and 3PIDs (Third-Party IDentifiers) for the Homeserver and its
@@ -29,54 +29,61 @@ users. 3PIDs can be anything that uniquely and globally identify a user, like:
 - Twitter handle
 - Facebook ID
 
+If you are unfamiliar with the Identity vocabulary and concepts in Matrix, **please read this [introduction](docs/concepts.md)**.
+
 # Features
-As a [regular Matrix Identity service](docs/features/identity.md):
-- Search for people by 3PID using its own Identity stores (LDAP, SQL, etc.)
-- Invite people to rooms by 3PID using its own Identity stores, with [notifications](docs/README.md)
-to the invitee (Email, SMS, etc.)
+[Identity](docs/features/identity.md): As a [regular Matrix Identity service](https://kamax.io/matrix/api/identity_service/unstable.html#general-principles):
+- Search for people by 3PID using its own Identity stores
+  ([Spec](https://kamax.io/matrix/api/identity_service/unstable.html#association-lookup))
+- Invite people to rooms by 3PID using its own Identity stores, with notifications to the invitee (Email, SMS, etc.)
+  ([Spec](https://kamax.io/matrix/api/identity_service/unstable.html#post-matrix-identity-api-v1-store-invite))
 - Allow users to add 3PIDs to their settings/profile
+  ([Spec](https://kamax.io/matrix/api/identity_service/unstable.html#establishing-associations))
+- Register accounts on your Homeserver with 3PIDs
+  ([Spec](https://kamax.io/matrix/api/identity_service/unstable.html#establishing-associations))
 
 As an enhanced Identity service:
-- Use a recursive lookup mechanism when searching and inviting people by 3PID, allowing to fetch data from:
-  - Own Identity store
+- [Federation](docs/features/federation.md): Use a recursive lookup mechanism when searching and inviting people by 3PID,
+  allowing to fetch data from:
+  - Own Identity store(s)
   - Federated Identity servers, if applicable to the 3PID
   - Arbitrary Identity servers
   - Central Matrix Identity servers
-- [Extensive control of where 3PIDs are transmited](docs/sessions/3pid.md), so they are not leaked publicly by users
-- [Authentication support](docs/features/authentication.md) for [synapse](https://github.com/matrix-org/synapse) via the
-[REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth)
-- [Directory integration](docs/features/directory-users.md) which allows you to search for users within your
-organisation, even without prior contact within Matrix
-- [Auto-fill of user profile](docs/features/authentication.md) (Display name, 3PIDs)
+- [Session Control](docs/threepids/session/session.md): Extensive control of where 3PIDs are transmitted so they are not
+  leaked publicly by users
+- [Authentication](docs/features/authentication.md): Use your Identity stores to perform authentication in [synapse](https://github.com/matrix-org/synapse)
+  via the [REST auth module](https://github.com/kamax-io/matrix-synapse-rest-auth)
+- [Directory search](docs/features/directory.md) which allows you to search for users within your organisation,
+  even without prior contact within Matrix using arbitrary search terms
+- [Auto-fill of user profile](docs/features/authentication.md#profile-auto-fill) (Display name, 3PIDs)
+- [Bridge Integration](docs/features/bridge-integration.md): Automatically bridge users without a published Matrix ID
 
 # Use cases
-- Use your existing Identity store, do not duplicate information
+- Use your existing Identity stores, do not duplicate your users information
 - Auto-fill user profiles with relevant information
-- As an organisation, stay in control of 3PIDs so they are not published to the central Matrix.org servers where they
-currently **cannot be removed**
+- As an organisation, stay in control of your data so it is not published to other servers by default where they
+  currently **cannot be removed**
 - Users can directly find each other using whatever attribute is relevant within your Identity store
-- Federate your Identity lookups so you can discover others and/or others can discover you, all with extensive ACLs
+- Federate your Identity server so you can discover others and/or others can discover you
 
 # Getting started
 See the [dedicated document](docs/getting-started.md)
 
 # Support
 ## Community
-If you need help, want to report a bug or just say hi, you can reach us on Matrix at 
-[#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io) or
-[directly peek anonymously](https://view.matrix.org/room/!NPRUEisLjcaMtHIzDr:kamax.io/).
-For more high-level discussion about the Identity Server architecture/API, go to 
-[#matrix-identity:matrix.org](https://matrix.to/#/#matrix-identity:matrix.org)
+Over Matrix: [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io) ([Preview](https://view.matrix.org/room/!NPRUEisLjcaMtHIzDr:kamax.io/))
+
+For more high-level discussion about the Identity Server architecture/API, go to  [#matrix-identity:kamax.io](https://matrix.to/#/#matrix-identity:kamax.io)
 
 ## Commercial
 If you would prefer professional support/custom development for mxisd and/or for Matrix in general, including other open
-source technologies/products, please visit [our website](https://www.kamax.io/) to get in touch with us and get a quote.
+source technologies/products:
+- Visit our [website](https://www.kamax.io/) to get in touch with us and get a quote.
+- Come in our general Matrix room: [#kamax-matrix:kamax.io](https://matrix.to/#/#kamax-matrix:kamax.io)
 
-# Contribute
-First and foremost, the best way to contribute is to use mxisd and tell us about it!  
-We would love to hear about your experience and get your feedback on how to make it an awesome product. 
-
+# Contribute 
 You can contribute as a community member by:
+- Giving us feedback about your usage of mxisd, even if it seems unimportant or if all is working well!
 - Opening issues for any weird behaviour or bug. mxisd should feel natural, let us know if it does not!
 - Helping us improve the documentation: tell us what is good or not good (in an issue or in Matrix), or make a PR with
 changes you feel improve the doc.
@@ -85,7 +92,7 @@ changes you feel improve the doc.
 be used for the fixed costs and developer time of mxisd.
 
 You can contribute as an organisation/corporation by:
-- Get a [support contract](#support-commercial). This is the best way you can help us as it ensures mxisd is
+- Get a [support contract](#commercial). This is the best way you can help us as it ensures mxisd is
 maintained regularly and you get direct access to the support team.
 - Sponsoring new features or bug fixes. [Get in touch](#contact) so we can discuss it further.
 

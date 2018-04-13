@@ -7,8 +7,8 @@
 6. [Next steps](#next-steps)
 
 Following these quick start instructions, you will have a basic setup that can perform recursive/federated lookups and
-talk to the central Matrix.org Identity service.  
-This will be a good ground work for further integration with your existing Identity stores.
+talk to the central Matrix.org Identity server.  
+This will be a good ground work for further integration with features and your existing Identity stores.
 
 ## Preparation
 You will need:
@@ -39,12 +39,12 @@ See the [Latest release](https://github.com/kamax-io/mxisd/releases/latest) for 
 **NOTE**: please view the install instruction for your platform, as this step might be optional or already handled for you.
 
 Create/edit a minimal configuration (see installer doc for the location):
-```
+```yaml
 matrix.domain: 'example.org'
 key.path: '/path/to/signing.key.file'
 storage.provider.sqlite.database: '/path/to/mxisd.db'
 ```  
-- `matrix.domain` should be set to your Homeserver domain
+- `matrix.domain` should be set to your Homeserver domain (`server_name` in synapse configuration)
 - `key.path` will store the signing keys, which must be kept safe! If the file does not exist, keys will be generated for you.
 - `storage.provider.sqlite.database` is the location of the SQLite Database file which will hold state (invites, etc.)
 
@@ -58,12 +58,12 @@ For an overview of a typical mxisd infrastructure, see the [dedicated document](
 In the `VirtualHost` section handling the domain with SSL, add the following and replace `0.0.0.0` by the internal
 hostname/IP pointing to mxisd.  
 **This line MUST be present before the one for the homeserver!**
-```
-ProxyPass /_matrix/identity/ http://0.0.0.0:8090/_matrix/identity/
+```apache
+ProxyPass /_matrix/identity http://0.0.0.0:8090/_matrix/identity
 ```
 
 Typical configuration would look like:
-```
+```apache
 <VirtualHost *:443>
     ServerName example.org
     
@@ -79,14 +79,14 @@ Typical configuration would look like:
 In the `server` section handling the domain with SSL, add the following and replace `0.0.0.0` with the internal
 hostname/IP pointing to mxisd.
 **This line MUST be present before the one for the homeserver!**
-```
+```nginx
 location /_matrix/identity {
     proxy_pass http://0.0.0.0:8090/_matrix/identity;
 }
 ```
 
 Typical configuration would look like:
-```
+```nginx
 server {
     listen 443 ssl;
     server_name example.org;
@@ -109,8 +109,8 @@ server {
 
 ### Synapse
 Add your mxisd domain into the `homeserver.yaml` at `trusted_third_party_id_servers` and restart synapse.  
-In a typical configuration, you would end up with something similair to:
-```
+In a typical configuration, you would end up with something similar to:
+```yaml
 trusted_third_party_id_servers:
     - example.org
 ```
@@ -122,16 +122,14 @@ Log in using your Matrix client and set `https://example.org` as your Identity s
 the relevant hostname which you configured in your reverse proxy.  
 Invite `mxisd-federation-test@kamax.io` to a room, which should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`.
 At this point, the test user will join the room, send a congratulation message and leave.  
-**NOTE:** You might not see a Matrix suggestion for the e-mail address, which is normal. Still proceed with the invite.
+**NOTE:** You might not see a suggestion for the e-mail address, which is normal. Still proceed with the invite.
   
 If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  
 If it did not work, [get in touch](../README.md#support) and we'll do our best to get you started.
-
-You can now integrate mxisd further with your infrastructure using the various [features](README.md) guides.
 
 ## Next steps
 Once your mxisd server is up and running, there are several ways you can enhance and integrate further with your
 infrastructure:
 
-- [Enable extra features](features/README.md)
-- [Use your own Identity stores](backends/README.md)
+- [Enable extra features](features/)
+- [Use your own Identity stores](stores/README.md)

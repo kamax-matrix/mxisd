@@ -1,10 +1,9 @@
 # Install from sources
-
 ## Instructions
 Follow the [build instructions](../build.md) then:
 
 1. Prepare files and directories:
-```
+```bash
 # Create a dedicated user
 useradd -r mxisd
 
@@ -12,12 +11,12 @@ useradd -r mxisd
 mkdir /opt/mxisd
 
 # Create config directory and set ownership
-mkdir /etc/opt/mxisd
-chown mxisd /etc/opt/mxisd
+mkdir -p /etc/opt/mxisd
+chown -R mxisd /etc/opt/mxisd
 
 # Create data directory and set ownership
-mkdir /var/opt/mxisd
-chown mxisd /var/opt/mxisd
+mkdir -p /var/opt/mxisd
+chown -R mxisd /var/opt/mxisd
 
 # Copy <repo root>/build/libs/mxisd.jar to bin directory
 cp ./build/libs/mxisd.jar /opt/mxisd/
@@ -27,17 +26,13 @@ chmod a+x /opt/mxisd/mxisd.jar
 # Create symlink for easy exec
 ln -s /opt/mxisd/mxisd.jar /usr/bin/mxisd
 ```
-
 2. Copy the sample config file `./application.example.yaml` to `/etc/opt/mxisd/mxisd.yaml`, edit to your needs
-4. Copy `<repo root>/src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
-5. Enable service for auto-startup
-```
+3. Copy `src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
+4. Enable service for auto-startup
+```bash
 systemctl enable mxisd
 ```
-6. Start mxisd
-```
+5. Start mxisd
+```bash
 systemctl start mxisd
 ```
-
-## Next steps
-- [Integrate with your infrastructure](getting-started.md#integrate)

@@ -1,4 +1,4 @@
-# Wordpress
+# Wordpress Identity store
 This Identity store allows you to use user accounts registered on your Wordpress setup.  
 Two types of connections are required for full support:
 - [REST API](https://developer.wordpress.org/rest-api/) with JWT authentication
