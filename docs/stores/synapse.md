@@ -35,7 +35,7 @@ Example: `/path/to/synapse/sqliteFile.db`
 
 ### PostgreSQL
 ```yaml
-synapseSql.connection: //<HOST[:PORT]/DB?username=USER&password=PASS
+synapseSql.connection: //<HOST[:PORT]/DB?user=USER&password=PASS
 ```
 Set the connection info for the database by replacing the following values:
 - `HOST`: Hostname of the SQL server
