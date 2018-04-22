@@ -24,7 +24,7 @@ import io.kamax.matrix.crypto.KeyFileStore;
 import io.kamax.matrix.crypto.KeyManager;
 import io.kamax.matrix.crypto.SignatureManager;
 import io.kamax.mxisd.config.KeyConfig;
-import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.ServerConfig;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,8 +50,8 @@ public class CryptoFactory {
     }
 
     @Bean
-    public SignatureManager getSignatureManager(KeyManager keyMgr, MatrixConfig mxCfg) {
-        return new SignatureManager(keyMgr, mxCfg.getDomain());
+    public SignatureManager getSignatureManager(KeyManager keyMgr, ServerConfig cfg) {
+        return new SignatureManager(keyMgr, cfg.getName());
     }
 
 }
