@@ -20,8 +20,8 @@
 
 package io.kamax.mxisd.controller.directory.v1.io;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UserDirectorySearchResult {
 
@@ -55,10 +55,31 @@ public class UserDirectorySearchResult {
             this.userId = userId;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Result result = (Result) o;
+
+            if (displayName != null ? !displayName.equals(result.displayName) : result.displayName != null)
+                return false;
+            if (avatarUrl != null ? !avatarUrl.equals(result.avatarUrl) : result.avatarUrl != null) return false;
+            return userId.equals(result.userId);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = displayName != null ? displayName.hashCode() : 0;
+            result = 31 * result + (avatarUrl != null ? avatarUrl.hashCode() : 0);
+            result = 31 * result + userId.hashCode();
+            return result;
+        }
+
     }
 
     private boolean limited;
-    private List<Result> results = new ArrayList<>();
+    private Set<Result> results = new HashSet<>();
 
     public boolean isLimited() {
         return limited;
@@ -68,11 +89,11 @@ public class UserDirectorySearchResult {
         this.limited = limited;
     }
 
-    public List<Result> getResults() {
+    public Set<Result> getResults() {
         return results;
     }
 
-    public void setResults(List<Result> results) {
+    public void setResults(Set<Result> results) {
         this.results = results;
     }
 

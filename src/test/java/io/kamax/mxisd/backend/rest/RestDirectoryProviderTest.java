@@ -33,8 +33,7 @@ import org.junit.Test;
 import java.nio.charset.StandardCharsets;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RestDirectoryProviderTest {
 
@@ -89,8 +88,8 @@ public class RestDirectoryProviderTest {
 
         UserDirectorySearchResult result = p.searchByDisplayName(byNameSearch);
         assertTrue(!result.isLimited());
-        assertTrue(result.getResults().size() == 1);
-        UserDirectorySearchResult.Result entry = result.getResults().get(0);
+        assertEquals(1, result.getResults().size());
+        UserDirectorySearchResult.Result entry = result.getResults().iterator().next();
         assertNotNull(entry);
         assertTrue(StringUtils.equals(byNameAvatar, entry.getAvatarUrl()));
         assertTrue(StringUtils.equals(byNameDisplay, entry.getDisplayName()));
@@ -132,8 +131,8 @@ public class RestDirectoryProviderTest {
 
         UserDirectorySearchResult result = p.searchBy3pid(byThreepidSearch);
         assertTrue(!result.isLimited());
-        assertTrue(result.getResults().size() == 1);
-        UserDirectorySearchResult.Result entry = result.getResults().get(0);
+        assertEquals(1, result.getResults().size());
+        UserDirectorySearchResult.Result entry = result.getResults().iterator().next();
         assertNotNull(entry);
         assertTrue(StringUtils.equals(byThreepidAvatar, entry.getAvatarUrl()));
         assertTrue(StringUtils.equals(byThreepidDisplay, entry.getDisplayName()));
