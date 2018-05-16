@@ -359,6 +359,7 @@ public abstract class LdapConfig {
 
         log.info("Host: {}", connection.getHost());
         log.info("Port: {}", connection.getPort());
+        log.info("TLS: {}", connection.isTls());
         log.info("Bind DN: {}", connection.getBindDn());
         log.info("Base DN: {}", connection.getBaseDn());
 
