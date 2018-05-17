@@ -117,6 +117,7 @@ The following example of configuration (incomplete extract) shows which items ar
 **IMPORTANT:** Most configuration items shown have default values and should not be included in your own configuration
 file unless you want to specifically overwrite them.
 ```yaml
+# CONFIGURATION EXAMPLE
 # DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
 session.policy.validation.enabled: true
 session.policy.validation.forLocal:
@@ -132,6 +133,7 @@ session.policy.validation.forRemote:
     enabled: true
     server: 'configExample'  # Not to be included in config! Already present in default config!
 # DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
+# CONFIGURATION EXAMPLE
 ```
 
 `session.policy.validation` is the core configuration to control what users configured to use your Identity server
@@ -143,8 +145,8 @@ It is also divided into two sections: `forLocal` and `forRemote` which refers to
 Each scope is divided into three parts:
 - global on/off switch for 3PID sessions using `.enabled`
 - `toLocal` allowing or not local 3PID session validations
-- `toRemote` allowing or not remote 3PID session validations and to which server such sessions should be sent. 
-`.server` takes a Matrix Identity server list label. Only the first server in the list is currently used.
+- `toRemote` allowing or not remote 3PID session validations and to which server such sessions should be sent.   
+  `.server` takes a Matrix Identity server list label. Only the first server in the list is currently used.
 
 If both `toLocal` and `toRemote` are enabled, the user will be offered to initiate a remote session once their 3PID
 locally validated.
