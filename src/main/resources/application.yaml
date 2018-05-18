@@ -24,7 +24,7 @@ matrix:
   domain: ''
   identity:
     servers:
-      root:
+      matrix-org:
         - 'https://matrix.org'
 
 lookup:
@@ -174,9 +174,7 @@ wordpress:
         threepid: 'SELECT DISTINCT user_login, display_name FROM wp_users WHERE user_email LIKE ?'
 
 forward:
-  servers:
-    - 'https://matrix.org'
-    - 'https://vector.im'
+  servers: []
 
 threepid:
   medium:
@@ -226,13 +224,13 @@ session:
         toLocal: true
         toRemote:
           enabled: true
-          server: 'root'
+          server: 'matrix-org'
       forRemote:
         enabled: true
         toLocal: false
         toRemote:
           enabled: true
-          server: 'root'
+          server: 'matrix-org'
 
 notification:
 #  handler:

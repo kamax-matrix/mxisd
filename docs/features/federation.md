@@ -5,8 +5,8 @@ Federated Identity server using the DNS domain part of the 3PID.
 Emails are the best candidate for this kind of resolution which are DNS domain based already.  
 On the other hand, Phone numbers cannot be resolved this way.
 
-For 3PIDs which are not compatible with the DNS system, mxisd will talk to the central Identity server of matrix.org by
-default.
+For 3PIDs which are not compatible with the DNS system, mxisd can be configured to talk to fallback Identity servers like
+the central matrix.org one. See the [Identity feature](identity.md#lookups) for instructions on how to enable it.
 
 Outbound federation is enabled by default while inbound federation is opt-in and require a specific DNS record.
 
@@ -17,16 +17,14 @@ Outbound federation is enabled by default while inbound federation is opt-in and
               |                   |   |      +------> +----------+
               |                   |   |      |
               | Invites / Lookups |   |      |
- Federated    | +--------+        |   |      |        +-------------------+
- Identity  ---->| Remote |>-----------+      +------> | Remote Federated  |
- Server       | +--------+        |          |        | mxisd servers     |
-              |                   |          |        +-------------------+
-              | +--------+        |          |
- Homeserver --->| Local  |>------------------+
- and clients  | +--------+        |          |        +--------------------------+ 
-              +-------------------+          +------> | Central Identity service |
-                                                      | Matrix.org / Vector.im   |
-                                                      +--------------------------+
+ Federated    | +--------+        |   |      |
+ Identity  ---->| Remote |>-----------+      |
+ Server       | +--------+        |          |
+              |                   |          |
+              | +--------+        |          |        +-------------------+
+ Homeserver --->| Local  |>------------------+------> | Remote Federated  |
+ and clients  | +--------+        |                   | mxisd servers     |
+              +-------------------+                   +-------------------+
 ```
 
 ## Inbound
