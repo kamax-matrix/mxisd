@@ -19,8 +19,9 @@ started and answer questions you might have.
 ### Do I need to use mxisd if I run a Homeserver?
 No, but it is strongly recommended, even if you don't use any Identity store or integration.
 
-In its default configuration, mxisd will talk to the central Matrix Identity servers and use other federated public
-servers when performing queries, giving you access to at least the same information as if you were not running it.
+In its default configuration, mxisd uses other federated public servers when performing queries.  
+It can also [be configured](features/identity.md#lookups) to use the central matrix.org servers, giving you access to at
+least the same information as if you were not running it.
 
 It will also give your users a choice to make their 3PIDs available publicly, ensuring they are made aware of the
 privacy consequences, which is not the case with the central Matrix.org servers.
@@ -70,17 +71,14 @@ So really, you should go with mxisd.
 ### Will I loose access to the central Matrix.org/Vector.im Identity data if I use mxisd?
 No.
 
-In its default configuration, mxisd act as a proxy to Matrix.org/Vector.im. You will have access to the same data and
-behaviour than if you were using them directly. There is no downside in using mxisd with the default configuration.
+In its default configuration, mxisd does not talk to the central Identity server matrix.org to avoid leaking your private
+data and those of people you might know.
 
-mxisd can also be configured not to talk to the central Identity servers if you wish.
+mxisd [can be configured](features/identity.md#lookups) to talk to the central Identity servers if you wish.
 
 ### So mxisd is just a big hack! I don't want to use non-official features!
-mxisd primary concern is to always be compatible with the Matrix ecosystem and the Identity service API.  
+mxisd primary concerns are your privacy and to always be compatible with the Matrix ecosystem and the Identity service API.  
 Whenever the API will be updated and/or enhanced, mxisd will follow, remaining 100% compatible with the ecosystem.
-
-Therefore, using mxisd is a safe choice. It will be like using the central Matrix.org Identity servers, yet not closing
-the door to a growing list of enhancements and integrations.
 
 ### Should I use mxisd if I don't host my own Homeserver?
 No.

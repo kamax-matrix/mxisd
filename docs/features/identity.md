@@ -3,6 +3,16 @@
 
 Implementation of the [Unofficial Matrix Identity Service API](https://kamax.io/matrix/api/identity_service/unstable.html).
 
+## Lookups
+If you would like to use the central matrix.org Identity server to ensure maximum discovery at the cost of potentially
+leaking all your contacts information, add the following to your configuration:
+```yaml
+forward.servers:
+  - 'matrix-org'
+```
+**NOTE:** You should carefully consider enabling this option, which is discouraged.  
+For more info, see the [relevant issue](https://github.com/kamax-io/mxisd/issues/76).
+
 ## Room Invitations
 Resolution can be customized using the following configuration:
 

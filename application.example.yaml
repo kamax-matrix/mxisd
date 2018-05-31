@@ -47,17 +47,32 @@ key.path: ''
 storage.provider.sqlite.database: '/path/to/mxisd.db'
 
 
+####################
+# Fallback servers #
+####################
+#
+# Root/Central servers to be used as final fallback when performing lookups.
+# By default, for privacy reasons, matrix.org servers are not enabled anymore.
+# See the following issue: https://github.com/kamax-io/mxisd/issues/76
+#
+# If you would like to use them and trade away your privacy for convenience, uncomment the following option:
+#
+#forward.servers: ['matrix-org']
+
+
 ################
 # LDAP Backend #
 ################
 # If you would like to integrate with your AD/Samba/LDAP server,
 # see https://github.com/kamax-io/mxisd/blob/master/docs/backends/ldap.md
 
+
 ###############
 # SQL Backend #
 ###############
 # If you would like to integrate with a MySQL/MariaDB/PostgreQL/SQLite DB,
 # see https://github.com/kamax-io/mxisd/blob/master/docs/backends/sql.md
+
 
 ################
 # REST Backend #

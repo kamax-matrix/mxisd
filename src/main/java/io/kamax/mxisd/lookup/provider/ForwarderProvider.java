@@ -21,6 +21,7 @@
 package io.kamax.mxisd.lookup.provider;
 
 import io.kamax.mxisd.config.ForwardConfig;
+import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
@@ -43,6 +44,9 @@ class ForwarderProvider implements IThreePidProvider {
     private ForwardConfig cfg;
 
     @Autowired
+    private MatrixConfig mxCfg;
+
+    @Autowired
     private IRemoteIdentityServerFetcher fetcher;
 
     @Override
@@ -62,10 +66,13 @@ class ForwarderProvider implements IThreePidProvider {
 
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
-        for (String root : cfg.getServers()) {
-            Optional<SingleLookupReply> answer = fetcher.find(root, request);
-            if (answer.isPresent()) {
-                return answer;
+        for (String label : cfg.getServers()) {
+            for (String srv : mxCfg.getIdentity().getServers(label)) {
+                log.info("Using forward server {}", srv);
+                Optional<SingleLookupReply> answer = fetcher.find(srv, request);
+                if (answer.isPresent()) {
+                    return answer;
+                }
             }
         }
 
@@ -77,13 +84,15 @@ class ForwarderProvider implements IThreePidProvider {
         List<ThreePidMapping> mappingsToDo = new ArrayList<>(mappings);
         List<ThreePidMapping> mappingsFoundGlobal = new ArrayList<>();
 
-        for (String root : cfg.getServers()) {
-            log.info("{} mappings remaining: {}", mappingsToDo.size(), mappingsToDo);
-            log.info("Querying {}", root);
-            List<ThreePidMapping> mappingsFound = fetcher.find(root, mappingsToDo);
-            log.info("{} returned {} mappings", root, mappingsFound.size());
-            mappingsFoundGlobal.addAll(mappingsFound);
-            mappingsToDo.removeAll(mappingsFound);
+        for (String label : cfg.getServers()) {
+            for (String srv : mxCfg.getIdentity().getServers(label)) {
+                log.info("{} mappings remaining: {}", mappingsToDo.size(), mappingsToDo);
+                log.info("Querying {}", srv);
+                List<ThreePidMapping> mappingsFound = fetcher.find(srv, mappingsToDo);
+                log.info("{} returned {} mappings", srv, mappingsFound.size());
+                mappingsFoundGlobal.addAll(mappingsFound);
+                mappingsToDo.removeAll(mappingsFound);
+            }
         }
 
         return mappingsFoundGlobal;
