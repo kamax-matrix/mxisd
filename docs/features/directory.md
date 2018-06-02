@@ -138,5 +138,5 @@ the `matrix.domain` configuration option and avoid duplicating it.
 You can configure if the Homeserver should be queried at all when doing a directory search.  
 To disable Homeserver results, set the following in mxisd configuration file:
 ```yaml
-directory.exclude.homeserever: true
+directory.exclude.homeserver: true
 ```
