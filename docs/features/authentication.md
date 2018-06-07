@@ -148,7 +148,8 @@ dns.overwrite.homeserver.client:
     value: 'http://localhost:8008'
 ```
 `name` must be the hostname of the URL that clients use when connecting to the Homeserver.
-In case the hostname is the same as your Matrix domain, you can use `${matrix.domain}` to auto-populate the `value`
-using the `matrix.domain` configuration option and avoid duplicating it.
+You can use `${server.name}` to auto-populate the `value` using the `server.name` configuration option and avoid duplicating it.
+In case the hostname is the same as your Matrix domain and `server.name` is not explicitely set in the config, `server.name` will default to
+`matrix.domain` and will still probably have the correct value.
 
 `value` is the base internal URL of the Homeserver, without any `/_matrix/..` or trailing `/`.
