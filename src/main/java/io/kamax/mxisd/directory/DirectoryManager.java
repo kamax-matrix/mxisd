@@ -75,6 +75,10 @@ public class DirectoryManager {
     }
 
     public UserDirectorySearchResult search(URI target, String accessToken, String query) {
+        if (StringUtils.startsWith(query, "@")) {
+            query = query.substring(1);
+        }
+
         log.info("Performing search for '{}'", query);
         log.info("Original request URL: {}", target);
         UserDirectorySearchResult result = new UserDirectorySearchResult();
