@@ -21,6 +21,7 @@
 package io.kamax.mxisd.lookup.strategy;
 
 import edazdarevic.commons.net.CIDRUtils;
+import io.kamax.mxisd.config.BulkLookupConfig;
 import io.kamax.mxisd.config.RecursiveLookupConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.lookup.*;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,14 +46,16 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
     private Logger log = LoggerFactory.getLogger(RecursivePriorityLookupStrategy.class);
 
     private RecursiveLookupConfig cfg;
+    private BulkLookupConfig bulkCfg;
     private List<IThreePidProvider> providers;
     private IBridgeFetcher bridge;
 
     private List<CIDRUtils> allowedCidr = new ArrayList<>();
 
     @Autowired
-    public RecursivePriorityLookupStrategy(RecursiveLookupConfig cfg, List<IThreePidProvider> providers, IBridgeFetcher bridge) {
+    public RecursivePriorityLookupStrategy(RecursiveLookupConfig cfg, BulkLookupConfig bulkCfg, List<IThreePidProvider> providers, IBridgeFetcher bridge) {
         this.cfg = cfg;
+        this.bulkCfg = bulkCfg;
         this.bridge = bridge;
         this.providers = providers.stream().filter(p -> {
             log.info("3PID Provider {} is enabled: {}", p.getClass().getSimpleName(), p.isEnabled());
@@ -193,6 +197,10 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
 
     @Override
     public List<ThreePidMapping> find(BulkLookupRequest request) {
+        if (!bulkCfg.getEnabled()) {
+            return Collections.emptyList();
+        }
+
         List<ThreePidMapping> mapToDo = new ArrayList<>(request.getMappings());
         List<ThreePidMapping> mapFoundAll = new ArrayList<>();
 
