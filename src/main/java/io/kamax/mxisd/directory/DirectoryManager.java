@@ -129,11 +129,15 @@ public class DirectoryManager {
                 result.setLimited(true);
             }
 
-            resultProvider = provider.searchBy3pid(query);
-            log.info("Threepid: found {} match(es) for '{}'", resultProvider.getResults().size(), query);
-            result.getResults().addAll(resultProvider.getResults());
-            if (resultProvider.isLimited()) {
-                result.setLimited(true);
+            if (cfg.getExclude().getThreepid()) {
+                log.info("Skipping 3PID data, disabled in config");
+            } else {
+                resultProvider = provider.searchBy3pid(query);
+                log.info("Threepid: found {} match(es) for '{}'", resultProvider.getResults().size(), query);
+                result.getResults().addAll(resultProvider.getResults());
+                if (resultProvider.isLimited()) {
+                    result.setLimited(true);
+                }
             }
         }
 

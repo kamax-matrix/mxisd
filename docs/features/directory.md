@@ -140,3 +140,10 @@ To disable Homeserver results, set the following in mxisd configuration file:
 ```yaml
 directory.exclude.homeserver: true
 ```
+
+### 3PID exclusion in search
+You can configure if the 3PID should also be included when doing a directory search.
+By default, a search is performed on the 3PIDs. If you would like to not include them:
+```yaml
+directory.exclude.threepid: true
+```

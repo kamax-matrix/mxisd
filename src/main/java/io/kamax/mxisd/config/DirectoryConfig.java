@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+
 @Configuration
 @ConfigurationProperties("directory")
 public class DirectoryConfig {
@@ -34,6 +36,7 @@ public class DirectoryConfig {
     public static class Exclude {
 
         private boolean homeserver;
+        private boolean threepid;
 
         public boolean getHomeserver() {
             return homeserver;
@@ -42,6 +45,14 @@ public class DirectoryConfig {
         public Exclude setHomeserver(boolean homeserver) {
             this.homeserver = homeserver;
             return this;
+        }
+
+        public boolean getThreepid() {
+            return threepid;
+        }
+
+        public void setThreepid(boolean threepid) {
+            this.threepid = threepid;
         }
 
     }
@@ -54,6 +65,14 @@ public class DirectoryConfig {
 
     public void setExclude(Exclude exclude) {
         this.exclude = exclude;
+    }
+
+    @PostConstruct
+    public void buid() {
+        log.info("--- Directory config ---");
+        log.info("Exclude:");
+        log.info("\tHomeserver: {}", getExclude().getHomeserver());
+        log.info("\t3PID: {}", getExclude().getThreepid());
     }
 
 }
