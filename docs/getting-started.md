@@ -12,7 +12,7 @@ This will be a good ground work for further integration with features and your e
 
 ## Preparation
 You will need:
-- Homeserver
+- Working Homeserver, ideally with working federation
 - Reverse proxy with regular TLS/SSL certificate (Let's encrypt) for your mxisd domain
 
 As synapse requires an HTTPS connection when talking to an Identity service, **a reverse proxy is required** as mxisd does
@@ -30,6 +30,7 @@ If you would like a high-level view of the infrastructure and how each feature i
 ## Install
 Install via:
 - [Debian package](install/debian.md)
+- [ArchLinux](install/archlinux.md)
 - [Docker image](install/docker.md)
 - [Sources](build.md)
 
@@ -118,10 +119,15 @@ It is recommended to remove `matrix.org` and `vector.im` (or any other default e
 your own Identity server is authoritative for your HS.
 
 ## Validate
-Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
-the relevant hostname which you configured in your reverse proxy.  
-Invite `mxisd-federation-test@kamax.io` to a room, which should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`.
-At this point, the test user will join the room, send a congratulation message and leave.  
+**NOTE:** In case your homeserver has no working federation, step 5 will not happen. If step 4 took place, consider
+your installation validated.
+
+1. Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
+the relevant hostname which you configured in your reverse proxy.
+2. Create a new empty room. All further actions will take place in this room.
+3. Invite `mxisd-federation-test@kamax.io`
+4. The 3PID invite should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`.
+5. The invited test user will join the room, send a congratulation message and leave.
 **NOTE:** You might not see a suggestion for the e-mail address, which is normal. Still proceed with the invite.
   
 If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  

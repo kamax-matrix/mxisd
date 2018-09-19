@@ -5,7 +5,7 @@ Identity in Matrix is one of the most difficult topic, mainly as it has not rece
 
 We have tried our best to put together documentation that requires almost no knowledge of Matrix inner workings to get a
 first basic setup running which relies on you reading the documentation in the right order:
-- [The  Concepts](concepts.md) in few words.
+- [The Concepts](concepts.md) in few words.
 - [Getting Started](getting-started.md) step-by-step to a minimal working install.
 - [Identity stores](stores/README.md) you wish to fetch data from.
 - [Features](features) you are interested in that will use your Identity store(s) data.

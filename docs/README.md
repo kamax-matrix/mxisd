@@ -1,4 +1,6 @@
 # Table of Contents
+- [Identity Concepts in Matrix](concepts.md)
+- [Getting Started](getting-started.md)
 - [Build from sources](build.md) (Optional)
 - Installation
   - [Debian package](install/debian.md)
@@ -20,3 +22,4 @@
     - [SendGrid](threepids/notification/sendgrid-handler.md)
 - [Sessions](threepids/session/session.md)
   - [Views](threepids/session/session-views.md)
+- [FAQ](faq.md)
