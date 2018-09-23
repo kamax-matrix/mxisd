@@ -18,7 +18,7 @@
 
 ## Overview
 When adding an email, a phone number or any other kind of 3PID (Third-Party Identifier) in a Matrix client, 
-the identity server is called to validate the 3PID.
+the identity server is contacted to validate the 3PID.
 
 Once this 3PID is validated, the Homeserver will publish the user Matrix ID on the Identity Server and
 add this 3PID to the Matrix account which initiated the request.
@@ -30,10 +30,10 @@ This serves two purposes:
 by a 3PID, allowing it to be resolved to a Matrix ID.
 
 ## Federation
-Federation is based on the principle that one can get a domain name and serve services and information within that
+Federation is based on the principle that one can get a domain name and provide services and information within that
 domain namespace in a way which can be discovered following a specific protocol or specification.
 
-In the Matrix eco-system, some 3PID can be federated (e.g. emails) while some others cannot (phone numbers).
+In the Matrix ecosystem, some 3PID can be federated (e.g. emails) while some others cannot (phone numbers).
 Also, Matrix users might add 3PIDs that would not point to the Identity server that actually holds the 3PID binding.  
 
 Example: a user from Homeserver `example.org` adds an email `john@gmail.com`.  
@@ -52,14 +52,14 @@ and would require contacting the Matrix.org administrators for each bind individ
 This poses a privacy, control and security concern, especially for groups/corporations that want to keep a tight control
 on where such identifiers can be made publicly visible.
 
-To ensure full control, validation management rely on two concepts:
+To ensure full control, validation management relies on two concepts:
 - The scope of 3PID being validated
 - The scope of 3PID sessions that should be possible/offered
 
 ### 3PID scope
 3PID can either be scoped as local or remote.
 
-Local means that they can looked up using federation and that such federation call would end up on the local
+Local means that they can be looked up using federation and that such a federation call would end up on the local
 Identity Server.  
 Remote means that they cannot be lookup using federation or that a federation call would not end up on the local
 Identity Server.
@@ -139,7 +139,7 @@ session.policy.validation.forRemote:
 `session.policy.validation` is the core configuration to control what users configured to use your Identity server
 are allowed to do in terms of 3PID sessions.
 
-The policy is divided contains a global on/off switch for 3PID sessions using `.enabled`  
+The policy has a global on/off switch for 3PID sessions using `.enabled`  
 It is also divided into two sections: `forLocal` and `forRemote` which refers to the 3PID scopes.  
 
 Each scope is divided into three parts:
