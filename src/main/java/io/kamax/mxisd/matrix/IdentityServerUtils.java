@@ -67,7 +67,7 @@ public class IdentityServerUtils {
                 log.info("{} is not an URL, using as-is", domainOrUrl);
             }
 
-            log.info("Discovery Identity Server for {}", domainOrUrl);
+            log.info("Discovering Identity Server for {}", domainOrUrl);
             log.info("Performing SRV lookup");
             String lookupDns = getSrvRecordName(domainOrUrl);
             log.info("Lookup name: {}", lookupDns);
@@ -98,10 +98,12 @@ public class IdentityServerUtils {
                 if (isUsable(baseUrl)) {
                     log.info("Found Identity Server for domain {} at {}", domainOrUrl, baseUrl);
                     return Optional.of(baseUrl);
+                } else {
+                    log.info("Found no Identity server for domain {} at {}", domainOrUrl, baseUrl);
                 }
             }
 
-            log.info("Found no Identity server for domain {} at {}");
+            log.info("Found no Identity server for domain {}", domainOrUrl);
             return Optional.empty();
         } catch (TextParseException e) {
             log.warn(domainOrUrl + " is not a valid domain name");
