@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@
 package io.kamax.mxisd.threepid.notification;
 
 import io.kamax.matrix.ThreePid;
+import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.controller.identity.v1.IdentityAPIv1;
@@ -39,7 +40,7 @@ public abstract class PlaceholderNotificationGenerator {
         this.srvCfg = srvCfg;
     }
 
-    protected String populateForCommon(String input, ThreePid recipient) {
+    protected String populateForCommon(ThreePid recipient, String input) {
         String domainPretty = WordUtils.capitalizeFully(mxCfg.getDomain());
 
         return input
@@ -49,7 +50,14 @@ public abstract class PlaceholderNotificationGenerator {
                 .replace("%RECIPIENT_ADDRESS%", recipient.getAddress());
     }
 
-    protected String populateForInvite(IThreePidInviteReply invite, String input) {
+    protected String populateForInvite(IMatrixIdInvite invite, String input) {
+        return populateForCommon(new ThreePid(invite.getMedium(), invite.getAddress()), input)
+                .replace("%SENDER_ID%", invite.getSender().getId())
+                .replace("%RECIPIENT_ID%", invite.getInvitee().getId())
+                .replace("%ROOM_ID%", invite.getRoomId());
+    }
+
+    protected String populateForReply(IThreePidInviteReply invite, String input) {
         ThreePid tpid = new ThreePid(invite.getInvite().getMedium(), invite.getInvite().getAddress());
 
         String senderName = invite.getInvite().getProperties().getOrDefault("sender_display_name", "");
@@ -57,7 +65,7 @@ public abstract class PlaceholderNotificationGenerator {
         String roomName = invite.getInvite().getProperties().getOrDefault("room_name", "");
         String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
 
-        return populateForCommon(input, tpid)
+        return populateForCommon(tpid, input)
                 .replace("%SENDER_ID%", invite.getInvite().getSender().getId())
                 .replace("%SENDER_NAME%", senderName)
                 .replace("%SENDER_NAME_OR_ID%", senderNameOrId)
@@ -76,7 +84,7 @@ public abstract class PlaceholderNotificationGenerator {
                 session.getToken()
         );
 
-        return populateForCommon(input, session.getThreePid())
+        return populateForCommon(session.getThreePid(), input)
                 .replace("%VALIDATION_LINK%", validationLink)
                 .replace("%VALIDATION_TOKEN%", session.getToken())
                 .replace("%NEXT_URL%", validationLink);

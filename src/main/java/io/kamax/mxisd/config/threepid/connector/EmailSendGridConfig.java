@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -28,6 +28,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @ConfigurationProperties("notification.handlers.sendgrid")
@@ -142,6 +144,15 @@ public class EmailSendGridConfig {
 
         private EmailTemplate invite = new EmailTemplate();
         private TemplateSession session = new TemplateSession();
+        private Map<String, EmailTemplate> generic = new HashMap<>();
+
+        public Map<String, EmailTemplate> getGeneric() {
+            return generic;
+        }
+
+        public void setGeneric(Map<String, EmailTemplate> generic) {
+            this.generic = generic;
+        }
 
         public EmailTemplate getInvite() {
             return invite;

@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Kamax Sarl
+ * Copyright (C) 2018 Kamax Sarl
  *
  * https://www.kamax.io/
  *
@@ -18,24 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.notification;
+package io.kamax.mxisd.as;
 
-import io.kamax.mxisd.as.IMatrixIdInvite;
-import io.kamax.mxisd.invitation.IThreePidInviteReply;
-import io.kamax.mxisd.threepid.session.IThreePidSession;
+import io.kamax.matrix._MatrixID;
+import io.kamax.mxisd.invitation.IThreePidInvite;
 
-public interface INotificationGenerator {
+public interface IMatrixIdInvite extends IThreePidInvite {
 
-    String getId();
-
-    String getMedium();
-
-    String getForInvite(IMatrixIdInvite invite);
-
-    String getForReply(IThreePidInviteReply invite);
-
-    String getForValidation(IThreePidSession session);
-
-    String getForRemoteValidation(IThreePidSession session);
+    _MatrixID getInvitee();
 
 }

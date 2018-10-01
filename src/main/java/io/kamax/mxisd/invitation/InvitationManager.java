@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -228,7 +228,7 @@ public class InvitationManager {
             log.info("Invite is already pending for {}:{}, returning data", invitation.getMedium(), invitation.getAddress());
             if (!StringUtils.equals(invitation.getRoomId(), reply.getInvite().getRoomId())) {
                 log.info("Sending new notification as new invite room {} is different from the original {}", invitation.getRoomId(), reply.getInvite().getRoomId());
-                notifMgr.sendForInvite(new ThreePidInviteReply(reply.getId(), invitation, reply.getToken(), reply.getDisplayName()));
+                notifMgr.sendForReply(new ThreePidInviteReply(reply.getId(), invitation, reply.getToken(), reply.getDisplayName()));
             } else {
                 // FIXME we should check attempt and send if bigger
             }
@@ -247,7 +247,7 @@ public class InvitationManager {
         reply = new ThreePidInviteReply(invId, invitation, token, displayName);
 
         log.info("Performing invite to {}:{}", invitation.getMedium(), invitation.getAddress());
-        notifMgr.sendForInvite(reply);
+        notifMgr.sendForReply(reply);
 
         log.info("Storing invite under ID {}", invId);
         storage.insertInvite(reply);

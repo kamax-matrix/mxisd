@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,9 @@
 package io.kamax.mxisd.config.threepid.medium;
 
 import org.apache.commons.lang.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GenericTemplateConfig {
 
@@ -73,6 +76,7 @@ public class GenericTemplateConfig {
 
     private String invite;
     private Session session = new Session();
+    private Map<String, String> generic = new HashMap<>();
 
     public String getInvite() {
         return invite;
@@ -84,6 +88,14 @@ public class GenericTemplateConfig {
 
     public Session getSession() {
         return session;
+    }
+
+    public Map<String, String> getGeneric() {
+        return generic;
+    }
+
+    public void setGeneric(Map<String, String> generic) {
+        this.generic = generic;
     }
 
 }

@@ -26,6 +26,12 @@ matrix:
     servers:
       matrix-org:
         - 'https://matrix.org'
+  listener:
+    url:  ''
+    localpart: ''
+    token:
+      as: ''
+      hs: ''
 
 lookup:
   recursive:

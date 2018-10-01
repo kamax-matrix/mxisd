@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ package io.kamax.mxisd.threepid.connector.email;
 import com.sendgrid.SendGrid;
 import com.sendgrid.SendGridException;
 import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.connector.EmailSendGridConfig;
@@ -87,12 +88,24 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
     }
 
     @Override
-    public void sendForInvite(IThreePidInviteReply invite) {
-        EmailTemplate template = cfg.getTemplates().getInvite();
+    public void sendForInvite(IMatrixIdInvite invite) {
+        EmailTemplate template = cfg.getTemplates().getGeneric().get("matrixId");
+
         Email email = getEmail();
         email.setSubject(populateForInvite(invite, template.getSubject()));
         email.setText(populateForInvite(invite, getFromFile(template.getBody().getText())));
         email.setHtml(populateForInvite(invite, getFromFile(template.getBody().getHtml())));
+
+        send(invite.getAddress(), email);
+    }
+
+    @Override
+    public void sendForReply(IThreePidInviteReply invite) {
+        EmailTemplate template = cfg.getTemplates().getInvite();
+        Email email = getEmail();
+        email.setSubject(populateForReply(invite, template.getSubject()));
+        email.setText(populateForReply(invite, getFromFile(template.getBody().getText())));
+        email.setHtml(populateForReply(invite, getFromFile(template.getBody().getHtml())));
 
         send(invite.getInvite().getAddress(), email);
     }

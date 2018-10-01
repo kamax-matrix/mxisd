@@ -81,7 +81,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-thymeleaf:1.5.10.RELEASE"
 
     // Matrix Java SDK
-    compile 'io.kamax:matrix-java-sdk:0.0.11'
+    compile 'io.kamax:matrix-java-sdk:0.0.14-8-g0e57ec6'
 
     // ed25519 handling
     compile 'net.i2p.crypto:eddsa:0.1.0'

@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.threepid.notification;
 
+import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.notification.INotificationHandler;
@@ -55,8 +56,13 @@ public abstract class GenericNotificationHandler<A extends IThreePidConnector, B
     }
 
     @Override
-    public void sendForInvite(IThreePidInviteReply invite) {
-        send(connector, invite.getInvite().getAddress(), generator.getForInvite(invite));
+    public void sendForInvite(IMatrixIdInvite invite) {
+        send(connector, invite.getAddress(), generator.getForInvite(invite));
+    }
+
+    @Override
+    public void sendForReply(IThreePidInviteReply invite) {
+        send(connector, invite.getInvite().getAddress(), generator.getForReply(invite));
     }
 
     @Override
