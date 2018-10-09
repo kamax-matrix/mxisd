@@ -319,9 +319,13 @@ public class InvitationManager {
                 CloseableHttpResponse response = client.execute(req);
                 int statusCode = response.getStatusLine().getStatusCode();
                 log.info("Answer code: {}", statusCode);
-                if (statusCode >= 300) {
+                if (statusCode >= 300 && statusCode != 403) {
                     log.warn("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
                 } else {
+                    if (statusCode == 403) {
+                        log.info("Invite was obsolete");
+                    }
+
                     invitations.remove(getId(reply.getInvite()));
                     storage.deleteInvite(reply.getId());
                     log.info("Removed invite from internal store");
