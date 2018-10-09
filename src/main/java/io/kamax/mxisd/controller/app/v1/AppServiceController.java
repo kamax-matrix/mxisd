@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -44,7 +43,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
 @CrossOrigin
-@RequestMapping(path = "/_matrix/app/v1", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class AppServiceController {
 
     private final Logger log = LoggerFactory.getLogger(AppServiceController.class);
@@ -101,9 +100,11 @@ public class AppServiceController {
             List<JsonObject> events = GsonUtil.asList(GsonUtil.getArray(parser.parse(request.getInputStream()), "events"), JsonObject.class);
             handler.processTransaction(events);
             return "{}";
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            log.warn("Unable to properly process transaction", e);
         }
+
+        return "{}";
     }
 
 }

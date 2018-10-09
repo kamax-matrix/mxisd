@@ -71,7 +71,6 @@ public class AppServiceHandler {
             String roomId = GsonUtil.getStringOrNull(ev, "room_id");
             _MatrixID sender = MatrixID.asAcceptable(GsonUtil.getStringOrNull(ev, "sender"));
             EventKey.StateKey.findString(ev).ifPresent(id -> {
-
                 _MatrixID mxid = MatrixID.asAcceptable(id);
                 if (!StringUtils.equals(mxid.getDomain(), cfg.getDomain())) {
                     log.debug("Ignoring invite for {}: not a local user");
@@ -79,6 +78,7 @@ public class AppServiceHandler {
                 }
                 log.info("Got invite for {}", id);
 
+                boolean wasSent = false;
                 for (_ThreePid tpid : profiler.getThreepids(mxid)) {
                     if (!StringUtils.equals("email", tpid.getMedium())) {
                         continue;
@@ -86,12 +86,15 @@ public class AppServiceHandler {
 
                     log.info("Found an email address to notify about room invitation: {}", tpid.getAddress());
                     Map<String, String> properties = new HashMap<>();
-                    profiler.getDisplayName(mxid).ifPresent(name -> properties.put("sender_display_name", name));
+                    profiler.getDisplayName(sender).ifPresent(name -> properties.put("sender_display_name", name));
                     synapse.getRoomName(roomId).ifPresent(name -> properties.put("room_name", name));
 
                     IMatrixIdInvite inv = new MatrixIdInvite(roomId, sender, mxid, tpid.getMedium(), tpid.getAddress(), properties);
                     notif.sendForInvite(inv);
+                    wasSent = true;
                 }
+
+                log.info("Was notification sent? {}", wasSent);
             });
         });
     }

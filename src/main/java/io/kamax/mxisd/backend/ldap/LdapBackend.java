@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.backend.ldap;
 
+import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
 import org.apache.commons.lang.StringUtils;
@@ -70,7 +71,7 @@ public abstract class LdapBackend {
         return getAt().getUid().getValue();
     }
 
-    protected synchronized LdapConnection getConn() throws LdapException {
+    protected synchronized LdapConnection getConn() {
         return new LdapNetworkConnection(cfg.getConnection().getHost(), cfg.getConnection().getPort(), cfg.getConnection().isTls());
     }
 
@@ -119,6 +120,17 @@ public abstract class LdapBackend {
             return "@" + uid + ":" + mxCfg.getDomain();
         } else if (StringUtils.equals(MATRIX_ID, uidType)) {
             return uid;
+        } else {
+            throw new IllegalArgumentException("Bind type " + uidType + " is not supported");
+        }
+    }
+
+    public String buildUidFromMatrixId(_MatrixID mxId) {
+        String uidType = getCfg().getAttribute().getUid().getType();
+        if (StringUtils.equals(UID, uidType)) {
+            return mxId.getLocalPart();
+        } else if (StringUtils.equals(MATRIX_ID, uidType)) {
+            return mxId.getId();
         } else {
             throw new IllegalArgumentException("Bind type " + uidType + " is not supported");
         }

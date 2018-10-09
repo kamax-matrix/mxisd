@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -234,6 +234,19 @@ public abstract class LdapConfig {
 
     }
 
+    public static class Profile {
+
+        private String filter;
+
+        public String getFilter() {
+            return filter;
+        }
+
+        public void setFilter(String filter) {
+            this.filter = filter;
+        }
+
+    }
 
     private Logger log = LoggerFactory.getLogger(LdapConfig.class);
 
@@ -245,6 +258,7 @@ public abstract class LdapConfig {
     private Auth auth;
     private Directory directory;
     private Identity identity;
+    private Profile profile = new Profile();
 
     protected abstract String getConfigName();
 
@@ -304,6 +318,14 @@ public abstract class LdapConfig {
         this.identity = identity;
     }
 
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
     @PostConstruct
     public void build() {
         log.info("--- " + getConfigName() + " Config ---");
@@ -356,6 +378,9 @@ public abstract class LdapConfig {
         getAuth().setFilter(StringUtils.defaultIfBlank(getAuth().getFilter(), getFilter()));
         getDirectory().setFilter(StringUtils.defaultIfBlank(getDirectory().getFilter(), getFilter()));
         getIdentity().setFilter(StringUtils.defaultIfBlank(getIdentity().getFilter(), getFilter()));
+        if (StringUtils.isBlank(getProfile().getFilter())) {
+            getProfile().setFilter(getFilter());
+        }
 
         log.info("Host: {}", connection.getHost());
         log.info("Port: {}", connection.getPort());
@@ -367,6 +392,7 @@ public abstract class LdapConfig {
         log.info("Auth: {}", GsonUtil.get().toJson(auth));
         log.info("Directory: {}", GsonUtil.get().toJson(directory));
         log.info("Identity: {}", GsonUtil.get().toJson(identity));
+        log.info("Profile: {}", GsonUtil.get().toJson(profile));
     }
 
 }

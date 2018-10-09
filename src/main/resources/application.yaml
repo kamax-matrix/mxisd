@@ -193,6 +193,8 @@ threepid:
       generators:
         template:
           invite: 'classpath:threepids/email/invite-template.eml'
+          generic:
+            matrixId: 'classpath:threepids/email/mxid-template.eml'
           session:
             validation:
               local: 'classpath:threepids/email/validate-local-template.eml'

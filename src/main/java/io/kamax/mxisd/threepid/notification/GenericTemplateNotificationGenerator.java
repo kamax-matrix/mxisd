@@ -67,8 +67,13 @@ public abstract class GenericTemplateNotificationGenerator extends PlaceholderNo
 
     @Override
     public String getForInvite(IMatrixIdInvite invite) {
+        String template = cfg.getGeneric().get("matrixId");
+        if (StringUtils.isBlank(template)) {
+            throw new InternalServerError("No " + invite.getMedium() + " template configured for Matrix ID invites");
+        }
+
         log.info("Generating notification content for Matrix ID invite");
-        return populateForInvite(invite, getTemplateContent(cfg.getGeneric().get("matrixId")));
+        return populateForInvite(invite, getTemplateContent(template));
     }
 
     @Override
