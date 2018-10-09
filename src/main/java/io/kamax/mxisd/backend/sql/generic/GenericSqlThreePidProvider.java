@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2018 Kamax Sàrl
+ * Copyright (C) 2017 Kamax Sarl
  *
  * https://www.kamax.io/
  *
@@ -18,22 +18,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.profile;
+package io.kamax.mxisd.backend.sql.generic;
 
-import io.kamax.matrix._MatrixID;
-import io.kamax.matrix._ThreePid;
+import io.kamax.mxisd.backend.sql.SqlThreePidProvider;
+import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
+@Component
+public class GenericSqlThreePidProvider extends SqlThreePidProvider {
 
-public interface ProfileProvider {
-
-    boolean isEnabled();
-
-    Optional<String> getDisplayName(_MatrixID userId);
-
-    List<_ThreePid> getThreepids(_MatrixID userId);
-
-    List<String> getRoles(_MatrixID userId);
+    @Autowired
+    public GenericSqlThreePidProvider(GenericSqlProviderConfig cfg, MatrixConfig mxCfg) {
+        super(cfg, mxCfg);
+    }
 
 }

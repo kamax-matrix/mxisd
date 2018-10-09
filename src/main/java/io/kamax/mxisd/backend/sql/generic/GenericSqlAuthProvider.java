@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,13 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.sql;
+package io.kamax.mxisd.backend.sql.generic;
 
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
-import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.config.sql.GenericSqlProviderConfig;
+import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
 import io.kamax.mxisd.invitation.InvitationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +36,6 @@ public class GenericSqlAuthProvider implements AuthenticatorProvider {
     private Logger log = LoggerFactory.getLogger(GenericSqlAuthProvider.class);
 
     @Autowired
-    private ServerConfig srvCfg;
-
-    @Autowired
     private GenericSqlProviderConfig cfg;
 
     @Autowired
@@ -47,7 +43,7 @@ public class GenericSqlAuthProvider implements AuthenticatorProvider {
 
     @Override
     public boolean isEnabled() {
-        return cfg.isEnabled();
+        return cfg.getAuth().isEnabled();
     }
 
     @Override

@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -28,6 +28,12 @@ import java.sql.SQLException;
 
 public class SqlConnectionPool {
 
+    public interface SqlFunction<T, R> {
+
+        R run(T connection) throws SQLException;
+
+    }
+
     private ComboPooledDataSource ds;
 
     public SqlConnectionPool(SqlConfig cfg) {
@@ -40,6 +46,14 @@ public class SqlConnectionPool {
 
     public Connection get() throws SQLException {
         return ds.getConnection();
+    }
+
+    public <T> T withConnFunction(SqlFunction<Connection, T> function) {
+        try (Connection conn = get()) {
+            return function.run(conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

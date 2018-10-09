@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2018 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,19 +18,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.sql;
+package io.kamax.mxisd.backend.sql.generic;
 
-import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.kamax.mxisd.backend.sql.SqlProfileProvider;
+import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SynapseSqlThreePidProvider extends SqlThreePidProvider {
+public class GenericSqlProfileProvider extends SqlProfileProvider {
 
-    @Autowired
-    public SynapseSqlThreePidProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg) {
-        super(cfg, mxCfg);
+    public GenericSqlProfileProvider(GenericSqlProviderConfig cfg) {
+        super(cfg);
     }
 
 }

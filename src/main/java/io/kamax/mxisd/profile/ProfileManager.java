@@ -22,37 +22,65 @@ package io.kamax.mxisd.profile;
 
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
 public class ProfileManager {
 
+    private final Logger log = LoggerFactory.getLogger(ProfileManager.class);
+
     private List<ProfileProvider> providers;
 
+    @Autowired
     public ProfileManager(List<ProfileProvider> providers) {
-        this.providers = providers.stream()
-                .filter(ProfileProvider::isEnabled)
-                .collect(Collectors.toList());
+        this.providers = providers;
     }
 
-    public <T> List<T> get(Function<ProfileProvider, List<T>> function) {
+    @PostConstruct
+    public void build() {
+        providers = providers.stream()
+                .filter(ProfileProvider::isEnabled)
+                .collect(Collectors.toList());
+
+        log.info("--- Profile providers ---");
+        this.providers.forEach(pp -> log.info("\t- {}", pp.getClass().getSimpleName()));
+    }
+
+    public <T> List<T> getList(Function<ProfileProvider, List<T>> function) {
         return providers.stream()
                 .map(function)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
-    public List<_ThreePid> getThreepids(_MatrixID mxid) {
-        return get(p -> p.getThreepids(mxid));
+    public <T> Optional<T> getOpt(Function<ProfileProvider, Optional<T>> function) {
+        return providers.stream()
+                .map(function)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
     }
 
-    public List<String> getRoles(_MatrixID mxid) {
-        return get(p -> p.getRoles(mxid));
+    public Optional<String> getDisplayName(_MatrixID user) {
+        return getOpt(p -> p.getDisplayName(user));
+    }
+
+    public List<_ThreePid> getThreepids(_MatrixID user) {
+        return getList(p -> p.getThreepids(user));
+    }
+
+    public List<String> getRoles(_MatrixID user) {
+        return getList(p -> p.getRoles(user));
     }
 
 }

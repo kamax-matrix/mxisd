@@ -51,10 +51,19 @@ public abstract class PlaceholderNotificationGenerator {
     }
 
     protected String populateForInvite(IMatrixIdInvite invite, String input) {
+        String senderName = invite.getProperties().getOrDefault("sender_display_name", "");
+        String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getSender().getId());
+        String roomName = invite.getProperties().getOrDefault("room_name", "");
+        String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getRoomId());
+
         return populateForCommon(new ThreePid(invite.getMedium(), invite.getAddress()), input)
                 .replace("%SENDER_ID%", invite.getSender().getId())
+                .replace("%SENDER_NAME%", senderName)
+                .replace("%SENDER_NAME_OR_ID%", senderNameOrId)
                 .replace("%RECIPIENT_ID%", invite.getInvitee().getId())
-                .replace("%ROOM_ID%", invite.getRoomId());
+                .replace("%ROOM_ID%", invite.getRoomId())
+                .replace("%ROOM_NAME%", roomName)
+                .replace("%ROOM_NAME_OR_ID%", roomNameOrId);
     }
 
     protected String populateForReply(IThreePidInviteReply invite, String input) {

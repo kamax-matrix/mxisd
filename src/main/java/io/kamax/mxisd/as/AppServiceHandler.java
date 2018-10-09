@@ -23,8 +23,10 @@ package io.kamax.mxisd.as;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
+import io.kamax.matrix._ThreePid;
 import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.backend.sql.synapse.Synapse;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.profile.ProfileManager;
@@ -36,6 +38,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class AppServiceHandler {
@@ -45,12 +48,14 @@ public class AppServiceHandler {
     private MatrixConfig cfg;
     private ProfileManager profiler;
     private NotificationManager notif;
+    private Synapse synapse;
 
     @Autowired
-    public AppServiceHandler(MatrixConfig cfg, ProfileManager profiler, NotificationManager notif) {
+    public AppServiceHandler(MatrixConfig cfg, ProfileManager profiler, NotificationManager notif, Synapse synapse) {
         this.cfg = cfg;
         this.profiler = profiler;
         this.notif = notif;
+        this.synapse = synapse;
     }
 
     public void processTransaction(List<JsonObject> eventsJson) {
@@ -66,22 +71,27 @@ public class AppServiceHandler {
             String roomId = GsonUtil.getStringOrNull(ev, "room_id");
             _MatrixID sender = MatrixID.asAcceptable(GsonUtil.getStringOrNull(ev, "sender"));
             EventKey.StateKey.findString(ev).ifPresent(id -> {
-                log.info("Got invite for {}", id);
+
                 _MatrixID mxid = MatrixID.asAcceptable(id);
                 if (!StringUtils.equals(mxid.getDomain(), cfg.getDomain())) {
-                    log.info("Ignoring invite for {}: not a local user");
+                    log.debug("Ignoring invite for {}: not a local user");
                     return;
                 }
+                log.info("Got invite for {}", id);
 
-                profiler.getThreepids(mxid).forEach(tpid -> {
+                for (_ThreePid tpid : profiler.getThreepids(mxid)) {
                     if (!StringUtils.equals("email", tpid.getMedium())) {
-                        return;
+                        continue;
                     }
 
                     log.info("Found an email address to notify about room invitation: {}", tpid.getAddress());
-                    IMatrixIdInvite inv = new MatrixIdInvite(roomId, sender, mxid, tpid.getMedium(), tpid.getAddress(), new HashMap<>());
+                    Map<String, String> properties = new HashMap<>();
+                    profiler.getDisplayName(mxid).ifPresent(name -> properties.put("sender_display_name", name));
+                    synapse.getRoomName(roomId).ifPresent(name -> properties.put("room_name", name));
+
+                    IMatrixIdInvite inv = new MatrixIdInvite(roomId, sender, mxid, tpid.getMedium(), tpid.getAddress(), properties);
                     notif.sendForInvite(inv);
-                });
+                }
             });
         });
     }

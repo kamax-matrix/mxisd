@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,16 +21,12 @@
 package io.kamax.mxisd.backend.sql;
 
 import io.kamax.matrix.MatrixID;
-import io.kamax.matrix.ThreePid;
-import io.kamax.matrix._MatrixID;
-import io.kamax.matrix._ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.SqlConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
-import io.kamax.mxisd.profile.ProfileProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +36,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class SqlThreePidProvider implements IThreePidProvider, ProfileProvider {
+public abstract class SqlThreePidProvider implements IThreePidProvider {
 
     private Logger log = LoggerFactory.getLogger(SqlThreePidProvider.class);
 
@@ -112,33 +107,6 @@ public abstract class SqlThreePidProvider implements IThreePidProvider, ProfileP
     @Override
     public List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
         return new ArrayList<>();
-    }
-
-    @Override
-    public List<_ThreePid> getThreepids(_MatrixID mxid) {
-        List<_ThreePid> threepids = new ArrayList<>();
-
-        String stmtSql = cfg.getProfile().getThreepid().getQuery();
-        try (Connection conn = pool.get()) {
-            PreparedStatement stmt = conn.prepareStatement(stmtSql);
-            stmt.setString(1, mxid.getId());
-
-            ResultSet rSet = stmt.executeQuery();
-            while (rSet.next()) {
-                String medium = rSet.getString("medium");
-                String address = rSet.getString("address");
-                threepids.add(new ThreePid(medium, address));
-            }
-
-            return threepids;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public List<String> getRoles(_MatrixID mxid) {
-        return Collections.emptyList();
     }
 
 }

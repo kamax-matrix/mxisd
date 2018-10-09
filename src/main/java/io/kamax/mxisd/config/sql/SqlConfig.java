@@ -1,3 +1,23 @@
+/*
+ * mxisd - Matrix Identity Server Daemon
+ * Copyright (C) 2017 Kamax Sarl
+ *
+ * https://www.kamax.io/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package io.kamax.mxisd.config.sql;
 
 import io.kamax.mxisd.util.GsonUtil;
@@ -7,10 +27,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class SqlConfig {
 
-    private Logger log = LoggerFactory.getLogger(SqlConfig.class);
+    private transient Logger log = LoggerFactory.getLogger(SqlConfig.class);
 
     public static class Query {
 
@@ -136,6 +157,20 @@ public abstract class SqlConfig {
 
     }
 
+    public static class ProfileDisplayName {
+
+        private String query;
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
+        }
+
+    }
+
     public static class ProfileThreepids {
 
         private String query;
@@ -152,7 +187,25 @@ public abstract class SqlConfig {
 
     public static class Profile {
 
+        private Boolean enabled;
+        private ProfileDisplayName displayName = new ProfileDisplayName();
         private ProfileThreepids threepid = new ProfileThreepids();
+
+        public Boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(Boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public ProfileDisplayName getDisplayName() {
+            return displayName;
+        }
+
+        public void setDisplayName(ProfileDisplayName displayName) {
+            this.displayName = displayName;
+        }
 
         public ProfileThreepids getThreepid() {
             return threepid;
@@ -230,7 +283,8 @@ public abstract class SqlConfig {
 
     protected abstract String getProviderName();
 
-    protected void doBuild() {
+    @PostConstruct
+    public void build() {
         if (getAuth().isEnabled() == null) {
             getAuth().setEnabled(isEnabled());
         }
@@ -242,13 +296,14 @@ public abstract class SqlConfig {
         if (getIdentity().isEnabled() == null) {
             getIdentity().setEnabled(isEnabled());
         }
+
+        if (Objects.isNull(getProfile().isEnabled())) {
+            getProfile().setEnabled(isEnabled());
+        }
     }
 
-    @PostConstruct
-    public void build() {
+    protected void printConfig() {
         log.info("--- " + getProviderName() + " Provider config ---");
-
-        doBuild();
 
         log.info("Enabled: {}", isEnabled());
         if (isEnabled()) {
@@ -259,7 +314,12 @@ public abstract class SqlConfig {
             log.info("Identity type: {}", getIdentity().getType());
             log.info("3PID mapping query: {}", getIdentity().getQuery());
             log.info("Identity medium queries: {}", GsonUtil.build().toJson(getIdentity().getMedium()));
-            log.info("Profile 3PID query: {}", getProfile().getThreepid().getQuery());
+            log.info("Profile:");
+            log.info("\tEnabled: {}", getProfile().isEnabled());
+            if (getProfile().isEnabled()) {
+                log.info("\tDisplay name query: {}", getProfile().getDisplayName().getQuery());
+                log.info("\tProfile 3PID query: {}", getProfile().getThreepid().getQuery());
+            }
         }
     }
 

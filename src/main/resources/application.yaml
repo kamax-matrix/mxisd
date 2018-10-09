@@ -138,7 +138,6 @@ netiq:
 firebase:
   enabled: false
 
-
 sql:
   enabled: false
   type: 'sqlite'
@@ -160,13 +159,6 @@ sql:
   profile:
     threepid:
       query: 'SELECT medium, address FROM user_threepids WHERE user_id = ?'
-
-synapseSql:
-  enabled: false
-  type: 'sqlite'
-  profile:
-      threepid:
-        query: 'SELECT medium, address FROM user_threepids WHERE user_id = ?'
 
 wordpress:
   enabled: false

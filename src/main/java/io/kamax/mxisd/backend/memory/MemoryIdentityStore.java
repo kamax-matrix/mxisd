@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2018 Maxime Dor
+ * Copyright (C) 2018 Kamax Sarl
  *
  * https://www.kamax.io/
  *
@@ -74,6 +74,11 @@ public class MemoryIdentityStore implements AuthenticatorProvider, IDirectoryPro
     @Override
     public boolean isEnabled() {
         return cfg.isEnabled();
+    }
+
+    @Override
+    public Optional<String> getDisplayName(_MatrixID mxid) {
+        return findByUsername(mxid.getLocalPart()).map(MemoryIdentityConfig::getDisplayName);
     }
 
     private UserDirectorySearchResult search(
