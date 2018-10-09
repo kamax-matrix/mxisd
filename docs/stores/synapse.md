@@ -7,6 +7,7 @@ Synapse's Database itself can be used as an Identity store.
 | Authentication | No         |
 | Directory      | Yes        |
 | Identity       | Yes        |
+| Profile        | Yes        |
 
 Authentication is done by Synapse itself.
 

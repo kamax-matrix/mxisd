@@ -10,6 +10,7 @@ Two types of connections are required for full support:
 | Authentication | Yes        |
 | Directory      | Yes        |
 | Identity       | Yes        |
+| Profile        | No         |
 
 ## Requirements
 - [Wordpress](https://wordpress.org/download/) >= 4.4

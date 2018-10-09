@@ -13,6 +13,7 @@ To integrate this backend with your webapp, you will need to implement three spe
 | Authentication | Yes        |
 | Directory      | Yes        |
 | Identity       | Yes        |
+| Profile        | No         |
 
 ## Configuration
 | Key                              | Default                                        | Description                                          |

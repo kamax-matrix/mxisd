@@ -19,6 +19,8 @@ threepid.medium.<YOUR 3PID MEDIUM HERE>:
         validation:
           local: '/path/to/validate-local-template.eml'
           remote: 'path/to/validate-remote-template.eml'
+      generic:
+        matrixId: '/path/to/mxid-invite-template.eml'
 ```
 The `template` generator is usually the default, so no further configuration is needed.
 

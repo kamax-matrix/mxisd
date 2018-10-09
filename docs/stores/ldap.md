@@ -13,6 +13,7 @@ For NetIQ, replace all the `ldap` prefix in the configuration by `netiq`.
 | Authentication | Yes        |
 | Directory      | Yes        |
 | Identity       | Yes        |
+| Profile        | Yes        |
 
 ## Getting started
 ### Base

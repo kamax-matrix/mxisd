@@ -11,6 +11,7 @@
 | Authentication | No         |
 | Directory      | Yes        |
 | Identity       | Yes        |
+| Profile        | Yes        |
 
 Due to the implementation complexity of supporting arbitrary hashing/encoding mechanisms or auth flow, Authentication
 will be out of scope of SQL Identity stores and should be done via one of the other identity stores, typically

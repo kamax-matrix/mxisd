@@ -7,6 +7,7 @@ https://firebase.google.com/
 | Authentication | Yes        |
 | Directory      | No         |
 | Identity       | Yes        |
+| Profile        | No         |
 
 ## Requirements
 This backend requires a suitable Matrix client capable of performing Firebase authentication and passing the following
