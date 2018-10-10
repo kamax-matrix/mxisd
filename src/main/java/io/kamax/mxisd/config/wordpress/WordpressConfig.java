@@ -105,6 +105,7 @@ public class WordpressConfig {
 
         private String type;
         private String connection;
+        private String tablePrefix;
         private Query query;
 
         public String getType() {
@@ -121,6 +122,14 @@ public class WordpressConfig {
 
         public void setConnection(String connection) {
             this.connection = connection;
+        }
+
+        public String getTablePrefix() {
+            return tablePrefix;
+        }
+
+        public void setTablePrefix(String tablePrefix) {
+            this.tablePrefix = tablePrefix;
         }
 
         public Query getQuery() {

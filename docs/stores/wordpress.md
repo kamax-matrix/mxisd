@@ -55,3 +55,11 @@ With possible values:
 - `mariadb`
 - `postgresql`
 - `sqlite`
+
+---
+
+To configure the tables prefix for default queries, in case a custom value was set during Wordpress install:
+```yaml
+wordpress.sql.tablePrefix: <string>
+```
+By default, the value is set to `wp_`.
