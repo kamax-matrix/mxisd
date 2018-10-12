@@ -1,6 +1,6 @@
 mxisd - Federated Matrix Identity Server
 ----------------------------------------
-![Travis-CI build status](https://travis-ci.org/kamax-io/mxisd.svg?branch=master)  
+![Travis-CI build status](https://travis-ci.org/kamax-matrix/mxisd.svg?branch=master)  
 
 - [Overview](#overview)
 - [Features](#features)

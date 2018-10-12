@@ -20,7 +20,7 @@ not support HTTPS listener at this time.
 
 For maximum integration, it is best to have your Homeserver and mxisd reachable via the same hostname.
 
-Be aware of a [NAT/Reverse proxy gotcha](https://github.com/kamax-io/mxisd/wiki/Gotchas#nating) if you use the same
+Be aware of a [NAT/Reverse proxy gotcha](https://github.com/kamax-matrix/mxisd/wiki/Gotchas#nating) if you use the same
 hostname.
 
 The following Quick Start guide assumes you will host the Homeserver and mxisd under the same hostname.  
@@ -34,7 +34,7 @@ Install via:
 - [Docker image](install/docker.md)
 - [Sources](build.md)
 
-See the [Latest release](https://github.com/kamax-io/mxisd/releases/latest) for links to each.
+See the [Latest release](https://github.com/kamax-matrix/mxisd/releases/latest) for links to each.
 
 ## Configure
 **NOTE**: please view the install instruction for your platform, as this step might be optional or already handled for you.

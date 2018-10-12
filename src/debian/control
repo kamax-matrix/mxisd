@@ -1,6 +1,6 @@
 Package: mxisd
 Maintainer: Kamax.io <foss@kamax.io>
-Homepage: https://github.com/kamax-io/mxisd
+Homepage: https://github.com/kamax-matrix/mxisd
 Description: Federated Matrix Identity Server
 Architecture: all
 Depends: openjdk-8-jre | openjdk-8-jre-headless | openjdk-8-jdk | openjdk-8-jdk-headless

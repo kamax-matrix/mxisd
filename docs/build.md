@@ -12,7 +12,7 @@
 
 ### Build
 ```bash
-git clone https://github.com/kamax-io/mxisd.git
+git clone https://github.com/kamax-matrix/mxisd.git
 cd mxisd
 ./gradlew build
 ```

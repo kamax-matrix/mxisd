@@ -1,6 +1,6 @@
 # Debian package
 ## Install
-1. Download the [latest release](https://github.com/kamax-io/mxisd/releases/latest)
+1. Download the [latest release](https://github.com/kamax-matrix/mxisd/releases/latest)
 2. Run:
 ```bash
 dpkg -i /path/to/downloaded/mxisd.deb

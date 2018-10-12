@@ -11,7 +11,7 @@ forward.servers:
   - 'matrix-org'
 ```
 **NOTE:** You should carefully consider enabling this option, which is discouraged.  
-For more info, see the [relevant issue](https://github.com/kamax-io/mxisd/issues/76).
+For more info, see the [relevant issue](https://github.com/kamax-matrix/mxisd/issues/76).
 
 ## Room Invitations
 Resolution can be customized using the following configuration:

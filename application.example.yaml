@@ -1,6 +1,6 @@
 # Sample configuration file explaining the minimum required keys to be set to run mxisd
 #
-# For a complete list of options, see https://github.com/kamax-io/mxisd
+# For a complete list of options, see https://github.com/kamax-matrix/mxisd
 
 #######################
 # Matrix config items #
@@ -53,7 +53,7 @@ storage.provider.sqlite.database: '/path/to/mxisd.db'
 #
 # Root/Central servers to be used as final fallback when performing lookups.
 # By default, for privacy reasons, matrix.org servers are not enabled anymore.
-# See the following issue: https://github.com/kamax-io/mxisd/issues/76
+# See the following issue: https://github.com/kamax-matrix/mxisd/issues/76
 #
 # If you would like to use them and trade away your privacy for convenience, uncomment the following option:
 #
@@ -64,28 +64,28 @@ storage.provider.sqlite.database: '/path/to/mxisd.db'
 # LDAP Backend #
 ################
 # If you would like to integrate with your AD/Samba/LDAP server,
-# see https://github.com/kamax-io/mxisd/blob/master/docs/backends/ldap.md
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/backends/ldap.md
 
 
 ###############
 # SQL Backend #
 ###############
 # If you would like to integrate with a MySQL/MariaDB/PostgreQL/SQLite DB,
-# see https://github.com/kamax-io/mxisd/blob/master/docs/backends/sql.md
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/backends/sql.md
 
 
 ################
 # REST Backend #
 ################
 # If you would like to integrate with an existing web service/webapp,
-# see https://github.com/kamax-io/mxisd/blob/master/docs/backends/rest.md
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/backends/rest.md
 
 
 #################################################
 # Notifications for invites/addition to profile #
 #################################################
 # If you would like to change the content,
-# see https://github.com/kamax-io/mxisd/blob/master/docs/threepids/notifications/template-generator.md
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/threepids/notifications/template-generator.md
 #
 #### E-mail invite sender
 #

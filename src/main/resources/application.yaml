@@ -1,7 +1,7 @@
 # DO NOT USE THIS FILE AS-IS FOR YOUR INITIAL CONFIGURATION
 # ONLY TAKE THE SPECIFIC SECTION YOU WANT TO CONFIGURE
 #
-# For more information about configuration, visit https://github.com/kamax-io/mxisd/blob/master/docs/configure.md
+# For more information about configuration, visit https://github.com/kamax-matrix/mxisd/blob/master/docs/configure.md
 
 spring:
   main:
