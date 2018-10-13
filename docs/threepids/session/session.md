@@ -17,38 +17,52 @@
     - [Sessions disabled](#sessions-disabled)
 
 ## Overview
-When adding an email, a phone number or any other kind of 3PID (Third-Party Identifier) in a Matrix client, 
+When adding an email, a phone number or any other kind of 3PID (Third-Party Identifier) in a Matrix client,
 the identity server is contacted to validate the 3PID.
+
+To validate the 3PID the identity server sends a message to the 3PID (e.g. an
+email) with a hyperlink back to a web-page managed by the identity server to
+confirm ownership of the 3PID.
 
 Once this 3PID is validated, the Homeserver will publish the user Matrix ID on the Identity Server and
 add this 3PID to the Matrix account which initiated the request.
 
-## Purpose
 This serves two purposes:
 - Add the 3PID as an administrative/login info for the Homeserver directly
 - Publish, or *Bind*, the 3PID so it can be queried from Homeservers and clients when inviting someone in a room
 by a 3PID, allowing it to be resolved to a Matrix ID.
 
 ## Federation
-Federation is based on the principle that one can get a domain name and provide services and information within that
-domain namespace in a way which can be discovered following a specific protocol or specification.
+In a federated set up, identity servers must cooperate to find the Matrix ID associated with a 3PID.
 
-In the Matrix ecosystem, some 3PID can be federated (e.g. emails) while some others cannot (phone numbers).
-Also, Matrix users might add 3PIDs that would not point to the Identity server that actually holds the 3PID binding.  
+Federation is based on the principle that each server is responsible for its own (dns) domain.
+Therefore only those 3PID can be federated that can be distinguished by their
+domain such as email addresses.
+
+Example: a user from Homeserver `example.org` adds an email `john@example.com`.  
+Federated identity servers would try to find the identity server at `example.com` and ask it for the Matrix ID of associated with `john@example.com`.
+
+Nevertheless, Matrix users might add 3PIDs that are not associated to a domain, for example telephone numbers.
+Or they might even add 3PIDs associated to a different domain (such as an email address hosted by gmail).
+Such 3PIDs cannot be resolved in a federated way.
 
 Example: a user from Homeserver `example.org` adds an email `john@gmail.com`.  
 If a federated lookup was performed, Identity servers would try to find the 3PID bind at the `gmail.com` server, and
 not `example.org`.
 
-To allow global publishing of 3PID bindings to be found anywhere within the current protocol specification, one would
-perform a *Remote session* and *Remote bind*, effectively starting a new 3PID session with another Identity server on
-behalf of the user.  
+In order to resolve such 3PIDs, i.e. 3PIDs that cannot be resolved in a Federated way, an identity server can be configured such that
+- 3PIDs that cannot be resolved locally or using federation, are fowarded to another global identity server.
+- registration of new 3PIDs that cannot be looked up in a federated fashion, is forwarded to another global identity server.
+
+By forwarding a 3PIDs registration the identity creates a *Remote session* and *Remote bind*, effectively starting a new 3PID session with another Identity server on
+behalf of the user. 
+
 To ensure lookup works consistency within the current Matrix network, the central Matrix.org Identity Server should be
 used to store *remote* sessions and binds.
 
-On the flip side, at the time of writing, the Matrix specification and the central Matrix.org servers do not allow to
-remote a 3PID bind. This means that once a 3PID is published (email, phone number, etc.), it cannot be easily removed
-and would require contacting the Matrix.org administrators for each bind individually.  
+However, at the time of writing, the Matrix specification and the central Matrix.org servers do not allow to remote a 3PID bind.
+This means that once a 3PID is published (email, phone number, etc.), it cannot be easily removed
+and would require contacting the Matrix.org administrators for each bind individually.
 This poses a privacy, control and security concern, especially for groups/corporations that want to keep a tight control
 on where such identifiers can be made publicly visible.
 
