@@ -48,12 +48,13 @@ public class ProfileManager {
 
     @PostConstruct
     public void build() {
-        providers = providers.stream()
-                .filter(ProfileProvider::isEnabled)
-                .collect(Collectors.toList());
-
         log.info("--- Profile providers ---");
-        this.providers.forEach(pp -> log.info("\t- {}", pp.getClass().getSimpleName()));
+        providers = providers.stream()
+                .filter(pp -> {
+                    log.info("\t- {} - Is enabled? {}", pp.getClass().getSimpleName(), pp.isEnabled());
+                    return pp.isEnabled();
+                })
+                .collect(Collectors.toList());
     }
 
     public <T> List<T> getList(Function<ProfileProvider, List<T>> function) {

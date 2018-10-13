@@ -23,7 +23,7 @@ package io.kamax.mxisd.backend.ldap.netiq;
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.backend.ldap.LdapProfileProvider;
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ldap.LdapConfig;
+import io.kamax.mxisd.config.ldap.netiq.NetIqLdapConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 public class NetIqLdapProfileProvider extends LdapProfileProvider {
 
     @Autowired
-    public NetIqLdapProfileProvider(LdapConfig cfg, MatrixConfig mxCfg) {
+    public NetIqLdapProfileProvider(NetIqLdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
 

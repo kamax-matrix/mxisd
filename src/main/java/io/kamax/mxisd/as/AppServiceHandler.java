@@ -79,7 +79,12 @@ public class AppServiceHandler {
                 log.info("Got invite for {}", id);
 
                 boolean wasSent = false;
-                for (_ThreePid tpid : profiler.getThreepids(mxid)) {
+                List<_ThreePid> tpids = profiler.getThreepids(mxid);
+                if (tpids.isEmpty()) {
+                    log.info("No email found in identity stores for {}", id);
+                }
+
+                for (_ThreePid tpid : tpids) {
                     if (!StringUtils.equals("email", tpid.getMedium())) {
                         continue;
                     }

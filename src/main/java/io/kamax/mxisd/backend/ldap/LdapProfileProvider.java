@@ -62,10 +62,13 @@ public class LdapProfileProvider extends LdapBackend implements ProfileProvider 
 
     @Override
     public Optional<String> getDisplayName(_MatrixID userId) {
+        String uid = buildUidFromMatrixId(userId);
+        log.info("Searching for display name of {}:", uid);
+
         try (LdapConnection conn = getConn()) {
             bind(conn);
 
-            String searchQuery = buildOrQueryWithFilter(getCfg().getProfile().getFilter(), buildUidFromMatrixId(userId), getUidAtt());
+            String searchQuery = buildOrQueryWithFilter(getCfg().getProfile().getFilter(), uid, getUidAtt());
 
             log.debug("Base DN: {}", getBaseDn());
             log.debug("Query: {}", searchQuery);
@@ -74,7 +77,7 @@ public class LdapProfileProvider extends LdapBackend implements ProfileProvider 
                 while (cursor.next()) {
                     Entry entry = cursor.get();
                     log.info("Found possible match, DN: {}", entry.getDn().getName());
-                    Optional<String> v = getAttribute(entry, getAt().getName()).flatMap(uid -> {
+                    Optional<String> v = getAttribute(entry, getAt().getName()).flatMap(id -> {
                         log.info("DN {} is a valid match", entry.getDn().getName());
                         try {
                             return getAttribute(entry, getAt().getName());
@@ -102,7 +105,7 @@ public class LdapProfileProvider extends LdapBackend implements ProfileProvider 
     @Override
     public List<_ThreePid> getThreepids(_MatrixID userId) {
         String uid = buildUidFromMatrixId(userId);
-        log.info("Looking for display name of {}", uid);
+        log.info("Searching for 3PIDs of {}:", uid);
 
         List<_ThreePid> threePids = new ArrayList<>();
         try (LdapConnection conn = getConn()) {
