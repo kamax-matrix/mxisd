@@ -19,7 +19,16 @@ matrix:
     localpart: 'appservice-mxisd'
     token:
       hs: 'HS_TOKEN_CHANGE_ME'
+
+synapseSql:
+  enabled: false ## Do not use this line if Synapse is used as an Identity Store
+  type: '<DB TYPE>'
+  connection: '<DB CONNECTION URL>'
 ```
+
+The `synapseSql` section is used to retrieve display names which are not directly accessible in this mode.
+For details about `type` and `connection`, see the [relevant documentation](../../stores/synapse.md).
+If you do not configure it, some placeholders will not be available in the notification, like the Room name.
 
 You can also change the default template of the notification using the `generic.matrixId` template option.  
 See [the Template generator documentation](../../threepids/notification/template-generator.md) for more info.

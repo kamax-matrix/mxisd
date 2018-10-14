@@ -92,7 +92,12 @@ public class AppServiceHandler {
                     log.info("Found an email address to notify about room invitation: {}", tpid.getAddress());
                     Map<String, String> properties = new HashMap<>();
                     profiler.getDisplayName(sender).ifPresent(name -> properties.put("sender_display_name", name));
-                    synapse.getRoomName(roomId).ifPresent(name -> properties.put("room_name", name));
+                    try {
+                        synapse.getRoomName(roomId).ifPresent(name -> properties.put("room_name", name));
+                    } catch (RuntimeException e) {
+                        log.warn("Unable to fetch room name - Did you provide synapse DB information as documented?");
+                        log.warn("Underlying error:", e);
+                    }
 
                     IMatrixIdInvite inv = new MatrixIdInvite(roomId, sender, mxid, tpid.getMedium(), tpid.getAddress(), properties);
                     notif.sendForInvite(inv);
