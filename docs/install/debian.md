@@ -1,4 +1,7 @@
 # Debian package
+## Requirements
+- Any distribution that supports Java 8
+
 ## Install
 1. Download the [latest release](https://github.com/kamax-matrix/mxisd/releases/latest)
 2. Run:
