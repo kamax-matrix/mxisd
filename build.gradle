@@ -126,6 +126,9 @@ dependencies {
     // SendGrid SDK to send emails from GCE
     compile 'com.sendgrid:sendgrid-java:2.2.2'
 
+    // ZT-Exec for exec identity store
+    compile 'org.zeroturnaround:zt-exec:1.10'
+
     testCompile 'junit:junit:4.12'
     testCompile 'com.github.tomakehurst:wiremock:2.8.0'
 }

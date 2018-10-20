@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Kamax Sarl
+ * Copyright (C) 2018 Kamax Sarl
  *
  * https://www.kamax.io/
  *
@@ -18,33 +18,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd;
+package io.kamax.mxisd.backend.exec;
 
-// FIXME consider integrating in matrix-java-sdk?
-public class UserID {
+import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
+import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.exception.NotImplementedException;
+import org.springframework.stereotype.Component;
 
-    private String type;
-    private String value;
+@Component
+public class ExecDirectoryStore extends ExecStore implements IDirectoryProvider {
 
-    protected UserID() {
-        // stub for (de)serialization
+    @Override
+    public boolean isEnabled() {
+        return false;
     }
 
-    public UserID(UserIdType type, String value) {
-        this(type.getId(), value);
+    @Override
+    public UserDirectorySearchResult searchByDisplayName(String query) {
+        throw new NotImplementedException(this.getClass().getName());
     }
 
-    public UserID(String type, String value) {
-        this.type = type;
-        this.value = value;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getValue() {
-        return value;
+    @Override
+    public UserDirectorySearchResult searchBy3pid(String query) {
+        throw new NotImplementedException(this.getClass().getName());
     }
 
 }

@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Kamax Sarl
+ * Copyright (C) 2018 Kamax Sarl
  *
  * https://www.kamax.io/
  *
@@ -18,33 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd;
+package io.kamax.mxisd.backend.exec;
 
-// FIXME consider integrating in matrix-java-sdk?
-public class UserID {
+public abstract class ExecStore {
 
-    private String type;
-    private String value;
-
-    protected UserID() {
-        // stub for (de)serialization
-    }
-
-    public UserID(UserIdType type, String value) {
-        this(type.getId(), value);
-    }
-
-    public UserID(String type, String value) {
-        this.type = type;
-        this.value = value;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getValue() {
-        return value;
-    }
+    // no-op
 
 }

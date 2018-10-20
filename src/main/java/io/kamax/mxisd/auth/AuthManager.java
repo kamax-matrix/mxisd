@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -59,9 +59,10 @@ public class AuthManager {
                 continue;
             }
 
+            log.info("Attempting authentication with store {}", provider.getClass().getSimpleName());
+
             BackendAuthResult result = provider.authenticate(mxid, password);
             if (result.isSuccess()) {
-
                 String mxId;
                 if (UserIdType.Localpart.is(result.getId().getType())) {
                     mxId = MatrixID.from(result.getId().getValue(), mxCfg.getDomain()).acceptable().getId();

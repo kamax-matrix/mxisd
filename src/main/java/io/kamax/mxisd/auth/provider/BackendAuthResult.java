@@ -1,8 +1,8 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Maxime Dor
+ * Copyright (C) 2017 Kamax Sarl
  *
- * https://max.kamax.io/
+ * https://www.kamax.io/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -36,6 +36,10 @@ public class BackendAuthResult {
 
         public String getDisplayName() {
             return displayName;
+        }
+
+        public void setDisplayName(String displayName) {
+            this.displayName = displayName;
         }
 
         public Set<ThreePid> getThreePids() {
@@ -73,12 +77,20 @@ public class BackendAuthResult {
     private UserID id;
     private BackendAuthProfile profile = new BackendAuthProfile();
 
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
     public Boolean isSuccess() {
         return success;
     }
 
     public UserID getId() {
         return id;
+    }
+
+    public void setId(UserID id) {
+        this.id = id;
     }
 
     public BackendAuthProfile getProfile() {
