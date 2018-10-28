@@ -41,17 +41,25 @@ def debBuildDataPath = "${debBuildBasePath}${debDataPath}"
 def debBuildSystemdPath = "${debBuildBasePath}${debSystemdPath}"
 
 def dockerImageName = "kamax/mxisd"
-def dockerImageTag = "${dockerImageName}:${gitVersion()}"
+def dockerImageTag = "${dockerImageName}:${mxisdVersion()}"
+
+String mxisdVersion() {
+    def versionPattern = Pattern.compile("v(\\d+\\.)?(\\d+\\.)?(\\d+)(-.*)?")
+
+    String version = System.getenv('MXISD_BUILD_VERSION')
+    if (version == null || version.size() == 0) {
+        version = gitVersion()
+    }
+    return versionPattern.matcher(version).matches() ? version.substring(1) : version
+}
 
 String gitVersion() {
-    def versionPattern = Pattern.compile("v(\\d+\\.)?(\\d+\\.)?(\\d+)(-.*)?")
     ByteArrayOutputStream out = new ByteArrayOutputStream()
     exec {
         commandLine = ['git', 'describe', '--tags', '--always', '--dirty']
         standardOutput = out
     }
-    def v = out.toString().replace(System.lineSeparator(), '')
-    return versionPattern.matcher(v).matches() ? v.substring(1) : v
+    return out.toString().replace(System.lineSeparator(), '');
 }
 
 buildscript {
@@ -154,7 +162,7 @@ processResources {
 
 task buildDeb(dependsOn: build) {
     doLast {
-        def v = gitVersion()
+        def v = mxisdVersion()
         println "Version for package: ${v}"
         mkdir distDir
         mkdir debBuildBasePath
