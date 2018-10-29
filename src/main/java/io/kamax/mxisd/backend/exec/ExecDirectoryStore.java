@@ -20,17 +20,26 @@
 
 package io.kamax.mxisd.backend.exec;
 
+import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.NotImplementedException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ExecDirectoryStore extends ExecStore implements IDirectoryProvider {
 
+    private ExecConfig.Directory cfg;
+
+    @Autowired
+    public ExecDirectoryStore(ExecConfig cfg) {
+        this.cfg = cfg.getDirectory();
+    }
+
     @Override
     public boolean isEnabled() {
-        return false;
+        return cfg.isEnabled();
     }
 
     @Override

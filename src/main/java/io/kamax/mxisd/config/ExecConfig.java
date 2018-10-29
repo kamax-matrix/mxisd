@@ -31,6 +31,29 @@ import java.util.*;
 @ConfigurationProperties("exec")
 public class ExecConfig {
 
+    public class IO {
+
+        private String type;
+        private String template;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public Optional<String> getTemplate() {
+            return Optional.ofNullable(template);
+        }
+
+        public void setTemplate(String template) {
+            this.template = template;
+        }
+
+    }
+
     public class Exit {
 
         private List<Integer> success = Collections.singletonList(0);
@@ -101,6 +124,8 @@ public class ExecConfig {
         private String domain = "{domain}";
         private String mxid = "{mxid}";
         private String password = "{password}";
+        private String medium = "{medium}";
+        private String address = "{address}";
 
         public String getLocalpart() {
             return localpart;
@@ -134,6 +159,22 @@ public class ExecConfig {
             this.password = password;
         }
 
+        public String getMedium() {
+            return medium;
+        }
+
+        public void setMedium(String medium) {
+            this.medium = medium;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
     }
 
     public class Process {
@@ -143,10 +184,10 @@ public class ExecConfig {
 
         private List<String> args = new ArrayList<>();
         private Map<String, String> env = new HashMap<>();
-        private String input;
+        private IO input = new IO();
 
         private Exit exit = new Exit();
-        private String output;
+        private IO output = new IO();
 
         public TokenOverride getToken() {
             return token;
@@ -184,11 +225,11 @@ public class ExecConfig {
             this.env.put(key, value);
         }
 
-        public String getInput() {
+        public IO getInput() {
             return input;
         }
 
-        public void setInput(String input) {
+        public void setInput(IO input) {
             this.input = input;
         }
 
@@ -200,11 +241,11 @@ public class ExecConfig {
             this.exit = exit;
         }
 
-        public String getOutput() {
+        public IO getOutput() {
             return output;
         }
 
-        public void setOutput(String output) {
+        public void setOutput(IO output) {
             this.output = output;
         }
 
@@ -224,9 +265,33 @@ public class ExecConfig {
 
     }
 
-    public class Directory extends Process {
+    public class Directory {
+
+        public class Search {
+
+            private Process byName = new Process();
+            private Process byThreepid = new Process();
+
+            public Process getByName() {
+                return byName;
+            }
+
+            public void setByName(Process byName) {
+                this.byName = byName;
+            }
+
+            public Process getByThreepid() {
+                return byThreepid;
+            }
+
+            public void setByThreepid(Process byThreepid) {
+                this.byThreepid = byThreepid;
+            }
+
+        }
 
         private Boolean enabled;
+        private Search search = new Search();
 
         public Boolean isEnabled() {
             return enabled;
@@ -234,6 +299,14 @@ public class ExecConfig {
 
         public void setEnabled(Boolean enabled) {
             this.enabled = enabled;
+        }
+
+        public Search getSearch() {
+            return search;
+        }
+
+        public void setSearch(Search search) {
+            this.search = search;
         }
 
     }
@@ -241,6 +314,7 @@ public class ExecConfig {
     public class Identity extends Process {
 
         private Boolean enabled;
+        private int priority;
 
         public Boolean isEnabled() {
             return enabled;
@@ -248,6 +322,14 @@ public class ExecConfig {
 
         public void setEnabled(Boolean enabled) {
             this.enabled = enabled;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public void setPriority(int priority) {
+            this.priority = priority;
         }
 
     }

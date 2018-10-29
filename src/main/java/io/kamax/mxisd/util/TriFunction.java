@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec;
+package io.kamax.mxisd.util;
 
-public abstract class ExecStore {
+@FunctionalInterface
+public interface TriFunction<T, U, V, R> {
 
-    public static final String JsonType = "json";
-    public static final String MultilinesType = "multilines";
+    R apply(T t, U u, V v);
 
 }

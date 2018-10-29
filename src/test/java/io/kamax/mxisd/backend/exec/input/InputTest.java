@@ -18,13 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec;
+package io.kamax.mxisd.backend.exec.input;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.UserIdType;
+import io.kamax.mxisd.backend.exec.ExecAuthResult;
+import io.kamax.mxisd.backend.exec.ExecAuthStore;
 import io.kamax.mxisd.config.ExecConfig;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -32,7 +35,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
-public abstract class ExecAuthStoreTest {
+public abstract class InputTest {
 
     protected final ExecConfig cfg;
     protected final ExecAuthStore p;
@@ -61,20 +64,23 @@ public abstract class ExecAuthStoreTest {
         // no-op
     }
 
+    protected void setValidInput() {
+        // no-op
+    }
+
     protected void setValidExit() {
         cfg.getAuth().getExit().setSuccess(Collections.singletonList(0));
         cfg.getAuth().getExit().setFailure(Arrays.asList(1, 10, 11, 12, 20, 21, 22));
     }
 
-    protected void setValidConfig() {
+    @Before
+    public void setValidConfig() {
         setValidCommand();
         setValidEnv();
         setValidArgs();
+        setValidInput();
         setValidExit();
-    }
 
-    public ExecAuthStoreTest() {
-        cfg = new ExecConfig();
         cfg.getAuth().addEnv("WITH_LOCALPART", "1");
         cfg.getAuth().addEnv("REQ_LOCALPART", uId.getLocalPart());
         cfg.getAuth().addEnv("WITH_DOMAIN", "1");
@@ -82,9 +88,10 @@ public abstract class ExecAuthStoreTest {
         cfg.getAuth().addEnv("WITH_MXID", "1");
         cfg.getAuth().addEnv("REQ_MXID", uId.getId());
         cfg.getAuth().addEnv("REQ_PASS", requiredPass);
+    }
 
-        setValidConfig();
-
+    public InputTest() {
+        cfg = new ExecConfig();
         p = new ExecAuthStore(cfg);
     }
 
@@ -119,7 +126,7 @@ public abstract class ExecAuthStoreTest {
     protected abstract void setEmptyLocalpartConfig();
 
     @Test
-    public void doEmptyLocalpartConfig() {
+    public void emptyLocalpartConfig() {
         setEmptyLocalpartConfig();
 
         ExecAuthResult res = p.authenticate(uId, requiredPass);

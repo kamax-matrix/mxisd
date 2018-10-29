@@ -22,8 +22,10 @@ package io.kamax.mxisd.backend.exec;
 
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
+import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.exception.NotImplementedException;
 import io.kamax.mxisd.profile.ProfileProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,9 +34,16 @@ import java.util.Optional;
 @Component
 public class ExecProfileStore extends ExecStore implements ProfileProvider {
 
+    private ExecConfig.Profile cfg;
+
+    @Autowired
+    public ExecProfileStore(ExecConfig cfg) {
+        this.cfg = cfg.getProfile();
+    }
+
     @Override
     public boolean isEnabled() {
-        return false;
+        return cfg.isEnabled();
     }
 
     @Override

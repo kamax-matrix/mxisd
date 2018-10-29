@@ -18,55 +18,50 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec;
+package io.kamax.mxisd.backend.exec.input;
 
-public class ExecAuthStoreEnvTest extends ExecAuthStoreTest {
+import java.util.Arrays;
 
-    private final String LocalpartEnv = "LOCALPART";
-    private final String DomainEnv = "DOMAIN";
-    private final String MxidEnv = "MXID";
+public class ArgsTest extends InputTest {
 
     @Override
     protected void setValidCommand() {
-        cfg.getAuth().setCommand("src/test/resources/store/exec/authEnvTest.sh");
+        cfg.getAuth().setCommand("src/test/resources/store/exec/input/argsTest.sh");
     }
 
     @Override
-    protected void setValidEnv() {
-        cfg.getAuth().addEnv(LocalpartEnv, LocalpartToken);
-        cfg.getAuth().addEnv(DomainEnv, DomainToken);
-        cfg.getAuth().addEnv(MxidEnv, MxidToken);
-        cfg.getAuth().addEnv("PASS", PassToken);
+    protected void setValidArgs() {
+        cfg.getAuth().setArgs(Arrays.asList(LocalpartToken, DomainToken, MxidToken, PassToken));
     }
 
     @Override
     protected void setEmptyLocalpartConfig() {
-        cfg.getAuth().addEnv(LocalpartEnv, "");
+        cfg.getAuth().setArgs(Arrays.asList("", DomainToken, MxidToken, PassToken));
     }
 
     @Override
     public void setWrongLocalpartConfig() {
-        cfg.getAuth().addEnv(LocalpartEnv, LocalpartInvalid);
+        cfg.getAuth().setArgs(Arrays.asList(LocalpartInvalid, DomainToken, MxidToken, PassToken));
     }
 
     @Override
     protected void setEmptyDomainConfig() {
-        cfg.getAuth().addEnv(DomainEnv, "");
+        cfg.getAuth().setArgs(Arrays.asList(LocalpartToken, "", MxidToken, PassToken));
     }
 
     @Override
     public void setWrongDomainConfig() {
-        cfg.getAuth().addEnv(DomainEnv, DomainInvalid);
+        cfg.getAuth().setArgs(Arrays.asList(LocalpartToken, DomainInvalid, MxidToken, PassToken));
     }
 
     @Override
     protected void setEmptyMxidConfig() {
-        cfg.getAuth().addEnv(MxidEnv, "");
+        cfg.getAuth().setArgs(Arrays.asList(LocalpartToken, DomainToken, "", PassToken));
     }
 
     @Override
     public void setWrongMxidConfig() {
-        cfg.getAuth().addEnv(MxidEnv, MxidInvalid);
+        cfg.getAuth().setArgs(Arrays.asList(LocalpartToken, DomainToken, MxidInvalid, PassToken));
     }
 
 }
