@@ -20,9 +20,227 @@
 
 package io.kamax.mxisd.backend.exec;
 
-public abstract class ExecStore {
+import io.kamax.mxisd.config.ExecConfig;
+import io.kamax.mxisd.exception.InternalServerError;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+public class ExecStore {
 
     public static final String JsonType = "json";
     public static final String MultilinesType = "multilines";
+
+    private final Logger log = LoggerFactory.getLogger(ExecStore.class);
+
+    public class Processor<V> {
+
+        private ExecConfig.Process cfg;
+
+        private Supplier<Optional<String>> inputSupplier;
+        private Function<String, String> inputTypeMapper;
+        private Function<String, String> inputUnknownTypeMapper;
+        private Map<String, Supplier<String>> inputTypeSuppliers;
+
+        private Map<String, Function<ExecConfig.TokenOverride, String>> inputTypeTemplates;
+        private Supplier<String> inputTypeNoTemplateHandler;
+        private Map<String, Function<ExecConfig.TokenOverride, String>> inputTypeTokenizers;
+        private Map<String, Supplier<String>> tokenMappers;
+        private Function<String, String> tokenHandler;
+
+        private Consumer<ProcessResult> onExitHandler;
+        private Consumer<ProcessResult> successHandler;
+        private Map<String, Function<String, V>> successMappers;
+        private Function<String, V> successDefault;
+        private Consumer<ProcessResult> failureHandler;
+        private Map<String, Function<String, V>> failureMappers;
+        private Function<String, V> failureDefault;
+        private Consumer<ProcessResult> unknownHandler;
+        private Map<String, Function<String, V>> unknownMappers;
+        private Function<String, V> unknownDefault;
+
+        public Processor() {
+            tokenMappers = new HashMap<>();
+            inputTypeSuppliers = new HashMap<>();
+            inputTypeTemplates = new HashMap<>();
+
+            tokenHandler = input -> {
+                for (Map.Entry<String, Supplier<String>> entry : tokenMappers.entrySet()) {
+                    input = input.replace(entry.getKey(), entry.getValue().get());
+                }
+                return input;
+            };
+
+            inputTypeNoTemplateHandler = () -> cfg.getInput().getType()
+                    .map(type -> inputTypeTemplates.get(type).apply(cfg.getToken()))
+                    .orElse("");
+
+            inputUnknownTypeMapper = type -> tokenHandler.apply(cfg.getInput().getTemplate().orElseGet(inputTypeNoTemplateHandler));
+
+            inputTypeMapper = type -> {
+                if (!inputTypeSuppliers.containsKey(type)) {
+                    return inputUnknownTypeMapper.apply(type);
+                }
+
+                return inputTypeSuppliers.get(type).get();
+            };
+
+            inputSupplier = () -> cfg.getInput().getType().map(type -> inputTypeMapper.apply(type));
+
+            onExitHandler = pr -> {
+            };
+
+            successMappers = new HashMap<>();
+            successHandler = pr -> {
+            };
+            successDefault = output -> {
+                log.info("{} stdout: {}{}", cfg.getCommand(), System.lineSeparator(), output);
+                throw new InternalServerError("Exec command has no success handler configured. This is a bug. Please report.");
+            };
+
+            failureHandler = pr -> {
+            };
+            failureMappers = new HashMap<>();
+            failureDefault = output -> {
+                log.info("{} stdout: {}{}", cfg.getCommand(), System.lineSeparator(), output);
+                throw new InternalServerError("Exec command has no failure handler configured. This is a bug. Please report.");
+            };
+
+            unknownHandler = pr -> log.warn("Unexpected exit status: {}", pr.getExitValue());
+            unknownMappers = new HashMap<>();
+            unknownDefault = output -> {
+                log.error("{} stdout:{}{}", cfg.getCommand(), System.lineSeparator(), output);
+                throw new InternalServerError("Exec command returned with unexpected exit status");
+            };
+        }
+
+        public Processor<V> withConfig(ExecConfig.Process cfg) {
+            this.cfg = cfg;
+            return this;
+        }
+
+        public Processor<V> addTokenMapper(String token, Supplier<String> data) {
+            tokenMappers.put(token, data);
+            return this;
+        }
+
+        public Processor<V> withTokenHandler(Function<String, String> tokenHandler) {
+            this.tokenHandler = tokenHandler;
+            return this;
+        }
+
+        public Processor<V> addInput(String type, Supplier<String> handler) {
+            inputTypeSuppliers.put(type, handler);
+            return this;
+        }
+
+        public Processor<V> addInputTemplate(String type, Function<ExecConfig.TokenOverride, String> template) {
+            inputTypeTemplates.put(type, template);
+            return this;
+        }
+
+        public Processor<V> withExitHandler(Consumer<ProcessResult> handler) {
+            onExitHandler = handler;
+            return this;
+        }
+
+        public Processor<V> withSuccessHandler(Consumer<ProcessResult> handler) {
+            successHandler = handler;
+            return this;
+        }
+
+        public Processor<V> addSuccessMapper(String type, Function<String, V> mapper) {
+            successMappers.put(type, mapper);
+            return this;
+        }
+
+        public Processor<V> withSuccessDefault(Function<String, V> mapper) {
+            successDefault = mapper;
+            return this;
+        }
+
+        public Processor<V> withFailureHandler(Consumer<ProcessResult> handler) {
+            failureHandler = handler;
+            return this;
+        }
+
+        public Processor<V> addFailureMapper(String type, Function<String, V> mapper) {
+            failureMappers.put(type, mapper);
+            return this;
+        }
+
+        public Processor<V> withFailureDefault(Function<String, V> mapper) {
+            failureDefault = mapper;
+            return this;
+        }
+
+        public Processor<V> addUnknownMapper(String type, Function<String, V> mapper) {
+            unknownMappers.put(type, mapper);
+            return this;
+        }
+
+        public Processor<V> withUnknownDefault(Function<String, V> mapper) {
+            unknownDefault = mapper;
+            return this;
+        }
+
+        V execute() {
+            log.info("Executing {}", cfg.getCommand());
+
+            try {
+                ProcessExecutor psExec = new ProcessExecutor().readOutput(true);
+
+                List<String> args = new ArrayList<>();
+                args.add(cfg.getCommand());
+                args.addAll(cfg.getArgs().stream().map(arg -> tokenHandler.apply(arg)).collect(Collectors.toList()));
+                psExec.command(args);
+
+                psExec.environment(new HashMap<>(cfg.getEnv()).entrySet().stream()
+                        .peek(e -> e.setValue(tokenHandler.apply(e.getValue())))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+                inputSupplier.get().ifPresent(input -> psExec.redirectInput(IOUtils.toInputStream(input, StandardCharsets.UTF_8)));
+
+                ProcessResult psResult = psExec.execute();
+                String output = psResult.outputUTF8();
+                onExitHandler.accept(psResult);
+
+                if (cfg.getExit().getSuccess().contains(psResult.getExitValue())) {
+                    successHandler.accept(psResult);
+
+                    return cfg.getOutput().getType()
+                            .map(type -> successMappers.getOrDefault(type, successDefault).apply(output))
+                            .orElseGet(() -> successDefault.apply(output));
+                } else if (cfg.getExit().getFailure().contains(psResult.getExitValue())) {
+                    failureHandler.accept(psResult);
+
+                    return cfg.getOutput().getType()
+                            .map(type -> failureMappers.getOrDefault(type, failureDefault).apply(output))
+                            .orElseGet(() -> failureDefault.apply(output));
+                } else {
+                    unknownHandler.accept(psResult);
+
+                    return cfg.getOutput().getType()
+                            .map(type -> unknownMappers.getOrDefault(type, unknownDefault).apply(output))
+                            .orElseGet(() -> unknownDefault.apply(output));
+                }
+            } catch (IOException | InterruptedException | TimeoutException e) {
+                log.error("Failed to execute {}", cfg.getCommand());
+                throw new InternalServerError(e);
+            }
+        }
+
+    }
 
 }

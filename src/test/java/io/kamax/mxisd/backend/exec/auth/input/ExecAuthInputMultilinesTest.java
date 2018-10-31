@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec.input;
+package io.kamax.mxisd.backend.exec.auth.input;
 
 import io.kamax.mxisd.backend.exec.ExecStore;
 
-public class MultilinesTest extends InputTest {
+public class ExecAuthInputMultilinesTest extends ExecAuthTest {
 
     @Override
     protected void setValidCommand() {

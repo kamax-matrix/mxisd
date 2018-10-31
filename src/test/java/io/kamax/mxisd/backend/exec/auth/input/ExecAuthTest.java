@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec.input;
+package io.kamax.mxisd.backend.exec.auth.input;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
@@ -35,7 +35,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
-public abstract class InputTest {
+public abstract class ExecAuthTest {
 
     protected final ExecConfig cfg;
     protected final ExecAuthStore p;
@@ -90,7 +90,7 @@ public abstract class InputTest {
         cfg.getAuth().addEnv("REQ_PASS", requiredPass);
     }
 
-    public InputTest() {
+    public ExecAuthTest() {
         cfg = new ExecConfig();
         p = new ExecAuthStore(cfg);
     }

@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec.input;
+package io.kamax.mxisd.backend.exec.auth.input;
 
 import java.util.HashMap;
 
-public class EnvTest extends InputTest {
+public class ExecAuthEnvTest extends ExecAuthTest {
 
     private final String LocalpartEnv = "LOCALPART";
     private final String DomainEnv = "DOMAIN";

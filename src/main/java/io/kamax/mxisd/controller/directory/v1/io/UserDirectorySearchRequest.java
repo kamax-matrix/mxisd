@@ -29,6 +29,11 @@ public class UserDirectorySearchRequest {
         setSearchTerm(searchTerm);
     }
 
+    public UserDirectorySearchRequest(String type, String searchTerm) {
+        setBy(type);
+        setSearchTerm(searchTerm);
+    }
+
     public String getBy() {
         return by;
     }

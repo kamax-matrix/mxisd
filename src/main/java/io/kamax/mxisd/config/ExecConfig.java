@@ -36,8 +36,8 @@ public class ExecConfig {
         private String type;
         private String template;
 
-        public String getType() {
-            return type;
+        public Optional<String> getType() {
+            return Optional.ofNullable(type);
         }
 
         public void setType(String type) {
@@ -83,6 +83,10 @@ public class ExecConfig {
         private String domain;
         private String mxid;
         private String password;
+        private String medium;
+        private String address;
+        private String type;
+        private String query;
 
         public String getLocalpart() {
             return StringUtils.defaultIfEmpty(localpart, getToken().getLocalpart());
@@ -116,6 +120,38 @@ public class ExecConfig {
             this.password = password;
         }
 
+        public String getMedium() {
+            return StringUtils.defaultIfEmpty(medium, getToken().getMedium());
+        }
+
+        public void setMedium(String medium) {
+            this.medium = medium;
+        }
+
+        public String getAddress() {
+            return StringUtils.defaultIfEmpty(address, getToken().getAddress());
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public String getType() {
+            return StringUtils.defaultIfEmpty(type, getToken().getType());
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getQuery() {
+            return StringUtils.defaultIfEmpty(query, getToken().getQuery());
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
+        }
+
     }
 
     public class Token {
@@ -126,6 +162,8 @@ public class ExecConfig {
         private String password = "{password}";
         private String medium = "{medium}";
         private String address = "{address}";
+        private String type = "{type}";
+        private String query = "{query}";
 
         public String getLocalpart() {
             return localpart;
@@ -173,6 +211,22 @@ public class ExecConfig {
 
         public void setAddress(String address) {
             this.address = address;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
         }
 
     }
@@ -311,10 +365,34 @@ public class ExecConfig {
 
     }
 
-    public class Identity extends Process {
+    public class Lookup {
+
+        private Process single = new Process();
+        private Process bulk = new Process();
+
+        public Process getSingle() {
+            return single;
+        }
+
+        public void setSingle(Process single) {
+            this.single = single;
+        }
+
+        public Process getBulk() {
+            return bulk;
+        }
+
+        public void setBulk(Process bulk) {
+            this.bulk = bulk;
+        }
+
+    }
+
+    public class Identity {
 
         private Boolean enabled;
         private int priority;
+        private Lookup lookup = new Lookup();
 
         public Boolean isEnabled() {
             return enabled;
@@ -330,6 +408,14 @@ public class ExecConfig {
 
         public void setPriority(int priority) {
             this.priority = priority;
+        }
+
+        public Lookup getLookup() {
+            return lookup;
+        }
+
+        public void setLookup(Lookup lookup) {
+            this.lookup = lookup;
         }
 
     }
