@@ -111,7 +111,7 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
         p.addTokenMapper(getSingleCfg().getToken().getAddress(), request::getThreePid);
 
         p.addJsonInputTemplate(tokens -> new ThreePid(tokens.getMedium(), tokens.getAddress()));
-        p.addInputTemplate(MultilinesType, tokens -> tokens.getMedium()
+        p.addInputTemplate(PlainType, tokens -> tokens.getMedium()
                 + System.lineSeparator()
                 + tokens.getAddress()
         );
@@ -128,7 +128,7 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
                     .map(mxId -> new SingleLookupReply(request, mxId));
         });
 
-        p.addSuccessMapper(MultilinesType, output -> {
+        p.addSuccessMapper(PlainType, output -> {
             String[] lines = output.split("\\R");
             if (lines.length > 2) {
                 throw new InternalServerError("Exec auth command returned more than 2 lines (" + lines.length + ")");
@@ -138,7 +138,7 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
                 return Optional.empty();
             }
 
-            String type = StringUtils.trimToEmpty(lines.length == 1 ? "uid" : lines[0]);
+            String type = StringUtils.trimToEmpty(lines.length == 1 ? UserIdType.Localpart.getId() : lines[0]);
             String value = StringUtils.trimToEmpty(lines.length == 2 ? lines[1] : lines[0]);
 
             if (UserIdType.Localpart.is(type)) {
@@ -168,7 +168,7 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
                     .collect(Collectors.toList()));
             return GsonUtil.get().toJson(GsonUtil.makeObj("lookup", tpids));
         });
-        p.addInput(MultilinesType, () -> {
+        p.addInput(PlainType, () -> {
             StringBuilder input = new StringBuilder();
             for (ThreePidMapping mapping : mappings) {
                 input.append(mapping.getMedium()).append("\t").append(mapping.getValue()).append(System.lineSeparator());

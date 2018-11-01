@@ -60,7 +60,7 @@ public class ExecDirectoryStore extends ExecStore implements IDirectoryProvider 
         Processor<UserDirectorySearchResult> p = new Processor<>(cfg);
 
         p.addJsonInputTemplate(tokens -> new UserDirectorySearchRequest(tokens.getType(), tokens.getQuery()));
-        p.addInputTemplate(MultilinesType, tokens -> tokens.getType() + System.lineSeparator() + tokens.getQuery());
+        p.addInputTemplate(PlainType, tokens -> tokens.getType() + System.lineSeparator() + tokens.getQuery());
 
         p.addTokenMapper(cfg.getToken().getType(), request::getBy);
         p.addTokenMapper(cfg.getToken().getQuery(), request::getSearchTerm);

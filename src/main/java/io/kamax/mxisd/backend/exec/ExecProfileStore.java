@@ -58,7 +58,7 @@ public class ExecProfileStore extends ExecStore implements ProfileProvider {
         Processor<Optional<JsonProfileResult>> p = new Processor<>(cfg);
 
         p.addJsonInputTemplate(tokens -> new JsonProfileRequest(tokens.getLocalpart(), tokens.getDomain(), tokens.getMxid()));
-        p.addInputTemplate(MultilinesType, tokens -> tokens.getLocalpart() + System.lineSeparator()
+        p.addInputTemplate(PlainType, tokens -> tokens.getLocalpart() + System.lineSeparator()
                 + tokens.getDomain() + System.lineSeparator()
                 + tokens.getMxid() + System.lineSeparator()
         );

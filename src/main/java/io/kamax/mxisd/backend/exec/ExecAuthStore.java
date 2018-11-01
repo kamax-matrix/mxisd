@@ -81,7 +81,7 @@ public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
             json.setPassword(tokens.getPassword());
             return json;
         });
-        p.addInputTemplate(MultilinesType, tokens -> tokens.getLocalpart() + System.lineSeparator() +
+        p.addInputTemplate(PlainType, tokens -> tokens.getLocalpart() + System.lineSeparator() +
                 tokens.getDomain() + System.lineSeparator() +
                 tokens.getMxid() + System.lineSeparator() +
                 tokens.getPassword() + System.lineSeparator()
@@ -102,7 +102,7 @@ public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
 
             return result;
         });
-        p.addSuccessMapper(MultilinesType, output -> {
+        p.addSuccessMapper(PlainType, output -> {
             String[] lines = output.split("\\R");
             if (lines.length > 2) {
                 throw new InternalServerError("Exec auth command returned more than 2 lines (" + lines.length + ")");

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 public class ExecStore {
 
     public static final String JsonType = "json";
-    public static final String MultilinesType = "multilines";
+    public static final String PlainType = "plain";
 
     protected static String toJson(Object o) {
         return GsonUtil.get().toJson(o);

@@ -32,7 +32,7 @@ public class ExecAuthInputMultilinesTest extends ExecAuthStoreTest {
 
     @Override
     protected void setValidInput() {
-        cfg.getAuth().getInput().setType(ExecStore.MultilinesType);
+        cfg.getAuth().getInput().setType(ExecStore.PlainType);
         cfg.getAuth().getInput().setTemplate(null);
     }
 
