@@ -25,6 +25,10 @@ import java.util.Set;
 
 public class UserDirectorySearchResult {
 
+    public static UserDirectorySearchResult empty() {
+        return new UserDirectorySearchResult();
+    }
+
     public static class Result {
 
         private String displayName;

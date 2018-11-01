@@ -27,6 +27,7 @@ import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
 import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +39,11 @@ public class ExecDirectoryStore extends ExecStore implements IDirectoryProvider 
 
     @Autowired
     public ExecDirectoryStore(ExecConfig cfg, MatrixConfig mxCfg) {
-        this.cfg = cfg.getDirectory();
+        this(cfg.getDirectory(), mxCfg);
+    }
+
+    public ExecDirectoryStore(ExecConfig.Directory cfg, MatrixConfig mxCfg) {
+        this.cfg = cfg;
         this.mxCfg = mxCfg;
     }
 
@@ -48,24 +53,32 @@ public class ExecDirectoryStore extends ExecStore implements IDirectoryProvider 
     }
 
     private UserDirectorySearchResult search(ExecConfig.Process cfg, UserDirectorySearchRequest request) {
-        Processor<UserDirectorySearchResult> processor = new Processor<>();
-        processor.withConfig(cfg);
-        processor.addInputTemplate(JsonType, tokens -> GsonUtil.get().toJson(new UserDirectorySearchRequest(tokens.getType(), tokens.getQuery())));
-        processor.addInputTemplate(MultilinesType, tokens -> tokens.getType() + System.lineSeparator() + tokens.getQuery());
+        if (StringUtils.isEmpty(cfg.getCommand())) {
+            return UserDirectorySearchResult.empty();
+        }
 
-        processor.addTokenMapper(cfg.getToken().getType(), request::getBy);
-        processor.addTokenMapper(cfg.getToken().getQuery(), request::getSearchTerm);
+        Processor<UserDirectorySearchResult> p = new Processor<>(cfg);
 
-        processor.addSuccessMapper(JsonType, output -> {
+        p.addJsonInputTemplate(tokens -> new UserDirectorySearchRequest(tokens.getType(), tokens.getQuery()));
+        p.addInputTemplate(MultilinesType, tokens -> tokens.getType() + System.lineSeparator() + tokens.getQuery());
+
+        p.addTokenMapper(cfg.getToken().getType(), request::getBy);
+        p.addTokenMapper(cfg.getToken().getQuery(), request::getSearchTerm);
+
+        p.addSuccessMapper(JsonType, output -> {
+            if (StringUtils.isBlank(output)) {
+                return UserDirectorySearchResult.empty();
+            }
+
             UserDirectorySearchResult response = GsonUtil.get().fromJson(output, UserDirectorySearchResult.class);
             for (UserDirectorySearchResult.Result result : response.getResults()) {
                 result.setUserId(MatrixID.asAcceptable(result.getUserId(), mxCfg.getDomain()).getId());
             }
             return response;
         });
-        processor.withFailureDefault(output -> new UserDirectorySearchResult());
+        p.withFailureDefault(output -> new UserDirectorySearchResult());
 
-        return processor.execute();
+        return p.execute();
     }
 
     @Override

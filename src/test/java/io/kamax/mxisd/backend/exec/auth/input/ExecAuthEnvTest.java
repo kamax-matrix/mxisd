@@ -20,9 +20,11 @@
 
 package io.kamax.mxisd.backend.exec.auth.input;
 
+import io.kamax.mxisd.backend.exec.ExecAuthStoreTest;
+
 import java.util.HashMap;
 
-public class ExecAuthEnvTest extends ExecAuthTest {
+public class ExecAuthEnvTest extends ExecAuthStoreTest {
 
     private final String LocalpartEnv = "LOCALPART";
     private final String DomainEnv = "DOMAIN";

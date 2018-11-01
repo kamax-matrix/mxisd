@@ -42,7 +42,7 @@ import java.util.Optional;
 @Component
 public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
 
-    private final transient Logger log = LoggerFactory.getLogger(ExecAuthStore.class);
+    private final Logger log = LoggerFactory.getLogger(ExecAuthStore.class);
 
     private ExecConfig.Auth cfg;
 
@@ -66,43 +66,43 @@ public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
         ExecAuthResult result = new ExecAuthResult();
         result.setId(new UserID(UserIdType.Localpart, uId.getLocalPart()));
 
-        Processor<ExecAuthResult> process = new Processor<>();
-        process.withConfig(cfg);
-        process.addTokenMapper(cfg.getToken().getLocalpart(), uId::getLocalPart);
-        process.addTokenMapper(cfg.getToken().getDomain(), uId::getDomain);
-        process.addTokenMapper(cfg.getToken().getMxid(), uId::getId);
-        process.addTokenMapper(cfg.getToken().getPassword(), () -> password);
+        Processor<ExecAuthResult> p = new Processor<>(cfg);
 
-        process.addInputTemplate(JsonType, tokens -> {
+        p.addTokenMapper(cfg.getToken().getLocalpart(), uId::getLocalPart);
+        p.addTokenMapper(cfg.getToken().getDomain(), uId::getDomain);
+        p.addTokenMapper(cfg.getToken().getMxid(), uId::getId);
+        p.addTokenMapper(cfg.getToken().getPassword(), () -> password);
+
+        p.addJsonInputTemplate(tokens -> {
             RestAuthRequestJson json = new RestAuthRequestJson();
             json.setLocalpart(tokens.getLocalpart());
             json.setDomain(tokens.getDomain());
             json.setMxid(tokens.getMxid());
             json.setPassword(tokens.getPassword());
-            return GsonUtil.get().toJson(json);
+            return json;
         });
-        process.addInputTemplate(MultilinesType, tokens -> tokens.getLocalpart() + System.lineSeparator() +
+        p.addInputTemplate(MultilinesType, tokens -> tokens.getLocalpart() + System.lineSeparator() +
                 tokens.getDomain() + System.lineSeparator() +
                 tokens.getMxid() + System.lineSeparator() +
                 tokens.getPassword() + System.lineSeparator()
         );
 
-        process.withExitHandler(pr -> result.setExitStatus(pr.getExitValue()));
+        p.withExitHandler(pr -> result.setExitStatus(pr.getExitValue()));
 
-        process.withSuccessHandler(pr -> result.setSuccess(true));
-        process.withSuccessDefault(o -> result);
-        process.addSuccessMapper(JsonType, output -> {
+        p.withSuccessHandler(pr -> result.setSuccess(true));
+        p.withSuccessDefault(o -> result);
+        p.addSuccessMapper(JsonType, output -> {
             JsonObject data = GsonUtil.getObj(GsonUtil.parseObj(output), "auth");
             GsonUtil.findPrimitive(data, "success")
                     .map(JsonPrimitive::getAsBoolean)
                     .ifPresent(result::setSuccess);
             GsonUtil.findObj(data, "profile")
-                    .flatMap(p -> GsonUtil.findString(p, "display_name"))
+                    .flatMap(profile -> GsonUtil.findString(profile, "display_name"))
                     .ifPresent(v -> result.getProfile().setDisplayName(v));
 
             return result;
         });
-        process.addSuccessMapper(MultilinesType, output -> {
+        p.addSuccessMapper(MultilinesType, output -> {
             String[] lines = output.split("\\R");
             if (lines.length > 2) {
                 throw new InternalServerError("Exec auth command returned more than 2 lines (" + lines.length + ")");
@@ -120,10 +120,10 @@ public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
             return result;
         });
 
-        process.withFailureHandler(pr -> result.setSuccess(false));
-        process.withFailureDefault(o -> result);
+        p.withFailureHandler(pr -> result.setSuccess(false));
+        p.withFailureDefault(o -> result);
 
-        return process.execute();
+        return p.execute();
     }
 
 }

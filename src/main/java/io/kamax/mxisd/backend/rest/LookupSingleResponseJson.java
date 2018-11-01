@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.backend.rest;
 
+import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.UserID;
 
 public class LookupSingleResponseJson {
@@ -32,12 +33,28 @@ public class LookupSingleResponseJson {
         return medium;
     }
 
+    public void setMedium(String medium) {
+        this.medium = medium;
+    }
+
+    public void setMedium(ThreePidMedium medium) {
+        setMedium(medium.getId());
+    }
+
     public String getAddress() {
         return address;
     }
 
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public UserID getId() {
         return id;
+    }
+
+    public void setId(UserID id) {
+        this.id = id;
     }
 
 }

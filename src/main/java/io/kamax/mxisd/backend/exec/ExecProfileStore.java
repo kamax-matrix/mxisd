@@ -22,12 +22,16 @@ package io.kamax.mxisd.backend.exec;
 
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.ExecConfig;
-import io.kamax.mxisd.exception.NotImplementedException;
+import io.kamax.mxisd.profile.JsonProfileRequest;
+import io.kamax.mxisd.profile.JsonProfileResult;
 import io.kamax.mxisd.profile.ProfileProvider;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +42,11 @@ public class ExecProfileStore extends ExecStore implements ProfileProvider {
 
     @Autowired
     public ExecProfileStore(ExecConfig cfg) {
-        this.cfg = cfg.getProfile();
+        this(cfg.getProfile());
+    }
+
+    public ExecProfileStore(ExecConfig.Profile cfg) {
+        this.cfg = cfg;
     }
 
     @Override
@@ -46,19 +54,50 @@ public class ExecProfileStore extends ExecStore implements ProfileProvider {
         return cfg.isEnabled();
     }
 
+    private Optional<JsonProfileResult> getFull(_MatrixID userId, ExecConfig.Process cfg) {
+        Processor<Optional<JsonProfileResult>> p = new Processor<>(cfg);
+
+        p.addJsonInputTemplate(tokens -> new JsonProfileRequest(tokens.getLocalpart(), tokens.getDomain(), tokens.getMxid()));
+        p.addInputTemplate(MultilinesType, tokens -> tokens.getLocalpart() + System.lineSeparator()
+                + tokens.getDomain() + System.lineSeparator()
+                + tokens.getMxid() + System.lineSeparator()
+        );
+
+        p.addTokenMapper(cfg.getToken().getLocalpart(), userId::getLocalPart);
+        p.addTokenMapper(cfg.getToken().getDomain(), userId::getDomain);
+        p.addTokenMapper(cfg.getToken().getMxid(), userId::getId);
+
+        p.withFailureDefault(v -> Optional.empty());
+
+        p.addSuccessMapper(JsonType, output -> {
+            if (StringUtils.isBlank(output)) {
+                return Optional.empty();
+            }
+
+            return GsonUtil.findObj(GsonUtil.parseObj(output), "profile")
+                    .map(obj -> GsonUtil.get().fromJson(obj, JsonProfileResult.class));
+        });
+
+        return p.execute();
+    }
+
     @Override
     public Optional<String> getDisplayName(_MatrixID userId) {
-        throw new NotImplementedException(this.getClass().getName());
+        return getFull(userId, cfg.getDisplayName()).map(JsonProfileResult::getDisplayName);
     }
 
     @Override
     public List<_ThreePid> getThreepids(_MatrixID userId) {
-        throw new NotImplementedException(this.getClass().getName());
+        return getFull(userId, cfg.getThreePid())
+                .map(p -> Collections.<_ThreePid>unmodifiableList(p.getThreepids()))
+                .orElseGet(Collections::emptyList);
     }
 
     @Override
     public List<String> getRoles(_MatrixID userId) {
-        throw new NotImplementedException(this.getClass().getName());
+        return getFull(userId, cfg.getRole())
+                .map(JsonProfileResult::getRoles)
+                .orElseGet(Collections::emptyList);
     }
 
 }

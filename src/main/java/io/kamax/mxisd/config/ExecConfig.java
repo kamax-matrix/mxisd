@@ -420,9 +420,12 @@ public class ExecConfig {
 
     }
 
-    public class Profile extends Process {
+    public class Profile {
 
         private Boolean enabled;
+        private Process displayName = new Process();
+        private Process threePid = new Process();
+        private Process role = new Process();
 
         public Boolean isEnabled() {
             return enabled;
@@ -430,6 +433,30 @@ public class ExecConfig {
 
         public void setEnabled(Boolean enabled) {
             this.enabled = enabled;
+        }
+
+        public Process getDisplayName() {
+            return displayName;
+        }
+
+        public void setDisplayName(Process displayName) {
+            this.displayName = displayName;
+        }
+
+        public Process getThreePid() {
+            return threePid;
+        }
+
+        public void setThreePid(Process threePid) {
+            this.threePid = threePid;
+        }
+
+        public Process getRole() {
+            return role;
+        }
+
+        public void setRoles(Process role) {
+            this.role = role;
         }
 
     }
@@ -490,7 +517,7 @@ public class ExecConfig {
     }
 
     @PostConstruct
-    public void build() {
+    public ExecConfig compute() {
         if (Objects.isNull(getAuth().isEnabled())) {
             getAuth().setEnabled(isEnabled());
         }
@@ -506,6 +533,8 @@ public class ExecConfig {
         if (Objects.isNull(getProfile().isEnabled())) {
             getProfile().setEnabled(isEnabled());
         }
+
+        return this;
     }
 
 }

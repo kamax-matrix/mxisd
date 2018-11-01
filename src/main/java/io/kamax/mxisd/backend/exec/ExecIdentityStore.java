@@ -21,12 +21,15 @@
 package io.kamax.mxisd.backend.exec;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.ThreePid;
+import io.kamax.matrix._MatrixID;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.UserID;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.backend.rest.LookupBulkResponseJson;
+import io.kamax.mxisd.backend.rest.LookupSingleResponseJson;
 import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.exception.InternalServerError;
@@ -42,6 +45,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -55,7 +59,11 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
 
     @Autowired
     public ExecIdentityStore(ExecConfig cfg, MatrixConfig mxCfg) {
-        this.cfg = cfg.getIdentity();
+        this(cfg.getIdentity(), mxCfg);
+    }
+
+    public ExecIdentityStore(ExecConfig.Identity cfg, MatrixConfig mxCfg) {
+        this.cfg = cfg;
         this.mxCfg = mxCfg;
     }
 
@@ -78,46 +86,49 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
         return cfg.getLookup().getSingle();
     }
 
+    private _MatrixID getUserId(UserID id) {
+        if (Objects.isNull(id)) {
+            throw new JsonParseException("User id key is not present");
+        }
+
+        if (UserIdType.Localpart.is(id.getType())) {
+            return MatrixID.asAcceptable(id.getValue(), mxCfg.getDomain());
+        }
+
+        if (UserIdType.MatrixID.is(id.getType())) {
+            return MatrixID.asAcceptable(id.getValue());
+        }
+
+        throw new InternalServerError("Unknown user type: " + id.getType());
+    }
+
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
-        Processor<Optional<SingleLookupReply>> processor = new Processor<>();
-        processor.withConfig(cfg.getLookup().getSingle());
+        Processor<Optional<SingleLookupReply>> p = new Processor<>();
+        p.withConfig(cfg.getLookup().getSingle());
 
-        processor.addTokenMapper(getSingleCfg().getToken().getMedium(), request::getType);
-        processor.addTokenMapper(getSingleCfg().getToken().getAddress(), request::getThreePid);
+        p.addTokenMapper(getSingleCfg().getToken().getMedium(), request::getType);
+        p.addTokenMapper(getSingleCfg().getToken().getAddress(), request::getThreePid);
 
-        processor.addInputTemplate(JsonType, tokens -> {
-            JsonObject json = new JsonObject();
-            json.addProperty("medium", tokens.getMedium());
-            json.addProperty("address", tokens.getAddress());
-            return GsonUtil.get().toJson(json);
-        });
-        processor.addInputTemplate(MultilinesType, tokens -> tokens.getMedium()
+        p.addJsonInputTemplate(tokens -> new ThreePid(tokens.getMedium(), tokens.getAddress()));
+        p.addInputTemplate(MultilinesType, tokens -> tokens.getMedium()
                 + System.lineSeparator()
                 + tokens.getAddress()
         );
 
-        processor.addSuccessMapper(JsonType, output -> {
+        p.addSuccessMapper(JsonType, output -> {
             if (StringUtils.isBlank(output)) {
                 return Optional.empty();
             }
 
-            return GsonUtil.findObj(GsonUtil.parseObj(output), "lookup").map(lookup -> {
-                String type = GsonUtil.getStringOrThrow(lookup, "type");
-                String value = GsonUtil.getStringOrThrow(lookup, "value");
-                if (UserIdType.Localpart.is(type)) {
-                    return MatrixID.asAcceptable(value, mxCfg.getDomain());
-                }
-
-                if (UserIdType.MatrixID.is(type)) {
-                    return MatrixID.asAcceptable(value);
-                }
-
-                throw new InternalServerError("Invalid user type: " + type);
-            }).map(mxId -> new SingleLookupReply(request, mxId));
+            return GsonUtil.findObj(GsonUtil.parseObj(output), "lookup")
+                    .filter(obj -> !obj.entrySet().isEmpty())
+                    .map(json -> GsonUtil.get().fromJson(json, LookupSingleResponseJson.class))
+                    .map(lookup -> getUserId(lookup.getId()))
+                    .map(mxId -> new SingleLookupReply(request, mxId));
         });
 
-        processor.addSuccessMapper(MultilinesType, output -> {
+        p.addSuccessMapper(MultilinesType, output -> {
             String[] lines = output.split("\\R");
             if (lines.length > 2) {
                 throw new InternalServerError("Exec auth command returned more than 2 lines (" + lines.length + ")");
@@ -141,23 +152,23 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
             throw new InternalServerError("Invalid user type: " + type);
         });
 
-        processor.withFailureDefault(o -> Optional.empty());
+        p.withFailureDefault(o -> Optional.empty());
 
-        return processor.execute();
+        return p.execute();
     }
 
     @Override
     public List<ThreePidMapping> populate(List<ThreePidMapping> mappings) {
-        Processor<List<ThreePidMapping>> processor = new Processor<>();
-        processor.withConfig(cfg.getLookup().getBulk());
+        Processor<List<ThreePidMapping>> p = new Processor<>();
+        p.withConfig(cfg.getLookup().getBulk());
 
-        processor.addInput(JsonType, () -> {
+        p.addInput(JsonType, () -> {
             JsonArray tpids = GsonUtil.asArray(mappings.stream()
                     .map(mapping -> GsonUtil.get().toJsonTree(new ThreePid(mapping.getMedium(), mapping.getValue())))
                     .collect(Collectors.toList()));
             return GsonUtil.get().toJson(GsonUtil.makeObj("lookup", tpids));
         });
-        processor.addInput(MultilinesType, () -> {
+        p.addInput(MultilinesType, () -> {
             StringBuilder input = new StringBuilder();
             for (ThreePidMapping mapping : mappings) {
                 input.append(mapping.getMedium()).append("\t").append(mapping.getValue()).append(System.lineSeparator());
@@ -165,7 +176,7 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
             return input.toString();
         });
 
-        processor.addSuccessMapper(JsonType, output -> {
+        p.addSuccessMapper(JsonType, output -> {
             if (StringUtils.isBlank(output)) {
                 return Collections.emptyList();
             }
@@ -190,9 +201,9 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
             }).collect(Collectors.toList());
         });
 
-        processor.withFailureDefault(output -> Collections.emptyList());
+        p.withFailureDefault(output -> Collections.emptyList());
 
-        return processor.execute();
+        return p.execute();
     }
 
 }

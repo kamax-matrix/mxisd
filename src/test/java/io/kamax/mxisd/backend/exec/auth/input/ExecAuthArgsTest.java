@@ -20,9 +20,11 @@
 
 package io.kamax.mxisd.backend.exec.auth.input;
 
+import io.kamax.mxisd.backend.exec.ExecAuthStoreTest;
+
 import java.util.Arrays;
 
-public class ExecAuthArgsTest extends ExecAuthTest {
+public class ExecAuthArgsTest extends ExecAuthStoreTest {
 
     @Override
     protected void setValidCommand() {

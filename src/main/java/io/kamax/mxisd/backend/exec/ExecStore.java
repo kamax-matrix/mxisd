@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.backend.exec;
 
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.commons.io.IOUtils;
@@ -42,7 +43,17 @@ public class ExecStore {
     public static final String JsonType = "json";
     public static final String MultilinesType = "multilines";
 
+    protected static String toJson(Object o) {
+        return GsonUtil.get().toJson(o);
+    }
+
     private final Logger log = LoggerFactory.getLogger(ExecStore.class);
+
+    private Supplier<ProcessExecutor> executorSupplier = () -> new ProcessExecutor().readOutput(true);
+
+    public void setExecutorSupplier(Supplier<ProcessExecutor> supplier) {
+        executorSupplier = supplier;
+    }
 
     public class Processor<V> {
 
@@ -55,7 +66,6 @@ public class ExecStore {
 
         private Map<String, Function<ExecConfig.TokenOverride, String>> inputTypeTemplates;
         private Supplier<String> inputTypeNoTemplateHandler;
-        private Map<String, Function<ExecConfig.TokenOverride, String>> inputTypeTokenizers;
         private Map<String, Supplier<String>> tokenMappers;
         private Function<String, String> tokenHandler;
 
@@ -70,17 +80,22 @@ public class ExecStore {
         private Map<String, Function<String, V>> unknownMappers;
         private Function<String, V> unknownDefault;
 
+        public Processor(ExecConfig.Process cfg) {
+            this();
+            withConfig(cfg);
+        }
+
         public Processor() {
             tokenMappers = new HashMap<>();
             inputTypeSuppliers = new HashMap<>();
             inputTypeTemplates = new HashMap<>();
 
-            tokenHandler = input -> {
+            withTokenHandler(tokenHandler = input -> {
                 for (Map.Entry<String, Supplier<String>> entry : tokenMappers.entrySet()) {
                     input = input.replace(entry.getKey(), entry.getValue().get());
                 }
                 return input;
-            };
+            });
 
             inputTypeNoTemplateHandler = () -> cfg.getInput().getType()
                     .map(type -> inputTypeTemplates.get(type).apply(cfg.getToken()))
@@ -98,12 +113,12 @@ public class ExecStore {
 
             inputSupplier = () -> cfg.getInput().getType().map(type -> inputTypeMapper.apply(type));
 
-            onExitHandler = pr -> {
-            };
+            withExitHandler(pr -> {
+            });
 
-            successMappers = new HashMap<>();
             successHandler = pr -> {
             };
+            successMappers = new HashMap<>();
             successDefault = output -> {
                 log.info("{} stdout: {}{}", cfg.getCommand(), System.lineSeparator(), output);
                 throw new InternalServerError("Exec command has no success handler configured. This is a bug. Please report.");
@@ -119,90 +134,80 @@ public class ExecStore {
 
             unknownHandler = pr -> log.warn("Unexpected exit status: {}", pr.getExitValue());
             unknownMappers = new HashMap<>();
-            unknownDefault = output -> {
+            withUnknownDefault(output -> {
                 log.error("{} stdout:{}{}", cfg.getCommand(), System.lineSeparator(), output);
                 throw new InternalServerError("Exec command returned with unexpected exit status");
-            };
+            });
         }
 
-        public Processor<V> withConfig(ExecConfig.Process cfg) {
+        public void withConfig(ExecConfig.Process cfg) {
             this.cfg = cfg;
-            return this;
         }
 
-        public Processor<V> addTokenMapper(String token, Supplier<String> data) {
+        public void addTokenMapper(String token, Supplier<String> data) {
             tokenMappers.put(token, data);
-            return this;
         }
 
-        public Processor<V> withTokenHandler(Function<String, String> tokenHandler) {
-            this.tokenHandler = tokenHandler;
-            return this;
+        public void withTokenHandler(Function<String, String> handler) {
+            tokenHandler = handler;
         }
 
-        public Processor<V> addInput(String type, Supplier<String> handler) {
+        public void addInput(String type, Supplier<String> handler) {
             inputTypeSuppliers.put(type, handler);
-            return this;
         }
 
-        public Processor<V> addInputTemplate(String type, Function<ExecConfig.TokenOverride, String> template) {
+        protected void addInputTemplate(String type, Function<ExecConfig.TokenOverride, String> template) {
             inputTypeTemplates.put(type, template);
-            return this;
         }
 
-        public Processor<V> withExitHandler(Consumer<ProcessResult> handler) {
+        public void addJsonInputTemplate(Function<ExecConfig.TokenOverride, Object> template) {
+            inputTypeTemplates.put(JsonType, token -> GsonUtil.get().toJson(template.apply(token)));
+        }
+
+        public void withExitHandler(Consumer<ProcessResult> handler) {
             onExitHandler = handler;
-            return this;
         }
 
-        public Processor<V> withSuccessHandler(Consumer<ProcessResult> handler) {
+        public void withSuccessHandler(Consumer<ProcessResult> handler) {
             successHandler = handler;
-            return this;
         }
 
-        public Processor<V> addSuccessMapper(String type, Function<String, V> mapper) {
+        public void addSuccessMapper(String type, Function<String, V> mapper) {
             successMappers.put(type, mapper);
-            return this;
         }
 
-        public Processor<V> withSuccessDefault(Function<String, V> mapper) {
+        public void withSuccessDefault(Function<String, V> mapper) {
             successDefault = mapper;
-            return this;
         }
 
-        public Processor<V> withFailureHandler(Consumer<ProcessResult> handler) {
+        public void withFailureHandler(Consumer<ProcessResult> handler) {
             failureHandler = handler;
-            return this;
         }
 
-        public Processor<V> addFailureMapper(String type, Function<String, V> mapper) {
+        public void addFailureMapper(String type, Function<String, V> mapper) {
             failureMappers.put(type, mapper);
-            return this;
         }
 
-        public Processor<V> withFailureDefault(Function<String, V> mapper) {
+        public void withFailureDefault(Function<String, V> mapper) {
             failureDefault = mapper;
-            return this;
         }
 
-        public Processor<V> addUnknownMapper(String type, Function<String, V> mapper) {
+        public void addUnknownMapper(String type, Function<String, V> mapper) {
             unknownMappers.put(type, mapper);
-            return this;
         }
 
-        public Processor<V> withUnknownDefault(Function<String, V> mapper) {
+        public void withUnknownDefault(Function<String, V> mapper) {
             unknownDefault = mapper;
-            return this;
         }
 
-        V execute() {
+        public V execute() {
             log.info("Executing {}", cfg.getCommand());
 
             try {
-                ProcessExecutor psExec = new ProcessExecutor().readOutput(true);
+                ProcessExecutor psExec = executorSupplier.get();
 
                 List<String> args = new ArrayList<>();
-                args.add(cfg.getCommand());
+                args.add(tokenHandler.apply(cfg.getCommand()));
                 args.addAll(cfg.getArgs().stream().map(arg -> tokenHandler.apply(arg)).collect(Collectors.toList()));
                 psExec.command(args);
 
@@ -235,8 +240,9 @@ public class ExecStore {
                             .map(type -> unknownMappers.getOrDefault(type, unknownDefault).apply(output))
                             .orElseGet(() -> unknownDefault.apply(output));
                 }
-            } catch (IOException | InterruptedException | TimeoutException e) {
+            } catch (RuntimeException | IOException | InterruptedException | TimeoutException e) {
                 log.error("Failed to execute {}", cfg.getCommand());
+                log.debug("Internal exception:", e);
                 throw new InternalServerError(e);
             }
         }

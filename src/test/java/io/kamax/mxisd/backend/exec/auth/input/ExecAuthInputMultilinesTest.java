@@ -20,9 +20,10 @@
 
 package io.kamax.mxisd.backend.exec.auth.input;
 
+import io.kamax.mxisd.backend.exec.ExecAuthStoreTest;
 import io.kamax.mxisd.backend.exec.ExecStore;
 
-public class ExecAuthInputMultilinesTest extends ExecAuthTest {
+public class ExecAuthInputMultilinesTest extends ExecAuthStoreTest {
 
     @Override
     protected void setValidCommand() {
