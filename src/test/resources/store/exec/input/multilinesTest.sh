@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # mxisd - Matrix Identity Server Daemon
 # Copyright (C) 2018 Kamax Sarl
