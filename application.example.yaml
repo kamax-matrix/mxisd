@@ -64,28 +64,28 @@ storage.provider.sqlite.database: '/path/to/mxisd.db'
 # LDAP Backend #
 ################
 # If you would like to integrate with your AD/Samba/LDAP server,
-# see https://github.com/kamax-matrix/mxisd/blob/master/docs/backends/ldap.md
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/ldap.md
 
 
 ###############
 # SQL Backend #
 ###############
 # If you would like to integrate with a MySQL/MariaDB/PostgreQL/SQLite DB,
-# see https://github.com/kamax-matrix/mxisd/blob/master/docs/backends/sql.md
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/sql.md
 
 
 ################
 # REST Backend #
 ################
 # If you would like to integrate with an existing web service/webapp,
-# see https://github.com/kamax-matrix/mxisd/blob/master/docs/backends/rest.md
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/rest.md
 
 
 #################################################
 # Notifications for invites/addition to profile #
 #################################################
 # If you would like to change the content,
-# see https://github.com/kamax-matrix/mxisd/blob/master/docs/threepids/notifications/template-generator.md
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/threepids/notification/template-generator.md
 #
 #### E-mail invite sender
 #
