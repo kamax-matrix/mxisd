@@ -29,9 +29,10 @@ If you would like a high-level view of the infrastructure and how each feature i
 
 ## Install
 Install via:
+- [Docker image](install/docker.md)
 - [Debian package](install/debian.md)
 - [ArchLinux](install/archlinux.md)
-- [Docker image](install/docker.md)
+- [NixOS](install/nixos.md)
 - [Sources](build.md)
 
 See the [Latest release](https://github.com/kamax-matrix/mxisd/releases/latest) for links to each.
