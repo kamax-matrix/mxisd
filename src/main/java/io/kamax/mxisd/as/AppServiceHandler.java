@@ -22,6 +22,7 @@ package io.kamax.mxisd.as;
 
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
+import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
 import io.kamax.matrix.event.EventKey;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class AppServiceHandler {
@@ -60,52 +62,77 @@ public class AppServiceHandler {
 
     public void processTransaction(List<JsonObject> eventsJson) {
         eventsJson.forEach(ev -> {
+            String evId = EventKey.Id.getStringOrNull(ev);
+            if (StringUtils.isBlank(evId)) {
+                log.warn("Event has no ID, skipping");
+                log.debug("Event:\n{}", GsonUtil.getPrettyForLog(ev));
+                return;
+            }
+            log.debug("Event {}: processing start", evId);
+
+            String roomId = EventKey.RoomId.getStringOrNull(ev);
+            if (StringUtils.isBlank(roomId)) {
+                log.debug("Event has no room ID, skipping");
+                return;
+            }
+
+            String senderId = EventKey.Sender.getStringOrNull(ev);
+            if (StringUtils.isBlank(senderId)) {
+                log.debug("Event has no room ID, skipping");
+                return;
+            }
+            _MatrixID sender = MatrixID.asAcceptable(senderId);
+
             if (!StringUtils.equals("m.room.member", GsonUtil.getStringOrNull(ev, "type"))) {
+                log.debug("This is not a room membership event, skipping");
                 return;
             }
 
             if (!StringUtils.equals("invite", GsonUtil.getStringOrNull(ev, "membership"))) {
+                log.debug("This is not an invite event, skipping");
                 return;
             }
 
-            String roomId = GsonUtil.getStringOrNull(ev, "room_id");
-            _MatrixID sender = MatrixID.asAcceptable(GsonUtil.getStringOrNull(ev, "sender"));
-            EventKey.StateKey.findString(ev).ifPresent(id -> {
-                _MatrixID mxid = MatrixID.asAcceptable(id);
-                if (!StringUtils.equals(mxid.getDomain(), cfg.getDomain())) {
-                    log.debug("Ignoring invite for {}: not a local user");
-                    return;
-                }
-                log.info("Got invite for {}", id);
+            String inviteeId = EventKey.StateKey.getStringOrNull(ev);
+            if (StringUtils.isBlank(inviteeId)) {
+                log.warn("Invalid event: No invitee ID, skipping");
+                return;
+            }
 
-                boolean wasSent = false;
-                List<_ThreePid> tpids = profiler.getThreepids(mxid);
-                if (tpids.isEmpty()) {
-                    log.info("No email found in identity stores for {}", id);
-                }
+            _MatrixID invitee = MatrixID.asAcceptable(inviteeId);
+            if (!StringUtils.equals(invitee.getDomain(), cfg.getDomain())) {
+                log.debug("Ignoring invite for {}: not a local user");
+                return;
+            }
 
-                for (_ThreePid tpid : tpids) {
-                    if (!StringUtils.equals("email", tpid.getMedium())) {
-                        continue;
-                    }
+            log.info("Got invite for {}", inviteeId);
 
-                    log.info("Found an email address to notify about room invitation: {}", tpid.getAddress());
-                    Map<String, String> properties = new HashMap<>();
-                    profiler.getDisplayName(sender).ifPresent(name -> properties.put("sender_display_name", name));
-                    try {
-                        synapse.getRoomName(roomId).ifPresent(name -> properties.put("room_name", name));
-                    } catch (RuntimeException e) {
-                        log.warn("Unable to fetch room name - Did you provide synapse DB information as documented?");
-                        log.warn("Underlying error:", e);
-                    }
+            boolean wasSent = false;
+            List<_ThreePid> tpids = profiler.getThreepids(invitee).stream()
+                    .filter(tpid -> ThreePidMedium.Email.is(tpid.getMedium()))
+                    .collect(Collectors.toList());
+            log.info("Found {} email(s) in identity store for {}", tpids.size(), inviteeId);
 
-                    IMatrixIdInvite inv = new MatrixIdInvite(roomId, sender, mxid, tpid.getMedium(), tpid.getAddress(), properties);
-                    notif.sendForInvite(inv);
-                    wasSent = true;
+            for (_ThreePid tpid : tpids) {
+                log.info("Found Email to notify about room invitation: {}", tpid.getAddress());
+                Map<String, String> properties = new HashMap<>();
+                profiler.getDisplayName(sender).ifPresent(name -> properties.put("sender_display_name", name));
+                try {
+                    synapse.getRoomName(roomId).ifPresent(name -> properties.put("room_name", name));
+                } catch (RuntimeException e) {
+                    log.warn("Could not fetch room name", e);
+                    log.warn("Unable to fetch room name: Did you integrate your Homeserver as documented?");
                 }
 
-                log.info("Was notification sent? {}", wasSent);
-            });
+                IMatrixIdInvite inv = new MatrixIdInvite(roomId, sender, invitee, tpid.getMedium(), tpid.getAddress(), properties);
+                notif.sendForInvite(inv);
+                log.info("Notification for invite of {} sent to {}", inviteeId, tpid.getAddress());
+                wasSent = true;
+            }
+
+            log.info("Was notification sent? {}", wasSent);
+
+            log.debug("Event {}: processing end", evId);
         });
     }
 

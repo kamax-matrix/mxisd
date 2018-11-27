@@ -89,19 +89,20 @@ public class AppServiceController {
     }
 
     @RequestMapping(value = "/transactions/{txnId:.+}", method = PUT)
-    public Object getTransaction(
+    public String getTransaction(
             HttpServletRequest request,
             @RequestParam(name = "access_token", required = false) String token,
             @PathVariable String txnId) {
         try {
             validateToken(token);
 
-            log.info("Processing transaction {}", txnId);
+            log.info("Transaction {}: Processing start", txnId);
             List<JsonObject> events = GsonUtil.asList(GsonUtil.getArray(parser.parse(request.getInputStream()), "events"), JsonObject.class);
+            log.debug("Transaction {}: {} events to process", txnId, events.size());
             handler.processTransaction(events);
-            return "{}";
+            log.info("Transaction {}: Processing end", txnId);
         } catch (Throwable e) {
-            log.warn("Unable to properly process transaction", e);
+            log.error("Unable to properly process transaction {}", txnId, e);
         }
 
         return "{}";
