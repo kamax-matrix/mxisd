@@ -85,11 +85,11 @@ public abstract class SqlThreePidProvider implements IThreePidProvider {
                         log.info("Found match: {}", uid);
                         if (StringUtils.equals("uid", cfg.getIdentity().getType())) {
                             log.info("Resolving as localpart");
-                            return Optional.of(new SingleLookupReply(request, new MatrixID(uid, mxCfg.getDomain())));
+                            return Optional.of(new SingleLookupReply(request, MatrixID.asAcceptable(uid, mxCfg.getDomain())));
                         }
                         if (StringUtils.equals("mxid", cfg.getIdentity().getType())) {
                             log.info("Resolving as MXID");
-                            return Optional.of(new SingleLookupReply(request, new MatrixID(uid)));
+                            return Optional.of(new SingleLookupReply(request, MatrixID.asAcceptable(uid)));
                         }
 
                         log.info("Identity type is unknown, skipping");

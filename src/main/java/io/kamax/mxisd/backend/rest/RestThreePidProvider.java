@@ -60,9 +60,9 @@ public class RestThreePidProvider extends RestProvider implements IThreePidProvi
     // TODO refactor in lookup manager with above FIXME
     private _MatrixID getMxId(UserID id) {
         if (UserIdType.Localpart.is(id.getType())) {
-            return new MatrixID(id.getValue(), mxCfg.getDomain());
+            return MatrixID.asAcceptable(id.getValue(), mxCfg.getDomain());
         } else {
-            return new MatrixID(id.getValue());
+            return MatrixID.asAcceptable(id.getValue());
         }
     }
 

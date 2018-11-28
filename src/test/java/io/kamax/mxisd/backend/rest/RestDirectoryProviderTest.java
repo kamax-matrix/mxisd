@@ -93,7 +93,7 @@ public class RestDirectoryProviderTest {
         assertNotNull(entry);
         assertTrue(StringUtils.equals(byNameAvatar, entry.getAvatarUrl()));
         assertTrue(StringUtils.equals(byNameDisplay, entry.getDisplayName()));
-        assertTrue(StringUtils.equals(new MatrixID(byNameId, domain).getId(), entry.getUserId()));
+        assertTrue(StringUtils.equals(MatrixID.asAcceptable(byNameId, domain).getId(), entry.getUserId()));
 
         verify(postRequestedFor(urlMatching(endpoint))
                 .withHeader("Content-Type", containing("application/json"))
@@ -136,7 +136,7 @@ public class RestDirectoryProviderTest {
         assertNotNull(entry);
         assertTrue(StringUtils.equals(byThreepidAvatar, entry.getAvatarUrl()));
         assertTrue(StringUtils.equals(byThreepidDisplay, entry.getDisplayName()));
-        assertTrue(StringUtils.equals(new MatrixID(byThreepidId, domain).getId(), entry.getUserId()));
+        assertTrue(StringUtils.equals(MatrixID.asAcceptable(byThreepidId, domain).getId(), entry.getUserId()));
 
         verify(postRequestedFor(urlMatching(endpoint))
                 .withHeader("Content-Type", containing("application/json"))

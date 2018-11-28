@@ -62,7 +62,7 @@ public class RestDirectoryProvider extends RestProvider implements IDirectoryPro
 
             UserDirectorySearchResult response = parser.parse(httpResponse, UserDirectorySearchResult.class);
             for (UserDirectorySearchResult.Result result : response.getResults()) {
-                result.setUserId(new MatrixID(result.getUserId(), mxCfg.getDomain()).getId());
+                result.setUserId(MatrixID.asAcceptable(result.getUserId(), mxCfg.getDomain()).getId());
             }
 
             return response;

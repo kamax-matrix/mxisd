@@ -148,7 +148,7 @@ public class MemoryIdentityStore implements AuthenticatorProvider, IDirectoryPro
         for (MemoryIdentityConfig id : cfg.getIdentities()) {
             for (MemoryThreePid threepid : id.getThreepids()) {
                 if (req.equals(new ThreePid(threepid.getMedium(), threepid.getAddress()))) {
-                    return Optional.of(new SingleLookupReply(request, new MatrixID(id.getUsername(), mxCfg.getDomain())));
+                    return Optional.of(new SingleLookupReply(request, MatrixID.asAcceptable(id.getUsername(), mxCfg.getDomain())));
                 }
             }
         }

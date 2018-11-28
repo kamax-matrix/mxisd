@@ -108,7 +108,7 @@ public class InvitationManager {
         ioList.forEach(io -> {
             log.info("Processing invite {}", gson.toJson(io));
             ThreePidInvite invite = new ThreePidInvite(
-                    new MatrixID(io.getSender()),
+                    MatrixID.asAcceptable(io.getSender()),
                     io.getMedium(),
                     io.getAddress(),
                     io.getRoomId(),

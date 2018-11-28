@@ -49,7 +49,7 @@ public class GoogleFirebaseProvider extends GoogleFirebaseBackend implements ITh
     }
 
     private String getMxid(UserRecord record) {
-        return new MatrixID(record.getUid(), domain).getId();
+        return MatrixID.asAcceptable(record.getUid(), domain).getId();
     }
 
     @Override

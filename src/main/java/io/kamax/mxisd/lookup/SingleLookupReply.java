@@ -48,7 +48,7 @@ public class SingleLookupReply {
 
         try {
             SingeLookupReplyJson json = gson.fromJson(body, SingeLookupReplyJson.class);
-            reply.mxid = new MatrixID(json.getMxid());
+            reply.mxid = MatrixID.asAcceptable(json.getMxid());
             reply.notAfter = Instant.ofEpochMilli(json.getNot_after());
             reply.notBefore = Instant.ofEpochMilli(json.getNot_before());
             reply.timestamp = Instant.ofEpochMilli(json.getTs());
@@ -64,7 +64,7 @@ public class SingleLookupReply {
     }
 
     public SingleLookupReply(SingleLookupRequest request, String mxid) {
-        this(request, new MatrixID(mxid));
+        this(request, MatrixID.asAcceptable(mxid));
     }
 
     public SingleLookupReply(SingleLookupRequest request, _MatrixID mxid) {

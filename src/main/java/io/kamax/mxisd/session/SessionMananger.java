@@ -218,7 +218,7 @@ public class SessionMananger {
     }
 
     public void bind(String sid, String secret, String mxidRaw) {
-        _MatrixID mxid = new MatrixID(mxidRaw);
+        _MatrixID mxid = MatrixID.asAcceptable(mxidRaw);
         ThreePidSession session = getSessionIfValidated(sid, secret);
 
         if (!session.isRemote()) {

@@ -86,7 +86,7 @@ public abstract class GenericSqlDirectoryProvider implements IDirectoryProvider 
                     while (rSet.next()) {
                         processRow(rSet).ifPresent(e -> {
                             if (StringUtils.equalsIgnoreCase("localpart", query.getType())) {
-                                e.setUserId(new MatrixID(e.getUserId(), mxCfg.getDomain()).getId());
+                                e.setUserId(MatrixID.asAcceptable(e.getUserId(), mxCfg.getDomain()).getId());
                             }
                             result.addResult(e);
                         });

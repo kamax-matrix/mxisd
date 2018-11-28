@@ -73,7 +73,7 @@ class InvitationController {
         for (String key : request.getParameterMap().keySet()) {
             parameters.put(key, request.getParameter(key));
         }
-        IThreePidInvite invite = new ThreePidInvite(new MatrixID(sender), medium, address, roomId, parameters);
+        IThreePidInvite invite = new ThreePidInvite(MatrixID.asAcceptable(sender), medium, address, roomId, parameters);
         IThreePidInviteReply reply = mgr.storeInvite(invite);
 
         return gson.toJson(new ThreePidInviteReplyIO(reply, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex()), srvCfg.getPublicUrl()));
