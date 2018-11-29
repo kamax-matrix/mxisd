@@ -26,7 +26,7 @@ import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
 import io.kamax.mxisd.exception.FeatureNotAvailable;
 import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +40,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Properties;
 
 @Component
 public class EmailSmtpConnector implements IEmailConnector {
@@ -52,7 +53,18 @@ public class EmailSmtpConnector implements IEmailConnector {
     @Autowired
     public EmailSmtpConnector(EmailSmtpConfig cfg) {
         this.cfg = cfg;
-        session = Session.getInstance(System.getProperties());
+
+        Properties sCfg = new Properties();
+        sCfg.setProperty("mail.smtp.host", cfg.getHost());
+        sCfg.setProperty("mail.smtp.port", Integer.toString(cfg.getPort()));
+        if (StringUtils.isAllEmpty(cfg.getLogin(), cfg.getPassword())) {
+            sCfg.setProperty("mail.smtp.auth", "false");
+        } else {
+            sCfg.setProperty("mail.smtp.user", cfg.getLogin());
+            sCfg.setProperty("mail.smtp.password", cfg.getPassword());
+        }
+
+        session = Session.getInstance(sCfg);
     }
 
     @Override
@@ -91,7 +103,7 @@ public class EmailSmtpConnector implements IEmailConnector {
             transport.setRequireStartTLS(cfg.getTls() > 1);
 
             log.info("Connecting to {}:{}", cfg.getHost(), cfg.getPort());
-            transport.connect(cfg.getHost(), cfg.getPort(), cfg.getLogin(), cfg.getPassword());
+            transport.connect();
             try {
                 transport.sendMessage(msg, InternetAddress.parse(recipient));
                 log.info("Invite to {} was sent", recipient);
