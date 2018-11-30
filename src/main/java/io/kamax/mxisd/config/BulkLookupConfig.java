@@ -23,6 +23,7 @@ package io.kamax.mxisd.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import java.util.Objects;
 
 @Configuration
@@ -39,6 +40,7 @@ public class BulkLookupConfig {
         this.enabled = enabled;
     }
 
+    @PostConstruct
     public void build() {
         if (Objects.isNull(enabled)) {
             enabled = true;
