@@ -58,6 +58,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -267,7 +268,7 @@ public class AuthManager {
                 log.warn("Expected HS to return data but got nothing");
                 return "";
             } else {
-                return IOUtils.toString(httpResponse.getEntity().getContent(), httpResponse.getEntity().getContentType().getValue());
+                return IOUtils.toString(httpResponse.getEntity().getContent(), StandardCharsets.UTF_8);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
