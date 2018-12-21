@@ -74,7 +74,15 @@ See your Identity store [documentation](../stores/README.md) on how to enable th
 
 
 ## Advanced
-The Authentication feature allows users to login to their Homeserver by using their 3PIDs in a configured Identity store.
+The Authentication feature allows users to:
+- Rewrite usernames matching a pattern to be mapped to another username via a 3PID.
+- login to their Homeserver by using their 3PIDs in a configured Identity store.
+
+This feature also allows to work around the following issues:
+- Lowercase all usernames for synapse, allowing case-insensitive login
+- Unable to login on synapse if username is numerical
+- Any generic transformation of username prior to sending to synapse, bypassing the restriction that password providers
+cannot change the localpart being authenticated.
 
 ### Overview
 This is performed by intercepting the Homeserver endpoint `/_matrix/client/r0/login` as depicted below:
@@ -109,10 +117,10 @@ Steps of user authentication using a 3PID:
 4. The response from the Homeserver is sent back to the client, believing it was the HS which directly answered.
 
 ### Requirements
-- [Basic Authentication configured and working](#basic)
-- Reverse proxy setup
-- Homeserver
 - Compatible [Identity store](../stores/README.md)
+- [Basic Authentication configured and working](#basic)
+- Client and Homeserver using the [C2S API r0.4.x](https://matrix.org/docs/spec/client_server/r0.4.0.html) or later
+- Reverse proxy setup
 
 ### Configuration
 #### Reverse Proxy
@@ -153,3 +161,40 @@ In case the hostname is the same as your Matrix domain and `server.name` is not 
 `matrix.domain` and will still probably have the correct value.
 
 `value` is the base internal URL of the Homeserver, without any `/_matrix/..` or trailing `/`.
+
+#### Username rewrite
+In mxisd config:
+```yaml
+auth:
+  rewrite:
+    user:
+      rules:
+        - regex: <your regexp>
+          medium: 'your.custom.medium.type'
+```
+`rules` takes a list of rules. Rules have two properties:
+- `regexp`: The regex pattern to match. This **MUST** match the full string. See [Java regex](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) for syntax.
+- `medium`: Custom 3PID type that will be used in the 3PID lookup. This can be anything you want and needs to be supported
+by your Identity store config and/or code.
+
+Rules are matched in listed order.
+
+Common regexp patterns:
+- Numerical usernames: `[0-9]+`
+
+##### LDAP Example
+If your users use their numerical employee IDs, which cannot be used with synapse, you can make it work with (relevant config only):
+```yaml
+auth:
+  rewrite:
+    user:
+      rules:
+        - regex: '[0-9]+'
+          medium: 'kmx.employee.id'
+          
+ldap:
+  attribute:
+    threepid:
+      kmx.employee.id:
+        - 'ldapAttributeForEmployeeId'
+```
