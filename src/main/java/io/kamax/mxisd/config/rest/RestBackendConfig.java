@@ -30,6 +30,8 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
+import java.util.Optional;
 
 @Configuration
 @ConfigurationProperties("rest")
@@ -58,11 +60,44 @@ public class RestBackendConfig {
 
     }
 
+    public static class ProfileEndpoints {
+
+        private String displayName;
+        private String threepids;
+        private String roles;
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public void setDisplayName(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getThreepids() {
+            return threepids;
+        }
+
+        public void setThreepids(String threepids) {
+            this.threepids = threepids;
+        }
+
+        public String getRoles() {
+            return roles;
+        }
+
+        public void setRoles(String roles) {
+            this.roles = roles;
+        }
+
+    }
+
     public static class Endpoints {
 
         private String auth;
         private String directory;
         private IdentityEndpoints identity = new IdentityEndpoints();
+        private ProfileEndpoints profile;
 
         public String getAuth() {
             return auth;
@@ -86,6 +121,14 @@ public class RestBackendConfig {
 
         public void setIdentity(IdentityEndpoints identity) {
             this.identity = identity;
+        }
+
+        public Optional<ProfileEndpoints> getProfile() {
+            return Optional.ofNullable(profile);
+        }
+
+        public void setProfile(ProfileEndpoints profile) {
+            this.profile = profile;
         }
 
     }
@@ -121,21 +164,21 @@ public class RestBackendConfig {
     }
 
     private String buildEndpointUrl(String endpoint) {
-        if (StringUtils.startsWith(endpoint, "/")) {
-            if (StringUtils.isBlank(getHost())) {
-                throw new ConfigurationException("rest.host");
-            }
-
-            try {
-                new URL(getHost());
-            } catch (MalformedURLException e) {
-                throw new ConfigurationException("rest.host", e.getMessage());
-            }
-
-            return getHost() + endpoint;
-        } else {
+        if (!StringUtils.startsWith(endpoint, "/")) {
             return endpoint;
         }
+
+        if (StringUtils.isBlank(getHost())) {
+            throw new ConfigurationException("rest.host");
+        }
+
+        try {
+            new URL(getHost());
+        } catch (MalformedURLException e) {
+            throw new ConfigurationException("rest.host", e.getMessage());
+        }
+
+        return getHost() + endpoint;
     }
 
     @PostConstruct
@@ -148,6 +191,12 @@ public class RestBackendConfig {
             endpoints.setDirectory(buildEndpointUrl(endpoints.getDirectory()));
             endpoints.identity.setSingle(buildEndpointUrl(endpoints.identity.getSingle()));
             endpoints.identity.setBulk(buildEndpointUrl(endpoints.identity.getBulk()));
+
+            if (Objects.nonNull(endpoints.profile)) {
+                endpoints.profile.setDisplayName(buildEndpointUrl(endpoints.profile.getDisplayName()));
+                endpoints.profile.setThreepids(buildEndpointUrl(endpoints.profile.getThreepids()));
+                endpoints.profile.setRoles(buildEndpointUrl(endpoints.profile.getRoles()));
+            }
 
             log.info("Host: {}", getHost());
             log.info("Auth endpoint: {}", endpoints.getAuth());

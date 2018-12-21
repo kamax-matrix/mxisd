@@ -56,6 +56,10 @@ rest:
     identity:
       single: '/_mxisd/backend/api/v1/identity/lookup/single'
       bulk: '/_mxisd/backend/api/v1/identity/lookup/bulk'
+    profile:
+      displayName: '/_mxisd/backend/api/v1/profile/displayName'
+      threepids: '/_mxisd/backend/api/v1/profile/threepids'
+      roles: '/_mxisd/backend/api/v1/profile/roles'
 
 ldap:
   enabled: false
