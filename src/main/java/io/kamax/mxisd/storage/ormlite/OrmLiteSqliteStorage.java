@@ -31,6 +31,8 @@ import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
+import io.kamax.mxisd.storage.ormlite.dao.ASTransactionDao;
+import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidSessionDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -63,17 +66,21 @@ public class OrmLiteSqliteStorage implements IStorage {
 
     private Dao<ThreePidInviteIO, String> invDao;
     private Dao<ThreePidSessionDao, String> sessionDao;
+    private Dao<ASTransactionDao, String> asTxnDao;
 
-    OrmLiteSqliteStorage(String path) {
+    public OrmLiteSqliteStorage(String backend, String path) {
         withCatcher(() -> {
-            File parent = new File(path).getParentFile();
-            if (!parent.mkdirs() && !parent.isDirectory()) {
-                throw new RuntimeException("Unable to create DB parent directory: " + parent);
+            if (path.startsWith("/") && !path.startsWith("//")) {
+                File parent = new File(path).getParentFile();
+                if (!parent.mkdirs() && !parent.isDirectory()) {
+                    throw new RuntimeException("Unable to create DB parent directory: " + parent);
+                }
             }
 
-            ConnectionSource connPool = new JdbcConnectionSource("jdbc:sqlite:" + path);
+            ConnectionSource connPool = new JdbcConnectionSource("jdbc:" + backend + ":" + path);
             invDao = createDaoAndTable(connPool, ThreePidInviteIO.class);
             sessionDao = createDaoAndTable(connPool, ThreePidSessionDao.class);
+            asTxnDao = createDaoAndTable(connPool, ASTransactionDao.class);
         });
     }
 
@@ -175,6 +182,37 @@ public class OrmLiteSqliteStorage implements IStorage {
             if (updated != 1) {
                 throw new RuntimeException("Unexpected row count after DB action: " + updated);
             }
+        });
+    }
+
+    @Override
+    public void insertTransactionResult(String localpart, String txnId, Instant completion, String result) {
+        withCatcher(() -> {
+            int created = asTxnDao.create(new ASTransactionDao(localpart, txnId, completion, result));
+            if (created != 1) {
+                throw new RuntimeException("Unexpected row count after DB action: " + created);
+            }
+        });
+    }
+
+    @Override
+    public Optional<ASTransactionDao> getTransactionResult(String localpart, String txnId) {
+        return withCatcher(() -> {
+            ASTransactionDao dao = new ASTransactionDao();
+            dao.setLocalpart(localpart);
+            dao.setTransactionId(txnId);
+            List<ASTransactionDao> daoList = asTxnDao.queryForMatchingArgs(dao);
+
+            if (daoList.size() > 1) {
+                throw new InternalServerError("Lookup for Transaction " +
+                        txnId + " for localpart " + localpart + " returned more than one result");
+            }
+
+            if (daoList.isEmpty()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(daoList.get(0));
         });
     }
 

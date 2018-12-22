@@ -18,12 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.ormlite;
+package io.kamax.mxisd.storage.ormlite.dao;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import org.apache.commons.lang.StringUtils;
 
@@ -32,8 +32,6 @@ import java.util.Map;
 
 @DatabaseTable(tableName = "invite_3pid")
 public class ThreePidInviteIO {
-
-    private static Gson gson = new Gson();
 
     @DatabaseField(id = true)
     private String id;
@@ -57,7 +55,7 @@ public class ThreePidInviteIO {
     private String properties;
 
     public ThreePidInviteIO() {
-        // needed for ORMlite
+        // Needed for ORMLite
     }
 
     public ThreePidInviteIO(IThreePidInviteReply data) {
@@ -67,7 +65,7 @@ public class ThreePidInviteIO {
         this.medium = data.getInvite().getMedium();
         this.address = data.getInvite().getAddress();
         this.roomId = data.getInvite().getRoomId();
-        this.properties = gson.toJson(data.getInvite().getProperties());
+        this.properties = GsonUtil.get().toJson(data.getInvite().getProperties());
     }
 
     public String getId() {
@@ -99,7 +97,7 @@ public class ThreePidInviteIO {
             return new HashMap<>();
         }
 
-        return gson.fromJson(properties, new TypeToken<Map<String, String>>() {
+        return GsonUtil.get().fromJson(properties, new TypeToken<Map<String, String>>() {
         }.getType());
     }
 

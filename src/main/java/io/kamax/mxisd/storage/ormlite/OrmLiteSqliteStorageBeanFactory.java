@@ -45,13 +45,15 @@ public class OrmLiteSqliteStorageBeanFactory implements FactoryBean<IStorage> {
 
     @PostConstruct
     private void postConstruct() {
-        if (StringUtils.equals("sqlite", storagecfg.getBackend())) {
-            if (StringUtils.isBlank(cfg.getDatabase())) {
-                throw new ConfigurationException("storage.provider.sqlite.database");
-            }
-
-            storage = new OrmLiteSqliteStorage(cfg.getDatabase());
+        if (StringUtils.isBlank(storagecfg.getBackend())) {
+            throw new ConfigurationException("storage.backend");
         }
+
+        if (StringUtils.equals("sqlite", storagecfg.getBackend()) && StringUtils.isBlank(cfg.getDatabase())) {
+            throw new ConfigurationException("storage.provider.sqlite.database");
+        }
+
+        storage = new OrmLiteSqliteStorage(storagecfg.getBackend(), cfg.getDatabase());
     }
 
     @Override

@@ -23,8 +23,10 @@ package io.kamax.mxisd.storage;
 import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
-import io.kamax.mxisd.storage.ormlite.ThreePidInviteIO;
+import io.kamax.mxisd.storage.ormlite.dao.ASTransactionDao;
+import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -43,5 +45,9 @@ public interface IStorage {
     void insertThreePidSession(IThreePidSessionDao session);
 
     void updateThreePidSession(IThreePidSessionDao session);
+
+    void insertTransactionResult(String localpart, String txnId, Instant completion, String response);
+
+    Optional<ASTransactionDao> getTransactionResult(String localpart, String txnId);
 
 }

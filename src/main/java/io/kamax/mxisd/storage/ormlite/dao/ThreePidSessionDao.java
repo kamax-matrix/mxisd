@@ -80,7 +80,7 @@ public class ThreePidSessionDao implements IThreePidSessionDao {
     private boolean isRemoteValidated;
 
     public ThreePidSessionDao() {
-        // stub for ORMLite
+        // Needed for ORMLite
     }
 
     public ThreePidSessionDao(IThreePidSessionDao session) {

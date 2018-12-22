@@ -28,18 +28,24 @@ import io.kamax.matrix._ThreePid;
 import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.backend.sql.synapse.Synapse;
+import io.kamax.mxisd.config.ListenerConfig;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.profile.ProfileManager;
+import io.kamax.mxisd.storage.IStorage;
+import io.kamax.mxisd.storage.ormlite.dao.ASTransactionDao;
+import io.kamax.mxisd.util.GsonParser;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.InputStream;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -47,20 +53,83 @@ public class AppServiceHandler {
 
     private final Logger log = LoggerFactory.getLogger(AppServiceHandler.class);
 
+    private final GsonParser parser;
+
+    private String localpart;
     private MatrixConfig cfg;
+    private IStorage store;
     private ProfileManager profiler;
     private NotificationManager notif;
     private Synapse synapse;
 
+    private Map<String, CompletableFuture<String>> transactionsInProgress;
+
     @Autowired
-    public AppServiceHandler(MatrixConfig cfg, ProfileManager profiler, NotificationManager notif, Synapse synapse) {
+    public AppServiceHandler(ListenerConfig lCfg, MatrixConfig cfg, IStorage store, ProfileManager profiler, NotificationManager notif, Synapse synapse) {
         this.cfg = cfg;
+        this.store = store;
         this.profiler = profiler;
         this.notif = notif;
         this.synapse = synapse;
+
+        localpart = lCfg.getLocalpart();
+        parser = new GsonParser();
+        transactionsInProgress = new ConcurrentHashMap<>();
+    }
+
+    public CompletableFuture<String> processTransaction(String txnId, InputStream is) {
+        synchronized (this) {
+            Optional<ASTransactionDao> dao = store.getTransactionResult(localpart, txnId);
+            if (dao.isPresent()) {
+                log.info("AS Transaction {} already processed - returning computed result", txnId);
+                return CompletableFuture.completedFuture(dao.get().getResult());
+            }
+
+            CompletableFuture<String> f = transactionsInProgress.get(txnId);
+            if (Objects.nonNull(f)) {
+                log.info("Returning future for transaction {}", txnId);
+                return f;
+            }
+
+            transactionsInProgress.put(txnId, new CompletableFuture<>());
+        }
+
+        CompletableFuture<String> future = transactionsInProgress.get(txnId);
+
+        Instant start = Instant.now();
+        log.info("Processing AS Transaction {}: start", txnId);
+        try {
+            List<JsonObject> events = GsonUtil.asList(GsonUtil.getArray(parser.parse(is), "events"), JsonObject.class);
+            is.close();
+            log.debug("{} event(s) parsed", events.size());
+
+            processTransaction(events);
+            Instant end = Instant.now();
+            log.info("Processed AS transaction {} in {} ms", txnId, (Instant.now().toEpochMilli() - start.toEpochMilli()));
+
+            String result = "{}";
+
+            try {
+                log.info("Saving transaction details to store");
+                store.insertTransactionResult(localpart, txnId, end, result);
+            } finally {
+                log.debug("Removing CompletedFuture from transaction map");
+                transactionsInProgress.remove(txnId);
+            }
+
+            future.complete(result);
+        } catch (Exception e) {
+            log.error("Unable to properly process transaction {}", txnId, e);
+            future.completeExceptionally(e);
+        }
+
+        log.info("Processing AS Transaction {}: end", txnId);
+        return future;
     }
 
     public void processTransaction(List<JsonObject> eventsJson) {
+        log.info("Processing transaction events: start");
+
         eventsJson.forEach(ev -> {
             String evId = EventKey.Id.getStringOrNull(ev);
             if (StringUtils.isBlank(evId)) {
@@ -78,10 +147,11 @@ public class AppServiceHandler {
 
             String senderId = EventKey.Sender.getStringOrNull(ev);
             if (StringUtils.isBlank(senderId)) {
-                log.debug("Event has no room ID, skipping");
+                log.debug("Event has no sender ID, skipping");
                 return;
             }
             _MatrixID sender = MatrixID.asAcceptable(senderId);
+            log.debug("Sender: {}", senderId);
 
             if (!StringUtils.equals("m.room.member", GsonUtil.getStringOrNull(ev, "type"))) {
                 log.debug("This is not a room membership event, skipping");
@@ -105,7 +175,7 @@ public class AppServiceHandler {
                 return;
             }
 
-            log.info("Got invite for {}", inviteeId);
+            log.info("Got invite from {} to {}", senderId, inviteeId);
 
             boolean wasSent = false;
             List<_ThreePid> tpids = profiler.getThreepids(invitee).stream()
@@ -121,7 +191,7 @@ public class AppServiceHandler {
                     synapse.getRoomName(roomId).ifPresent(name -> properties.put("room_name", name));
                 } catch (RuntimeException e) {
                     log.warn("Could not fetch room name", e);
-                    log.warn("Unable to fetch room name: Did you integrate your Homeserver as documented?");
+                    log.info("Unable to fetch room name: Did you integrate your Homeserver as documented?");
                 }
 
                 IMatrixIdInvite inv = new MatrixIdInvite(roomId, sender, invitee, tpid.getMedium(), tpid.getAddress(), properties);
@@ -134,6 +204,8 @@ public class AppServiceHandler {
 
             log.debug("Event {}: processing end", evId);
         });
+
+        log.info("Processing transaction events: end");
     }
 
 }

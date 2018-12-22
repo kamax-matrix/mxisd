@@ -34,7 +34,7 @@ import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
-import io.kamax.mxisd.storage.ormlite.ThreePidInviteIO;
+import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;

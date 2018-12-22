@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.controller.app.v1;
 
-import com.google.gson.JsonObject;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.as.AppServiceHandler;
 import io.kamax.mxisd.config.ListenerConfig;
@@ -36,7 +35,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
@@ -89,23 +89,19 @@ public class AppServiceController {
     }
 
     @RequestMapping(value = "/transactions/{txnId:.+}", method = PUT)
-    public String getTransaction(
+    public CompletableFuture<String> getTransaction(
             HttpServletRequest request,
             @RequestParam(name = "access_token", required = false) String token,
-            @PathVariable String txnId) {
+            @PathVariable String txnId
+    ) {
+        validateToken(token);
+
         try {
-            validateToken(token);
-
-            log.info("Transaction {}: Processing start", txnId);
-            List<JsonObject> events = GsonUtil.asList(GsonUtil.getArray(parser.parse(request.getInputStream()), "events"), JsonObject.class);
-            log.debug("Transaction {}: {} events to process", txnId, events.size());
-            handler.processTransaction(events);
-            log.info("Transaction {}: Processing end", txnId);
-        } catch (Throwable e) {
-            log.error("Unable to properly process transaction {}", txnId, e);
+            log.info("Received AS transaction {}", txnId);
+            return handler.processTransaction(txnId, request.getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException("AS Transaction " + txnId + ": I/O error when getting input", e);
         }
-
-        return "{}";
     }
 
 }
