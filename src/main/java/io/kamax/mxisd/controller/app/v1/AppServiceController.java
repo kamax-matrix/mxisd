@@ -25,7 +25,6 @@ import io.kamax.mxisd.as.AppServiceHandler;
 import io.kamax.mxisd.config.ListenerConfig;
 import io.kamax.mxisd.exception.HttpMatrixException;
 import io.kamax.mxisd.exception.NotAllowedException;
-import io.kamax.mxisd.util.GsonParser;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,13 +49,11 @@ public class AppServiceController {
     private final ListenerConfig cfg;
 
     private final String notFoundBody;
-    private final GsonParser parser;
     private final AppServiceHandler handler;
 
     @Autowired
     public AppServiceController(ListenerConfig cfg, AppServiceHandler handler) {
         this.notFoundBody = GsonUtil.get().toJson(GsonUtil.makeObj("errcode", "io.kamax.mxisd.AS_NOT_FOUND"));
-        this.parser = new GsonParser();
 
         this.cfg = cfg;
         this.handler = handler;
