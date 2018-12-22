@@ -30,6 +30,7 @@ import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
+import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.util.GsonUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
@@ -87,7 +88,6 @@ public class LdapAuthProvider extends LdapBackend implements AuthenticatorProvid
     public BackendAuthResult authenticate(_MatrixID mxid, String password) {
         log.info("Performing auth for {}", mxid);
 
-
         try (LdapConnection conn = getConn()) {
             bind(conn);
 
@@ -108,62 +108,65 @@ public class LdapAuthProvider extends LdapBackend implements AuthenticatorProvid
             String[] attArray = new String[attributes.size()];
             attributes.toArray(attArray);
 
-            log.debug("Base DN: {}", getBaseDn());
             log.debug("Query: {}", userFilter);
             log.debug("Attributes: {}", GsonUtil.build().toJson(attArray));
 
-            try (EntryCursor cursor = conn.search(getBaseDn(), userFilter, SearchScope.SUBTREE, attArray)) {
-                while (cursor.next()) {
-                    Entry entry = cursor.get();
-                    String dn = entry.getDn().getName();
-                    log.info("Checking possible match, DN: {}", dn);
+            for (String baseDN : getBaseDNs()) {
+                log.debug("Base DN: {}", baseDN);
 
-                    if (!getAttribute(entry, getUidAtt()).isPresent()) {
-                        continue;
-                    }
+                try (EntryCursor cursor = conn.search(baseDN, userFilter, SearchScope.SUBTREE, attArray)) {
+                    while (cursor.next()) {
+                        Entry entry = cursor.get();
+                        String dn = entry.getDn().getName();
+                        log.info("Checking possible match, DN: {}", dn);
 
-                    log.info("Attempting authentication on LDAP for {}", dn);
-                    try {
-                        conn.bind(entry.getDn(), password);
-                    } catch (LdapException e) {
-                        log.info("Unable to bind using {} because {}", entry.getDn().getName(), e.getMessage());
-                        return BackendAuthResult.failure();
-                    }
+                        if (!getAttribute(entry, getUidAtt()).isPresent()) {
+                            continue;
+                        }
 
-                    Attribute nameAttribute = entry.get(getAt().getName());
-                    String name = nameAttribute != null ? nameAttribute.get().toString() : null;
+                        log.info("Attempting authentication on LDAP for {}", dn);
+                        try {
+                            conn.bind(entry.getDn(), password);
+                        } catch (LdapException e) {
+                            log.info("Unable to bind using {} because {}", entry.getDn().getName(), e.getMessage());
+                            return BackendAuthResult.failure();
+                        }
 
-                    log.info("Authentication successful for {}", entry.getDn().getName());
-                    log.info("DN {} is a valid match", dn);
+                        Attribute nameAttribute = entry.get(getAt().getName());
+                        String name = nameAttribute != null ? nameAttribute.get().toString() : null;
 
-                    // TODO should we canonicalize the MXID?
-                    BackendAuthResult result = BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, name);
-                    log.info("Processing 3PIDs for profile");
-                    getAt().getThreepid().forEach((k, v) -> {
-                        log.info("Processing 3PID type {}", k);
-                        v.forEach(attId -> {
-                            List<String> values = getAttributes(entry, attId);
-                            log.info("\tAttribute {} has {} value(s)", attId, values.size());
-                            getAttributes(entry, attId).forEach(tpidValue -> {
-                                if (ThreePidMedium.PhoneNumber.is(k)) {
-                                    tpidValue = getMsisdn(tpidValue).orElse(tpidValue);
-                                }
-                                result.withThreePid(new ThreePid(k, tpidValue));
+                        log.info("Authentication successful for {}", entry.getDn().getName());
+                        log.info("DN {} is a valid match", dn);
+
+                        // TODO should we canonicalize the MXID?
+                        BackendAuthResult result = BackendAuthResult.success(mxid.getId(), UserIdType.MatrixID, name);
+                        log.info("Processing 3PIDs for profile");
+                        getAt().getThreepid().forEach((k, v) -> {
+                            log.info("Processing 3PID type {}", k);
+                            v.forEach(attId -> {
+                                List<String> values = getAttributes(entry, attId);
+                                log.info("\tAttribute {} has {} value(s)", attId, values.size());
+                                getAttributes(entry, attId).forEach(tpidValue -> {
+                                    if (ThreePidMedium.PhoneNumber.is(k)) {
+                                        tpidValue = getMsisdn(tpidValue).orElse(tpidValue);
+                                    }
+                                    result.withThreePid(new ThreePid(k, tpidValue));
+                                });
                             });
                         });
-                    });
 
-                    log.info("Found {} 3PIDs", result.getProfile().getThreePids().size());
-                    return result;
+                        log.info("Found {} 3PIDs", result.getProfile().getThreePids().size());
+                        return result;
+                    }
+                } catch (CursorLdapReferralException e) {
+                    log.warn("Entity for {} is only available via referral, skipping", mxid);
                 }
-            } catch (CursorLdapReferralException e) {
-                log.warn("Entity for {} is only available via referral, skipping", mxid);
             }
 
             log.info("No match were found for {}", mxid);
             return BackendAuthResult.failure();
         } catch (LdapException | IOException | CursorException e) {
-            throw new RuntimeException(e);
+            throw new InternalServerError(e);
         }
     }
 

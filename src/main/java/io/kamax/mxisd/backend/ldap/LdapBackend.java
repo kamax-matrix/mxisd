@@ -59,8 +59,8 @@ public abstract class LdapBackend {
         return cfg;
     }
 
-    protected String getBaseDn() {
-        return cfg.getConnection().getBaseDn();
+    protected List<String> getBaseDNs() {
+        return cfg.getConnection().getBaseDNs();
     }
 
     protected LdapConfig.Attribute getAt() {

@@ -139,6 +139,7 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     testCompile 'com.github.tomakehurst:wiremock:2.8.0'
+    testCompile 'com.unboundid:unboundid-ldapsdk:4.0.9'
 }
 
 springBoot {

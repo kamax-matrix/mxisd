@@ -78,28 +78,30 @@ public class LdapThreePidProvider extends LdapBackend implements IThreePidProvid
         // we merge 3PID specific query with global/specific filter, if one exists.
         String tPidQuery = tPidQueryOpt.get().replaceAll(getCfg().getIdentity().getToken(), value);
         String searchQuery = buildWithFilter(tPidQuery, getCfg().getIdentity().getFilter());
-
-        log.debug("Base DN: {}", getBaseDn());
         log.debug("Query: {}", searchQuery);
         log.debug("Attributes: {}", GsonUtil.build().toJson(getUidAtt()));
 
-        try (EntryCursor cursor = conn.search(getBaseDn(), searchQuery, SearchScope.SUBTREE, getUidAtt())) {
-            while (cursor.next()) {
-                Entry entry = cursor.get();
-                log.info("Found possible match, DN: {}", entry.getDn().getName());
+        for (String baseDN : getBaseDNs()) {
+            log.debug("Base DN: {}", baseDN);
 
-                Optional<String> data = getAttribute(entry, getUidAtt());
-                if (!data.isPresent()) {
-                    continue;
+            try (EntryCursor cursor = conn.search(baseDN, searchQuery, SearchScope.SUBTREE, getUidAtt())) {
+                while (cursor.next()) {
+                    Entry entry = cursor.get();
+                    log.info("Found possible match, DN: {}", entry.getDn().getName());
+
+                    Optional<String> data = getAttribute(entry, getUidAtt());
+                    if (!data.isPresent()) {
+                        continue;
+                    }
+
+                    log.info("DN {} is a valid match", entry.getDn().getName());
+                    return Optional.of(buildMatrixIdFromUid(data.get()));
                 }
-
-                log.info("DN {} is a valid match", entry.getDn().getName());
-                return Optional.of(buildMatrixIdFromUid(data.get()));
+            } catch (CursorLdapReferralException e) {
+                log.warn("3PID {} is only available via referral, skipping", value);
+            } catch (IOException | LdapException | CursorException e) {
+                throw new InternalServerError(e);
             }
-        } catch (CursorLdapReferralException e) {
-            log.warn("3PID {} is only available via referral, skipping", value);
-        } catch (IOException | LdapException | CursorException e) {
-            throw new InternalServerError(e);
         }
 
         return Optional.empty();

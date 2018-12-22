@@ -24,9 +24,12 @@ ldap.connection.host: 'ldapHostnameOrIp'
 ldap.connection.port: 389
 ldap.connection.bindDn: 'CN=My Mxisd User,OU=Users,DC=example,DC=org'
 ldap.connection.bindPassword: 'TheUserPassword'
-ldap.connection.baseDn: 'OU=Users,DC=example,DC=org'
+ldap.connection.baseDNs:
+  - 'OU=Users,DC=example,DC=org'
 ```
 These are standard LDAP connection configuration. mxisd will try to connect on port default port 389 without encryption.
+
+If you would like to use several Base DNs, simply add more entries under `baseDNs`.
 
 ### TLS/SSL connection
 If you would like to use a TLS/SSL connection, use the following configuration options (STARTLS not supported):

@@ -69,32 +69,33 @@ public class LdapProfileProvider extends LdapBackend implements ProfileProvider 
             bind(conn);
 
             String searchQuery = buildOrQueryWithFilter(getCfg().getProfile().getFilter(), uid, getUidAtt());
-
-            log.debug("Base DN: {}", getBaseDn());
             log.debug("Query: {}", searchQuery);
 
-            try (EntryCursor cursor = conn.search(getBaseDn(), searchQuery, SearchScope.SUBTREE, getAt().getName())) {
-                while (cursor.next()) {
-                    Entry entry = cursor.get();
-                    log.info("Found possible match, DN: {}", entry.getDn().getName());
-                    Optional<String> v = getAttribute(entry, getAt().getName()).flatMap(id -> {
-                        log.info("DN {} is a valid match", entry.getDn().getName());
-                        try {
-                            return getAttribute(entry, getAt().getName());
-                        } catch (IllegalArgumentException e) {
-                            log.warn("Bind was found but type {} is not supported", getAt().getUid().getType());
-                            return Optional.empty();
-                        }
-                    });
+            for (String baseDN : getBaseDNs()) {
+                log.debug("Base DN: {}", baseDN);
+                try (EntryCursor cursor = conn.search(baseDN, searchQuery, SearchScope.SUBTREE, getAt().getName())) {
+                    while (cursor.next()) {
+                        Entry entry = cursor.get();
+                        log.info("Found possible match, DN: {}", entry.getDn().getName());
+                        Optional<String> v = getAttribute(entry, getAt().getName()).flatMap(id -> {
+                            log.info("DN {} is a valid match", entry.getDn().getName());
+                            try {
+                                return getAttribute(entry, getAt().getName());
+                            } catch (IllegalArgumentException e) {
+                                log.warn("Bind was found but type {} is not supported", getAt().getUid().getType());
+                                return Optional.empty();
+                            }
+                        });
 
-                    if (v.isPresent()) {
-                        log.info("DN {} is the final match", entry.getDn().getName());
-                        return v;
+                        if (v.isPresent()) {
+                            log.info("DN {} is the final match", entry.getDn().getName());
+                            return v;
+                        }
                     }
+                } catch (CursorLdapReferralException e) {
+                    log.warn("An entry is only available via referral, skipping");
                 }
             }
-        } catch (CursorLdapReferralException e) {
-            log.warn("An entry is only available via referral, skipping");
         } catch (IOException | LdapException | CursorException e) {
             throw new InternalServerError(e);
         }
@@ -111,7 +112,6 @@ public class LdapProfileProvider extends LdapBackend implements ProfileProvider 
         try (LdapConnection conn = getConn()) {
             bind(conn);
 
-            log.debug("Base DN: {}", getBaseDn());
             getCfg().getAttribute().getThreepid().forEach((medium, attributes) -> {
                 String[] attArray = new String[attributes.size()];
                 attributes.toArray(attArray);
@@ -120,28 +120,30 @@ public class LdapProfileProvider extends LdapBackend implements ProfileProvider 
 
                 log.debug("Query for 3PID {}: {}", medium, searchQuery);
 
-                try (EntryCursor cursor = conn.search(getBaseDn(), searchQuery, SearchScope.SUBTREE, attArray)) {
-                    while (cursor.next()) {
-                        Entry entry = cursor.get();
-                        log.info("Found possible match, DN: {}", entry.getDn().getName());
-                        try {
-                            attributes.stream()
-                                    .flatMap(at -> getAttributes(entry, at).stream())
-                                    .forEach(address -> {
-                                        log.info("Found 3PID: {} - {}", medium, address);
-                                        threePids.add(new ThreePid(medium, address));
-                                    });
-                        } catch (IllegalArgumentException e) {
-                            log.warn("Bind was found but type {} is not supported", getAt().getUid().getType());
+                for (String baseDN : getBaseDNs()) {
+                    log.debug("Base DN: {}", baseDN);
+                    try (EntryCursor cursor = conn.search(baseDN, searchQuery, SearchScope.SUBTREE, attArray)) {
+                        while (cursor.next()) {
+                            Entry entry = cursor.get();
+                            log.info("Found possible match, DN: {}", entry.getDn().getName());
+                            try {
+                                attributes.stream()
+                                        .flatMap(at -> getAttributes(entry, at).stream())
+                                        .forEach(address -> {
+                                            log.info("Found 3PID: {} - {}", medium, address);
+                                            threePids.add(new ThreePid(medium, address));
+                                        });
+                            } catch (IllegalArgumentException e) {
+                                log.warn("Bind was found but type {} is not supported", getAt().getUid().getType());
+                            }
                         }
+                    } catch (CursorLdapReferralException e) {
+                        log.warn("An entry is only available via referral, skipping");
+                    } catch (LdapException | IOException | CursorException e) {
+                        throw new InternalServerError(e);
                     }
-                } catch (CursorLdapReferralException e) {
-                    log.warn("An entry is only available via referral, skipping");
-                } catch (IOException | LdapException | CursorException e) {
-                    throw new InternalServerError(e);
                 }
             });
-
         } catch (IOException | LdapException e) {
             throw new InternalServerError(e);
         }

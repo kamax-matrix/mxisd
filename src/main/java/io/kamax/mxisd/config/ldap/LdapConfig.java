@@ -110,6 +110,7 @@ public abstract class LdapConfig {
         private String bindDn;
         private String bindPassword;
         private String baseDn;
+        private List<String> baseDNs = new ArrayList<>();
 
         public boolean isTls() {
             return tls;
@@ -151,12 +152,22 @@ public abstract class LdapConfig {
             this.bindPassword = bindPassword;
         }
 
+        @Deprecated
         public String getBaseDn() {
             return baseDn;
         }
 
+        @Deprecated
         public void setBaseDn(String baseDn) {
             this.baseDn = baseDn;
+        }
+
+        public List<String> getBaseDNs() {
+            return baseDNs;
+        }
+
+        public void setBaseDNs(List<String> baseDNs) {
+            this.baseDNs = baseDNs;
         }
 
     }
@@ -253,11 +264,11 @@ public abstract class LdapConfig {
     private boolean enabled;
     private String filter;
 
-    private Connection connection;
-    private Attribute attribute;
-    private Auth auth;
-    private Directory directory;
-    private Identity identity;
+    private Connection connection = new Connection();
+    private Attribute attribute = new Attribute();
+    private Auth auth = new Auth();
+    private Directory directory = new Directory();
+    private Identity identity = new Identity();
     private Profile profile = new Profile();
 
     protected abstract String getConfigName();
@@ -343,8 +354,14 @@ public abstract class LdapConfig {
             throw new IllegalStateException("LDAP port is not valid");
         }
 
-        if (StringUtils.isBlank(connection.getBaseDn())) {
-            throw new ConfigurationException("ldap.connection.baseDn");
+        // Backward compatibility with the old option
+        if (!StringUtils.isBlank(connection.baseDn)) {
+            connection.getBaseDNs().add(connection.baseDn);
+        }
+
+        if (connection.getBaseDNs().isEmpty()) {
+            throw new ConfigurationException("ldap.connection.baseDNs",
+                    "You must specify at least one Base DN via the singular or plural config option");
         }
 
         if (StringUtils.isBlank(attribute.getUid().getType())) {
@@ -386,7 +403,10 @@ public abstract class LdapConfig {
         log.info("Port: {}", connection.getPort());
         log.info("TLS: {}", connection.isTls());
         log.info("Bind DN: {}", connection.getBindDn());
-        log.info("Base DN: {}", connection.getBaseDn());
+        log.info("Base DNs: {}");
+        for (String baseDN : connection.getBaseDNs()) {
+            log.info("\t- {}", baseDN);
+        }
 
         log.info("Attribute: {}", GsonUtil.get().toJson(attribute));
         log.info("Auth: {}", GsonUtil.get().toJson(auth));

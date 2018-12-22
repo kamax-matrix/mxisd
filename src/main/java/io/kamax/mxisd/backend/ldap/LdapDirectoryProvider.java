@@ -65,34 +65,37 @@ public class LdapDirectoryProvider extends LdapBackend implements IDirectoryProv
             bind(conn);
 
             LdapConfig.Attribute atCfg = getCfg().getAttribute();
-
             attributes = new ArrayList<>(attributes);
             attributes.add(getUidAtt());
             String[] attArray = new String[attributes.size()];
             attributes.toArray(attArray);
             String searchQuery = buildOrQueryWithFilter(getCfg().getDirectory().getFilter(), "*" + query + "*", attArray);
 
-            log.debug("Base DN: {}", getBaseDn());
             log.debug("Query: {}", searchQuery);
             log.debug("Attributes: {}", GsonUtil.build().toJson(attArray));
 
-            try (EntryCursor cursor = conn.search(getBaseDn(), searchQuery, SearchScope.SUBTREE, attArray)) {
-                while (cursor.next()) {
-                    Entry entry = cursor.get();
-                    log.info("Found possible match, DN: {}", entry.getDn().getName());
-                    getAttribute(entry, getUidAtt()).ifPresent(uid -> {
-                        log.info("DN {} is a valid match", entry.getDn().getName());
-                        try {
-                            UserDirectorySearchResult.Result entryResult = new UserDirectorySearchResult.Result();
-                            entryResult.setUserId(buildMatrixIdFromUid(uid));
-                            getAttribute(entry, atCfg.getName()).ifPresent(entryResult::setDisplayName);
-                            result.addResult(entryResult);
-                        } catch (IllegalArgumentException e) {
-                            log.warn("Bind was found but type {} is not supported", atCfg.getUid().getType());
-                        }
-                    });
+            for (String baseDN : getBaseDNs()) {
+                log.debug("Base DN: {}", baseDN);
+
+                try (EntryCursor cursor = conn.search(baseDN, searchQuery, SearchScope.SUBTREE, attArray)) {
+                    while (cursor.next()) {
+                        Entry entry = cursor.get();
+                        log.info("Found possible match, DN: {}", entry.getDn().getName());
+                        getAttribute(entry, getUidAtt()).ifPresent(uid -> {
+                            log.info("DN {} is a valid match", entry.getDn().getName());
+                            try {
+                                UserDirectorySearchResult.Result entryResult = new UserDirectorySearchResult.Result();
+                                entryResult.setUserId(buildMatrixIdFromUid(uid));
+                                getAttribute(entry, atCfg.getName()).ifPresent(entryResult::setDisplayName);
+                                result.addResult(entryResult);
+                            } catch (IllegalArgumentException e) {
+                                log.warn("Bind was found but type {} is not supported", atCfg.getUid().getType());
+                            }
+                        });
+                    }
                 }
             }
+
         } catch (CursorLdapReferralException e) {
             log.warn("An entry is only available via referral, skipping");
         } catch (IOException | LdapException | CursorException e) {
