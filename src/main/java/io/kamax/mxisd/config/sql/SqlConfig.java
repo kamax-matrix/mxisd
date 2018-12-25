@@ -24,14 +24,13 @@ import io.kamax.mxisd.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public abstract class SqlConfig {
 
-    private transient Logger log = LoggerFactory.getLogger(SqlConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(SqlConfig.class);
 
     public static class Query {
 
@@ -283,7 +282,6 @@ public abstract class SqlConfig {
 
     protected abstract String getProviderName();
 
-    @PostConstruct
     public void build() {
         if (getAuth().isEnabled() == null) {
             getAuth().setEnabled(isEnabled());

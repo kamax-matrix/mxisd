@@ -25,9 +25,9 @@ import io.kamax.mxisd.backend.sql.SqlConnectionPool;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.SqlConfig;
 import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +38,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import static io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult.Result;
+import static io.kamax.mxisd.http.io.UserDirectorySearchResult.Result;
 
-public abstract class GenericSqlDirectoryProvider implements IDirectoryProvider {
+public class GenericSqlDirectoryProvider implements IDirectoryProvider {
 
-    private Logger log = LoggerFactory.getLogger(GenericSqlDirectoryProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(GenericSqlDirectoryProvider.class);
 
     protected SqlConfig cfg;
     protected MatrixConfig mxCfg;

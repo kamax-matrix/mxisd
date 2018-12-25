@@ -28,17 +28,13 @@ import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class WordpressAuthProvider implements AuthenticatorProvider {
 
-    private final Logger log = LoggerFactory.getLogger(WordpressAuthProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(WordpressAuthProvider.class);
 
     private WordpressRestBackend wordpress;
 
-    @Autowired
     public WordpressAuthProvider(WordpressRestBackend wordpress) {
         this.wordpress = wordpress;
     }

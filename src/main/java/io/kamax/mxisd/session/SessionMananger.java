@@ -30,9 +30,9 @@ import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.SessionConfig;
-import io.kamax.mxisd.controller.identity.v1.io.RequestTokenResponse;
-import io.kamax.mxisd.controller.identity.v1.remote.RemoteIdentityAPIv1;
 import io.kamax.mxisd.exception.*;
+import io.kamax.mxisd.http.io.identity.RequestTokenResponse;
+import io.kamax.mxisd.http.undertow.handler.identity.v1.RemoteIdentityAPIv1;
 import io.kamax.mxisd.lookup.ThreePidValidation;
 import io.kamax.mxisd.matrix.IdentityServerUtils;
 import io.kamax.mxisd.notification.NotificationManager;
@@ -50,12 +50,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -66,10 +63,9 @@ import java.util.Optional;
 import static io.kamax.mxisd.config.SessionConfig.Policy.PolicyTemplate;
 import static io.kamax.mxisd.config.SessionConfig.Policy.PolicyTemplate.PolicySource;
 
-@Component
 public class SessionMananger {
 
-    private Logger log = LoggerFactory.getLogger(SessionMananger.class);
+    private transient final Logger log = LoggerFactory.getLogger(SessionMananger.class);
 
     private SessionConfig cfg;
     private MatrixConfig mxCfg;
@@ -80,14 +76,14 @@ public class SessionMananger {
     private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance(); // FIXME refactor for sessions handling their own stuff
 
     // FIXME export into central class, set version
-    private CloseableHttpClient client = HttpClients.custom().setUserAgent("mxisd").build();
+    private CloseableHttpClient client;
 
-    @Autowired
-    public SessionMananger(SessionConfig cfg, MatrixConfig mxCfg, IStorage storage, NotificationManager notifMgr) {
+    public SessionMananger(SessionConfig cfg, MatrixConfig mxCfg, IStorage storage, NotificationManager notifMgr, CloseableHttpClient client) {
         this.cfg = cfg;
         this.mxCfg = mxCfg;
         this.storage = storage;
         this.notifMgr = notifMgr;
+        this.client = client;
     }
 
     private boolean isLocal(ThreePid tpid) {
@@ -96,7 +92,7 @@ public class SessionMananger {
         }
 
         String domain = tpid.getAddress().split("@")[1];
-        return StringUtils.equalsIgnoreCase(cfg.getMatrixCfg().getDomain(), domain);
+        return StringUtils.equalsIgnoreCase(mxCfg.getDomain(), domain);
     }
 
     private ThreePidSession getSession(String sid, String secret) {

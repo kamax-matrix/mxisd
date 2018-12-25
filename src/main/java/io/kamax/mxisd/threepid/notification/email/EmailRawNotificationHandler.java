@@ -24,17 +24,13 @@ import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.threepid.connector.email.IEmailConnector;
 import io.kamax.mxisd.threepid.notification.GenericNotificationHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public class EmailRawNotificationHandler extends GenericNotificationHandler<IEmailConnector, IEmailNotificationGenerator> {
 
     private EmailConfig cfg;
 
-    @Autowired
     public EmailRawNotificationHandler(EmailConfig cfg, List<IEmailNotificationGenerator> generators, List<IEmailConnector> connectors) {
         this.cfg = cfg;
         process(connectors, generators);

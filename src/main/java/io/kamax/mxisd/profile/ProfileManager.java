@@ -20,36 +20,43 @@
 
 package io.kamax.mxisd.profile;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
+import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.dns.ClientDnsOverwrite;
+import io.kamax.mxisd.exception.InternalServerError;
+import io.kamax.mxisd.proxy.Response;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Component
 public class ProfileManager {
 
-    private final Logger log = LoggerFactory.getLogger(ProfileManager.class);
+    private transient final Logger log = LoggerFactory.getLogger(ProfileManager.class);
 
     private List<ProfileProvider> providers;
+    private ClientDnsOverwrite dns;
+    private CloseableHttpClient client;
 
-    @Autowired
-    public ProfileManager(List<ProfileProvider> providers) {
-        this.providers = providers;
-    }
+    public ProfileManager(List<? extends ProfileProvider> providers, ClientDnsOverwrite dns, CloseableHttpClient client) {
+        this.dns = dns;
+        this.client = client;
 
-    @PostConstruct
-    public void build() {
         log.info("--- Profile providers ---");
-        providers = providers.stream()
+        this.providers = providers.stream()
                 .filter(pp -> {
                     log.info("\t- {} - Is enabled? {}", pp.getClass().getSimpleName(), pp.isEnabled());
                     return pp.isEnabled();
@@ -82,6 +89,31 @@ public class ProfileManager {
 
     public List<String> getRoles(_MatrixID user) {
         return getList(p -> p.getRoles(user));
+    }
+
+    public Response enhance(_MatrixID userId, HttpRequestBase request) {
+        try {
+            request.setURI(dns.transform(request.getURI()).build());
+
+            Response res = new Response();
+            try (CloseableHttpResponse hsResponse = client.execute(request)) {
+                res.setStatus(hsResponse.getStatusLine().getStatusCode());
+                JsonElement el = GsonUtil.parse(EntityUtils.toString(hsResponse.getEntity()));
+                if (el.isJsonObject()) {
+                    JsonObject obj = el.getAsJsonObject();
+                    List<_ThreePid> list = getThreepids(userId);
+                    obj.add("threepids", GsonUtil.get().toJsonTree(list));
+                }
+
+                res.setBody(GsonUtil.get().toJson(el));
+                return res;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (URISyntaxException e) {
+            log.error("Unable to build target URL for profile proxy enhancement", e);
+            throw new InternalServerError(e);
+        }
     }
 
 }

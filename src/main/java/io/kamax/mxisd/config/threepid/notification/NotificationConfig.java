@@ -20,22 +20,20 @@
 
 package io.kamax.mxisd.config.threepid.notification;
 
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
-@ConfigurationProperties("notification")
 public class NotificationConfig {
 
-    private Logger log = LoggerFactory.getLogger(NotificationConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(NotificationConfig.class);
 
     private Map<String, String> handler = new HashMap<>();
+    private Map<String, JsonObject> handlers = new HashMap<>();
 
     public Map<String, String> getHandler() {
         return handler;
@@ -45,13 +43,19 @@ public class NotificationConfig {
         this.handler = handler;
     }
 
+    public Map<String, JsonObject> getHandlers() {
+        return handlers;
+    }
+
+    public void setHandlers(Map<String, JsonObject> handlers) {
+        this.handlers = handlers;
+    }
+
     @PostConstruct
     public void build() {
         log.info("--- Notification config ---");
         log.info("Handlers:");
-        handler.forEach((k, v) -> {
-            log.info("\t{}: {}", k, v);
-        });
+        handler.forEach((k, v) -> log.info("\t{}: {}", k, v));
     }
 
 }

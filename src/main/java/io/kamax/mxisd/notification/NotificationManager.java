@@ -28,21 +28,17 @@ import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
 public class NotificationManager {
 
-    private Logger log = LoggerFactory.getLogger(NotificationManager.class);
+    private transient final Logger log = LoggerFactory.getLogger(NotificationManager.class);
 
     private Map<String, INotificationHandler> handlers;
 
-    @Autowired
     public NotificationManager(NotificationConfig cfg, List<INotificationHandler> handlers) {
         this.handlers = new HashMap<>();
         handlers.forEach(h -> {

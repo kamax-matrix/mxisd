@@ -24,7 +24,7 @@ import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.controller.identity.v1.IdentityAPIv1;
+import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.lang.StringUtils;
@@ -86,7 +86,7 @@ public abstract class PlaceholderNotificationGenerator {
     }
 
     protected String populateForValidation(IThreePidSession session, String input) {
-        String validationLink = srvCfg.getPublicUrl() + IdentityAPIv1.getValidate(
+        String validationLink = srvCfg.getPublicUrl() + IsAPIv1.getValidate(
                 session.getThreePid().getMedium(),
                 session.getId(),
                 session.getSecret(),

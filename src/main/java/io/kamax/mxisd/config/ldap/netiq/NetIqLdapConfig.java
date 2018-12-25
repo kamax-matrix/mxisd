@@ -21,11 +21,7 @@
 package io.kamax.mxisd.config.ldap.netiq;
 
 import io.kamax.mxisd.config.ldap.LdapConfig;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@ConfigurationProperties(prefix = "netiq")
 public class NetIqLdapConfig extends LdapConfig {
 
     @Override

@@ -40,8 +40,6 @@ import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,15 +47,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
 
-    private final Logger log = LoggerFactory.getLogger(ExecIdentityStore.class);
+    private transient final Logger log = LoggerFactory.getLogger(ExecIdentityStore.class);
 
     private final ExecConfig.Identity cfg;
     private final MatrixConfig mxCfg;
 
-    @Autowired
     public ExecIdentityStore(ExecConfig cfg, MatrixConfig mxCfg) {
         this(cfg.getIdentity(), mxCfg);
     }

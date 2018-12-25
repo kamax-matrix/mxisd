@@ -20,9 +20,6 @@
 
 package io.kamax.mxisd.threepid.connector.phone;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class BlackholePhoneConnector implements IPhoneConnector {
 
     @Override

@@ -31,8 +31,8 @@ import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.memory.MemoryIdentityConfig;
 import io.kamax.mxisd.config.memory.MemoryStoreConfig;
 import io.kamax.mxisd.config.memory.MemoryThreePid;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
@@ -41,8 +41,6 @@ import io.kamax.mxisd.profile.ProfileProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,15 +49,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-@Component
 public class MemoryIdentityStore implements AuthenticatorProvider, IDirectoryProvider, IThreePidProvider, ProfileProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(MemoryIdentityStore.class);
+    private transient final Logger logger = LoggerFactory.getLogger(MemoryIdentityStore.class);
 
     private final MatrixConfig mxCfg;
     private final MemoryStoreConfig cfg;
 
-    @Autowired
     public MemoryIdentityStore(MatrixConfig mxCfg, MemoryStoreConfig cfg) {
         this.mxCfg = mxCfg;
         this.cfg = cfg;

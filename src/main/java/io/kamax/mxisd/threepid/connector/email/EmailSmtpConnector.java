@@ -29,8 +29,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -42,15 +40,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Properties;
 
-@Component
 public class EmailSmtpConnector implements IEmailConnector {
 
-    private Logger log = LoggerFactory.getLogger(EmailSmtpConnector.class);
+    private transient final Logger log = LoggerFactory.getLogger(EmailSmtpConnector.class);
 
     private EmailSmtpConfig cfg;
     private Session session;
 
-    @Autowired
     public EmailSmtpConnector(EmailSmtpConfig cfg) {
         this.cfg = cfg;
 

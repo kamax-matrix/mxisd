@@ -25,6 +25,7 @@ import com.google.firebase.tasks.OnFailureListener;
 import com.google.firebase.tasks.OnSuccessListener;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
@@ -40,8 +41,12 @@ import java.util.concurrent.TimeUnit;
 
 public class GoogleFirebaseProvider extends GoogleFirebaseBackend implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(GoogleFirebaseProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(GoogleFirebaseProvider.class);
     private String domain;
+
+    public GoogleFirebaseProvider(MxisdConfig cfg) {
+        this(cfg.getFirebase().isEnabled(), cfg.getFirebase().getCredentials(), cfg.getFirebase().getDatabase(), cfg.getMatrix().getDomain());
+    }
 
     public GoogleFirebaseProvider(boolean isEnabled, String credsPath, String db, String domain) {
         super(isEnabled, "ThreePidProvider", credsPath, db);

@@ -40,7 +40,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -48,10 +47,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 
-@Component
 public class RestProfileProvider extends RestProvider implements ProfileProvider {
 
-    private final Logger log = LoggerFactory.getLogger(RestProfileProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(RestProfileProvider.class);
 
     public RestProfileProvider(RestBackendConfig cfg) {
         super(cfg);

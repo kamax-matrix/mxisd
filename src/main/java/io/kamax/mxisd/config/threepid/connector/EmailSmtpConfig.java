@@ -23,16 +23,12 @@ package io.kamax.mxisd.config.threepid.connector;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties(prefix = "threepid.medium.email.connectors.smtp")
 public class EmailSmtpConfig {
 
-    private Logger log = LoggerFactory.getLogger(EmailSmtpConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(EmailSmtpConfig.class);
 
     private String host;
     private int port;

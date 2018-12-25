@@ -22,14 +22,10 @@ package io.kamax.mxisd.config.wordpress;
 
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
 
-@Configuration
-@ConfigurationProperties("wordpress")
 public class WordpressConfig {
 
     public static class Credential {

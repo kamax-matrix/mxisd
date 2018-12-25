@@ -1,0 +1,9 @@
+io.kamax.mxisd.backend.exec.ExecIdentityStoreSupplier
+io.kamax.mxisd.backend.firebase.GoogleFirebaseStoreSupplier
+io.kamax.mxisd.backend.ldap.LdapStoreSupplier
+io.kamax.mxisd.backend.ldap.netiq.NetIqLdapStoreSupplier
+io.kamax.mxisd.backend.memory.MemoryIdentityStoreSupplier
+io.kamax.mxisd.backend.rest.RestStoreSupplier
+io.kamax.mxisd.backend.sql.generic.GenericSqlStoreSupplier
+io.kamax.mxisd.backend.sql.synapse.SynapseSqlStoreSupplier
+io.kamax.mxisd.backend.wordpress.WordpressStoreSupplier

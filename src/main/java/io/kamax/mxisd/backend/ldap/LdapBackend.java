@@ -45,7 +45,7 @@ public abstract class LdapBackend {
     public static final String UID = "uid";
     public static final String MATRIX_ID = "mxid";
 
-    private Logger log = LoggerFactory.getLogger(LdapBackend.class);
+    private transient final Logger log = LoggerFactory.getLogger(LdapBackend.class);
 
     private LdapConfig cfg;
     private MatrixConfig mxCfg;

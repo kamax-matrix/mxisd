@@ -20,27 +20,14 @@
 
 package io.kamax.mxisd.config;
 
-import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
-import io.kamax.mxisd.backend.firebase.GoogleFirebaseAuthenticator;
-import io.kamax.mxisd.backend.firebase.GoogleFirebaseProvider;
-import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties("firebase")
 public class FirebaseConfig {
 
-    private Logger log = LoggerFactory.getLogger(FirebaseConfig.class);
-
-    @Autowired
-    private MatrixConfig mxCfg;
+    private transient final Logger log = LoggerFactory.getLogger(FirebaseConfig.class);
 
     private boolean enabled;
     private String credentials;
@@ -78,16 +65,6 @@ public class FirebaseConfig {
             log.info("Credentials: {}", getCredentials());
             log.info("Database: {}", getDatabase());
         }
-    }
-
-    @Bean
-    public AuthenticatorProvider getAuthProvider() {
-        return new GoogleFirebaseAuthenticator(enabled, credentials, database);
-    }
-
-    @Bean
-    public IThreePidProvider getLookupProvider() {
-        return new GoogleFirebaseProvider(enabled, credentials, database, mxCfg.getDomain());
     }
 
 }

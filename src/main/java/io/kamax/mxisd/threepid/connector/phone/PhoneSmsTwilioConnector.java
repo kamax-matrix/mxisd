@@ -28,17 +28,13 @@ import io.kamax.mxisd.exception.BadRequestException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class PhoneSmsTwilioConnector implements IPhoneConnector {
 
-    private Logger log = LoggerFactory.getLogger(PhoneSmsTwilioConnector.class);
+    private transient final Logger log = LoggerFactory.getLogger(PhoneSmsTwilioConnector.class);
 
     private PhoneTwilioConfig cfg;
 
-    @Autowired
     public PhoneSmsTwilioConnector(PhoneTwilioConfig cfg) {
         this.cfg = cfg;
 

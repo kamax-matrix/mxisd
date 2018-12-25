@@ -259,7 +259,7 @@ public abstract class LdapConfig {
 
     }
 
-    private Logger log = LoggerFactory.getLogger(LdapConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(LdapConfig.class);
 
     private boolean enabled;
     private String filter;

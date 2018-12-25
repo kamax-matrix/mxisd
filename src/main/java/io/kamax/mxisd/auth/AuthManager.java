@@ -37,6 +37,7 @@ import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.AuthenticationConfig;
 import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.exception.RemoteLoginException;
 import io.kamax.mxisd.invitation.InvitationManager;
@@ -53,8 +54,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -63,7 +62,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Service
 public class AuthManager {
 
     private static final String TypeKey = "type";
@@ -74,8 +72,8 @@ public class AuthManager {
     private static final String UserIdTypeValue = "m.id.user";
     private static final String ThreepidTypeValue = "m.id.thirdparty";
 
-    private final Logger log = LoggerFactory.getLogger(AuthManager.class);
-    private final Gson gson = GsonUtil.get();
+    private transient final Logger log = LoggerFactory.getLogger(AuthManager.class);
+    private final Gson gson = GsonUtil.get(); // FIXME replace
 
     private List<AuthenticatorProvider> providers;
     private MatrixConfig mxCfg;
@@ -85,18 +83,16 @@ public class AuthManager {
     private LookupStrategy strategy;
     private CloseableHttpClient client;
 
-    @Autowired
     public AuthManager(
-            AuthenticationConfig cfg,
-            MatrixConfig mxCfg,
-            List<AuthenticatorProvider> providers,
+            MxisdConfig cfg,
+            List<? extends AuthenticatorProvider> providers,
             LookupStrategy strategy,
             InvitationManager invMgr,
             ClientDnsOverwrite dns,
             CloseableHttpClient client
     ) {
-        this.cfg = cfg;
-        this.mxCfg = mxCfg;
+        this.cfg = cfg.getAuth();
+        this.mxCfg = cfg.getMatrix();
         this.providers = new ArrayList<>(providers);
         this.strategy = strategy;
         this.invMgr = invMgr;

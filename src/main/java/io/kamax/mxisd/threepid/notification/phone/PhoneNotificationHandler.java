@@ -24,17 +24,13 @@ import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.threepid.medium.PhoneConfig;
 import io.kamax.mxisd.threepid.connector.phone.IPhoneConnector;
 import io.kamax.mxisd.threepid.notification.GenericNotificationHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public class PhoneNotificationHandler extends GenericNotificationHandler<IPhoneConnector, IPhoneNotificationGenerator> {
 
     private PhoneConfig cfg;
 
-    @Autowired
     public PhoneNotificationHandler(PhoneConfig cfg, List<IPhoneConnector> connectors, List<IPhoneNotificationGenerator> generators) {
         this.cfg = cfg;
         process(connectors, generators);

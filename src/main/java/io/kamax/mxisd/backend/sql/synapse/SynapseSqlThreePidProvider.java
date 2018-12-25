@@ -23,13 +23,9 @@ package io.kamax.mxisd.backend.sql.synapse;
 import io.kamax.mxisd.backend.sql.SqlThreePidProvider;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SynapseSqlThreePidProvider extends SqlThreePidProvider {
 
-    @Autowired
     public SynapseSqlThreePidProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }

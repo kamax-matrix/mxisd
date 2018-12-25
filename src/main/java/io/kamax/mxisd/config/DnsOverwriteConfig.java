@@ -24,18 +24,14 @@ import com.google.gson.Gson;
 import io.kamax.mxisd.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
-@ConfigurationProperties("dns.overwrite")
 public class DnsOverwriteConfig {
 
-    private Logger log = LoggerFactory.getLogger(DnsOverwriteConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(DnsOverwriteConfig.class);
 
     public static class Entry {
 

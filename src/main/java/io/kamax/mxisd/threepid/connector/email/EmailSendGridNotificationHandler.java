@@ -36,8 +36,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -47,15 +45,13 @@ import static com.sendgrid.SendGrid.Email;
 import static com.sendgrid.SendGrid.Response;
 import static io.kamax.mxisd.config.threepid.connector.EmailSendGridConfig.EmailTemplate;
 
-@Component
 public class EmailSendGridNotificationHandler extends PlaceholderNotificationGenerator implements INotificationHandler {
 
-    private Logger log = LoggerFactory.getLogger(EmailSendGridNotificationHandler.class);
+    private transient final Logger log = LoggerFactory.getLogger(EmailSendGridNotificationHandler.class);
 
     private EmailSendGridConfig cfg;
     private SendGrid sendgrid;
 
-    @Autowired
     public EmailSendGridNotificationHandler(MatrixConfig mxCfg, ServerConfig srvCfg, EmailSendGridConfig cfg) {
         super(mxCfg, srvCfg);
         this.cfg = cfg;

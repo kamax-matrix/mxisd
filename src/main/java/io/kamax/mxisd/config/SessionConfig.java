@@ -23,17 +23,12 @@ package io.kamax.mxisd.config;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties("session")
 public class SessionConfig {
 
-    private static Logger log = LoggerFactory.getLogger(SessionConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(SessionConfig.class);
 
     public static class Policy {
 
@@ -144,17 +139,7 @@ public class SessionConfig {
 
     }
 
-    private MatrixConfig mxCfg;
     private Policy policy = new Policy();
-
-    @Autowired
-    public SessionConfig(MatrixConfig mxCfg) {
-        this.mxCfg = mxCfg;
-    }
-
-    public MatrixConfig getMatrixCfg() {
-        return mxCfg;
-    }
 
     public Policy getPolicy() {
         return policy;

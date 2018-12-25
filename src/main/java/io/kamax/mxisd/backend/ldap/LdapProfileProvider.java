@@ -36,8 +36,6 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,12 +43,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Component
 public class LdapProfileProvider extends LdapBackend implements ProfileProvider {
 
-    private transient Logger log = LoggerFactory.getLogger(LdapProfileProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(LdapProfileProvider.class);
 
-    @Autowired
     public LdapProfileProvider(LdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }

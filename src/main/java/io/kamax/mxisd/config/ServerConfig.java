@@ -23,25 +23,17 @@ package io.kamax.mxisd.config;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-@Configuration
-@ConfigurationProperties(prefix = "server")
 public class ServerConfig {
 
-    private Logger log = LoggerFactory.getLogger(ServerConfig.class);
-
-    @Autowired
-    private MatrixConfig mxCfg;
+    private transient final Logger log = LoggerFactory.getLogger(ServerConfig.class);
 
     private String name;
-    private int port;
+    private int port = 8090;
     private String publicUrl;
 
     public String getName() {
@@ -71,11 +63,6 @@ public class ServerConfig {
     @PostConstruct
     public void build() {
         log.info("--- Server config ---");
-
-        if (StringUtils.isBlank(getName())) {
-            setName(mxCfg.getDomain());
-            log.debug("server.name is empty, using matrix.domain");
-        }
 
         if (StringUtils.isBlank(getPublicUrl())) {
             setPublicUrl("https://" + getName());

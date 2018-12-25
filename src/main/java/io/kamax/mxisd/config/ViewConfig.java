@@ -20,19 +20,15 @@
 
 package io.kamax.mxisd.config;
 
-import com.google.gson.Gson;
+import io.kamax.matrix.json.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties("view")
 public class ViewConfig {
 
-    private Logger log = LoggerFactory.getLogger(ViewConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(ViewConfig.class);
 
     public static class Session {
 
@@ -138,7 +134,7 @@ public class ViewConfig {
     @PostConstruct
     public void build() {
         log.info("--- View config ---");
-        log.info("Session: {}", new Gson().toJson(session));
+        log.info("Session: {}", GsonUtil.get().toJson(session));
     }
 
 }

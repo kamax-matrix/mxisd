@@ -20,16 +20,15 @@
 
 package io.kamax.mxisd.directory;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import io.kamax.matrix.MatrixErrorInfo;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.DirectoryConfig;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.exception.HttpMatrixException;
 import io.kamax.mxisd.exception.InternalServerError;
-import io.kamax.mxisd.util.GsonUtil;
+import io.kamax.mxisd.http.io.UserDirectorySearchRequest;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,8 +39,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
@@ -49,25 +46,19 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
 public class DirectoryManager {
 
-    private Logger log = LoggerFactory.getLogger(DirectoryManager.class);
+    private transient final Logger log = LoggerFactory.getLogger(DirectoryManager.class);
 
     private DirectoryConfig cfg;
+    private ClientDnsOverwrite dns;
+    private CloseableHttpClient client;
     private List<IDirectoryProvider> providers;
 
-    private ClientDnsOverwrite dns;
-    private Gson gson;
-
-    @Autowired
-    private CloseableHttpClient client;
-
-    @Autowired
-    public DirectoryManager(DirectoryConfig cfg, List<IDirectoryProvider> providers, ClientDnsOverwrite dns) {
+    public DirectoryManager(DirectoryConfig cfg, ClientDnsOverwrite dns, CloseableHttpClient client, List<? extends IDirectoryProvider> providers) {
         this.cfg = cfg;
         this.dns = dns;
-        this.gson = GsonUtil.build();
+        this.client = client;
         this.providers = providers.stream().filter(IDirectoryProvider::isEnabled).collect(Collectors.toList());
 
         log.info("Directory providers:");
@@ -98,7 +89,7 @@ public class DirectoryManager {
                 String body = IOUtils.toString(res.getEntity().getContent(), charset);
 
                 if (status != 200) {
-                    MatrixErrorInfo info = gson.fromJson(body, MatrixErrorInfo.class);
+                    MatrixErrorInfo info = GsonUtil.get().fromJson(body, MatrixErrorInfo.class);
                     if (StringUtils.equals("M_UNRECOGNIZED", info.getErrcode())) { // FIXME no hardcoding, use Enum
                         log.warn("Homeserver does not support Directory feature, skipping");
                     } else {
@@ -107,7 +98,7 @@ public class DirectoryManager {
                     }
                 }
 
-                UserDirectorySearchResult resultHs = gson.fromJson(body, UserDirectorySearchResult.class);
+                UserDirectorySearchResult resultHs = GsonUtil.get().fromJson(body, UserDirectorySearchResult.class);
                 log.info("Found {} match(es) in HS for '{}'", resultHs.getResults().size(), query);
                 result.getResults().addAll(resultHs.getResults());
                 if (resultHs.isLimited()) {

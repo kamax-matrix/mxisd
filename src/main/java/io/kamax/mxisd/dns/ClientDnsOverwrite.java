@@ -26,8 +26,6 @@ import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -37,14 +35,12 @@ import java.util.Map;
 
 import static io.kamax.mxisd.config.DnsOverwriteConfig.Entry;
 
-@Component
 public class ClientDnsOverwrite {
 
-    private Logger log = LoggerFactory.getLogger(ClientDnsOverwrite.class);
+    private transient final Logger log = LoggerFactory.getLogger(ClientDnsOverwrite.class);
 
     private Map<String, Entry> mappings;
 
-    @Autowired
     public ClientDnsOverwrite(DnsOverwriteConfig cfg) {
         mappings = new HashMap<>();
         cfg.getHomeserver().getClient().forEach(e -> mappings.put(e.getName(), e));

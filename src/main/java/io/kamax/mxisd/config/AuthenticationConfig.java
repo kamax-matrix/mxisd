@@ -20,16 +20,10 @@
 
 package io.kamax.mxisd.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@Configuration
-@ConfigurationProperties(prefix = "auth")
 public class AuthenticationConfig {
 
     public static class Rule {
@@ -102,7 +96,6 @@ public class AuthenticationConfig {
         this.rewrite = rewrite;
     }
 
-    @PostConstruct
     public void build() {
         getRewrite().getUser().getRules().forEach(mapping -> mapping.setPattern(Pattern.compile(mapping.getRegex())));
     }

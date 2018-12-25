@@ -31,8 +31,6 @@ import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,16 +40,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Component
 public class WordpressThreePidProvider implements IThreePidProvider {
 
-    private final Logger log = LoggerFactory.getLogger(WordpressThreePidProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(WordpressThreePidProvider.class);
 
     private MatrixConfig mxCfg;
     private WordpressConfig cfg;
     private WordressSqlBackend wordpress;
 
-    @Autowired
     public WordpressThreePidProvider(MatrixConfig mxCfg, WordpressConfig cfg, WordressSqlBackend wordpress) {
         this.mxCfg = mxCfg;
         this.cfg = cfg;

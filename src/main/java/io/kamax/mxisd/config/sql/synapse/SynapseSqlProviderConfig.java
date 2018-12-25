@@ -23,13 +23,7 @@ package io.kamax.mxisd.config.sql.synapse;
 import io.kamax.mxisd.backend.sql.synapse.SynapseQueries;
 import io.kamax.mxisd.config.sql.SqlConfig;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
-
-@Configuration
-@ConfigurationProperties("synapseSql")
 public class SynapseSqlProviderConfig extends SqlConfig {
 
     @Override
@@ -37,8 +31,9 @@ public class SynapseSqlProviderConfig extends SqlConfig {
         return "Synapse SQL";
     }
 
-    @PostConstruct
-    public void doBuild() {
+    public void build() {
+        super.build();
+
         getAuth().setEnabled(false); // Synapse does the auth, we only act as a directory/identity service.
 
         // FIXME check that the DB is not the mxisd one

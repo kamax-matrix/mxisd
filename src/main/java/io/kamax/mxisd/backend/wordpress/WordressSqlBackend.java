@@ -24,22 +24,17 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import io.kamax.mxisd.config.wordpress.WordpressConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Component
 public class WordressSqlBackend {
 
-    private Logger log = LoggerFactory.getLogger(WordressSqlBackend.class);
+    private transient final Logger log = LoggerFactory.getLogger(WordressSqlBackend.class);
 
     private WordpressConfig cfg;
-
     private ComboPooledDataSource ds;
 
-    @Autowired
     public WordressSqlBackend(WordpressConfig cfg) {
         this.cfg = cfg;
 

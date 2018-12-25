@@ -34,15 +34,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Component
 public class WordpressRestBackend {
 
-    private final Logger log = LoggerFactory.getLogger(WordpressRestBackend.class);
+    private transient final Logger log = LoggerFactory.getLogger(WordpressRestBackend.class);
     private final String jsonPath = "/wp-json";
     private final String jwtPath = "/jwt-auth/v1";
 
@@ -54,7 +51,6 @@ public class WordpressRestBackend {
 
     private String token;
 
-    @Autowired
     public WordpressRestBackend(WordpressConfig cfg, CloseableHttpClient client) {
         this.cfg = cfg;
         this.client = client;

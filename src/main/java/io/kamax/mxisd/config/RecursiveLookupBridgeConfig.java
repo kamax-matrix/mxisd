@@ -22,18 +22,14 @@ package io.kamax.mxisd.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
-@ConfigurationProperties(prefix = "lookup.recursive.bridge")
 public class RecursiveLookupBridgeConfig {
 
-    private Logger log = LoggerFactory.getLogger(RecursiveLookupBridgeConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(RecursiveLookupBridgeConfig.class);
 
     private boolean enabled;
     private boolean recursiveOnly;

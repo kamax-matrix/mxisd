@@ -27,15 +27,11 @@ import io.kamax.mxisd.config.rest.RestBackendConfig;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Component
 public class RestAuthProvider extends RestProvider implements AuthenticatorProvider {
 
-    @Autowired
     public RestAuthProvider(RestBackendConfig cfg) {
         super(cfg);
     }

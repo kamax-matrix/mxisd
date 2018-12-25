@@ -20,14 +20,9 @@
 
 package io.kamax.mxisd.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
 import javax.annotation.PostConstruct;
 import java.util.Objects;
 
-@Configuration
-@ConfigurationProperties(prefix = "lookup.bulk")
 public class BulkLookupConfig {
 
     private Boolean enabled;

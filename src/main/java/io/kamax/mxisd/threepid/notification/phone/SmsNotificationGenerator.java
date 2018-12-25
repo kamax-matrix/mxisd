@@ -24,9 +24,7 @@ import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.medium.PhoneSmsTemplateConfig;
 import io.kamax.mxisd.threepid.notification.GenericTemplateNotificationGenerator;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SmsNotificationGenerator extends GenericTemplateNotificationGenerator implements IPhoneNotificationGenerator {
 
     public SmsNotificationGenerator(MatrixConfig mxCfg, ServerConfig srvCfg, PhoneSmsTemplateConfig cfg) {

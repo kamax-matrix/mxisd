@@ -240,8 +240,8 @@ session:
           server: 'matrix-org'
 
 notification:
-#  handler:
-#    3PID-medium: 'handlerId'
+  #  handler:
+  #    3PID-medium: 'handlerId'
   handlers:
     sendgrid:
       api:

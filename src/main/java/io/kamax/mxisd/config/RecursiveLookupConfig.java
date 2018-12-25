@@ -20,18 +20,14 @@
 
 package io.kamax.mxisd.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
+import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
-@ConfigurationProperties(prefix = "lookup.recursive")
 public class RecursiveLookupConfig {
 
     private boolean enabled;
-    private List<String> allowedCidr;
-    private RecursiveLookupBridgeConfig bridge;
+    private List<String> allowedCidr = new ArrayList<>();
+    private RecursiveLookupBridgeConfig bridge = new RecursiveLookupBridgeConfig();
 
     public boolean isEnabled() {
         return enabled;
@@ -55,6 +51,10 @@ public class RecursiveLookupConfig {
 
     public void setBridge(RecursiveLookupBridgeConfig bridge) {
         this.bridge = bridge;
+    }
+
+    public void build() {
+        // no-op
     }
 
 }

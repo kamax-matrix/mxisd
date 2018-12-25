@@ -21,7 +21,9 @@
 import java.util.regex.Pattern
 
 apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'idea'
 
 def confFileName = "application.example.yaml"
 def distDir = "${project.buildDir}/dist"
@@ -42,6 +44,9 @@ def debBuildSystemdPath = "${debBuildBasePath}${debSystemdPath}"
 
 def dockerImageName = "kamax/mxisd"
 def dockerImageTag = "${dockerImageName}:${mxisdVersion()}"
+
+group = 'io.kamax'
+mainClassName = 'io.kamax.mxisd.MxisdStandaloneExec'
 
 String mxisdVersion() {
     def versionPattern = Pattern.compile("v(\\d+\\.)?(\\d+\\.)?(\\d+)(-.*)?")
@@ -64,16 +69,16 @@ String gitVersion() {
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
     }
 }
 
 repositories {
-    mavenCentral()
+    jcenter()
     maven { url "https://kamax.io/maven/releases/" }
     maven { url "https://kamax.io/maven/snapshots/" }
 }
@@ -81,12 +86,9 @@ repositories {
 dependencies {
     // Easy file management
     compile 'commons-io:commons-io:2.5'
-
-    // Spring Boot - standalone app
-    compile 'org.springframework.boot:spring-boot-starter-web:1.5.10.RELEASE'
-
-    // Thymeleaf for HTML templates
-    compile "org.springframework.boot:spring-boot-starter-thymeleaf:1.5.10.RELEASE"
+    
+    // Config management
+    compile 'org.yaml:snakeyaml:1.23'
 
     // Matrix Java SDK
     compile 'io.kamax:matrix-java-sdk:0.0.14-8-g0e57ec6'
@@ -137,17 +139,18 @@ dependencies {
     // ZT-Exec for exec identity store
     compile 'org.zeroturnaround:zt-exec:1.10'
 
+    // HTTP server
+    compile 'io.undertow:undertow-core:2.0.16.Final'
+
     testCompile 'junit:junit:4.12'
     testCompile 'com.github.tomakehurst:wiremock:2.8.0'
     testCompile 'com.unboundid:unboundid-ldapsdk:4.0.9'
 }
 
-springBoot {
-    executable = true
-
-    embeddedLaunchScriptProperties = [
-            confFolder: "/etc/default"
-    ]
+shadowJar {
+    baseName = project.name
+    classifier = null
+    version = null
 }
 
 processResources {

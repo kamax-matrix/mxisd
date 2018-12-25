@@ -41,7 +41,7 @@ import java.util.Optional;
 
 public abstract class SqlThreePidProvider implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(SqlThreePidProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(SqlThreePidProvider.class);
 
     private SqlConfig cfg;
     private MatrixConfig mxCfg;

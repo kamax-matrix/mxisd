@@ -23,9 +23,7 @@ package io.kamax.mxisd.backend.ldap.netiq;
 import io.kamax.mxisd.backend.ldap.LdapThreePidProvider;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.netiq.NetIqLdapConfig;
-import org.springframework.stereotype.Component;
 
-@Component
 public class NetIqLdapThreePidProvider extends LdapThreePidProvider {
 
     public NetIqLdapThreePidProvider(NetIqLdapConfig cfg, MatrixConfig mxCfg) {

@@ -23,13 +23,9 @@ package io.kamax.mxisd.backend.sql.generic;
 import io.kamax.mxisd.backend.sql.SqlThreePidProvider;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class GenericSqlThreePidProvider extends SqlThreePidProvider {
 
-    @Autowired
     public GenericSqlThreePidProvider(GenericSqlProviderConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }

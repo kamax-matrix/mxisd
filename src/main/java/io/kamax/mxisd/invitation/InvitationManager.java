@@ -49,8 +49,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.xbill.DNS.*;
 
 import javax.annotation.PostConstruct;
@@ -66,36 +64,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
-@Component
 public class InvitationManager {
 
-    private Logger log = LoggerFactory.getLogger(InvitationManager.class);
+    private transient final Logger log = LoggerFactory.getLogger(InvitationManager.class);
 
-    private Map<String, IThreePidInviteReply> invitations = new ConcurrentHashMap<>();
-
-    @Autowired
     private InvitationConfig cfg;
-
-    @Autowired
     private IStorage storage;
-
-    @Autowired
     private LookupStrategy lookupMgr;
-
-    @Autowired
     private SignatureManager signMgr;
-
-    @Autowired
     private FederationDnsOverwrite dns;
-
     private NotificationManager notifMgr;
 
     private CloseableHttpClient client;
     private Gson gson;
     private Timer refreshTimer;
 
-    @Autowired
-    public InvitationManager(NotificationManager notifMgr) {
+    private Map<String, IThreePidInviteReply> invitations = new ConcurrentHashMap<>();
+
+    public InvitationManager(InvitationConfig cfg, IStorage storage, LookupStrategy lookupMgr, SignatureManager signMgr, FederationDnsOverwrite dns, NotificationManager notifMgr) {
+        this.cfg = cfg;
+        this.storage = storage;
+        this.lookupMgr = lookupMgr;
+        this.signMgr = signMgr;
+        this.dns = dns;
         this.notifMgr = notifMgr;
     }
 

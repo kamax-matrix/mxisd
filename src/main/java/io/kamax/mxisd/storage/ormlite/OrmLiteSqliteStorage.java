@@ -27,6 +27,8 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import io.kamax.matrix.ThreePid;
+import io.kamax.mxisd.config.MxisdConfig;
+import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.storage.IStorage;
@@ -34,6 +36,7 @@ import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
 import io.kamax.mxisd.storage.ormlite.dao.ASTransactionDao;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidSessionDao;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +51,7 @@ import java.util.Optional;
 
 public class OrmLiteSqliteStorage implements IStorage {
 
-    private Logger log = LoggerFactory.getLogger(OrmLiteSqliteStorage.class);
+    private transient final Logger log = LoggerFactory.getLogger(OrmLiteSqliteStorage.class);
 
     @FunctionalInterface
     private interface Getter<T> {
@@ -68,7 +71,19 @@ public class OrmLiteSqliteStorage implements IStorage {
     private Dao<ThreePidSessionDao, String> sessionDao;
     private Dao<ASTransactionDao, String> asTxnDao;
 
+    public OrmLiteSqliteStorage(MxisdConfig cfg) {
+        this(cfg.getStorage().getBackend(), cfg.getStorage().getProvider().getSqlite().getDatabase());
+    }
+
     public OrmLiteSqliteStorage(String backend, String path) {
+        if (StringUtils.isBlank(backend)) {
+            throw new ConfigurationException("storage.backend");
+        }
+
+        if (StringUtils.isBlank(path)) {
+            throw new ConfigurationException("Storage destination cannot be empty");
+        }
+
         withCatcher(() -> {
             if (path.startsWith("/") && !path.startsWith("//")) {
                 File parent = new File(path).getParentFile();

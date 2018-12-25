@@ -20,14 +20,9 @@
 
 package io.kamax.mxisd.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
-@ConfigurationProperties(prefix = "forward")
 public class ForwardConfig {
 
     private List<String> servers = new ArrayList<>();
@@ -38,6 +33,10 @@ public class ForwardConfig {
 
     public void setServers(List<String> servers) {
         this.servers = servers;
+    }
+
+    public void build() {
+        // no-op
     }
 
 }

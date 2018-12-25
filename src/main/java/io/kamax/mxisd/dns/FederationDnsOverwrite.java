@@ -21,11 +21,8 @@
 package io.kamax.mxisd.dns;
 
 import io.kamax.mxisd.config.DnsOverwriteConfig;
-import io.kamax.mxisd.config.ServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,17 +30,13 @@ import java.util.Optional;
 
 import static io.kamax.mxisd.config.DnsOverwriteConfig.Entry;
 
-@Component
 public class FederationDnsOverwrite {
 
-    private Logger log = LoggerFactory.getLogger(FederationDnsOverwrite.class);
+    private transient final Logger log = LoggerFactory.getLogger(FederationDnsOverwrite.class);
 
-    private ServerConfig srvCfg;
     private Map<String, Entry> mappings;
 
-    @Autowired
-    public FederationDnsOverwrite(DnsOverwriteConfig cfg, ServerConfig srvCfg) {
-        this.srvCfg = srvCfg;
+    public FederationDnsOverwrite(DnsOverwriteConfig cfg) {
 
         mappings = new HashMap<>();
         cfg.getHomeserver().getFederation().forEach(e -> mappings.put(e.getName(), e));

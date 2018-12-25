@@ -24,32 +24,15 @@ import io.kamax.mxisd.backend.sql.generic.GenericSqlDirectoryProvider;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
 import io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Objects;
 
-@Component
 public class SynapseSqlDirectoryProvider extends GenericSqlDirectoryProvider {
 
-    @Autowired
     public SynapseSqlDirectoryProvider(SynapseSqlProviderConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
-    }
-
-    @Override
-    protected void setParameters(PreparedStatement stmt, String searchTerm) throws SQLException {
-        stmt.setString(1, "%" + searchTerm + "%");
-    }
-
-    @PostConstruct
-    public void build() {
-        if (!isEnabled()) {
-            return;
-        }
 
         GenericSqlProviderConfig.Type queries = cfg.getDirectory().getQuery();
         if (Objects.isNull(queries.getName().getValue())) {
@@ -58,6 +41,11 @@ public class SynapseSqlDirectoryProvider extends GenericSqlDirectoryProvider {
         if (Objects.isNull(queries.getThreepid().getValue())) {
             queries.getThreepid().setValue(SynapseQueries.findByThreePidAddress(cfg.getType(), mxCfg.getDomain()));
         }
+    }
+
+    @Override
+    protected void setParameters(PreparedStatement stmt, String searchTerm) throws SQLException {
+        stmt.setString(1, "%" + searchTerm + "%");
     }
 
 }

@@ -20,11 +20,6 @@
 
 package io.kamax.mxisd.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-@ConfigurationProperties("storage.provider.sqlite")
 public class SQLiteStorageConfig {
 
     private String database;

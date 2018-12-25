@@ -23,8 +23,8 @@ package io.kamax.mxisd.backend.exec;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.ExecConfig;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.exception.InternalServerError;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
@@ -55,7 +55,7 @@ public class ExecDirectoryStoreTest extends ExecStoreTest {
     }
 
     private ExecConfig.Directory getCfg() {
-        ExecConfig.Directory cfg = new ExecConfig().compute().getDirectory();
+        ExecConfig.Directory cfg = new ExecConfig().build().getDirectory();
         assertFalse(cfg.isEnabled());
         cfg.setEnabled(true);
         assertTrue(cfg.isEnabled());

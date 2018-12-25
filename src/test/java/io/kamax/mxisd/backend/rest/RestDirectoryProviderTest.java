@@ -24,7 +24,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Rule;

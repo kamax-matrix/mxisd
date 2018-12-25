@@ -23,16 +23,12 @@ package io.kamax.mxisd.config;
 import io.kamax.mxisd.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties("invite")
 public class InvitationConfig {
 
-    private final Logger log = LoggerFactory.getLogger(InvitationConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(InvitationConfig.class);
 
     public static class Resolution {
 

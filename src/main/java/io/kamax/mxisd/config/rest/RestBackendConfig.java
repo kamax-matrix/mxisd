@@ -24,8 +24,6 @@ import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.net.MalformedURLException;
@@ -33,8 +31,6 @@ import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 
-@Configuration
-@ConfigurationProperties("rest")
 public class RestBackendConfig {
 
     public static class IdentityEndpoints {
@@ -133,7 +129,7 @@ public class RestBackendConfig {
 
     }
 
-    private Logger log = LoggerFactory.getLogger(RestBackendConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(RestBackendConfig.class);
 
     private boolean enabled;
     private String host;

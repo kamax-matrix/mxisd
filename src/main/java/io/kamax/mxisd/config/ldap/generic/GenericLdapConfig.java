@@ -21,13 +21,7 @@
 package io.kamax.mxisd.config.ldap.generic;
 
 import io.kamax.mxisd.config.ldap.LdapConfig;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
-@Configuration
-@ConfigurationProperties(prefix = "ldap")
-@Primary
 public class GenericLdapConfig extends LdapConfig {
 
     @Override

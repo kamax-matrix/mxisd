@@ -24,15 +24,11 @@ import io.kamax.mxisd.util.GsonUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
-@ConfigurationProperties("notification.handlers.sendgrid")
 public class EmailSendGridConfig {
 
     public static class EmailTemplate {
@@ -172,7 +168,7 @@ public class EmailSendGridConfig {
 
     }
 
-    private Logger log = LoggerFactory.getLogger(EmailSendGridConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(EmailSendGridConfig.class);
 
     private Api api = new Api();
     private Identity identity = new Identity();

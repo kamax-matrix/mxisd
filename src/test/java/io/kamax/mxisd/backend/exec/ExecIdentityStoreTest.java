@@ -61,7 +61,7 @@ public class ExecIdentityStoreTest extends ExecStoreTest {
     }
 
     private ExecConfig.Identity getCfg() {
-        ExecConfig.Identity cfg = new ExecConfig().compute().getIdentity();
+        ExecConfig.Identity cfg = new ExecConfig().build().getIdentity();
         assertFalse(cfg.isEnabled());
         cfg.setEnabled(true);
         assertTrue(cfg.isEnabled());

@@ -26,7 +26,6 @@ import io.kamax.mxisd.exception.JsonMemberNotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -52,10 +51,6 @@ public class GsonParser {
         }
 
         return el.getAsJsonObject();
-    }
-
-    public <T> T parse(HttpServletRequest req, Class<T> type) throws IOException {
-        return gson.fromJson(parse(req.getInputStream()), type);
     }
 
     public <T> T parse(HttpResponse res, Class<T> type) throws IOException {

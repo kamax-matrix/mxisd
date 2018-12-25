@@ -22,13 +22,9 @@ package io.kamax.mxisd.config;
 
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties(prefix = "key")
 public class KeyConfig {
 
     private String path;

@@ -27,19 +27,18 @@ import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
 import io.kamax.mxisd.invitation.InvitationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class GenericSqlAuthProvider implements AuthenticatorProvider {
 
-    private Logger log = LoggerFactory.getLogger(GenericSqlAuthProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(GenericSqlAuthProvider.class);
 
-    @Autowired
     private GenericSqlProviderConfig cfg;
-
-    @Autowired
     private InvitationManager invMgr;
+
+    public GenericSqlAuthProvider(GenericSqlProviderConfig cfg, InvitationManager invMgr) {
+        this.cfg = cfg;
+        this.invMgr = invMgr;
+    }
 
     @Override
     public boolean isEnabled() {

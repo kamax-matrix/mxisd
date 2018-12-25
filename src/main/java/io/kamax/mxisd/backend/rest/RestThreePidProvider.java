@@ -35,8 +35,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,14 +42,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 public class RestThreePidProvider extends RestProvider implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(RestThreePidProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(RestThreePidProvider.class);
 
     private MatrixConfig mxCfg; // FIXME should be done in the lookup manager
 
-    @Autowired
     public RestThreePidProvider(RestBackendConfig cfg, MatrixConfig mxCfg) {
         super(cfg);
         this.mxCfg = mxCfg;

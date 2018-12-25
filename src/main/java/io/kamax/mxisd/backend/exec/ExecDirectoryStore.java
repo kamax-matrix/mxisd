@@ -24,22 +24,19 @@ import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchRequest;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
+import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.http.io.UserDirectorySearchRequest;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ExecDirectoryStore extends ExecStore implements IDirectoryProvider {
 
     private ExecConfig.Directory cfg;
     private MatrixConfig mxCfg;
 
-    @Autowired
-    public ExecDirectoryStore(ExecConfig cfg, MatrixConfig mxCfg) {
-        this(cfg.getDirectory(), mxCfg);
+    public ExecDirectoryStore(MxisdConfig cfg) {
+        this(cfg.getExec().getDirectory(), cfg.getMatrix());
     }
 
     public ExecDirectoryStore(ExecConfig.Directory cfg, MatrixConfig mxCfg) {

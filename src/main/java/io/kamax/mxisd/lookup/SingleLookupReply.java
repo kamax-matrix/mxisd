@@ -24,7 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
-import io.kamax.mxisd.controller.identity.v1.io.SingeLookupReplyJson;
+import io.kamax.mxisd.http.io.identity.SingeLookupReplyJson;
 
 import java.time.Instant;
 

@@ -29,6 +29,7 @@ import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
+import io.kamax.mxisd.config.FirebaseConfig;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,13 @@ import java.util.concurrent.TimeUnit;
 
 public class GoogleFirebaseAuthenticator extends GoogleFirebaseBackend implements AuthenticatorProvider {
 
-    private Logger log = LoggerFactory.getLogger(GoogleFirebaseAuthenticator.class);
+    private transient final Logger log = LoggerFactory.getLogger(GoogleFirebaseAuthenticator.class);
 
     private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+
+    public GoogleFirebaseAuthenticator(FirebaseConfig cfg) {
+        this(cfg.isEnabled(), cfg.getCredentials(), cfg.getDatabase());
+    }
 
     public GoogleFirebaseAuthenticator(boolean isEnabled, String credsPath, String db) {
         super(isEnabled, "AuthenticationProvider", credsPath, db);

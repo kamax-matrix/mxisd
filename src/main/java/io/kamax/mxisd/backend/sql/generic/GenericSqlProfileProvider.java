@@ -22,9 +22,7 @@ package io.kamax.mxisd.backend.sql.generic;
 
 import io.kamax.mxisd.backend.sql.SqlProfileProvider;
 import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
-import org.springframework.stereotype.Component;
 
-@Component
 public class GenericSqlProfileProvider extends SqlProfileProvider {
 
     public GenericSqlProfileProvider(GenericSqlProviderConfig cfg) {

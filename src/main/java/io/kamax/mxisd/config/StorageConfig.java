@@ -22,16 +22,27 @@ package io.kamax.mxisd.config;
 
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties("storage")
 public class StorageConfig {
 
-    private String backend;
+    public static class Provider {
+
+        private SQLiteStorageConfig sqlite = new SQLiteStorageConfig();
+
+        public SQLiteStorageConfig getSqlite() {
+            return sqlite;
+        }
+
+        public void setSqlite(SQLiteStorageConfig sqlite) {
+            this.sqlite = sqlite;
+        }
+
+    }
+
+    private String backend = "sqlite";
+    private Provider provider = new Provider();
 
     public String getBackend() {
         return backend;
@@ -41,8 +52,16 @@ public class StorageConfig {
         this.backend = backend;
     }
 
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+
     @PostConstruct
-    private void postConstruct() {
+    public void build() {
         if (StringUtils.isBlank(getBackend())) {
             throw new ConfigurationException("storage.backend");
         }

@@ -28,7 +28,7 @@ public class ConfigurationException extends RuntimeException {
     private String detailedMsg;
 
     public ConfigurationException(String key) {
-        super("Invalid or empty value for configuration key " + key);
+        super("Invalid or empty value for configuration item " + key);
     }
 
     public ConfigurationException(Throwable t) {

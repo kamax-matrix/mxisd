@@ -22,16 +22,12 @@ package io.kamax.mxisd.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties("directory")
 public class DirectoryConfig {
 
-    private final transient Logger log = LoggerFactory.getLogger(DnsOverwriteConfig.class);
+    private final static Logger log = LoggerFactory.getLogger(DirectoryConfig.class);
 
     public static class Exclude {
 
@@ -68,7 +64,7 @@ public class DirectoryConfig {
     }
 
     @PostConstruct
-    public void buid() {
+    public void build() {
         log.info("--- Directory config ---");
         log.info("Exclude:");
         log.info("\tHomeserver: {}", getExclude().getHomeserver());

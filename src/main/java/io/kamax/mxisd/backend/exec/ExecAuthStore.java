@@ -33,20 +33,16 @@ import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.Optional;
 
-@Component
 public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
 
-    private final Logger log = LoggerFactory.getLogger(ExecAuthStore.class);
+    private transient final Logger log = LoggerFactory.getLogger(ExecAuthStore.class);
 
     private ExecConfig.Auth cfg;
 
-    @Autowired
     public ExecAuthStore(ExecConfig cfg) {
         this.cfg = Objects.requireNonNull(cfg.getAuth());
     }

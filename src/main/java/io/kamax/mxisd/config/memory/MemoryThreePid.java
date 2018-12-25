@@ -21,9 +21,7 @@
 package io.kamax.mxisd.config.memory;
 
 import io.kamax.matrix._ThreePid;
-import org.springframework.stereotype.Component;
 
-@Component
 public class MemoryThreePid implements _ThreePid {
 
     private String medium;

@@ -24,8 +24,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import io.kamax.matrix.json.GsonUtil;
-import io.kamax.mxisd.controller.identity.v1.ClientBulkLookupRequest;
 import io.kamax.mxisd.exception.InvalidResponseJsonException;
+import io.kamax.mxisd.http.io.identity.ClientBulkLookupRequest;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
@@ -41,10 +41,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -52,18 +48,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Component
-@Scope("prototype")
-@Lazy
 public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher {
 
-    private Logger log = LoggerFactory.getLogger(RemoteIdentityServerFetcher.class);
+    private transient final Logger log = LoggerFactory.getLogger(RemoteIdentityServerFetcher.class);
 
+    // FIXME remove
     private Gson gson = new Gson();
     private GsonParser parser = new GsonParser(gson);
 
-    @Autowired
     private CloseableHttpClient client;
+
+    public RemoteIdentityServerFetcher(CloseableHttpClient client) {
+        this.client = client;
+    }
 
     @Override
     public boolean isUsable(String remote) {

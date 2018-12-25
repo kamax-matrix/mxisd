@@ -28,26 +28,24 @@ import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Component
-class ForwarderProvider implements IThreePidProvider {
+public class ForwarderProvider implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(ForwarderProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(ForwarderProvider.class);
 
-    @Autowired
     private ForwardConfig cfg;
-
-    @Autowired
     private MatrixConfig mxCfg;
-
-    @Autowired
     private IRemoteIdentityServerFetcher fetcher;
+
+    public ForwarderProvider(ForwardConfig cfg, MatrixConfig mxCfg, IRemoteIdentityServerFetcher fetcher) {
+        this.cfg = cfg;
+        this.mxCfg = mxCfg;
+        this.fetcher = fetcher;
+    }
 
     @Override
     public boolean isEnabled() {

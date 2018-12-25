@@ -20,12 +20,9 @@
 
 package io.kamax.mxisd.config.memory;
 
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 public class MemoryIdentityConfig {
 
     private String username;

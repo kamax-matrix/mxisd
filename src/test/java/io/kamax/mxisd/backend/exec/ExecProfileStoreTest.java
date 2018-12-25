@@ -69,7 +69,7 @@ public class ExecProfileStoreTest extends ExecStoreTest {
     }
 
     private ExecConfig.Profile getCfg() {
-        ExecConfig.Profile cfg = new ExecConfig().compute().getProfile();
+        ExecConfig.Profile cfg = new ExecConfig().build().getProfile();
         assertFalse(cfg.isEnabled());
         cfg.setEnabled(true);
         assertTrue(cfg.isEnabled());

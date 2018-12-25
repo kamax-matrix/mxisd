@@ -47,7 +47,7 @@ public class ExecStore {
         return GsonUtil.get().toJson(o);
     }
 
-    private final Logger log = LoggerFactory.getLogger(ExecStore.class);
+    private transient final Logger log = LoggerFactory.getLogger(ExecStore.class);
 
     private Supplier<ProcessExecutor> executorSupplier = () -> new ProcessExecutor().readOutput(true);
 

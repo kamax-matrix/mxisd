@@ -39,7 +39,7 @@ import java.util.Optional;
 
 public abstract class SqlProfileProvider implements ProfileProvider {
 
-    private Logger log = LoggerFactory.getLogger(SqlProfileProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(SqlProfileProvider.class);
 
     private SqlConfig.Profile cfg;
 

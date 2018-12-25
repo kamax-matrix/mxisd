@@ -26,17 +26,13 @@ import io.kamax.matrix.crypto.SignatureManager;
 import io.kamax.mxisd.config.KeyConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import org.apache.commons.io.FileUtils;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 import java.io.IOException;
 
-@Configuration
 public class CryptoFactory {
 
-    @Bean
-    public KeyManager getKeyManager(KeyConfig keyCfg) {
+    public static KeyManager getKeyManager(KeyConfig keyCfg) {
         File keyStore = new File(keyCfg.getPath());
         if (!keyStore.exists()) {
             try {
@@ -49,8 +45,7 @@ public class CryptoFactory {
         return new KeyManager(new KeyFileStore(keyCfg.getPath()));
     }
 
-    @Bean
-    public SignatureManager getSignatureManager(KeyManager keyMgr, ServerConfig cfg) {
+    public static SignatureManager getSignatureManager(KeyManager keyMgr, ServerConfig cfg) {
         return new SignatureManager(keyMgr, cfg.getName());
     }
 

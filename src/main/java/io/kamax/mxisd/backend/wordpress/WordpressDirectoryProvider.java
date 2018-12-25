@@ -23,13 +23,11 @@ package io.kamax.mxisd.backend.wordpress;
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.wordpress.WordpressConfig;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,16 +35,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-@Component
 public class WordpressDirectoryProvider implements IDirectoryProvider {
 
-    private final Logger log = LoggerFactory.getLogger(WordpressDirectoryProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(WordpressDirectoryProvider.class);
 
     private WordpressConfig cfg;
     private WordressSqlBackend wordpress;
     private MatrixConfig mxCfg;
 
-    @Autowired
     public WordpressDirectoryProvider(WordpressConfig cfg, WordressSqlBackend wordpress, MatrixConfig mxCfg) {
         this.cfg = cfg;
         this.wordpress = wordpress;

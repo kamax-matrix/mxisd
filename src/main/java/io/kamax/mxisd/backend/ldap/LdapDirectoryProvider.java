@@ -22,9 +22,9 @@ package io.kamax.mxisd.backend.ldap;
 
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
-import io.kamax.mxisd.controller.directory.v1.io.UserDirectorySearchResult;
 import io.kamax.mxisd.directory.IDirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import io.kamax.mxisd.util.GsonUtil;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException;
@@ -35,19 +35,15 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 public class LdapDirectoryProvider extends LdapBackend implements IDirectoryProvider {
 
-    private Logger log = LoggerFactory.getLogger(LdapDirectoryProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(LdapDirectoryProvider.class);
 
-    @Autowired
     public LdapDirectoryProvider(LdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
     }
@@ -95,7 +91,6 @@ public class LdapDirectoryProvider extends LdapBackend implements IDirectoryProv
                     }
                 }
             }
-
         } catch (CursorLdapReferralException e) {
             log.warn("An entry is only available via referral, skipping");
         } catch (IOException | LdapException | CursorException e) {

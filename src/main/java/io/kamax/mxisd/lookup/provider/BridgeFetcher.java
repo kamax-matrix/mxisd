@@ -28,23 +28,22 @@ import io.kamax.mxisd.lookup.fetcher.IBridgeFetcher;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Component
 public class BridgeFetcher implements IBridgeFetcher {
 
-    private Logger log = LoggerFactory.getLogger(BridgeFetcher.class);
+    private transient final Logger log = LoggerFactory.getLogger(BridgeFetcher.class);
 
-    @Autowired
     private RecursiveLookupBridgeConfig cfg;
-
-    @Autowired
     private RemoteIdentityServerFetcher fetcher;
+
+    public BridgeFetcher(RecursiveLookupBridgeConfig cfg, RemoteIdentityServerFetcher fetcher) {
+        this.cfg = cfg;
+        this.fetcher = fetcher;
+    }
 
     @Override
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {

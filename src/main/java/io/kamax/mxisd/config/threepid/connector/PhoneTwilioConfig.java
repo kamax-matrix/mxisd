@@ -22,18 +22,14 @@ package io.kamax.mxisd.config.threepid.connector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties(prefix = PhoneTwilioConfig.NAMESPACE)
 public class PhoneTwilioConfig {
 
     static final String NAMESPACE = "threepid.medium.msisdn.connectors.twilio";
 
-    private Logger log = LoggerFactory.getLogger(PhoneTwilioConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(PhoneTwilioConfig.class);
 
     private String accountSid;
     private String authToken;

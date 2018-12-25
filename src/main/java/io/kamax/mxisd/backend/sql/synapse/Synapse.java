@@ -22,19 +22,15 @@ package io.kamax.mxisd.backend.sql.synapse;
 
 import io.kamax.mxisd.backend.sql.SqlConnectionPool;
 import io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Optional;
 
-@Component
 public class Synapse {
 
     private SqlConnectionPool pool;
 
-    @Autowired
     public Synapse(SynapseSqlProviderConfig sqlCfg) {
         this.pool = new SqlConnectionPool(sqlCfg);
     }

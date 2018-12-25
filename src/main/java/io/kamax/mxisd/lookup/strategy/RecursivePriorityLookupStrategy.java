@@ -21,18 +21,14 @@
 package io.kamax.mxisd.lookup.strategy;
 
 import edazdarevic.commons.net.CIDRUtils;
-import io.kamax.mxisd.config.BulkLookupConfig;
-import io.kamax.mxisd.config.RecursiveLookupConfig;
+import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.lookup.*;
 import io.kamax.mxisd.lookup.fetcher.IBridgeFetcher;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,38 +36,31 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 public class RecursivePriorityLookupStrategy implements LookupStrategy {
 
-    private Logger log = LoggerFactory.getLogger(RecursivePriorityLookupStrategy.class);
+    private transient final Logger log = LoggerFactory.getLogger(RecursivePriorityLookupStrategy.class);
 
-    private RecursiveLookupConfig cfg;
-    private BulkLookupConfig bulkCfg;
+    private MxisdConfig.Lookup cfg;
     private List<IThreePidProvider> providers;
     private IBridgeFetcher bridge;
 
     private List<CIDRUtils> allowedCidr = new ArrayList<>();
 
-    @Autowired
-    public RecursivePriorityLookupStrategy(RecursiveLookupConfig cfg, BulkLookupConfig bulkCfg, List<IThreePidProvider> providers, IBridgeFetcher bridge) {
+    public RecursivePriorityLookupStrategy(MxisdConfig.Lookup cfg, List<? extends IThreePidProvider> providers, IBridgeFetcher bridge) {
         this.cfg = cfg;
-        this.bulkCfg = bulkCfg;
         this.bridge = bridge;
         this.providers = providers.stream().filter(p -> {
             log.info("3PID Provider {} is enabled: {}", p.getClass().getSimpleName(), p.isEnabled());
             return p.isEnabled();
         }).collect(Collectors.toList());
-    }
 
-    @PostConstruct
-    private void build() throws UnknownHostException {
         try {
             log.info("Found {} providers", providers.size());
             providers.forEach(p -> log.info("\t- {}", p.getClass().getName()));
             providers.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority()));
 
-            log.info("Recursive lookup enabled: {}", cfg.isEnabled());
-            for (String cidr : cfg.getAllowedCidr()) {
+            log.info("Recursive lookup enabled: {}", cfg.getRecursive().isEnabled());
+            for (String cidr : cfg.getRecursive().getAllowedCidr()) {
                 log.info("{} is allowed for recursion", cidr);
                 allowedCidr.add(new CIDRUtils(cidr));
             }
@@ -84,7 +73,7 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
         boolean canRecurse = false;
 
         try {
-            if (cfg.isEnabled()) {
+            if (cfg.getRecursive().isEnabled()) {
                 log.debug("Checking {} CIDRs for recursion", allowedCidr.size());
                 for (CIDRUtils cidr : allowedCidr) {
                     if (cidr.isInRange(source)) {
@@ -170,10 +159,10 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
         }
 
         if (
-                cfg.getBridge() != null &&
-                        cfg.getBridge().getEnabled() &&
-                        (!cfg.getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))
-                ) {
+                cfg.getRecursive().getBridge() != null &&
+                        cfg.getRecursive().getBridge().getEnabled() &&
+                        (!cfg.getRecursive().getBridge().getRecursiveOnly() || isAllowedForRecursive(request.getRequester()))
+        ) {
             log.info("Using bridge failover for lookup");
             Optional<SingleLookupReply> lookupDataOpt = bridge.find(request);
             log.info("Found 3PID mapping: {medium: '{}', address: '{}', mxid: '{}'}",
@@ -197,7 +186,7 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
 
     @Override
     public List<ThreePidMapping> find(BulkLookupRequest request) {
-        if (!bulkCfg.getEnabled()) {
+        if (!cfg.getBulk().getEnabled()) {
             return Collections.emptyList();
         }
 

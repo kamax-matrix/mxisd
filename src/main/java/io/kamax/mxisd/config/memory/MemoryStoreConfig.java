@@ -20,17 +20,13 @@
 
 package io.kamax.mxisd.config.memory;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
+import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
-@ConfigurationProperties("memory")
 public class MemoryStoreConfig {
 
     private boolean enabled;
-    private List<MemoryIdentityConfig> identities;
+    private List<MemoryIdentityConfig> identities = new ArrayList<>();
 
     public boolean isEnabled() {
         return enabled;
@@ -46,6 +42,10 @@ public class MemoryStoreConfig {
 
     public void setIdentities(List<MemoryIdentityConfig> identities) {
         this.identities = identities;
+    }
+
+    public void build() {
+        // no-op
     }
 
 }

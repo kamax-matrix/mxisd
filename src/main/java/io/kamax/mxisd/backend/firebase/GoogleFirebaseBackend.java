@@ -35,7 +35,7 @@ import java.io.IOException;
 
 public class GoogleFirebaseBackend {
 
-    private Logger log = LoggerFactory.getLogger(GoogleFirebaseBackend.class);
+    private transient final Logger log = LoggerFactory.getLogger(GoogleFirebaseBackend.class);
 
     private boolean isEnabled;
     private FirebaseAuth fbAuth;

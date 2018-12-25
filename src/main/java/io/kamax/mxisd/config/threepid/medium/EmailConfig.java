@@ -26,17 +26,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@Configuration
-@ConfigurationProperties("threepid.medium.email")
 public class EmailConfig {
-
-    private Logger log = LoggerFactory.getLogger(EmailConfig.class);
 
     public static class Identity {
         private String from;
@@ -60,13 +53,14 @@ public class EmailConfig {
 
     }
 
+    private transient final Logger log = LoggerFactory.getLogger(EmailConfig.class);
+
     private String generator;
     private String connector;
 
     private MatrixConfig mxCfg;
     private Identity identity = new Identity();
 
-    @Autowired
     public EmailConfig(MatrixConfig mxCfg) {
         this.mxCfg = mxCfg;
     }

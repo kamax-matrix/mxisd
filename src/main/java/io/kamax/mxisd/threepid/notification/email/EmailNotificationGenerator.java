@@ -26,15 +26,11 @@ import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailTemplateConfig;
 import io.kamax.mxisd.threepid.notification.GenericTemplateNotificationGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class EmailNotificationGenerator extends GenericTemplateNotificationGenerator implements IEmailNotificationGenerator {
 
     private EmailConfig cfg;
 
-    @Autowired
     public EmailNotificationGenerator(EmailTemplateConfig templateCfg, EmailConfig cfg, MatrixConfig mxCfg, ServerConfig srvCfg) {
         super(mxCfg, srvCfg, templateCfg);
         this.cfg = cfg;

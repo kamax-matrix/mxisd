@@ -30,23 +30,22 @@ import io.kamax.mxisd.matrix.IdentityServerUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
-@Component
 class DnsLookupProvider implements IThreePidProvider {
 
-    private Logger log = LoggerFactory.getLogger(DnsLookupProvider.class);
+    private transient final Logger log = LoggerFactory.getLogger(DnsLookupProvider.class);
 
-    @Autowired
-    private MatrixConfig mxCfg;
-
-    @Autowired
+    private MatrixConfig cfg;
     private IRemoteIdentityServerFetcher fetcher;
+
+    public DnsLookupProvider(MatrixConfig cfg, IRemoteIdentityServerFetcher fetcher) {
+        this.cfg = cfg;
+        this.fetcher = fetcher;
+    }
 
     @Override
     public boolean isEnabled() {
@@ -74,7 +73,7 @@ class DnsLookupProvider implements IThreePidProvider {
 
     // TODO use caching mechanism
     private Optional<String> findIdentityServerForDomain(String domain) {
-        if (StringUtils.equals(mxCfg.getDomain(), domain)) {
+        if (StringUtils.equals(cfg.getDomain(), domain)) {
             log.info("We are authoritative for {}, no remote lookup", domain);
             return Optional.empty();
         }

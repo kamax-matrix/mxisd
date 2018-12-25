@@ -22,13 +22,9 @@ package io.kamax.mxisd.backend.sql.synapse;
 
 import io.kamax.mxisd.backend.sql.SqlProfileProvider;
 import io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SynapseSqlProfileProvider extends SqlProfileProvider {
 
-    @Autowired
     public SynapseSqlProfileProvider(SynapseSqlProviderConfig cfg) {
         super(cfg);
     }

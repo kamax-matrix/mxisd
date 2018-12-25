@@ -25,16 +25,12 @@ import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Configuration
-@ConfigurationProperties("matrix")
 public class MatrixConfig {
 
     public static class Identity {
@@ -57,10 +53,11 @@ public class MatrixConfig {
         }
     }
 
-    private Logger log = LoggerFactory.getLogger(MatrixConfig.class);
+    private transient final Logger log = LoggerFactory.getLogger(MatrixConfig.class);
 
     private String domain;
     private Identity identity = new Identity();
+    private ListenerConfig listener = new ListenerConfig();
 
     public String getDomain() {
         return domain;
@@ -76,6 +73,14 @@ public class MatrixConfig {
 
     public void setIdentity(Identity identity) {
         this.identity = identity;
+    }
+
+    public ListenerConfig getListener() {
+        return listener;
+    }
+
+    public void setListener(ListenerConfig listener) {
+        this.listener = listener;
     }
 
     @PostConstruct

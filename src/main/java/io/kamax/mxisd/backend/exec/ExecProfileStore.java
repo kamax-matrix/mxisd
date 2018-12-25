@@ -28,19 +28,15 @@ import io.kamax.mxisd.profile.JsonProfileRequest;
 import io.kamax.mxisd.profile.JsonProfileResult;
 import io.kamax.mxisd.profile.ProfileProvider;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Component
 public class ExecProfileStore extends ExecStore implements ProfileProvider {
 
     private ExecConfig.Profile cfg;
 
-    @Autowired
     public ExecProfileStore(ExecConfig cfg) {
         this(cfg.getProfile());
     }
