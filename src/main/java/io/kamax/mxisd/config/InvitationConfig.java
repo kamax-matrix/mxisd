@@ -32,8 +32,8 @@ public class InvitationConfig {
 
     public static class Resolution {
 
-        private boolean recursive;
-        private long timer;
+        private boolean recursive = true;
+        private long timer = 1;
 
         public boolean isRecursive() {
             return recursive;

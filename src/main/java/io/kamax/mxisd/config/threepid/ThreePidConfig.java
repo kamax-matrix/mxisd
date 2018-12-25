@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Kamax Sarl
+ * Copyright (C) 2018 Kamax Sàrl
  *
  * https://www.kamax.io/
  *
@@ -18,18 +18,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.config.threepid.medium;
+package io.kamax.mxisd.config.threepid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.gson.JsonObject;
+import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 
-public class PhoneConfig extends MediumConfig {
+import java.util.HashMap;
+import java.util.Map;
 
-    private transient final Logger log = LoggerFactory.getLogger(PhoneConfig.class);
+public class ThreePidConfig {
 
-    public PhoneConfig() {
-        setConnector("twilio");
-        setGenerator("template");
+    private Map<String, JsonObject> medium = new HashMap<>();
+
+    public ThreePidConfig() {
+        EmailConfig emailCfg = new EmailConfig();
+    }
+
+    public Map<String, JsonObject> getMedium() {
+        return medium;
+    }
+
+    public void setMedium(Map<String, JsonObject> medium) {
+        this.medium = medium;
+    }
+
+    public void build() {
+        // no-op
     }
 
 }

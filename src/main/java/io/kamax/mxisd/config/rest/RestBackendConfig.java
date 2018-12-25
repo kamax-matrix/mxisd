@@ -35,8 +35,8 @@ public class RestBackendConfig {
 
     public static class IdentityEndpoints {
 
-        private String single;
-        private String bulk;
+        private String single = "/_mxisd/backend/api/v1/identity/lookup/single";
+        private String bulk = "/_mxisd/backend/api/v1/identity/lookup/bulk";
 
         public String getSingle() {
             return single;
@@ -58,9 +58,9 @@ public class RestBackendConfig {
 
     public static class ProfileEndpoints {
 
-        private String displayName;
-        private String threepids;
-        private String roles;
+        private String displayName = "/_mxisd/backend/api/v1/profile/displayName";
+        private String threepids = "/_mxisd/backend/api/v1/profile/threepids";
+        private String roles = "/_mxisd/backend/api/v1/profile/roles";
 
         public String getDisplayName() {
             return displayName;
@@ -90,8 +90,8 @@ public class RestBackendConfig {
 
     public static class Endpoints {
 
-        private String auth;
-        private String directory;
+        private String auth = "/_mxisd/backend/api/v1/auth/login";
+        private String directory = "/_mxisd/backend/api/v1/directory/user/search";
         private IdentityEndpoints identity = new IdentityEndpoints();
         private ProfileEndpoints profile;
 

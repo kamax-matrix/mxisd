@@ -20,18 +20,17 @@
 
 package io.kamax.mxisd.config.threepid.medium;
 
-import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 
-public class EmailConfig {
+public class EmailConfig extends MediumConfig {
 
     public static class Identity {
+
         private String from;
         private String name;
 
@@ -55,34 +54,15 @@ public class EmailConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(EmailConfig.class);
 
-    private String generator;
-    private String connector;
-
-    private MatrixConfig mxCfg;
     private Identity identity = new Identity();
 
-    public EmailConfig(MatrixConfig mxCfg) {
-        this.mxCfg = mxCfg;
+    public EmailConfig() {
+        setConnector("smtp");
+        setGenerator("template");
     }
 
     public Identity getIdentity() {
         return identity;
-    }
-
-    public String getGenerator() {
-        return generator;
-    }
-
-    public void setGenerator(String generator) {
-        this.generator = generator;
-    }
-
-    public String getConnector() {
-        return connector;
-    }
-
-    public void setConnector(String connector) {
-        this.connector = connector;
     }
 
     @PostConstruct
@@ -97,12 +77,8 @@ public class EmailConfig {
             throw new ConfigurationException("connector");
         }
 
-        log.info("From: {}", identity.getFrom());
-
-        if (StringUtils.isBlank(identity.getName())) {
-            identity.setName(WordUtils.capitalize(mxCfg.getDomain()) + " Identity Server");
-        }
-        log.info("Name: {}", identity.getName());
+        log.info("From: {}", getIdentity().getFrom());
+        log.info("Name: {}", getIdentity().getName());
         log.info("Generator: {}", getGenerator());
         log.info("Connector: {}", getConnector());
     }

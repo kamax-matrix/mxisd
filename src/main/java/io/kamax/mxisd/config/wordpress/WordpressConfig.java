@@ -24,6 +24,7 @@ import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.Map;
 
 public class WordpressConfig {
@@ -76,8 +77,14 @@ public class WordpressConfig {
 
     public static class Query {
 
-        private Map<String, String> threepid;
-        private Map<String, String> directory;
+        private Map<String, String> threepid = new HashMap<>();
+        private Map<String, String> directory = new HashMap<>();
+
+        public Query() {
+            threepid.put("email", "SELECT user_login as uid FROM %TABLE_PREFIX%users WHERE user_email = ?");
+            directory.put("name", "SELECT DISTINCT user_login, display_name FROM %TABLE_PREFIX%users u LEFT JOIN %TABLE_PREFIX%usermeta m ON m.user_id = u.id WHERE u.display_name LIKE ? OR (m.meta_key = 'nickname' AND m.meta_value = ?) OR (m.meta_key = 'first_name' AND m.meta_value = ?) OR (m.meta_key = 'last_name' AND m.meta_value = ?)");
+            directory.put("threepid", "SELECT DISTINCT user_login, display_name FROM %TABLE_PREFIX%users WHERE user_email LIKE ?");
+        }
 
         public Map<String, String> getThreepid() {
             return threepid;
@@ -95,13 +102,17 @@ public class WordpressConfig {
             this.directory = directory;
         }
 
+        public void build() {
+            // FIXME replace table prefix
+        }
+
     }
 
     public static class Sql {
 
-        private String type;
+        private String type = "mysql";
         private String connection;
-        private String tablePrefix;
+        private String tablePrefix = "wp_";
         private Query query;
 
         public String getType() {

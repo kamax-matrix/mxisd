@@ -96,6 +96,20 @@ public class ViewConfig {
         private Local localRemote = new Local();
         private Remote remote = new Remote();
 
+        public Session() {
+            local.onTokenSubmit.success = "session/local/tokenSubmitSuccess";
+            local.onTokenSubmit.failure = "session/local/tokenSubmitFailure";
+
+            localRemote.onTokenSubmit.success = "session/localRemote/tokenSubmitSuccess";
+            localRemote.onTokenSubmit.failure = "session/local/tokenSubmitFailure";
+
+            remote.onRequest.success = "session/remote/requestSuccess";
+            remote.onRequest.failure = "session/remote/requestFailure";
+
+            remote.onCheck.success = "session/remote/checkSuccess";
+            remote.onCheck.failure = "session/remote/checkFailure";
+        }
+
         public Local getLocal() {
             return local;
         }

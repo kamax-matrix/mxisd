@@ -20,11 +20,11 @@
 
 package io.kamax.mxisd.invitation;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.crypto.SignatureManager;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.InvitationConfig;
 import io.kamax.mxisd.dns.FederationDnsOverwrite;
 import io.kamax.mxisd.exception.BadRequestException;
@@ -51,8 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.*;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -76,28 +74,29 @@ public class InvitationManager {
     private NotificationManager notifMgr;
 
     private CloseableHttpClient client;
-    private Gson gson;
     private Timer refreshTimer;
 
     private Map<String, IThreePidInviteReply> invitations = new ConcurrentHashMap<>();
 
-    public InvitationManager(InvitationConfig cfg, IStorage storage, LookupStrategy lookupMgr, SignatureManager signMgr, FederationDnsOverwrite dns, NotificationManager notifMgr) {
+    public InvitationManager(
+            InvitationConfig cfg,
+            IStorage storage,
+            LookupStrategy lookupMgr,
+            SignatureManager signMgr,
+            FederationDnsOverwrite dns,
+            NotificationManager notifMgr
+    ) {
         this.cfg = cfg;
         this.storage = storage;
         this.lookupMgr = lookupMgr;
         this.signMgr = signMgr;
         this.dns = dns;
         this.notifMgr = notifMgr;
-    }
-
-    @PostConstruct
-    private void postConstruct() {
-        gson = new Gson();
 
         log.info("Loading saved invites");
         Collection<ThreePidInviteIO> ioList = storage.getInvites();
         ioList.forEach(io -> {
-            log.info("Processing invite {}", gson.toJson(io));
+            log.info("Processing invite {}", GsonUtil.get().toJson(io));
             ThreePidInvite invite = new ThreePidInvite(
                     MatrixID.asAcceptable(io.getSender()),
                     io.getMedium(),
@@ -133,12 +132,11 @@ public class InvitationManager {
                 }
             }
         }, 5000L, TimeUnit.MILLISECONDS.convert(cfg.getResolution().getTimer(), TimeUnit.MINUTES));
-    }
 
-    @PreDestroy
-    private void preDestroy() {
-        refreshTimer.cancel();
-        ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.MINUTES);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            refreshTimer.cancel();
+            ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.MINUTES);
+        }));
     }
 
     private String getId(IThreePidInvite invite) {

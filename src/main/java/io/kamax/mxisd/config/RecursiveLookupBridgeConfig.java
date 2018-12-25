@@ -32,7 +32,7 @@ public class RecursiveLookupBridgeConfig {
     private transient final Logger log = LoggerFactory.getLogger(RecursiveLookupBridgeConfig.class);
 
     private boolean enabled;
-    private boolean recursiveOnly;
+    private boolean recursiveOnly = true;
     private String server;
     private Map<String, String> mappings = new HashMap<>();
 

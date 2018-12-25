@@ -29,6 +29,13 @@ public class EmailTemplateConfig extends GenericTemplateConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(EmailTemplateConfig.class);
 
+    public EmailTemplateConfig() {
+        setInvite("classpath:threepids/email/invite-template.eml");
+        getGeneric().put("matrixId", "classpath:threepids/email/mxid-template.eml");
+        getSession().getValidation().setLocal("classpath:threepids/email/validate-local-template.eml");
+        getSession().getValidation().setRemote("classpath:threepids/email/validate-remote-template.eml");
+    }
+
     @PostConstruct
     public void build() {
         log.info("--- E-mail Generator templates config ---");

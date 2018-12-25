@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.config;
 
-import com.google.gson.Gson;
+import io.kamax.matrix.json.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,6 +127,19 @@ public class SessionConfig {
 
         }
 
+        public Policy() {
+            validation.enabled = true;
+            validation.forLocal.enabled = true;
+            validation.forLocal.toLocal = true;
+            validation.forLocal.toRemote.enabled = true;
+            validation.forLocal.toRemote.server = "matrix-org";
+
+            validation.forRemote.enabled = true;
+            validation.forRemote.toLocal = false;
+            validation.forRemote.toRemote.enabled = true;
+            validation.forRemote.toRemote.server = "matrix-org";
+        }
+
         private PolicyTemplate validation = new PolicyTemplate();
 
         public PolicyTemplate getValidation() {
@@ -152,7 +165,7 @@ public class SessionConfig {
     @PostConstruct
     public void build() {
         log.info("--- Session config ---");
-        log.info("Global Policy: {}", new Gson().toJson(policy));
+        log.info("Global Policy: {}", GsonUtil.get().toJson(policy));
     }
 
 }

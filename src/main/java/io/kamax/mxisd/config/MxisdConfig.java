@@ -20,21 +20,18 @@
 
 package io.kamax.mxisd.config;
 
-import com.google.gson.JsonObject;
 import io.kamax.mxisd.config.ldap.generic.GenericLdapConfig;
 import io.kamax.mxisd.config.ldap.netiq.NetIqLdapConfig;
 import io.kamax.mxisd.config.memory.MemoryStoreConfig;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
 import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
 import io.kamax.mxisd.config.sql.synapse.SynapseSqlProviderConfig;
+import io.kamax.mxisd.config.threepid.ThreePidConfig;
 import io.kamax.mxisd.config.threepid.notification.NotificationConfig;
 import io.kamax.mxisd.config.wordpress.WordpressConfig;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MxisdConfig {
 
@@ -50,6 +47,10 @@ public class MxisdConfig {
 
         public void setOverwrite(DnsOverwriteConfig overwrite) {
             this.overwrite = overwrite;
+        }
+
+        public void build() {
+            overwrite.build();
         }
 
     }
@@ -82,20 +83,6 @@ public class MxisdConfig {
 
     }
 
-    public static class Threepid {
-
-        private Map<String, JsonObject> medium = new HashMap<>();
-
-        public Map<String, JsonObject> getMedium() {
-            return medium;
-        }
-
-        public void setMedium(Map<String, JsonObject> medium) {
-            this.medium = medium;
-        }
-
-    }
-
     private AuthenticationConfig auth = new AuthenticationConfig();
     private DirectoryConfig directory = new DirectoryConfig();
     private Dns dns = new Dns();
@@ -116,6 +103,7 @@ public class MxisdConfig {
     private RestBackendConfig rest = new RestBackendConfig();
     private GenericSqlProviderConfig sql = new GenericSqlProviderConfig();
     private SynapseSqlProviderConfig synapseSql = new SynapseSqlProviderConfig();
+    private ThreePidConfig threepid = new ThreePidConfig();
     private ViewConfig view = new ViewConfig();
     private WordpressConfig wordpress = new WordpressConfig();
 
@@ -279,6 +267,14 @@ public class MxisdConfig {
         this.synapseSql = synapseSql;
     }
 
+    public ThreePidConfig getThreepid() {
+        return threepid;
+    }
+
+    public void setThreepid(ThreePidConfig threepid) {
+        this.threepid = threepid;
+    }
+
     public ViewConfig getView() {
         return view;
     }
@@ -320,6 +316,7 @@ public class MxisdConfig {
         getSql().build();
         getStorage().build();
         getSynapseSql().build();
+        getThreepid().build();
         getView().build();
         getWordpress().build();
 

@@ -29,6 +29,13 @@ public class PhoneSmsTemplateConfig extends GenericTemplateConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(EmailTemplateConfig.class);
 
+    public PhoneSmsTemplateConfig() {
+        setInvite("classpath:threepids/sms/invite-template.txt");
+        getGeneric().put("matrixId", "classpath:threepids/email/mxid-template.eml");
+        getSession().getValidation().setLocal("classpath:threepids/sms/validate-local-template.txt");
+        getSession().getValidation().setRemote("classpath:threepids/sms/validate-remote-template.txt");
+    }
+
     @PostConstruct
     public void build() {
         log.info("--- SMS Generator templates config ---");

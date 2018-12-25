@@ -25,9 +25,17 @@ import java.util.List;
 
 public class RecursiveLookupConfig {
 
-    private boolean enabled;
+    private boolean enabled = true;
     private List<String> allowedCidr = new ArrayList<>();
     private RecursiveLookupBridgeConfig bridge = new RecursiveLookupBridgeConfig();
+
+    public RecursiveLookupConfig() {
+        allowedCidr.add("127.0.0.0/8");
+        allowedCidr.add("10.0.0.0/8");
+        allowedCidr.add("172.16.0.0/12");
+        allowedCidr.add("192.168.0.0/16");
+        allowedCidr.add("::1/128");
+    }
 
     public boolean isEnabled() {
         return enabled;
@@ -54,7 +62,7 @@ public class RecursiveLookupConfig {
     }
 
     public void build() {
-        // no-op
+        bridge.build();
     }
 
 }

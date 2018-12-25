@@ -97,6 +97,14 @@ public abstract class SqlConfig {
         private Boolean enabled;
         private Type query = new Type();
 
+        public Directory() {
+            query.getName().setType("localpart");
+            query.getName().setType("SELECT 1");
+
+            query.getThreepid().setType("localpart");
+            query.getThreepid().setType("SELECT 1");
+        }
+
         public Boolean isEnabled() {
             return enabled;
         }
@@ -118,8 +126,8 @@ public abstract class SqlConfig {
     public static class Identity {
 
         private Boolean enabled;
-        private String type;
-        private String query;
+        private String type = "mxid";
+        private String query = "SELECT user_id AS uid FROM user_threepids WHERE medium = ? AND address = ?";
         private Map<String, String> medium = new HashMap<>();
 
         public Boolean isEnabled() {
@@ -172,7 +180,7 @@ public abstract class SqlConfig {
 
     public static class ProfileThreepids {
 
-        private String query;
+        private String query = "SELECT medium, address FROM user_threepids WHERE user_id = ?";
 
         public String getQuery() {
             return query;
@@ -217,7 +225,7 @@ public abstract class SqlConfig {
     }
 
     private boolean enabled;
-    private String type;
+    private String type = "sqlite";
     private String connection;
     private Auth auth = new Auth();
     private Directory directory = new Directory();

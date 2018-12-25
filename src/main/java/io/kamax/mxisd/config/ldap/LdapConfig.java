@@ -59,8 +59,29 @@ public abstract class LdapConfig {
     public static class Attribute {
 
         private UID uid;
-        private String name;
+        private String name = "displayName";
         private Map<String, List<String>> threepid = new HashMap<>();
+
+        public Attribute() {
+            uid = new UID();
+            uid.setType("uid");
+            uid.setValue("saMAccountName");
+
+            threepid.put("email", Arrays.asList(
+                    "mailPrimaryAddress",
+                    "mail",
+                    "otherMailbox"
+            ));
+
+            threepid.put("msisdn", Arrays.asList(
+                    "telephoneNumber",
+                    "mobile",
+                    "homePhone",
+                    "otherTelephone",
+                    "otherMobile",
+                    "otherHomePhone"
+            ));
+        }
 
         public UID getUid() {
             return uid;
@@ -104,9 +125,9 @@ public abstract class LdapConfig {
 
     public static class Connection {
 
-        private boolean tls;
+        private boolean tls = false;
         private String host;
-        private int port;
+        private int port = 389;
         private String bindDn;
         private String bindPassword;
         private String baseDn;
@@ -212,7 +233,7 @@ public abstract class LdapConfig {
     public static class Identity {
 
         private String filter;
-        private String token;
+        private String token = "%3pid";
         private Map<String, String> medium = new HashMap<>();
 
         public String getFilter() {

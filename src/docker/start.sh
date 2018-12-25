@@ -22,4 +22,4 @@ if [[ -n "$CONF_FILE_PATH" ]] && [ ! -f "$CONF_FILE_PATH" ]; then
     echo
 fi
 
-exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.config.location=/etc/mxisd/ -Dspring.config.name=mxisd -jar /mxisd.jar
+exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /mxisd.jar

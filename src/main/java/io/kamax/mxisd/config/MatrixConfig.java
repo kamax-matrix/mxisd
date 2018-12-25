@@ -20,13 +20,14 @@
 
 package io.kamax.mxisd.config;
 
-import com.google.gson.Gson;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,12 @@ import java.util.Map;
 public class MatrixConfig {
 
     public static class Identity {
+
         private Map<String, List<String>> servers = new HashMap<>();
+
+        public Identity() {
+            servers.put("matrix-org", Collections.singletonList("https://matrix.org"));
+        }
 
         public Map<String, List<String>> getServers() {
             return servers;
@@ -51,6 +57,7 @@ public class MatrixConfig {
 
             return servers.get(label);
         }
+
     }
 
     private transient final Logger log = LoggerFactory.getLogger(MatrixConfig.class);
@@ -93,7 +100,7 @@ public class MatrixConfig {
 
         log.info("Domain: {}", getDomain());
         log.info("Identity:");
-        log.info("\tServers: {}", new Gson().toJson(identity.getServers()));
+        log.info("\tServers: {}", GsonUtil.get().toJson(identity.getServers()));
     }
 
 }

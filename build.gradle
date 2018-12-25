@@ -64,7 +64,7 @@ String gitVersion() {
         commandLine = ['git', 'describe', '--tags', '--always', '--dirty']
         standardOutput = out
     }
-    return out.toString().replace(System.lineSeparator(), '');
+    return out.toString().replace(System.lineSeparator(), '')
 }
 
 buildscript {
@@ -84,6 +84,9 @@ repositories {
 }
 
 dependencies {
+    // Logging
+    compile 'org.slf4j:slf4j-simple:1.7.25'
+    
     // Easy file management
     compile 'commons-io:commons-io:2.5'
     
@@ -92,6 +95,9 @@ dependencies {
 
     // Matrix Java SDK
     compile 'io.kamax:matrix-java-sdk:0.0.14-8-g0e57ec6'
+
+    // ORMLite
+    compile 'com.j256.ormlite:ormlite-jdbc:5.0'
 
     // ed25519 handling
     compile 'net.i2p.crypto:eddsa:0.1.0'
@@ -114,9 +120,6 @@ dependencies {
 
     // Google Firebase Authentication backend
     compile 'com.google.firebase:firebase-admin:5.3.0'
-
-    // ORMLite
-    compile 'com.j256.ormlite:ormlite-jdbc:5.0'
 
     // Connection Pool
     compile 'com.mchange:c3p0:0.9.5.2'
@@ -153,21 +156,10 @@ shadowJar {
     version = null
 }
 
-processResources {
+task debBuild(dependsOn: shadowJar) {
     doLast {
-        copy {
-            from('build/resources/main/application.yaml') {
-                rename 'application.yaml', 'mxisd.yaml'
-            }
-            into 'build/resources/main'
-        }
-    }
-}
-
-task buildDeb(dependsOn: build) {
-    doLast {
-        def v = mxisdVersion()
-        println "Version for package: ${v}"
+        String debVersion = mxisdVersion()
+        println "Version for package: ${debVersion}"
         mkdir distDir
         mkdir debBuildBasePath
         mkdir "${debBuildBasePath}/DEBIAN"
@@ -193,13 +185,13 @@ task buildDeb(dependsOn: build) {
             into debBuildConfPath
         }
 
-        ant.replaceregexp(
+        ant.replaceregexp( // FIXME adapt to new config format
                 file: "${debBuildConfPath}/${debConfFileName}",
                 match: "key.path:(.*)",
                 replace: "key.path: '${debDataPath}/signing.key'"
         )
 
-        ant.replaceregexp(
+        ant.replaceregexp( // FIXME adapt to new config format
                 file: "${debBuildConfPath}/${debConfFileName}",
                 match: "storage.provider.sqlite.database:(.*)",
                 replace: "storage.provider.sqlite.database: '${debDataPath}/mxisd.db'"
@@ -213,7 +205,7 @@ task buildDeb(dependsOn: build) {
         ant.replace(
                 file: "${debBuildDebianPath}/control",
                 token: 'Version: 0',
-                value: "Version: ${v}"
+                value: "Version: ${debVersion}"
         )
 
         ant.replace(
@@ -249,7 +241,7 @@ task buildDeb(dependsOn: build) {
     }
 }
 
-task dockerBuild(type: Exec, dependsOn: build) {
+task dockerBuild(type: Exec, dependsOn: shadowJar) {
     commandLine 'docker', 'build', '-t', dockerImageTag, project.rootDir
 
     doLast {

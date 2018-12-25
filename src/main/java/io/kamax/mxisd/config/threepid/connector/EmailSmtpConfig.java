@@ -31,8 +31,8 @@ public class EmailSmtpConfig {
     private transient final Logger log = LoggerFactory.getLogger(EmailSmtpConfig.class);
 
     private String host;
-    private int port;
-    private int tls;
+    private int port = 587;
+    private int tls = 1;
     private String login;
     private String password;
 
