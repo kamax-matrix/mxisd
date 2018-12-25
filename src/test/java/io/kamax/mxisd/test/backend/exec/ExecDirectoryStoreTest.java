@@ -18,10 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec;
+package io.kamax.mxisd.test.backend.exec;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.backend.exec.ExecDirectoryStore;
+import io.kamax.mxisd.backend.exec.ExecStore;
 import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;

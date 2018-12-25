@@ -18,11 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec;
+package io.kamax.mxisd.test.backend.exec;
 
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.UserIdType;
+import io.kamax.mxisd.backend.exec.ExecAuthResult;
+import io.kamax.mxisd.backend.exec.ExecAuthStore;
 import io.kamax.mxisd.config.ExecConfig;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;

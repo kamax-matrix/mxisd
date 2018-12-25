@@ -18,10 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec.auth.input;
+package io.kamax.mxisd.test.backend.exec.auth.input;
 
-import io.kamax.mxisd.backend.exec.ExecAuthStoreTest;
 import io.kamax.mxisd.backend.exec.ExecStore;
+import io.kamax.mxisd.test.backend.exec.ExecAuthStoreTest;
 
 public class ExecAuthInputMultilinesTest extends ExecAuthStoreTest {
 

@@ -43,16 +43,25 @@ public class LdapAuthTest {
     private static InMemoryDirectoryServer ds;
     private static ArrayList<String> dnList = new ArrayList<>();
 
+    private static String domain = "example.org";
+    private static String host = "localhost";
+    private static String mxisdCn = "cn=mxisd";
+    private static String mxisdPw = "mxisd";
+    private static String idType = "uid";
+    private static String idAttribute = "saMAccountName";
+    private static String userId = "john";
+    private static String userPw = "doe";
+
     @BeforeClass
     public static void beforeClass() throws LDAPException {
         dnList.add("dc=1,dc=mxisd,dc=example,dc=org");
         dnList.add("dc=2,dc=mxisd,dc=example,dc=org");
         dnList.add("dc=3,dc=mxisd,dc=example,dc=org");
 
-        InMemoryListenerConfig lCfg = InMemoryListenerConfig.createLDAPConfig("localhost", 65001);
+        InMemoryListenerConfig lCfg = InMemoryListenerConfig.createLDAPConfig(host, 65001);
         InMemoryDirectoryServerConfig config =
                 new InMemoryDirectoryServerConfig(dnList.get(0), dnList.get(1), dnList.get(2));
-        config.addAdditionalBindCredentials("cn=mxisd", "mxisd");
+        config.addAdditionalBindCredentials(mxisdCn, mxisdPw);
         config.setListenerConfigs(lCfg);
 
         ds = new InMemoryDirectoryServer(config);
@@ -67,48 +76,48 @@ public class LdapAuthTest {
     @Test
     public void singleDn() {
         MatrixConfig mxCfg = new MatrixConfig();
-        mxCfg.setDomain("example.org");
+        mxCfg.setDomain(domain);
         mxCfg.build();
 
         LdapConfig cfg = new GenericLdapConfig();
-        cfg.getConnection().setHost("localhost");
+        cfg.getConnection().setHost(host);
         cfg.getConnection().setPort(65001);
         cfg.getConnection().setBaseDn(dnList.get(0));
-        cfg.getConnection().setBindDn("cn=mxisd");
-        cfg.getConnection().setBindPassword("mxisd");
+        cfg.getConnection().setBindDn(mxisdCn);
+        cfg.getConnection().setBindPassword(mxisdPw);
 
         LdapConfig.UID uid = new LdapConfig.UID();
-        uid.setType("uid");
-        uid.setValue("saMAccountName");
+        uid.setType(idType);
+        uid.setValue(idAttribute);
         cfg.getAttribute().setUid(uid);
         cfg.build();
 
         LdapAuthProvider p = new LdapAuthProvider(cfg, mxCfg);
-        BackendAuthResult result = p.authenticate(MatrixID.from("john", "example.org").valid(), "doe");
+        BackendAuthResult result = p.authenticate(MatrixID.from(userId, domain).valid(), userPw);
         assertFalse(result.isSuccess());
     }
 
     @Test
     public void multiDNs() {
         MatrixConfig mxCfg = new MatrixConfig();
-        mxCfg.setDomain("example.org");
+        mxCfg.setDomain(domain);
         mxCfg.build();
 
         LdapConfig cfg = new GenericLdapConfig();
-        cfg.getConnection().setHost("localhost");
+        cfg.getConnection().setHost(host);
         cfg.getConnection().setPort(65001);
         cfg.getConnection().setBaseDNs(dnList);
-        cfg.getConnection().setBindDn("cn=mxisd");
-        cfg.getConnection().setBindPassword("mxisd");
+        cfg.getConnection().setBindDn(mxisdCn);
+        cfg.getConnection().setBindPassword(mxisdPw);
 
         LdapConfig.UID uid = new LdapConfig.UID();
-        uid.setType("uid");
-        uid.setValue("saMAccountName");
+        uid.setType(idType);
+        uid.setValue(idAttribute);
         cfg.getAttribute().setUid(uid);
         cfg.build();
 
         LdapAuthProvider p = new LdapAuthProvider(cfg, mxCfg);
-        BackendAuthResult result = p.authenticate(MatrixID.from("john", "example.org").valid(), "doe");
+        BackendAuthResult result = p.authenticate(MatrixID.from(userId, domain).valid(), userPw);
         assertFalse(result.isSuccess());
     }
 

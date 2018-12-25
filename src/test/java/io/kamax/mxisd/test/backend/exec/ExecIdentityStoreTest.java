@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.exec;
+package io.kamax.mxisd.test.backend.exec;
 
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
@@ -26,6 +26,8 @@ import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.UserID;
 import io.kamax.mxisd.UserIdType;
+import io.kamax.mxisd.backend.exec.ExecIdentityStore;
+import io.kamax.mxisd.backend.exec.ExecStore;
 import io.kamax.mxisd.backend.rest.LookupSingleResponseJson;
 import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.exception.InternalServerError;

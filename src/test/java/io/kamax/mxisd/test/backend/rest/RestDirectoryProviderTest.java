@@ -18,14 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.backend.rest;
+package io.kamax.mxisd.test.backend.rest;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import io.kamax.matrix.MatrixID;
+import io.kamax.mxisd.backend.rest.RestDirectoryProvider;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.entity.ContentType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -81,7 +83,7 @@ public class RestDirectoryProviderTest {
     public void byNameFound() {
         stubFor(post(urlEqualTo(endpoint))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
                         .withBody(byNameResponse)
                 )
         );
@@ -96,7 +98,7 @@ public class RestDirectoryProviderTest {
         assertTrue(StringUtils.equals(MatrixID.asAcceptable(byNameId, domain).getId(), entry.getUserId()));
 
         verify(postRequestedFor(urlMatching(endpoint))
-                .withHeader("Content-Type", containing("application/json"))
+                .withHeader("Content-Type", containing(ContentType.APPLICATION_JSON.getMimeType()))
                 .withRequestBody(equalTo(byNameRequest))
         );
     }
@@ -105,7 +107,7 @@ public class RestDirectoryProviderTest {
     public void byNameNotFound() {
         stubFor(post(urlEqualTo(endpoint))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
                         .withBody(byNameEmptyResponse)
                 )
         );
@@ -115,7 +117,7 @@ public class RestDirectoryProviderTest {
         assertTrue(result.getResults().isEmpty());
 
         verify(postRequestedFor(urlMatching(endpoint))
-                .withHeader("Content-Type", containing("application/json"))
+                .withHeader("Content-Type", containing(ContentType.APPLICATION_JSON.getMimeType()))
                 .withRequestBody(equalTo(byNameRequest))
         );
     }
@@ -124,7 +126,7 @@ public class RestDirectoryProviderTest {
     public void byThreepidFound() {
         stubFor(post(urlEqualTo(endpoint))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
                         .withBody(new String(byThreepidResponse.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8))
                 )
         );
@@ -139,7 +141,7 @@ public class RestDirectoryProviderTest {
         assertTrue(StringUtils.equals(MatrixID.asAcceptable(byThreepidId, domain).getId(), entry.getUserId()));
 
         verify(postRequestedFor(urlMatching(endpoint))
-                .withHeader("Content-Type", containing("application/json"))
+                .withHeader("Content-Type", containing(ContentType.APPLICATION_JSON.getMimeType()))
                 .withRequestBody(equalTo(byThreepidRequest))
         );
     }
@@ -148,7 +150,7 @@ public class RestDirectoryProviderTest {
     public void byThreepidNotFound() {
         stubFor(post(urlEqualTo(endpoint))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
                         .withBody(byThreepidEmptyResponse)
                 )
         );
@@ -158,7 +160,7 @@ public class RestDirectoryProviderTest {
         assertTrue(result.getResults().isEmpty());
 
         verify(postRequestedFor(urlMatching(endpoint))
-                .withHeader("Content-Type", containing("application/json"))
+                .withHeader("Content-Type", containing(ContentType.APPLICATION_JSON.getMimeType()))
                 .withRequestBody(equalTo(byThreepidRequest))
         );
     }

@@ -1,13 +1,15 @@
-package io.kamax.mxisd.backend.rest;
+package io.kamax.mxisd.test.backend.rest;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.backend.rest.RestThreePidProvider;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.entity.ContentType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -78,7 +81,7 @@ public class RestThreePidProviderTest {
     public void lookupSingleFound() {
         stubFor(post(urlEqualTo(lookupSinglePath))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
                         .withBody(lookupSingleFoundBody)
                 )
         );
@@ -91,7 +94,7 @@ public class RestThreePidProviderTest {
         });
 
         verify(postRequestedFor(urlMatching("/lookup/single"))
-                .withHeader("Content-Type", containing("application/json"))
+                .withHeader("Content-Type", containing(ContentType.APPLICATION_JSON.getMimeType()))
                 .withRequestBody(equalTo(lookupSingleRequestBody))
         );
     }
@@ -100,7 +103,7 @@ public class RestThreePidProviderTest {
     public void lookupSingleNotFound() {
         stubFor(post(urlEqualTo(lookupSinglePath))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
                         .withBody(lookupSingleNotFoundBody)
                 )
         );
@@ -109,7 +112,7 @@ public class RestThreePidProviderTest {
         assertTrue(!rep.isPresent());
 
         verify(postRequestedFor(urlMatching("/lookup/single"))
-                .withHeader("Content-Type", containing("application/json"))
+                .withHeader("Content-Type", containing(ContentType.APPLICATION_JSON.getMimeType()))
                 .withRequestBody(equalTo(lookupSingleRequestBody))
         );
     }
@@ -118,14 +121,14 @@ public class RestThreePidProviderTest {
     public void lookupBulkFound() {
         stubFor(post(urlEqualTo(lookupBulkPath))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
                         .withBody(lookupBulkFoundBody)
                 )
         );
 
         List<ThreePidMapping> mappings = p.populate(lookupBulkList);
         assertNotNull(mappings);
-        assertTrue(mappings.size() == 2);
+        assertEquals(2, mappings.size());
         assertTrue(StringUtils.equals(mappings.get(0).getMxid(), "@john:example.org"));
         assertTrue(StringUtils.equals(mappings.get(1).getMxid(), "@jane:example.org"));
     }
@@ -134,14 +137,14 @@ public class RestThreePidProviderTest {
     public void lookupBulkNotFound() {
         stubFor(post(urlEqualTo(lookupBulkPath))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())
                         .withBody(lookupBulkNotFoundBody)
                 )
         );
 
         List<ThreePidMapping> mappings = p.populate(lookupBulkList);
         assertNotNull(mappings);
-        assertTrue(mappings.size() == 0);
+        assertEquals(0, mappings.size());
     }
 
 }
