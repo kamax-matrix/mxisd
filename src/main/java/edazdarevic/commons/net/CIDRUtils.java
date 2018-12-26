@@ -37,13 +37,13 @@ import java.util.List;
  * both IPv4 and IPv6.
  */
 public class CIDRUtils {
+
     private final String cidr;
 
     private InetAddress inetAddress;
     private InetAddress startAddress;
     private InetAddress endAddress;
     private final int prefixLength;
-
 
     public CIDRUtils(String cidr) throws UnknownHostException {
 
@@ -66,7 +66,6 @@ public class CIDRUtils {
 
 
     private void calculate() throws UnknownHostException {
-
         ByteBuffer maskBuffer;
         int targetSize;
         if (inetAddress.getAddress().length == 4) {
@@ -120,12 +119,7 @@ public class CIDRUtils {
     }
 
     public String getNetworkAddress() {
-
         return this.startAddress.getHostAddress();
-    }
-
-    public String getBroadcastAddress() {
-        return this.endAddress.getHostAddress();
     }
 
     public boolean isInRange(String ipAddress) throws UnknownHostException {
@@ -139,4 +133,5 @@ public class CIDRUtils {
 
         return (st == -1 || st == 0) && (te == -1 || te == 0);
     }
+
 }
