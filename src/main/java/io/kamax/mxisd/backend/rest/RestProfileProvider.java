@@ -55,11 +55,6 @@ public class RestProfileProvider extends RestProvider implements ProfileProvider
         super(cfg);
     }
 
-    @Override
-    public boolean isEnabled() {
-        return cfg.isEnabled() && cfg.getEndpoints().getProfile().isPresent();
-    }
-
     private <T> Optional<T> doRequest(
             _MatrixID userId,
             Function<RestBackendConfig.ProfileEndpoints, Optional<String>> endpoint,

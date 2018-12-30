@@ -55,11 +55,6 @@ public abstract class SqlThreePidProvider implements IThreePidProvider {
     }
 
     @Override
-    public boolean isEnabled() {
-        return cfg.isEnabled();
-    }
-
-    @Override
     public boolean isLocal() {
         return true;
     }

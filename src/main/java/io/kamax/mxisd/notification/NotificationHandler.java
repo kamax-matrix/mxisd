@@ -18,16 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.directory;
+package io.kamax.mxisd.notification;
 
-import io.kamax.mxisd.http.io.UserDirectorySearchResult;
+import io.kamax.mxisd.as.IMatrixIdInvite;
+import io.kamax.mxisd.invitation.IThreePidInviteReply;
+import io.kamax.mxisd.threepid.session.IThreePidSession;
 
-public interface IDirectoryProvider {
+public interface NotificationHandler {
 
-    boolean isEnabled();
+    String getId();
 
-    UserDirectorySearchResult searchByDisplayName(String query);
+    String getMedium();
 
-    UserDirectorySearchResult searchBy3pid(String query);
+    void sendForInvite(IMatrixIdInvite invite);
+
+    void sendForReply(IThreePidInviteReply invite);
+
+    void sendForValidation(IThreePidSession session);
+
+    void sendForRemoteValidation(IThreePidSession session);
 
 }

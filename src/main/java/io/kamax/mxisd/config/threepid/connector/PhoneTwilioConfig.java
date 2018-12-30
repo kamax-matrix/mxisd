@@ -23,16 +23,12 @@ package io.kamax.mxisd.config.threepid.connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 public class PhoneTwilioConfig {
-
-    static final String NAMESPACE = "threepid.medium.msisdn.connectors.twilio";
 
     private transient final Logger log = LoggerFactory.getLogger(PhoneTwilioConfig.class);
 
-    private String accountSid;
-    private String authToken;
+    private String accountSid = "";
+    private String authToken = "";
     private String number;
 
     public String getAccountSid() {
@@ -59,11 +55,12 @@ public class PhoneTwilioConfig {
         this.number = number;
     }
 
-    @PostConstruct
-    public void build() {
+    public PhoneTwilioConfig build() {
         log.info("--- Phone SMS Twilio connector config ---");
         log.info("Account SID: {}", getAccountSid());
         log.info("Sender number: {}", getNumber());
+
+        return this;
     }
 
 }

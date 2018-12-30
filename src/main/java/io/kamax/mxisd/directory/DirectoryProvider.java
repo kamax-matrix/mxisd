@@ -18,14 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.notification.phone;
+package io.kamax.mxisd.directory;
 
-import io.kamax.mxisd.threepid.notification.INotificationGenerator;
+import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 
-public interface IPhoneNotificationGenerator extends INotificationGenerator {
+public interface DirectoryProvider {
 
-    default String getMedium() {
-        return "msisdn";
-    }
+    UserDirectorySearchResult searchByDisplayName(String query);
+
+    UserDirectorySearchResult searchBy3pid(String query);
 
 }

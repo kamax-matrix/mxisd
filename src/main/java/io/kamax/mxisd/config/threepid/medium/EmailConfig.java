@@ -20,12 +20,8 @@
 
 package io.kamax.mxisd.config.threepid.medium;
 
-import io.kamax.mxisd.exception.ConfigurationException;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
+import io.kamax.mxisd.threepid.connector.email.EmailSmtpConnector;
+import io.kamax.mxisd.threepid.generator.email.GenericEmailNotificationGenerator;
 
 public class EmailConfig extends MediumConfig {
 
@@ -52,35 +48,15 @@ public class EmailConfig extends MediumConfig {
 
     }
 
-    private transient final Logger log = LoggerFactory.getLogger(EmailConfig.class);
-
     private Identity identity = new Identity();
 
     public EmailConfig() {
-        setConnector("smtp");
-        setGenerator("template");
+        setConnector(EmailSmtpConnector.ID);
+        setGenerator(GenericEmailNotificationGenerator.ID);
     }
 
     public Identity getIdentity() {
         return identity;
-    }
-
-    @PostConstruct
-    public void build() {
-        log.info("--- E-mail config ---");
-
-        if (StringUtils.isBlank(getGenerator())) {
-            throw new ConfigurationException("generator");
-        }
-
-        if (StringUtils.isBlank(getConnector())) {
-            throw new ConfigurationException("connector");
-        }
-
-        log.info("From: {}", getIdentity().getFrom());
-        log.info("Name: {}", getIdentity().getName());
-        log.info("Generator: {}", getGenerator());
-        log.info("Connector: {}", getConnector());
     }
 
 }

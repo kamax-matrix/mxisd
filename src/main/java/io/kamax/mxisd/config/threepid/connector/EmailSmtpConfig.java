@@ -24,13 +24,11 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 public class EmailSmtpConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(EmailSmtpConfig.class);
 
-    private String host;
+    private String host = "";
     private int port = 587;
     private int tls = 1;
     private String login;
@@ -76,14 +74,15 @@ public class EmailSmtpConfig {
         this.password = password;
     }
 
-    @PostConstruct
-    public void build() {
+    public EmailSmtpConfig build() {
         log.info("--- E-mail SMTP Connector config ---");
         log.info("Host: {}", getHost());
         log.info("Port: {}", getPort());
         log.info("TLS Mode: {}", getTls());
         log.info("Login: {}", getLogin());
         log.info("Has password: {}", StringUtils.isNotBlank(getPassword()));
+
+        return this;
     }
 
 }

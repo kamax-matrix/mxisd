@@ -161,7 +161,7 @@ public class SessionMananger {
                     notifMgr.sendForValidation(session);
                 } else {
                     log.info("Session {} for {}: sending remote-only validation notification", sessionId, tpid);
-                    notifMgr.sendforRemoteValidation(session);
+                    notifMgr.sendForRemoteValidation(session);
                 }
 
                 storage.insertThreePidSession(session.getDao());

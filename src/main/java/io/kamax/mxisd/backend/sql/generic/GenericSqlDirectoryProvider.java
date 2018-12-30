@@ -25,7 +25,7 @@ import io.kamax.mxisd.backend.sql.SqlConnectionPool;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.sql.SqlConfig;
 import io.kamax.mxisd.config.sql.generic.GenericSqlProviderConfig;
-import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.directory.DirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.apache.commons.lang.StringUtils;
@@ -40,7 +40,7 @@ import java.util.Optional;
 
 import static io.kamax.mxisd.http.io.UserDirectorySearchResult.Result;
 
-public class GenericSqlDirectoryProvider implements IDirectoryProvider {
+public class GenericSqlDirectoryProvider implements DirectoryProvider {
 
     private transient final Logger log = LoggerFactory.getLogger(GenericSqlDirectoryProvider.class);
 
@@ -53,11 +53,6 @@ public class GenericSqlDirectoryProvider implements IDirectoryProvider {
         this.cfg = cfg;
         this.pool = new SqlConnectionPool(cfg);
         this.mxCfg = mxCfg;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return cfg.getDirectory().isEnabled();
     }
 
     protected void setParameters(PreparedStatement stmt, String searchTerm) throws SQLException {

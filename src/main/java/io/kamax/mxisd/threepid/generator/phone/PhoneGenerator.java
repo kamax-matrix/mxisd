@@ -18,18 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.connector.phone;
+package io.kamax.mxisd.threepid.generator.phone;
 
-import io.kamax.matrix.ThreePidMedium;
-import io.kamax.mxisd.threepid.connector.IThreePidConnector;
+import io.kamax.mxisd.threepid.generator.NotificationGenerator;
 
-public interface IPhoneConnector extends IThreePidConnector {
+public interface PhoneGenerator extends NotificationGenerator {
 
-    @Override
     default String getMedium() {
-        return ThreePidMedium.PhoneNumber.getId();
+        return "msisdn";
     }
-
-    void send(String recipient, String content);
 
 }

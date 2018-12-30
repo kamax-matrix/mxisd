@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -54,14 +55,10 @@ public class ProfileManager {
     public ProfileManager(List<? extends ProfileProvider> providers, ClientDnsOverwrite dns, CloseableHttpClient client) {
         this.dns = dns;
         this.client = client;
+        this.providers = new ArrayList<>(providers);
 
-        log.info("--- Profile providers ---");
-        this.providers = providers.stream()
-                .filter(pp -> {
-                    log.info("\t- {} - Is enabled? {}", pp.getClass().getSimpleName(), pp.isEnabled());
-                    return pp.isEnabled();
-                })
-                .collect(Collectors.toList());
+        log.info("Profile Providers:");
+        providers.forEach(p -> log.info("\t- {}", p.getClass().getSimpleName()));
     }
 
     public <T> List<T> getList(Function<ProfileProvider, List<T>> function) {

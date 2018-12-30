@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Kamax Sarl
+ * Copyright (C) 2018 Kamax Sarl
  *
  * https://www.kamax.io/
  *
@@ -18,18 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.connector.email;
+package io.kamax.mxisd.threepid.generator.email;
 
-import io.kamax.matrix.ThreePidMedium;
-import io.kamax.mxisd.threepid.connector.IThreePidConnector;
+import io.kamax.mxisd.Mxisd;
+import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 
-public interface IEmailConnector extends IThreePidConnector {
+import java.util.Optional;
+import java.util.function.BiFunction;
 
-    @Override
-    default String getMedium() {
-        return ThreePidMedium.Email.getId();
-    }
-
-    void send(String senderAddress, String senderName, String recipient, String content);
+public interface EmailGeneratorSupplier extends BiFunction<EmailConfig, Mxisd, Optional<EmailGenerator>> {
 
 }

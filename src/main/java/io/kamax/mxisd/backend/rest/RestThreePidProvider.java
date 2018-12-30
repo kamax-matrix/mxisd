@@ -63,11 +63,6 @@ public class RestThreePidProvider extends RestProvider implements IThreePidProvi
     }
 
     @Override
-    public boolean isEnabled() {
-        return cfg.isEnabled();
-    }
-
-    @Override
     public boolean isLocal() {
         return true;
     }

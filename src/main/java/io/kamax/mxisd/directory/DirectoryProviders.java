@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
 
 public class DirectoryProviders {
 
-    private static final List<Supplier<? extends IDirectoryProvider>> suppliers = new ArrayList<>();
+    private static final List<Supplier<? extends DirectoryProvider>> suppliers = new ArrayList<>();
 
-    public static void register(Supplier<? extends IDirectoryProvider> supplier) {
+    public static void register(Supplier<? extends DirectoryProvider> supplier) {
         suppliers.add(supplier);
     }
 
-    public static List<? extends IDirectoryProvider> get() {
+    public static List<? extends DirectoryProvider> get() {
         return suppliers.stream().map(Supplier::get).collect(Collectors.toList());
     }
 

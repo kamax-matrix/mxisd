@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.notification;
+package io.kamax.mxisd.threepid.generator;
 
 import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.config.MatrixConfig;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public abstract class GenericTemplateNotificationGenerator extends PlaceholderNotificationGenerator implements INotificationGenerator {
+public abstract class GenericTemplateNotificationGenerator extends PlaceholderNotificationGenerator implements NotificationGenerator {
 
     private transient final Logger log = LoggerFactory.getLogger(GenericTemplateNotificationGenerator.class);
 

@@ -18,12 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.connector;
+package io.kamax.mxisd.threepid.connector.email;
 
-public interface IThreePidConnector {
+import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.threepid.connector.ThreePidConnector;
 
-    String getId();
+public interface EmailConnector extends ThreePidConnector {
 
-    String getMedium();
+    @Override
+    default String getMedium() {
+        return ThreePidMedium.Email.getId();
+    }
+
+    void send(String senderAddress, String senderName, String recipient, String content);
 
 }

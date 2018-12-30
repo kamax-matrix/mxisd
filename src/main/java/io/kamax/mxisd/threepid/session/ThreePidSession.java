@@ -59,6 +59,7 @@ public class ThreePidSession implements IThreePidSession {
                 dao.getNextLink(),
                 dao.getToken()
         );
+
         timestamp = Instant.ofEpochMilli(dao.getCreationTime());
         isValidated = dao.getValidated();
         if (isValidated) {
@@ -81,7 +82,6 @@ public class ThreePidSession implements IThreePidSession {
         this.attempt = attempt;
         this.nextLink = nextLink;
         this.token = token;
-
         this.timestamp = Instant.now();
     }
 

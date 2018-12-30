@@ -84,7 +84,6 @@ public class ExecProfileStoreTest extends ExecStoreTest {
     private ExecProfileStore getStore(ExecConfig.Profile cfg) {
         ExecProfileStore store = new ExecProfileStore(cfg);
         store.setExecutorSupplier(this::build);
-        assertTrue(store.isEnabled());
         return store;
     }
 

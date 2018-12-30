@@ -40,7 +40,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Properties;
 
-public class EmailSmtpConnector implements IEmailConnector {
+public class EmailSmtpConnector implements EmailConnector {
+
+    public static final String ID = "smtp";
 
     private transient final Logger log = LoggerFactory.getLogger(EmailSmtpConnector.class);
 
@@ -48,7 +50,7 @@ public class EmailSmtpConnector implements IEmailConnector {
     private Session session;
 
     public EmailSmtpConnector(EmailSmtpConfig cfg) {
-        this.cfg = cfg;
+        this.cfg = cfg.build();
 
         Properties sCfg = new Properties();
         sCfg.setProperty("mail.smtp.host", cfg.getHost());
@@ -68,7 +70,7 @@ public class EmailSmtpConnector implements IEmailConnector {
 
     @Override
     public String getId() {
-        return "smtp";
+        return ID;
     }
 
     @Override

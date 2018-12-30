@@ -20,16 +20,14 @@
 
 package io.kamax.mxisd.config.threepid.medium;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.kamax.mxisd.threepid.connector.phone.PhoneSmsTwilioConnector;
+import io.kamax.mxisd.threepid.generator.phone.SmsNotificationGenerator;
 
 public class PhoneConfig extends MediumConfig {
 
-    private transient final Logger log = LoggerFactory.getLogger(PhoneConfig.class);
-
     public PhoneConfig() {
-        setConnector("twilio");
-        setGenerator("template");
+        setConnector(PhoneSmsTwilioConnector.ID);
+        setGenerator(SmsNotificationGenerator.ID);
     }
 
 }

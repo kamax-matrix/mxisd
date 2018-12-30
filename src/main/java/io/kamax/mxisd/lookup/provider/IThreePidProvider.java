@@ -29,8 +29,6 @@ import java.util.Optional;
 
 public interface IThreePidProvider {
 
-    boolean isEnabled();
-
     boolean isLocal();
 
     /**

@@ -28,8 +28,6 @@ import java.util.Optional;
 
 public interface ProfileProvider {
 
-    boolean isEnabled();
-
     Optional<String> getDisplayName(_MatrixID userId);
 
     List<_ThreePid> getThreepids(_MatrixID userId);

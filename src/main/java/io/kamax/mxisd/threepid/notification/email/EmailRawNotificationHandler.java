@@ -22,23 +22,26 @@ package io.kamax.mxisd.threepid.notification.email;
 
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
-import io.kamax.mxisd.threepid.connector.email.IEmailConnector;
+import io.kamax.mxisd.threepid.connector.email.EmailConnector;
+import io.kamax.mxisd.threepid.generator.email.EmailGenerator;
 import io.kamax.mxisd.threepid.notification.GenericNotificationHandler;
 
 import java.util.List;
 
-public class EmailRawNotificationHandler extends GenericNotificationHandler<IEmailConnector, IEmailNotificationGenerator> {
+public class EmailRawNotificationHandler extends GenericNotificationHandler<EmailConnector, EmailGenerator> {
+
+    public static final String ID = "raw";
 
     private EmailConfig cfg;
 
-    public EmailRawNotificationHandler(EmailConfig cfg, List<IEmailNotificationGenerator> generators, List<IEmailConnector> connectors) {
+    public EmailRawNotificationHandler(EmailConfig cfg, List<EmailGenerator> generators, List<EmailConnector> connectors) {
         this.cfg = cfg;
         process(connectors, generators);
     }
 
     @Override
     public String getId() {
-        return "raw";
+        return ID;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class EmailRawNotificationHandler extends GenericNotificationHandler<IEma
     }
 
     @Override
-    protected void send(IEmailConnector connector, String recipient, String content) {
+    protected void send(EmailConnector connector, String recipient, String content) {
         connector.send(
                 cfg.getIdentity().getFrom(),
                 cfg.getIdentity().getName(),

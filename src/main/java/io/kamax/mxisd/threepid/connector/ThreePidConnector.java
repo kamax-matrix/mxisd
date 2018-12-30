@@ -18,22 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.notification.phone;
+package io.kamax.mxisd.threepid.connector;
 
-import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.config.threepid.medium.PhoneSmsTemplateConfig;
-import io.kamax.mxisd.threepid.notification.GenericTemplateNotificationGenerator;
+public interface ThreePidConnector {
 
-public class SmsNotificationGenerator extends GenericTemplateNotificationGenerator implements IPhoneNotificationGenerator {
+    String getId();
 
-    public SmsNotificationGenerator(MatrixConfig mxCfg, ServerConfig srvCfg, PhoneSmsTemplateConfig cfg) {
-        super(mxCfg, srvCfg, cfg);
-    }
-
-    @Override
-    public String getId() {
-        return "template";
-    }
+    String getMedium();
 
 }

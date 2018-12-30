@@ -23,7 +23,7 @@ package io.kamax.mxisd.backend.wordpress;
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.wordpress.WordpressConfig;
-import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.directory.DirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-public class WordpressDirectoryProvider implements IDirectoryProvider {
+public class WordpressDirectoryProvider implements DirectoryProvider {
 
     private transient final Logger log = LoggerFactory.getLogger(WordpressDirectoryProvider.class);
 
@@ -47,11 +47,6 @@ public class WordpressDirectoryProvider implements IDirectoryProvider {
         this.cfg = cfg;
         this.wordpress = wordpress;
         this.mxCfg = mxCfg;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return wordpress.isEnabled();
     }
 
     protected void setParameters(PreparedStatement stmt, String searchTerm) throws SQLException {

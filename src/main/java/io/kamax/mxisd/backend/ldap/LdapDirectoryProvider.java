@@ -22,7 +22,7 @@ package io.kamax.mxisd.backend.ldap;
 
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ldap.LdapConfig;
-import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.directory.DirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import io.kamax.mxisd.util.GsonUtil;
@@ -40,17 +40,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LdapDirectoryProvider extends LdapBackend implements IDirectoryProvider {
+public class LdapDirectoryProvider extends LdapBackend implements DirectoryProvider {
 
     private transient final Logger log = LoggerFactory.getLogger(LdapDirectoryProvider.class);
 
     public LdapDirectoryProvider(LdapConfig cfg, MatrixConfig mxCfg) {
         super(cfg, mxCfg);
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return getCfg().isEnabled();
     }
 
     protected UserDirectorySearchResult search(String query, List<String> attributes) {

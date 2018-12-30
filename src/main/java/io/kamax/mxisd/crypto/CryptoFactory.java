@@ -18,14 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.spring;
+package io.kamax.mxisd.crypto;
 
-import io.kamax.matrix.crypto.KeyFileStore;
-import io.kamax.matrix.crypto.KeyManager;
-import io.kamax.matrix.crypto.SignatureManager;
+import io.kamax.matrix.crypto.*;
 import io.kamax.mxisd.config.KeyConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,16 +32,23 @@ import java.io.IOException;
 public class CryptoFactory {
 
     public static KeyManager getKeyManager(KeyConfig keyCfg) {
-        File keyStore = new File(keyCfg.getPath());
-        if (!keyStore.exists()) {
-            try {
-                FileUtils.touch(keyStore);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        _KeyStore store;
+        if (StringUtils.equals(":memory:", keyCfg.getPath())) {
+            store = new KeyMemoryStore();
+        } else {
+            File keyStore = new File(keyCfg.getPath());
+            if (!keyStore.exists()) {
+                try {
+                    FileUtils.touch(keyStore);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
+
+            store = new KeyFileStore(keyCfg.getPath());
         }
 
-        return new KeyManager(new KeyFileStore(keyCfg.getPath()));
+        return new KeyManager(store);
     }
 
     public static SignatureManager getSignatureManager(KeyManager keyMgr, ServerConfig cfg) {

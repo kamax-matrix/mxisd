@@ -23,8 +23,6 @@ package io.kamax.mxisd.config.threepid.medium;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 public class PhoneSmsTemplateConfig extends GenericTemplateConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(EmailTemplateConfig.class);
@@ -36,13 +34,14 @@ public class PhoneSmsTemplateConfig extends GenericTemplateConfig {
         getSession().getValidation().setRemote("classpath:threepids/sms/validate-remote-template.txt");
     }
 
-    @PostConstruct
-    public void build() {
+    public PhoneSmsTemplateConfig build() {
         log.info("--- SMS Generator templates config ---");
         log.info("Invite: {}", getName(getInvite()));
         log.info("Session validation:");
         log.info("\tLocal: {}", getName(getSession().getValidation().getLocal()));
         log.info("\tRemote: {}", getName(getSession().getValidation().getRemote()));
+
+        return this;
     }
 
 }

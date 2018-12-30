@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.notification;
+package io.kamax.mxisd.threepid.generator;
 
 import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.as.IMatrixIdInvite;

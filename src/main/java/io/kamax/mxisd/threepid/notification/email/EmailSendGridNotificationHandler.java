@@ -18,19 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.connector.email;
+package io.kamax.mxisd.threepid.notification.email;
 
 import com.sendgrid.SendGrid;
 import com.sendgrid.SendGridException;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.as.IMatrixIdInvite;
-import io.kamax.mxisd.config.MatrixConfig;
-import io.kamax.mxisd.config.ServerConfig;
+import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.config.threepid.connector.EmailSendGridConfig;
 import io.kamax.mxisd.exception.FeatureNotAvailable;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
-import io.kamax.mxisd.notification.INotificationHandler;
-import io.kamax.mxisd.threepid.notification.PlaceholderNotificationGenerator;
+import io.kamax.mxisd.notification.NotificationHandler;
+import io.kamax.mxisd.threepid.generator.PlaceholderNotificationGenerator;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -45,22 +44,24 @@ import static com.sendgrid.SendGrid.Email;
 import static com.sendgrid.SendGrid.Response;
 import static io.kamax.mxisd.config.threepid.connector.EmailSendGridConfig.EmailTemplate;
 
-public class EmailSendGridNotificationHandler extends PlaceholderNotificationGenerator implements INotificationHandler {
+public class EmailSendGridNotificationHandler extends PlaceholderNotificationGenerator implements NotificationHandler {
+
+    public static final String ID = "sendgrid";
 
     private transient final Logger log = LoggerFactory.getLogger(EmailSendGridNotificationHandler.class);
 
     private EmailSendGridConfig cfg;
     private SendGrid sendgrid;
 
-    public EmailSendGridNotificationHandler(MatrixConfig mxCfg, ServerConfig srvCfg, EmailSendGridConfig cfg) {
-        super(mxCfg, srvCfg);
+    public EmailSendGridNotificationHandler(MxisdConfig mCfg, EmailSendGridConfig cfg) {
+        super(mCfg.getMatrix(), mCfg.getServer());
         this.cfg = cfg;
         this.sendgrid = new SendGrid(cfg.getApi().getKey());
     }
 
     @Override
     public String getId() {
-        return "sendgrid";
+        return ID;
     }
 
     @Override

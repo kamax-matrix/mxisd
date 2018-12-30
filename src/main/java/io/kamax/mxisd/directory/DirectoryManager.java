@@ -43,8 +43,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DirectoryManager {
 
@@ -53,13 +53,13 @@ public class DirectoryManager {
     private DirectoryConfig cfg;
     private ClientDnsOverwrite dns;
     private CloseableHttpClient client;
-    private List<IDirectoryProvider> providers;
+    private List<DirectoryProvider> providers;
 
-    public DirectoryManager(DirectoryConfig cfg, ClientDnsOverwrite dns, CloseableHttpClient client, List<? extends IDirectoryProvider> providers) {
+    public DirectoryManager(DirectoryConfig cfg, ClientDnsOverwrite dns, CloseableHttpClient client, List<? extends DirectoryProvider> providers) {
         this.cfg = cfg;
         this.dns = dns;
         this.client = client;
-        this.providers = providers.stream().filter(IDirectoryProvider::isEnabled).collect(Collectors.toList());
+        this.providers = new ArrayList<>(providers);
 
         log.info("Directory providers:");
         this.providers.forEach(p -> log.info("\t- {}", p.getClass().getName()));
@@ -111,7 +111,7 @@ public class DirectoryManager {
             }
         }
 
-        for (IDirectoryProvider provider : providers) {
+        for (DirectoryProvider provider : providers) {
             log.info("Using Directory provider {}", provider.getClass().getSimpleName());
             UserDirectorySearchResult resultProvider = provider.searchByDisplayName(query);
             log.info("Display name: found {} match(es) for '{}'", resultProvider.getResults().size(), query);

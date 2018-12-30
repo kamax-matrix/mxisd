@@ -23,14 +23,15 @@ package io.kamax.mxisd.threepid.notification;
 import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
-import io.kamax.mxisd.notification.INotificationHandler;
-import io.kamax.mxisd.threepid.connector.IThreePidConnector;
+import io.kamax.mxisd.notification.NotificationHandler;
+import io.kamax.mxisd.threepid.connector.ThreePidConnector;
+import io.kamax.mxisd.threepid.generator.NotificationGenerator;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
-public abstract class GenericNotificationHandler<A extends IThreePidConnector, B extends INotificationGenerator> implements INotificationHandler {
+public abstract class GenericNotificationHandler<A extends ThreePidConnector, B extends NotificationGenerator> implements NotificationHandler {
 
     private A connector;
     private B generator;

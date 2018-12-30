@@ -37,9 +37,9 @@ public class NotificationManager {
 
     private transient final Logger log = LoggerFactory.getLogger(NotificationManager.class);
 
-    private Map<String, INotificationHandler> handlers;
+    private Map<String, NotificationHandler> handlers;
 
-    public NotificationManager(NotificationConfig cfg, List<INotificationHandler> handlers) {
+    public NotificationManager(NotificationConfig cfg, List<NotificationHandler> handlers) {
         this.handlers = new HashMap<>();
         handlers.forEach(h -> {
             log.info("Found handler {} for medium {}", h.getId(), h.getMedium());
@@ -53,8 +53,8 @@ public class NotificationManager {
         this.handlers.forEach((k, v) -> log.info("\tHandler for {}: {}", k, v.getId()));
     }
 
-    private INotificationHandler ensureMedium(String medium) {
-        INotificationHandler handler = handlers.get(medium);
+    private NotificationHandler ensureMedium(String medium) {
+        NotificationHandler handler = handlers.get(medium);
         if (handler == null) {
             throw new NotImplementedException(medium + " is not a supported 3PID medium type");
         }
@@ -77,7 +77,7 @@ public class NotificationManager {
         ensureMedium(session.getThreePid().getMedium()).sendForValidation(session);
     }
 
-    public void sendforRemoteValidation(IThreePidSession session) {
+    public void sendForRemoteValidation(IThreePidSession session) {
         ensureMedium(session.getThreePid().getMedium()).sendForRemoteValidation(session);
     }
 

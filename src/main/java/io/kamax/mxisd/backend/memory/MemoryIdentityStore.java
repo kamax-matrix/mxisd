@@ -31,7 +31,7 @@ import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.memory.MemoryIdentityConfig;
 import io.kamax.mxisd.config.memory.MemoryStoreConfig;
 import io.kamax.mxisd.config.memory.MemoryThreePid;
-import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.directory.DirectoryProvider;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
@@ -49,7 +49,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class MemoryIdentityStore implements AuthenticatorProvider, IDirectoryProvider, IThreePidProvider, ProfileProvider {
+public class MemoryIdentityStore implements AuthenticatorProvider, DirectoryProvider, IThreePidProvider, ProfileProvider {
 
     private transient final Logger logger = LoggerFactory.getLogger(MemoryIdentityStore.class);
 

@@ -29,14 +29,16 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhoneSmsTwilioConnector implements IPhoneConnector {
+public class PhoneSmsTwilioConnector implements PhoneConnector {
+
+    public static final String ID = "twilio";
 
     private transient final Logger log = LoggerFactory.getLogger(PhoneSmsTwilioConnector.class);
 
     private PhoneTwilioConfig cfg;
 
     public PhoneSmsTwilioConnector(PhoneTwilioConfig cfg) {
-        this.cfg = cfg;
+        this.cfg = cfg.build();
 
         Twilio.init(cfg.getAccountSid(), cfg.getAuthToken());
         log.info("Twilio API has been initiated");
@@ -44,7 +46,7 @@ public class PhoneSmsTwilioConnector implements IPhoneConnector {
 
     @Override
     public String getId() {
-        return "twilio";
+        return ID;
     }
 
     @Override

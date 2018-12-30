@@ -23,30 +23,24 @@ package io.kamax.mxisd.backend.rest;
 import io.kamax.matrix.MatrixID;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
-import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.directory.DirectoryProvider;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.http.io.UserDirectorySearchRequest;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class RestDirectoryProvider extends RestProvider implements IDirectoryProvider {
+public class RestDirectoryProvider extends RestProvider implements DirectoryProvider {
 
     private MatrixConfig mxCfg;
 
     public RestDirectoryProvider(RestBackendConfig cfg, MatrixConfig mxCfg) {
         super(cfg);
         this.mxCfg = mxCfg;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return cfg.isEnabled() && StringUtils.isNotBlank(cfg.getEndpoints().getDirectory());
     }
 
     private UserDirectorySearchResult search(String by, String query) {

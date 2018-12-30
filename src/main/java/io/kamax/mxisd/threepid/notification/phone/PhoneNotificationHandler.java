@@ -22,23 +22,26 @@ package io.kamax.mxisd.threepid.notification.phone;
 
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.config.threepid.medium.PhoneConfig;
-import io.kamax.mxisd.threepid.connector.phone.IPhoneConnector;
+import io.kamax.mxisd.threepid.connector.phone.PhoneConnector;
+import io.kamax.mxisd.threepid.generator.phone.PhoneGenerator;
 import io.kamax.mxisd.threepid.notification.GenericNotificationHandler;
 
 import java.util.List;
 
-public class PhoneNotificationHandler extends GenericNotificationHandler<IPhoneConnector, IPhoneNotificationGenerator> {
+public class PhoneNotificationHandler extends GenericNotificationHandler<PhoneConnector, PhoneGenerator> {
+
+    public static final String ID = "raw";
 
     private PhoneConfig cfg;
 
-    public PhoneNotificationHandler(PhoneConfig cfg, List<IPhoneConnector> connectors, List<IPhoneNotificationGenerator> generators) {
+    public PhoneNotificationHandler(PhoneConfig cfg, List<PhoneGenerator> generators, List<PhoneConnector> connectors) {
         this.cfg = cfg;
         process(connectors, generators);
     }
 
     @Override
     public String getId() {
-        return "raw";
+        return ID;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class PhoneNotificationHandler extends GenericNotificationHandler<IPhoneC
     }
 
     @Override
-    protected void send(IPhoneConnector connector, String recipient, String content) {
+    protected void send(PhoneConnector connector, String recipient, String content) {
         connector.send(recipient, content);
     }
 

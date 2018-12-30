@@ -28,8 +28,13 @@ import java.io.IOException;
 public class MxisdStandaloneExec {
 
     public static void main(String[] args) throws IOException {
-        MxisdConfig cfg = YamlConfigLoader.loadFromFile("mxisd.yaml"); // FIXME no hardcoding, make it configurable via Build, Env and CLI parameters
-        new Mxisd(cfg).start();
+        // FIXME no hard-coding, make it configurable via Build, Env and CLI parameters
+        MxisdConfig cfg = YamlConfigLoader.loadFromFile("mxisd.yaml");
+        HttpMxisd mxisd = new HttpMxisd(cfg);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(mxisd::stop));
+
+        mxisd.start();
     }
 
 }

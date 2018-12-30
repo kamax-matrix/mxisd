@@ -22,6 +22,7 @@ package io.kamax.mxisd.lookup.provider;
 
 import io.kamax.mxisd.config.ForwardConfig;
 import io.kamax.mxisd.config.MatrixConfig;
+import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
@@ -41,15 +42,14 @@ public class ForwarderProvider implements IThreePidProvider {
     private MatrixConfig mxCfg;
     private IRemoteIdentityServerFetcher fetcher;
 
+    public ForwarderProvider(MxisdConfig cfg, IRemoteIdentityServerFetcher fetcher) {
+        this(cfg.getForward(), cfg.getMatrix(), fetcher);
+    }
+
     public ForwarderProvider(ForwardConfig cfg, MatrixConfig mxCfg, IRemoteIdentityServerFetcher fetcher) {
         this.cfg = cfg;
         this.mxCfg = mxCfg;
         this.fetcher = fetcher;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 
     @Override

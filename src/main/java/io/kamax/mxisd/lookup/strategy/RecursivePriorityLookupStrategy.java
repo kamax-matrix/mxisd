@@ -49,10 +49,7 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
     public RecursivePriorityLookupStrategy(MxisdConfig.Lookup cfg, List<? extends IThreePidProvider> providers, IBridgeFetcher bridge) {
         this.cfg = cfg;
         this.bridge = bridge;
-        this.providers = providers.stream().filter(p -> {
-            log.info("3PID Provider {} is enabled: {}", p.getClass().getSimpleName(), p.isEnabled());
-            return p.isEnabled();
-        }).collect(Collectors.toList());
+        this.providers = new ArrayList<>(providers);
 
         try {
             log.info("Found {} providers", providers.size());
@@ -114,11 +111,11 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
 
     @Override
     public List<IThreePidProvider> getLocalProviders() {
-        return providers.stream().filter(iThreePidProvider -> iThreePidProvider.isEnabled() && iThreePidProvider.isLocal()).collect(Collectors.toList());
+        return providers.stream().filter(IThreePidProvider::isLocal).collect(Collectors.toList());
     }
 
     public List<IThreePidProvider> getRemoteProviders() {
-        return providers.stream().filter(iThreePidProvider -> iThreePidProvider.isEnabled() && !iThreePidProvider.isLocal()).collect(Collectors.toList());
+        return providers.stream().filter(iThreePidProvider -> !iThreePidProvider.isLocal()).collect(Collectors.toList());
     }
 
     private static SingleLookupRequest build(String medium, String address) {

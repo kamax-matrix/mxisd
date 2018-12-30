@@ -1,2 +1,0 @@
-org.springframework.boot.diagnostics.FailureAnalyzer=\
-io.kamax.mxisd.spring.ConfigurationFailureAnalyzer

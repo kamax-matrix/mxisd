@@ -62,7 +62,7 @@ public class GenericTemplateConfig {
 
         }
 
-        private SessionValidation validation;
+        private SessionValidation validation = new SessionValidation();
 
         public SessionValidation getValidation() {
             return validation;

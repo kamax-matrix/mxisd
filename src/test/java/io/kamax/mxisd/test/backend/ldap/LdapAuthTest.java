@@ -75,22 +75,22 @@ public class LdapAuthTest {
 
     @Test
     public void singleDn() {
-        MatrixConfig mxCfg = new MatrixConfig();
-        mxCfg.setDomain(domain);
-        mxCfg.build();
-
         LdapConfig cfg = new GenericLdapConfig();
         cfg.getConnection().setHost(host);
         cfg.getConnection().setPort(65001);
         cfg.getConnection().setBaseDn(dnList.get(0));
         cfg.getConnection().setBindDn(mxisdCn);
         cfg.getConnection().setBindPassword(mxisdPw);
+        cfg.build();
 
         LdapConfig.UID uid = new LdapConfig.UID();
         uid.setType(idType);
         uid.setValue(idAttribute);
         cfg.getAttribute().setUid(uid);
-        cfg.build();
+
+        MatrixConfig mxCfg = new MatrixConfig();
+        mxCfg.setDomain(domain);
+        mxCfg.build();
 
         LdapAuthProvider p = new LdapAuthProvider(cfg, mxCfg);
         BackendAuthResult result = p.authenticate(MatrixID.from(userId, domain).valid(), userPw);

@@ -48,11 +48,6 @@ class DnsLookupProvider implements IThreePidProvider {
     }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
     public boolean isLocal() {
         return false;
     }

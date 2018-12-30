@@ -51,11 +51,6 @@ public abstract class SqlProfileProvider implements ProfileProvider {
     }
 
     @Override
-    public boolean isEnabled() {
-        return cfg.isEnabled();
-    }
-
-    @Override
     public Optional<String> getDisplayName(_MatrixID user) {
         String stmtSql = cfg.getDisplayName().getQuery();
         try (Connection conn = pool.get()) {

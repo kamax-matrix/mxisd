@@ -52,11 +52,6 @@ public class LdapThreePidProvider extends LdapBackend implements IThreePidProvid
     }
 
     @Override
-    public boolean isEnabled() {
-        return getCfg().isEnabled();
-    }
-
-    @Override
     public boolean isLocal() {
         return true;
     }

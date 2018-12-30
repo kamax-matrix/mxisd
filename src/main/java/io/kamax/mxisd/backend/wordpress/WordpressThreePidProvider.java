@@ -55,11 +55,6 @@ public class WordpressThreePidProvider implements IThreePidProvider {
     }
 
     @Override
-    public boolean isEnabled() {
-        return wordpress.isEnabled();
-    }
-
-    @Override
     public boolean isLocal() {
         return true;
     }

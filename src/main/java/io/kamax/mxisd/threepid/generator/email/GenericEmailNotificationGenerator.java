@@ -18,27 +18,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.notification.email;
+package io.kamax.mxisd.threepid.generator.email;
 
 import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailTemplateConfig;
-import io.kamax.mxisd.threepid.notification.GenericTemplateNotificationGenerator;
+import io.kamax.mxisd.threepid.generator.GenericTemplateNotificationGenerator;
 
-public class EmailNotificationGenerator extends GenericTemplateNotificationGenerator implements IEmailNotificationGenerator {
+public class GenericEmailNotificationGenerator extends GenericTemplateNotificationGenerator implements EmailGenerator {
+
+    public static final String ID = "template";
 
     private EmailConfig cfg;
 
-    public EmailNotificationGenerator(EmailTemplateConfig templateCfg, EmailConfig cfg, MatrixConfig mxCfg, ServerConfig srvCfg) {
-        super(mxCfg, srvCfg, templateCfg);
+    public GenericEmailNotificationGenerator(EmailTemplateConfig templateCfg, EmailConfig cfg, MatrixConfig mxCfg, ServerConfig srvCfg) {
+        super(mxCfg, srvCfg, templateCfg.build());
         this.cfg = cfg;
     }
 
     @Override
     public String getId() {
-        return "template";
+        return ID;
     }
 
     @Override

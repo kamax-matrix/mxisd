@@ -7,3 +7,4 @@ io.kamax.mxisd.backend.rest.RestStoreSupplier
 io.kamax.mxisd.backend.sql.generic.GenericSqlStoreSupplier
 io.kamax.mxisd.backend.sql.synapse.SynapseSqlStoreSupplier
 io.kamax.mxisd.backend.wordpress.WordpressStoreSupplier
+io.kamax.mxisd.lookup.provider.RemoteLookupProviderSupplier

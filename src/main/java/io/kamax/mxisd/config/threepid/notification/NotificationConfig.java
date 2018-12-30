@@ -21,6 +21,9 @@
 package io.kamax.mxisd.config.threepid.notification;
 
 import com.google.gson.JsonObject;
+import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.threepid.notification.email.EmailRawNotificationHandler;
+import io.kamax.mxisd.threepid.notification.phone.PhoneNotificationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +37,11 @@ public class NotificationConfig {
 
     private Map<String, String> handler = new HashMap<>();
     private Map<String, JsonObject> handlers = new HashMap<>();
+
+    public NotificationConfig() {
+        handler.put(ThreePidMedium.Email.getId(), EmailRawNotificationHandler.ID);
+        handler.put(ThreePidMedium.PhoneNumber.getId(), PhoneNotificationHandler.ID);
+    }
 
     public Map<String, String> getHandler() {
         return handler;

@@ -20,7 +20,9 @@
 
 package io.kamax.mxisd.threepid.connector.phone;
 
-public class BlackholePhoneConnector implements IPhoneConnector {
+public class BlackholePhoneConnector implements PhoneConnector {
+
+    public static final String ID = "none";
 
     @Override
     public void send(String recipient, String content) {
@@ -29,7 +31,7 @@ public class BlackholePhoneConnector implements IPhoneConnector {
 
     @Override
     public String getId() {
-        return "BLACKHOLE";
+        return ID;
     }
 
 }

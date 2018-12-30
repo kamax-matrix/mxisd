@@ -68,7 +68,6 @@ public class ExecDirectoryStoreTest extends ExecStoreTest {
     private ExecDirectoryStore getStore(ExecConfig.Directory cfg) {
         ExecDirectoryStore store = new ExecDirectoryStore(cfg, getMatrixCfg());
         store.setExecutorSupplier(this::build);
-        assertTrue(store.isEnabled());
         return store;
     }
 

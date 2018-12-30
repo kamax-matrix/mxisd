@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
 
 public class NotificationHandlers {
 
-    private static final List<Supplier<INotificationHandler>> suppliers = new ArrayList<>();
+    private static final List<Supplier<NotificationHandler>> suppliers = new ArrayList<>();
 
-    public static void register(Supplier<INotificationHandler> supplier) {
+    public static void register(Supplier<NotificationHandler> supplier) {
         suppliers.add(supplier);
     }
 
-    public static List<INotificationHandler> get() {
+    public static List<NotificationHandler> get() {
         return suppliers.stream().map(Supplier::get).collect(Collectors.toList());
     }
 

@@ -25,6 +25,7 @@ import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.fetcher.IBridgeFetcher;
+import io.kamax.mxisd.lookup.fetcher.IRemoteIdentityServerFetcher;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,9 @@ public class BridgeFetcher implements IBridgeFetcher {
     private transient final Logger log = LoggerFactory.getLogger(BridgeFetcher.class);
 
     private RecursiveLookupBridgeConfig cfg;
-    private RemoteIdentityServerFetcher fetcher;
+    private IRemoteIdentityServerFetcher fetcher;
 
-    public BridgeFetcher(RecursiveLookupBridgeConfig cfg, RemoteIdentityServerFetcher fetcher) {
+    public BridgeFetcher(RecursiveLookupBridgeConfig cfg, IRemoteIdentityServerFetcher fetcher) {
         this.cfg = cfg;
         this.fetcher = fetcher;
     }

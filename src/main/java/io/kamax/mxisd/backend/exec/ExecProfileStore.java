@@ -45,11 +45,6 @@ public class ExecProfileStore extends ExecStore implements ProfileProvider {
         this.cfg = cfg;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return cfg.isEnabled();
-    }
-
     private Optional<JsonProfileResult> getFull(_MatrixID userId, ExecConfig.Process cfg) {
         Processor<Optional<JsonProfileResult>> p = new Processor<>(cfg);
 

@@ -53,7 +53,7 @@ public class InvitationConfig {
 
     }
 
-    private Resolution resolution;
+    private Resolution resolution = new Resolution();
 
     public Resolution getResolution() {
         return resolution;

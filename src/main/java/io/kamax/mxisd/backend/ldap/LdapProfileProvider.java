@@ -52,11 +52,6 @@ public class LdapProfileProvider extends LdapBackend implements ProfileProvider 
     }
 
     @Override
-    public boolean isEnabled() {
-        return getCfg().isEnabled();
-    }
-
-    @Override
     public Optional<String> getDisplayName(_MatrixID userId) {
         String uid = buildUidFromMatrixId(userId);
         log.info("Searching for display name of {}:", uid);

@@ -75,7 +75,7 @@ public class ExecIdentityStoreTest extends ExecStoreTest {
     private ExecIdentityStore getStore(ExecConfig.Identity cfg) {
         ExecIdentityStore store = new ExecIdentityStore(cfg, getMatrixCfg());
         store.setExecutorSupplier(this::build);
-        assertTrue(store.isEnabled());
+        assertTrue(store.isLocal());
         return store;
     }
 

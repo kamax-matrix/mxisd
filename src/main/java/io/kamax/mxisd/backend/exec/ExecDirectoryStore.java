@@ -25,12 +25,12 @@ import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.MxisdConfig;
-import io.kamax.mxisd.directory.IDirectoryProvider;
+import io.kamax.mxisd.directory.DirectoryProvider;
 import io.kamax.mxisd.http.io.UserDirectorySearchRequest;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import org.apache.commons.lang3.StringUtils;
 
-public class ExecDirectoryStore extends ExecStore implements IDirectoryProvider {
+public class ExecDirectoryStore extends ExecStore implements DirectoryProvider {
 
     private ExecConfig.Directory cfg;
     private MatrixConfig mxCfg;
@@ -42,11 +42,6 @@ public class ExecDirectoryStore extends ExecStore implements IDirectoryProvider 
     public ExecDirectoryStore(ExecConfig.Directory cfg, MatrixConfig mxCfg) {
         this.cfg = cfg;
         this.mxCfg = mxCfg;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return cfg.isEnabled();
     }
 
     private UserDirectorySearchResult search(ExecConfig.Process cfg, UserDirectorySearchRequest request) {
