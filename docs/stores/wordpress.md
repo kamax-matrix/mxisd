@@ -34,22 +34,29 @@ If this is not the case for your installation, the mxisd URL will need to be app
 ### mxisd
 Enable in the configuration:
 ```yaml
-wordpress.enabled: true
+wordpress:
+  enabled: true
 ```
 Configure the URL to your Wordpress installation - see above about added `/index.php`:
 ```yaml
-wordpress.rest.base: 'http://localhost:8080'
+wordpress:
+  rest:
+    base: 'http://localhost:8080'
 ```
 Configure the SQL connection to your Wordpress database:
 ```yaml
-wordpress.sql.connection: '//127.0.0.1/wordpress?user=root&password=example'
+wordpress:
+  sql:
+    connection: '//127.0.0.1/wordpress?user=root&password=example'
 ```
 
 ---
 
 By default, MySQL database is expected. If you use another database, use:
 ```yaml
-wordpress.sql.type: <string>
+wordpress:
+  sql:
+    type: <string>
 ```
 With possible values:
 - `mysql`
@@ -61,6 +68,8 @@ With possible values:
 
 To configure the tables prefix for default queries, in case a custom value was set during Wordpress install:
 ```yaml
-wordpress.sql.tablePrefix: <string>
+wordpress:
+  sql:
+    tablePrefix: <string>
 ```
 By default, the value is set to `wp_`.

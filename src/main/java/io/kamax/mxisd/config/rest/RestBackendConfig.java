@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
@@ -93,7 +92,7 @@ public class RestBackendConfig {
         private String auth = "/_mxisd/backend/api/v1/auth/login";
         private String directory = "/_mxisd/backend/api/v1/directory/user/search";
         private IdentityEndpoints identity = new IdentityEndpoints();
-        private ProfileEndpoints profile;
+        private ProfileEndpoints profile = new ProfileEndpoints();
 
         public String getAuth() {
             return auth;
@@ -177,7 +176,6 @@ public class RestBackendConfig {
         return getHost() + endpoint;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- REST backend config ---");
         log.info("Enabled: {}", isEnabled());

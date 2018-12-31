@@ -18,20 +18,23 @@ This handler can be used with the 3PID types:
 ## Configuration
 Enabled by default or with:
 ```yaml
-notification.handler.email: 'raw'
+notification:
+  handler:
+    email: 'raw'
 ```
 
 **WARNING:** Will be consolidated soon, prone to breaking changes.  
 Structure and default values:
 ```yaml
-threepid.medium:
-  email:
-    identity:
-      from: ''
-      name: ''
-    connector: 'smtp'
-    generator: 'template'
-  msisdn:
-    connector: 'twilio'
-    generator: 'template'
+threepid:
+  medium:
+    email:
+      identity:
+        from: ''
+        name: ''
+      connector: 'smtp'
+      generator: 'template'
+    msisdn:
+      connector: 'twilio'
+      generator: 'template'
 ```

@@ -133,19 +133,22 @@ file unless you want to specifically overwrite them.
 ```yaml
 # CONFIGURATION EXAMPLE
 # DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
-session.policy.validation.enabled: true
-session.policy.validation.forLocal:
-  enabled: true
-  toLocal: true
-  toRemote:
-    enabled: true
-    server: 'configExample'  # Not to be included in config! Already present in default config!
-session.policy.validation.forRemote:
-  enabled: true
-  toLocal: true
-  toRemote:
-    enabled: true
-    server: 'configExample'  # Not to be included in config! Already present in default config!
+session:
+  policy:
+    validation:
+      enabled: true
+      forLocal:
+        enabled: true
+        toLocal: true
+        toRemote:
+          enabled: true
+          server: 'configExample'  # Not to be included in config! Already present in default config!
+      forRemote:
+        enabled: true
+        toLocal: true
+        toRemote:
+          enabled: true
+          server: 'configExample'  # Not to be included in config! Already present in default config!
 # DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
 # CONFIGURATION EXAMPLE
 ```
@@ -219,17 +222,20 @@ On the flip side, people with *Remote* 3PID scopes will not be found from other 
 
 Use the following values:
 ```yaml
-session.policy.validation.enabled: true
-session.policy.validation.forLocal:
-  enabled: true
-  toLocal: true
-  toRemote:
-    enabled: false
-session.policy.validation.forRemote:
-  enabled: true
-  toLocal: true
-  toRemote:
-    enabled: false
+session:
+  policy:
+    validation:
+      enabled: true
+      forLocal:
+        enabled: true
+        toLocal: true
+        toRemote:
+          enabled: false
+      forRemote:
+        enabled: true
+        toLocal: true
+        toRemote:
+          enabled: false
 ```
 
 **IMPORTANT**: When using local-only mode and if you are using synapse, you will also need to enable its dedicated Identity
@@ -245,17 +251,20 @@ Typical use cases:
 
 Use the following values:
 ```yaml
-session.policy.validation.enabled: true
-session.policy.validation.forLocal:
-  enabled: true
-  toLocal: false
-  toRemote:
-    enabled: true
-session.policy.validation.forRemote:
-  enabled: true
-  toLocal: false
-  toRemote:
-    enabled: true
+session:
+  policy:
+    validation:
+      enabled: true
+      forLocal:
+        enabled: true
+        toLocal: false
+        toRemote:
+          enabled: true
+      forRemote:
+        enabled: true
+        toLocal: false
+        toRemote:
+          enabled: true
 ```
 
 #### Sessions disabled
@@ -272,5 +281,8 @@ It is therefore recommended to not fully disable sessions but instead restrict s
 
 Use the following values to enable this mode:
 ```yaml
-session.policy.validation.enabled: false
+session:
+  policy:
+    validation:
+      enabled: false
 ```

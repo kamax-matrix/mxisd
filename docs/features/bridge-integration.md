@@ -5,16 +5,19 @@ to 3PID queries if no mapping was found, allowing seamless bridging to a network
 This is performed by implementing a specific endpoint on the bridge to map a 3PID lookup to a virtual user.
 
 **NOTE**: This document is incomplete and might be misleading. In doubt, come in our Matrix room.  
-You can also look at our [Email Bridge README](https://github.com/kamax-io/matrix-appservice-email#mxisd) for an example
+You can also look at our [Email Bridge README](https://github.com/kamax-matrix/matrix-appservice-email#mxisd) for an example
 of working configuration.
 
 ## Configuration
 ```yaml
-lookup.recursive.bridge.enabled: <boolean>
-lookup.recursive.bridge.recursiveOnly: <boolean>
-lookup.recursive.bridge.server: <URL to the bridge endpoint for all 3PID medium>
-lookup.recursive.bridge.mappings:
-  <3PID MEDIUM HERE>: <URL to dedicated bridge for that medium>
+lookup:
+  recursive:
+    bridge:
+      enabled: <boolean>
+      recursiveOnly: <boolean>
+      server: <URL to the bridge endpoint for all 3PID medium>
+      mappings:
+        <3PID MEDIUM HERE>: <URL to dedicated bridge for that medium>
 
 ```
 

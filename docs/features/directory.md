@@ -123,27 +123,31 @@ the internal IP of the Homeserver so it can talk to it directly to integrate its
 
 To do so, use the following configuration:
 ```yaml
-dns.overwrite.homeserver.client:
-  - name: 'example.org'
-    value: 'http://localhost:8008'
+dns:
+  overwrite:
+    homeserver:
+      client:
+        - name: 'example.org'
+          value: 'http://localhost:8008'
 ```
-`name` must be the hostname of the URL that clients use when connecting to the Homeserver.  
-In case the hostname is the same as your Matrix domain, you can use `${matrix.domain}` to auto-populate the value using
-the `matrix.domain` configuration option and avoid duplicating it.
-
-`value` is the base internal URL of the Homeserver, without any `/_matrix/..` or trailing `/`.
+- `name` must be the hostname of the URL that clients use when connecting to the Homeserver.
+- `value` is the base internal URL of the Homeserver, without any `/_matrix/..` or trailing `/`.
 
 ## Next steps
 ### Homeserver results
 You can configure if the Homeserver should be queried at all when doing a directory search.  
 To disable Homeserver results, set the following in mxisd configuration file:
 ```yaml
-directory.exclude.homeserver: true
+directory:
+  exclude:
+    homeserver: true
 ```
 
 ### 3PID exclusion in search
 You can configure if the 3PID should also be included when doing a directory search.
 By default, a search is performed on the 3PIDs. If you would like to not include them:
 ```yaml
-directory.exclude.threepid: true
+directory:
+  exclude:
+    threepid: true
 ```

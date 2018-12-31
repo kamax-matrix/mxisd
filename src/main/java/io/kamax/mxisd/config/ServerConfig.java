@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -60,7 +59,6 @@ public class ServerConfig {
         this.publicUrl = publicUrl;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- Server config ---");
 

@@ -40,10 +40,21 @@ The port must be HTTPS capable which is what you get in a regular setup with a r
 If you would like to disable outbound federation and isolate your identity server from the rest of the Matrix network,
 use the following mxisd configuration options:
 ```yaml
-lookup.recursive.enabled: false
-invite.resolution.recursive: false
-session.policy.validation.forLocal.toRemote.enabled: false
-session.policy.validation.forRemote.toRemote.enabled: false
+lookup:
+  recursive:
+    enabled: false
+invite:
+  resolution:
+    recursive: false
+session:
+  policy:
+    validation:
+      forLocal:
+        toRemote:
+          enabled: false
+      forRemote:
+        toRemote:
+          enabled: false
 ``` 
 
 There is currently no way to selectively disable federation towards specific servers, but this feature is planned.

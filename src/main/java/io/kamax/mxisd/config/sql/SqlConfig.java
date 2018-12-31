@@ -291,15 +291,15 @@ public abstract class SqlConfig {
     protected abstract String getProviderName();
 
     public void build() {
-        if (getAuth().isEnabled() == null) {
+        if (Objects.isNull(getAuth().isEnabled())) {
             getAuth().setEnabled(isEnabled());
         }
 
-        if (getDirectory().isEnabled() == null) {
+        if (Objects.isNull(getDirectory().isEnabled())) {
             getDirectory().setEnabled(isEnabled());
         }
 
-        if (getIdentity().isEnabled() == null) {
+        if (Objects.isNull(getIdentity().isEnabled())) {
             getIdentity().setEnabled(isEnabled());
         }
 

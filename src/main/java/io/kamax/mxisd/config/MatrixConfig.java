@@ -26,7 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +89,6 @@ public class MatrixConfig {
         this.listener = listener;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- Matrix config ---");
 
@@ -101,6 +99,8 @@ public class MatrixConfig {
         log.info("Domain: {}", getDomain());
         log.info("Identity:");
         log.info("\tServers: {}", GsonUtil.get().toJson(identity.getServers()));
+
+        listener.build();
     }
 
 }

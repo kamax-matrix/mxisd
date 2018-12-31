@@ -24,8 +24,6 @@ import io.kamax.mxisd.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 public class InvitationConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(InvitationConfig.class);
@@ -63,7 +61,6 @@ public class InvitationConfig {
         this.resolution = resolution;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- Invite config ---");
         log.info("Resolution: {}", GsonUtil.build().toJson(resolution));

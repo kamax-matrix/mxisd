@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.config;
 
-import javax.annotation.PostConstruct;
 import java.util.Objects;
 
 public class BulkLookupConfig {
@@ -35,7 +34,6 @@ public class BulkLookupConfig {
         this.enabled = enabled;
     }
 
-    @PostConstruct
     public void build() {
         if (Objects.isNull(enabled)) {
             enabled = true;

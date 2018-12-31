@@ -20,9 +20,9 @@
 
 package io.kamax.mxisd.config;
 
+import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -80,24 +80,27 @@ public class ListenerConfig {
         this.token = token;
     }
 
-    @PostConstruct
-    public void build() throws MalformedURLException {
-        if (StringUtils.isBlank(url)) {
-            return;
-        }
+    public void build() {
+        try {
+            if (StringUtils.isBlank(url)) {
+                return;
+            }
 
-        csUrl = new URL(url);
+            csUrl = new URL(url);
 
-        if (StringUtils.isBlank(getLocalpart())) {
-            throw new IllegalArgumentException("localpart for matrix listener is not set");
-        }
+            if (StringUtils.isBlank(getLocalpart())) {
+                throw new IllegalArgumentException("localpart for matrix listener is not set");
+            }
 
-        if (StringUtils.isBlank(getToken().getAs())) {
-            throw new IllegalArgumentException("AS token is not set");
-        }
+            if (StringUtils.isBlank(getToken().getAs())) {
+                throw new IllegalArgumentException("AS token is not set");
+            }
 
-        if (StringUtils.isBlank(getToken().getHs())) {
-            throw new IllegalArgumentException("HS token is not set");
+            if (StringUtils.isBlank(getToken().getHs())) {
+                throw new IllegalArgumentException("HS token is not set");
+            }
+        } catch (MalformedURLException e) {
+            throw new ConfigurationException(e);
         }
     }
 

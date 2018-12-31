@@ -19,13 +19,15 @@ For NetIQ, replace all the `ldap` prefix in the configuration by `netiq`.
 ### Base
 To use your LDAP backend, add the bare minimum configuration in mxisd config file:
 ```yaml
-ldap.enabled: true
-ldap.connection.host: 'ldapHostnameOrIp'
-ldap.connection.port: 389
-ldap.connection.bindDn: 'CN=My Mxisd User,OU=Users,DC=example,DC=org'
-ldap.connection.bindPassword: 'TheUserPassword'
-ldap.connection.baseDNs:
-  - 'OU=Users,DC=example,DC=org'
+ldap:
+  enabled: true
+  connection:
+    host: 'ldapHostnameOrIp'
+    port: 389
+    bindDn: 'CN=My Mxisd User,OU=Users,DC=example,DC=org'
+    bindPassword: 'TheUserPassword'
+    baseDNs:
+      - 'OU=Users,DC=example,DC=org'
 ```
 These are standard LDAP connection configuration. mxisd will try to connect on port default port 389 without encryption.
 
@@ -34,14 +36,17 @@ If you would like to use several Base DNs, simply add more entries under `baseDN
 ### TLS/SSL connection
 If you would like to use a TLS/SSL connection, use the following configuration options (STARTLS not supported):
 ```yaml
-ldap.connection.tls: true
-ldap.connection.port: 12345
+ldap:
+  connection:
+    tls: true
+    port: 12345
 ```
 
 ### Filter results
 You can also set a default global filter on any LDAP queries:
 ```yaml
-ldap.filter: '(memberOf=CN=My Matrix Users,OU=Groups,DC=example,DC=org)'
+ldap:
+  filter: '(memberOf=CN=My Matrix Users,OU=Groups,DC=example,DC=org)'
 ```
 This example would only return users part of the group called `My Matrix Users`.
 This can be overwritten or append in each specific flow describe below.
@@ -64,8 +69,11 @@ most certainly configure those mappings.
 
 The following example would set the `sAMAccountName` attribute as a Matrix User ID localpart:
 ```yaml
-ldap.attribute.uid.type: 'uid'
-ldap.attribute.uid.value: 'sAMAccountName'
+ldap:
+  attribute:
+    uid:
+      type: 'uid'
+      value: 'sAMAccountName'
 ```
 
 #### Display name
@@ -73,7 +81,9 @@ Use `ldap.attribute.name`.
 
 The following example would set the display name to the value of the `cn` attribute:
 ```yaml
-ldap.attribute.name: 'cn'
+ldap:
+  attribute:
+    name: 'cn'
 ```
 
 #### 3PIDs
@@ -82,13 +92,15 @@ You can also change the attribute lists for 3PID, like email or phone numbers.
 The following example would overwrite the [default list of attributes](../../src/main/resources/application.yaml#L67)
 for emails and phone number:
 ```yaml
-ldap.attribute.threepid.email:
-  - 'mail'
-  - 'otherMailAttribute'
-
-ldap.attribute.threepid.msisdn:
-  - 'phone'
-  - 'otherPhoneAttribute'
+ldap:
+  attribute:
+    threepid:
+      email:
+        - 'mail'
+        - 'otherMailAttribute'
+      msisdn:
+        - 'phone'
+        - 'otherPhoneAttribute'
 ```
 
 ## Features
@@ -117,8 +129,11 @@ To set a specific filter applied during directory search, use `ldap.directory.fi
 
 If you would like to use extra attributes in search that are not 3PIDs, like nicknames, group names, employee number:
 ```yaml
-ldap.directory.attribute.other:
-  - 'myNicknameAttribute'
-  - 'memberOf'
-  - 'employeeNumberAttribute'
+ldap:
+  directory:
+    attribute:
+      other:
+        - 'myNicknameAttribute'
+        - 'memberOf'
+        - 'employeeNumberAttribute'
 ```

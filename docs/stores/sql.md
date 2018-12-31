@@ -15,19 +15,21 @@
 
 Due to the implementation complexity of supporting arbitrary hashing/encoding mechanisms or auth flow, Authentication
 will be out of scope of SQL Identity stores and should be done via one of the other identity stores, typically
-the [REST Identity store](rest.md).
+the [Exec Identity Store](exec.md) or the [REST Identity Store](rest.md).
 
 ## Configuration
 ### Basic
 ```yaml
-sql.enabled: <boolean>
+sql:
+  enabled: <boolean>
 ```
 Enable/disable the identity store
 
 ---
 
 ```yaml
-sql.type: <string>
+sql:
+  type: <string>
 ```
 Set the SQL backend to use:
 - `sqlite`
@@ -38,14 +40,16 @@ Set the SQL backend to use:
 ### Connection
 #### SQLite
 ```yaml
-sql.connection: <string>
+sql:
+  connection: <string>
 ```
 Set the value to the absolute path to the Synapse SQLite DB file.
 Example: `/path/to/sqlite/file.db`
 
 #### Others
 ```yaml
-sql.connection: //<HOST[:PORT]/DB?user=USER&password=PASS
+sql:
+  connection: //<HOST[:PORT]/DB?user=USER&password=PASS
 ```
 Set the connection info for the database by replacing the following values:
 - `HOST`: Hostname of the SQL server
@@ -58,20 +62,23 @@ This follow the JDBC URI syntax. See [official website](https://docs.oracle.com/
 
 ### Directory
 ```yaml
-sql.directory.enabled: false
+sql:
+  directory:
+    enabled: false
 ```
-
 
 ---
 
 ```yaml
-sql.directory.query:
-  name:
-    type: <string>
-    value: <string>
-  threepid:
-    type: <string>
-    value: <string>
+sql:
+  directory:
+    query:
+      name:
+        type: <string>
+        value: <string>
+      threepid:
+        type: <string>
+        value: <string>
 ```
 For each query, `type` can be used to tell mxisd how to process the ID column:
 - `localpart` will append the `matrix.domain` to it
@@ -83,17 +90,21 @@ For each query, `type` can be used to tell mxisd how to process the ID column:
 
 Example:
 ```yaml
-sql.directory.query:
-  name:
-    type: 'localpart'
-    value: 'SELECT idColumn, displayNameColumn FROM table WHERE displayNameColumn LIKE ?'
-  threepid:
-    type: 'localpart'
-    value: 'SELECT idColumn, displayNameColumn FROM table WHERE threepidColumn LIKE ?'
+sql:
+  directory:
+    query:
+      name:
+        type: 'localpart'
+        value: 'SELECT idColumn, displayNameColumn FROM table WHERE displayNameColumn LIKE ?'
+      threepid:
+        type: 'localpart'
+        value: 'SELECT idColumn, displayNameColumn FROM table WHERE threepidColumn LIKE ?'
 ```
 
 ### Identity
 ```yaml
-sql.identity.type: <string>
-sql.identity.query: <string>
+sql:
+  identity:
+    type: <string>
+    query: <string>
 ```

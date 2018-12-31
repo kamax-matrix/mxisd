@@ -23,8 +23,6 @@ package io.kamax.mxisd.config;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.PostConstruct;
-
 public class KeyConfig {
 
     private String path;
@@ -37,7 +35,6 @@ public class KeyConfig {
         return path;
     }
 
-    @PostConstruct
     public void build() {
         if (StringUtils.isBlank(getPath())) {
             throw new ConfigurationException("key.path");

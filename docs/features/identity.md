@@ -7,8 +7,9 @@ Implementation of the [Unofficial Matrix Identity Service API](https://kamax.io/
 If you would like to use the central matrix.org Identity server to ensure maximum discovery at the cost of potentially
 leaking all your contacts information, add the following to your configuration:
 ```yaml
-forward.servers:
-  - 'matrix-org'
+forward:
+  servers:
+    - 'matrix-org'
 ```
 **NOTE:** You should carefully consider enabling this option, which is discouraged.  
 For more info, see the [relevant issue](https://github.com/kamax-matrix/mxisd/issues/76).

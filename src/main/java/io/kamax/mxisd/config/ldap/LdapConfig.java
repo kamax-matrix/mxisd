@@ -28,7 +28,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 public abstract class LdapConfig {
@@ -58,12 +57,11 @@ public abstract class LdapConfig {
 
     public static class Attribute {
 
-        private UID uid;
+        private UID uid = new UID();
         private String name = "displayName";
         private Map<String, List<String>> threepid = new HashMap<>();
 
         public Attribute() {
-            uid = new UID();
             uid.setType("uid");
             uid.setValue("saMAccountName");
 
@@ -358,7 +356,6 @@ public abstract class LdapConfig {
         this.profile = profile;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- " + getConfigName() + " Config ---");
         log.info("Enabled: {}", isEnabled());

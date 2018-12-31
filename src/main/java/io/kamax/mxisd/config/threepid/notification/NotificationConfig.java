@@ -27,7 +27,6 @@ import io.kamax.mxisd.threepid.notification.phone.PhoneNotificationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +58,6 @@ public class NotificationConfig {
         this.handlers = handlers;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- Notification config ---");
         log.info("Handlers:");

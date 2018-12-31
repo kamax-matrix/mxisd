@@ -7,8 +7,8 @@ out/
 .idea/
 
 # Local dev config
-/application.yaml
 /mxisd.yaml
+/application.yaml
 
 # Local dev storage
 /mxisd.db

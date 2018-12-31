@@ -9,7 +9,8 @@
 # (note: in Synapse Homeserver, the Matrix domain may be defined as 'server_name' in configuration file).
 #
 # This is used to build the various identifiers for identity, auth and directory.
-matrix.domain: ''
+matrix:
+  domain: ''
 
 
 ################
@@ -24,7 +25,8 @@ matrix.domain: ''
 #   - /var/lib/mxisd/sign.key
 #
 # The signing key is auto-generated during execution time if not present.
-key.path: ''
+key:
+  path: ''
 
 
 ############################
@@ -44,7 +46,10 @@ key.path: ''
 #  - /var/local/mxisd/mxisd.db
 #  - /var/lib/mxisd/mxisd.db
 #
-storage.provider.sqlite.database: '/path/to/mxisd.db'
+storage:
+  provider:
+    sqlite:
+      database: '/path/to/mxisd.db'
 
 
 ####################
@@ -57,7 +62,8 @@ storage.provider.sqlite.database: '/path/to/mxisd.db'
 #
 # If you would like to use them and trade away your privacy for convenience, uncomment the following option:
 #
-#forward.servers: ['matrix-org']
+#forward:
+#  servers: ['matrix-org']
 
 
 ################
@@ -88,27 +94,33 @@ storage.provider.sqlite.database: '/path/to/mxisd.db'
 # see https://github.com/kamax-matrix/mxisd/blob/master/docs/threepids/notification/template-generator.md
 #
 #### E-mail invite sender
-#
-# SMTP host
-threepid.medium.email.connectors.smtp.host: "smtp.example.org"
+threepid:
+  medium:
+    email:
+      identity:
+        # The e-mail to send as.
+        from: "matrix-identity@example.org"
 
-# SMTP port
-threepid.medium.email.connectors.smtp.port: 587
+      connectors:
+        smtp:
 
-# TLS mode for the connection.
-#
-# Possible values:
-#  0    Disable TLS entirely
-#  1    Enable TLS if supported by server (default)
-#  2    Force TLS and fail if not available
-#
-#threepid.medium.email.connectors.smtp.tls: 1
+          # SMTP host
+          host: "smtp.example.org"
 
-# Login for SMTP
-threepid.medium.email.connectors.smtp.login: "matrix-identity@example.org"
+          # SMTP port
+          port: 587
 
-# Password for the account
-threepid.medium.email.connectors.smtp.password: "ThePassword"
+          # TLS mode for the connection.
+          #
+          # Possible values:
+          #  0    Disable TLS entirely
+          #  1    Enable TLS if supported by server (default)
+          #  2    Force TLS and fail if not available
+          #
+          # tls: 1
 
-# The e-mail to send as.
-threepid.medium.email.identity.from: "matrix-identity@example.org"
+          # Login for SMTP
+          login: "matrix-identity@example.org"
+
+          # Password for the account
+          password: "ThePassword"

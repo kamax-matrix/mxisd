@@ -68,7 +68,8 @@ We will use the term `Executable` for each lookup/action and `Processor` for eac
 
 ### Global
 ```yaml
-exec.enabled: <boolean>
+exec:
+  enabled: <boolean>
 ```
 Enable/disable the Identity store at a global/default level. Each feature can still be individually enabled/disabled.
 
@@ -79,7 +80,9 @@ Not all features use all tokens, and each feature might also have its own specif
 They can be set within the following scope:
 
 ```yaml
-exec.token.<token>: '<value>'
+exec:
+  token:
+    <token>: '<value>'
 ```
 
 ---
@@ -184,13 +187,16 @@ The following types are available:
 ### Examples
 #### Basic
 ```yaml
-exec.auth.enabled: true
-exec.auth.command: '/opt/mxisd-exec/auth.sh'
-exec.auth.args: ['{localpart}']
-exec.auth.input.type: 'plain'
-exec.auth.input.template: '{password}'
-exec.auth.env:
-  DOMAIN: '{domain}'
+exec:
+  auth:
+    enabled: true
+    command: '/opt/mxisd-exec/auth.sh'
+    args: ['{localpart}']
+    input:
+      type: 'plain'
+      template: '{password}'
+  env:
+    DOMAIN: '{domain}'
 ```
 With Authentication enabled, run `/opt/mxisd-exec/auth.sh` when validating credentials, providing:
 - A single command-line argument to provide the `localoart` as username 
@@ -243,14 +249,17 @@ See each dedicated [Feature](#features) section.
 ## Authentication
 The Authentication feature can be enabled/disabled using:
 ```yaml
-exec.auth.enabled: <true/false>
+exec:
+  auth:
+    enabled: <true/false>
 ```
 
 ---
 
 This feature provides a single *Executable* under the namespace:
 ```yaml
-exec.auth:
+exec:
+  auth:
   ...
 ```
 
@@ -294,7 +303,9 @@ Default template:
 ## Directory
 The Directory feature can be enabled/disabled using:
 ```yaml
-exec.directory.enabled: <true/false>
+exec:
+  directory:
+    enabled: <true/false>
 ```
 
 ---
@@ -303,13 +314,19 @@ Two search types configuration namespace are available, using the same input/out
 
 By name:
 ```yaml
-exec.directory.search.byName:
-  ...
+exec:
+  directory:
+    search:
+      byName:
+        ...
 ```
 By 3PID:
 ```yaml
-exec.directory.search.byThreepid:
-  ...
+exec:
+  directory:
+    search:
+      byThreepid:
+        ...
 ```
 
 #### Tokens
@@ -386,8 +403,11 @@ The User ID type will default to `localpart` if:
 ### Bulk lookup
 Configuration namespace:
 ```yaml
-exec.identity.lookup.bulk:
-  ...
+exec:
+  identity:
+    lookup:
+      bulk:
+        ...
 ```
 
 #### Tokens
@@ -418,7 +438,9 @@ Same as the [REST Identity Store](rest.md).
 ## Profile
 The Profile feature can be enabled/disabled using:
 ```yaml
-exec.profile.enabled: <true/false>
+exec:
+  profile:
+    enabled: <true/false>
 ```
 
 ---
@@ -427,20 +449,26 @@ The following *Executable*s namespace are available, share the same input/output
 
 Get Display name:
 ```yaml
-exec.profile.displayName:
-  ...
+exec:
+  profile:
+    displayName:
+      ...
 ```
 
 Get 3PIDs:
 ```yaml
-exec.profile.threePid:
-  ...
+exec:
+  profile:
+    threePid:
+      ...
 ```
 
 Get Roles:
 ```yaml
-exec.profile.role:
-  ...
+exec:
+  profile:
+    role:
+      ...
 ```
 
 

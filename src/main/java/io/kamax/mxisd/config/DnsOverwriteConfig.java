@@ -25,7 +25,6 @@ import io.kamax.mxisd.util.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +88,6 @@ public class DnsOverwriteConfig {
         this.homeserver = homeserver;
     }
 
-    @PostConstruct
     public void build() {
         Gson gson = GsonUtil.build();
         log.info("--- DNS Overwrite config ---");

@@ -23,8 +23,6 @@ package io.kamax.mxisd.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 public class DirectoryConfig {
 
     private final static Logger log = LoggerFactory.getLogger(DirectoryConfig.class);
@@ -63,7 +61,6 @@ public class DirectoryConfig {
         this.exclude = exclude;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- Directory config ---");
         log.info("Exclude:");

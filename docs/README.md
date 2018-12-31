@@ -5,6 +5,7 @@
 - Installation
   - [Debian package](install/debian.md)
   - [ArchLinux](install/archlinux.md)
+  - [NixOS](install/nixos.md)
   - [Docker](install/docker.md)
   - [From source](install/source.md)
 - [Architecture overview](architecture.md)

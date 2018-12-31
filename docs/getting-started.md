@@ -38,13 +38,20 @@ Install via:
 See the [Latest release](https://github.com/kamax-matrix/mxisd/releases/latest) for links to each.
 
 ## Configure
-**NOTE**: please view the install instruction for your platform, as this step might be optional or already handled for you.
+> **NOTE**: Please view the install instruction for your platform, as this step might be optional or already handled for you.
+  
+> **NOTE**: Details about configuration syntax and format are described [here](configure.md)
 
 Create/edit a minimal configuration (see installer doc for the location):
 ```yaml
-matrix.domain: 'example.org'
-key.path: '/path/to/signing.key.file'
-storage.provider.sqlite.database: '/path/to/mxisd.db'
+matrix:
+  domain: 'example.org'
+key:
+  path: '/path/to/signing.key.file'
+storage:
+  provider:
+    sqlite:
+      database: '/path/to/mxisd.db'
 ```  
 - `matrix.domain` should be set to your Homeserver domain (`server_name` in synapse configuration)
 - `key.path` will store the signing keys, which must be kept safe! If the file does not exist, keys will be generated for you.

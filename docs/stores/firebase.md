@@ -19,35 +19,41 @@ If your client is Riot, you will need a custom version.
 
 ## Configuration
 ```yaml
-firebase.enabled: <boolean>
+firebase:
+  enabled: <boolean>
 ```
 Enable/disable this identity store.
 
 Example:
 ```yaml
-firebase.enabled: <boolean>
+firebase:
+  enabled: <boolean>
 ```
 
 ---
 
 ```yaml
-firebase.credentials: <string>
+firebase:
+  credentials: <string>
 ```
 Path to the credentials file provided by Google Firebase to use with an external app.
 
 Example:
 ```yaml
-firebase.credentials: '/path/to/firebase/credentials.json'
+firebase:
+  credentials: '/path/to/firebase/credentials.json'
 ```
 
 ---
 
 ```yaml
-firebase.database: <string>
+firebase:
+  database: <string>
 ```
 URL to your Firebase database.
 
 Example:
 ```yaml
-firebase.database: 'https://my-project.firebaseio.com/'
+firebase:
+  database: 'https://my-project.firebaseio.com/'
 ```

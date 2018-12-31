@@ -22,7 +22,6 @@ package io.kamax.mxisd.config;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 public class ExecConfig {
@@ -512,7 +511,6 @@ public class ExecConfig {
         this.profile = profile;
     }
 
-    @PostConstruct
     public ExecConfig build() {
         if (Objects.isNull(getAuth().isEnabled())) {
             getAuth().setEnabled(isEnabled());

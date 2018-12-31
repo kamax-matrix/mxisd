@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -198,12 +197,13 @@ public class EmailSendGridConfig {
         this.templates = templates;
     }
 
-    @PostConstruct
-    public void build() {
+    public EmailSendGridConfig build() {
         log.info("--- Email SendGrid connector config ---");
         log.info("API key configured?: {}", StringUtils.isNotBlank(api.getKey()));
         log.info("Identity: {}", GsonUtil.build().toJson(identity));
         log.info("Templates: {}", GsonUtil.build().toJson(templates));
+
+        return this;
     }
 
 }

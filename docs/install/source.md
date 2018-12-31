@@ -26,7 +26,7 @@ chmod a+x /opt/mxisd/mxisd.jar
 # Create symlink for easy exec
 ln -s /opt/mxisd/mxisd.jar /usr/bin/mxisd
 ```
-2. Copy the sample config file `./application.example.yaml` to `/etc/opt/mxisd/mxisd.yaml`, edit to your needs
+2. Copy the sample config file `./mxisd.example.yaml` to `/etc/opt/mxisd/mxisd.yaml`, edit to your needs
 3. Copy `src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
 4. Enable service for auto-startup
 ```bash

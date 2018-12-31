@@ -14,14 +14,16 @@ Authentication is done by Synapse itself.
 ## Configuration
 ### Basic
 ```yaml
-synapseSql.enabled: <boolean>
+synapseSql:
+  enabled: <boolean>
 ```
 Enable/disable the identity store
 
 ---
 
 ```yaml
-synapseSql.type: <string>
+synapseSql:
+  type: <string>
 ```
 Set the SQL backend to use which is configured in synapse:
 - `sqlite`
@@ -29,14 +31,16 @@ Set the SQL backend to use which is configured in synapse:
 
 ### SQLite
 ```yaml
-synapseSql.connection: <string>
+synapseSql:
+  connection: <string>
 ```
 Set the value to the absolute path to the Synapse SQLite DB file.
 Example: `/path/to/synapse/sqliteFile.db`
 
 ### PostgreSQL
 ```yaml
-synapseSql.connection: //<HOST[:PORT]/DB?user=USER&password=PASS
+synapseSql:
+  connection: //<HOST[:PORT]/DB?user=USER&password=PASS
 ```
 Set the connection info for the database by replacing the following values:
 - `HOST`: Hostname of the SQL server

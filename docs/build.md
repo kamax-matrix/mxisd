@@ -29,12 +29,14 @@ java -jar build/libs/mxisd.jar
 Ensure the signing key is available:
 ```bash
 $ curl 'http://localhost:8090/_matrix/identity/api/v1/pubkey/ed25519:0'
+
 {"public_key":"..."}
 ```
 
 Test basic recursive lookup (requires Internet connection with access to TCP 443):
 ```bash
 $ curl 'http://localhost:8090/_matrix/identity/api/v1/lookup?medium=email&address=mxisd-federation-test@kamax.io'
+
 {"address":"mxisd-federation-test@kamax.io","medium":"email","mxid":"@mxisd-lookup-test:kamax.io",...}
 ```
 

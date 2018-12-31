@@ -1,7 +1,6 @@
 # Configuration
 - [Concepts](#concepts)
   - [Syntax](#syntax)
-  - [Variables](#variables)
 - [Matrix](#matrix)
 - [Server](#server)
 - [Storage](#storage)
@@ -11,36 +10,15 @@
 
 ## Concepts
 ### Syntax
-The configuration file is [YAML](http://yaml.org/) based, allowing two types of syntax.
-
-Properties-like:
-```yaml
-my.config.item: 'value'
-```
-
-Object-like:
+The configuration file is [YAML](http://yaml.org/) based:
 ```yaml
 my:
   config:
     item: 'value'
 
 ```
-These can also be combined within the same file.  
-Both syntax will be used interchangeably in these documents.
 
-### Variables
-It is possible to copy the value of a configuration item into another using the syntax `${config.key.item}`.  
-Example that will copy the value of `matrix.domain` into `server.name`:
-```yaml
-matrix:
-  domain: 'example.org'
-
-server:
-  name: '${matrix.domain}'
-```
-
-**WARNING:** mxisd might overwrite/adapt some values during launch. Those changes will not be reflected into copied keys.
-
+When referencing keys in all documents, a property-like shorthand will be used. The shorthand for the above example would be `my.config.item`
 
 ## Matrix
 `matrix.domain`
@@ -53,10 +31,12 @@ Namespace to create arbitrary list of Identity servers, usable in other parts of
 
 Example:
 ```yaml
-matrix.identity.servers:
-  myOtherServers:
-    - 'https://other1.example.org'
-    - 'https://other2.example.org'
+matrix:
+  identity:
+    servers:
+      myOtherServers:
+        - 'https://other1.example.org'
+        - 'https://other2.example.org'
 ```
 Create a list under the label `root` containing a single Identity server, `https://matrix.org`
 
@@ -82,19 +62,23 @@ See the dedicated documents:
 
 Example:
 ```yaml
-notification.handler.email: 'sendgrid'
-notification.handler.msisdn: 'raw'
+notification:
+  handler:
+    email: 'sendgrid'
+    msisdn: 'raw'
 ```
 - Emails notifications would use the `sendgrid` handler, which define its own configuration under `notification.handlers.sendgrid`
-- Phone notification would use the `raw` handler, basic default built-in handler of mxisd
+- Phone notification would use the `raw` handler, basic default built-in handler in mxisd
 
 ### Handlers
 - `notification.handers.<handler ID>`: Handler-specific configuration for the given handler ID. Repeatable.
 
 Example:
 ```yaml
-notification.handlers.raw: ...
-notification.handlers.sendgrid: ...
+notification:
+  handlers:
+    raw: ...
+    sendgrid: ...
 ```
 
 Built-in:

@@ -23,8 +23,6 @@ package io.kamax.mxisd.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 public class FirebaseConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(FirebaseConfig.class);
@@ -57,7 +55,6 @@ public class FirebaseConfig {
         this.database = database;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- Firebase configuration ---");
         log.info("Enabled: {}", isEnabled());

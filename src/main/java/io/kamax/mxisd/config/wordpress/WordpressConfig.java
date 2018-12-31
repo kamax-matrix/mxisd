@@ -23,7 +23,6 @@ package io.kamax.mxisd.config.wordpress;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,7 +112,7 @@ public class WordpressConfig {
         private String type = "mysql";
         private String connection;
         private String tablePrefix = "wp_";
-        private Query query;
+        private Query query = new Query();
 
         public String getType() {
             return type;
@@ -177,7 +176,6 @@ public class WordpressConfig {
         this.sql = sql;
     }
 
-    @PostConstruct
     public void build() {
         if (!isEnabled()) {
             return;

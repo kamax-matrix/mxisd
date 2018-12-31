@@ -23,8 +23,6 @@ package io.kamax.mxisd.config;
 import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.PostConstruct;
-
 public class StorageConfig {
 
     public static class Provider {
@@ -60,7 +58,6 @@ public class StorageConfig {
         this.provider = provider;
     }
 
-    @PostConstruct
     public void build() {
         if (StringUtils.isBlank(getBackend())) {
             throw new ConfigurationException("storage.backend");

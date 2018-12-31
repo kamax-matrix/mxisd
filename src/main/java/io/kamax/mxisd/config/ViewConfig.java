@@ -24,8 +24,6 @@ import io.kamax.matrix.json.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 public class ViewConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(ViewConfig.class);
@@ -145,7 +143,6 @@ public class ViewConfig {
         this.session = session;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- View config ---");
         log.info("Session: {}", GsonUtil.get().toJson(session));

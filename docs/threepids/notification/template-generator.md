@@ -11,16 +11,18 @@ placeholders and also have their own individual set of placeholders.
 ## Configuration
 To configure paths to the various templates:
 ```yaml
-threepid.medium.<YOUR 3PID MEDIUM HERE>:
-  generators:
-    template:
-      invite: '/path/to/invite-template.eml'
-      session:
-        validation:
-          local: '/path/to/validate-local-template.eml'
-          remote: 'path/to/validate-remote-template.eml'
-      generic:
-        matrixId: '/path/to/mxid-invite-template.eml'
+threepid:
+  medium:
+    <YOUR 3PID MEDIUM HERE>:
+      generators:
+        template:
+          invite: '/path/to/invite-template.eml'
+          session:
+            validation:
+              local: '/path/to/validate-local-template.eml'
+              remote: 'path/to/validate-remote-template.eml'
+          generic:
+            matrixId: '/path/to/mxid-invite-template.eml'
 ```
 The `template` generator is usually the default, so no further configuration is needed.
 

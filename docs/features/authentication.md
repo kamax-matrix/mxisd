@@ -151,9 +151,12 @@ the internal IP of the Homeserver so it can talk to it directly to integrate its
 
 To do so, put the following configuration in your mxisd configuration:
 ```yaml
-dns.overwrite.homeserver.client:
-  - name: 'example.org'
-    value: 'http://localhost:8008'
+dns:
+  overwrite:
+    homeserver:
+      client:
+        - name: 'example.org'
+          value: 'http://localhost:8008'
 ```
 `name` must be the hostname of the URL that clients use when connecting to the Homeserver.
 You can use `${server.name}` to auto-populate the `value` using the `server.name` configuration option and avoid duplicating it.

@@ -55,7 +55,7 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
 
     public EmailSendGridNotificationHandler(MxisdConfig mCfg, EmailSendGridConfig cfg) {
         super(mCfg.getMatrix(), mCfg.getServer());
-        this.cfg = cfg;
+        this.cfg = cfg.build();
         this.sendgrid = new SendGrid(cfg.getApi().getKey());
     }
 

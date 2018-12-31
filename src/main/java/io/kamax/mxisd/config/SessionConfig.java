@@ -24,8 +24,6 @@ import io.kamax.matrix.json.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 public class SessionConfig {
 
     private transient final Logger log = LoggerFactory.getLogger(SessionConfig.class);
@@ -162,7 +160,6 @@ public class SessionConfig {
         this.policy = policy;
     }
 
-    @PostConstruct
     public void build() {
         log.info("--- Session config ---");
         log.info("Global Policy: {}", GsonUtil.get().toJson(policy));
