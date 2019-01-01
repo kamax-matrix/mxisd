@@ -1,5 +1,5 @@
 # Web pages for the 3PID sessions
-You can customize the various pages used during a 3PID validation using [Thymeleaf templates](http://www.thymeleaf.org/).
+You can customize the various pages used during a 3PID validation using the options below.
 
 ## Configuration
 Pseudo-configuration to illustrate the structure:
@@ -57,7 +57,7 @@ client if they do not wish to proceed any further.
 
 #### Placeholders
 ##### Success
-`<a th:href="${remoteSessionLink}">text</a>` can be used to display the link to start a Remote 3PID session.
+`<a href="${remoteSessionLink}">text</a>` can be used to display the link to start a Remote 3PID session.
 
 ##### Failure
 No object/placeholder are currently available.
@@ -72,7 +72,7 @@ the remote Identity server and, once that is done, click a link to validate the 
 
 #### Placeholders
 ##### Success
-`<a th:href="${checkLink}">text</a>` can be used to display the link to validate the Remote 3PID session.
+`<a href="${checkLink}">text</a>` can be used to display the link to validate the Remote 3PID session.
 
 ##### Failure
 No object/placeholder are currently available.
