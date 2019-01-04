@@ -57,11 +57,14 @@ public class EmailSmtpConnector implements IEmailConnector {
         Properties sCfg = new Properties();
         sCfg.setProperty("mail.smtp.host", cfg.getHost());
         sCfg.setProperty("mail.smtp.port", Integer.toString(cfg.getPort()));
+
+        // This seems very fiddly as we need to call different connect() methods depending
+        // If there is authentication or not. We set those for the sake of completeness and
+        // Backward compatibility. See previously opened issues about Email and SMTP.
         if (StringUtils.isAllEmpty(cfg.getLogin(), cfg.getPassword())) {
             sCfg.setProperty("mail.smtp.auth", "false");
         } else {
-            sCfg.setProperty("mail.smtp.user", cfg.getLogin());
-            sCfg.setProperty("mail.smtp.password", cfg.getPassword());
+            sCfg.setProperty("mail.smtp.auth", "true");
         }
 
         session = Session.getInstance(sCfg);
@@ -103,7 +106,14 @@ public class EmailSmtpConnector implements IEmailConnector {
             transport.setRequireStartTLS(cfg.getTls() > 1);
 
             log.info("Connecting to {}:{}", cfg.getHost(), cfg.getPort());
-            transport.connect();
+            if (StringUtils.isAllEmpty(cfg.getLogin(), cfg.getPassword())) {
+                log.info("Not using SMTP authentication");
+                transport.connect();
+            } else {
+                log.info("Using SMTP authentication");
+                transport.connect(cfg.getLogin(), cfg.getPassword());
+            }
+
             try {
                 transport.sendMessage(msg, InternetAddress.parse(recipient));
                 log.info("Invite to {} was sent", recipient);
