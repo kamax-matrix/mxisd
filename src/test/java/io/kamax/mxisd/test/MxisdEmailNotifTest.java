@@ -63,6 +63,8 @@ public class MxisdEmailNotifTest {
 
     @Test
     public void forMatrixIdInvite() throws MessagingException {
+        gm.setUser("mxisd", "mxisd");
+
         _MatrixID sender = MatrixID.asAcceptable("mxisd", domain);
         _MatrixID recipient = MatrixID.asAcceptable("john", domain);
         MatrixIdInvite idInvite = new MatrixIdInvite("!rid:" + domain, sender, recipient, ThreePidMedium.Email.getId(), "john@" + domain, Collections.emptyMap());
