@@ -17,9 +17,8 @@ cd mxisd
 ./gradlew build
 ```
 
-Create a new configuration file by coping `application.example.yaml` to `application.yaml` and edit to your needs.  
-For advanced configuration, see the [Configure section](configure.md).  
-**NOTE**: `application.yaml` is also called `mxisd.yaml` in some specific installations.
+Create a new configuration file by coping `mxisd.example.yaml` to `mxisd.yaml` and edit to your needs.  
+For advanced configuration, see the [Configure section](configure.md).
 
 Start the server in foreground to validate the build and configuration:
 ```bash
@@ -59,7 +58,7 @@ Requirements:
 
 [Build mxisd](#build) then:
 ```bash
-./gradlew buildDeb 
+./gradlew debBuild
 ```
 You will find the debian package in `build/dist`.  
 Then follow the instruction in the [Debian package](install/debian.md) document.

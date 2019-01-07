@@ -2,37 +2,43 @@
 ## Instructions
 Follow the [build instructions](../build.md) then:
 
-1. Prepare files and directories:
+### Prepare files and directories:
 ```bash
 # Create a dedicated user
 useradd -r mxisd
 
-# Create bin directory
-mkdir /opt/mxisd
-
 # Create config directory and set ownership
-mkdir -p /etc/opt/mxisd
-chown -R mxisd /etc/opt/mxisd
+mkdir -p /etc/mxisd
 
 # Create data directory and set ownership
-mkdir -p /var/opt/mxisd
-chown -R mxisd /var/opt/mxisd
+mkdir -p /var/lib/mxisd
+chown -R mxisd /var/lib/mxisd
 
-# Copy <repo root>/build/libs/mxisd.jar to bin directory
-cp ./build/libs/mxisd.jar /opt/mxisd/
-chown mxisd /opt/mxisd/mxisd.jar
-chmod a+x /opt/mxisd/mxisd.jar
+# Create bin directory, copy the jar and launch scriot to bin directory
+mkdir /usr/lib/mxisd
+cp ./build/libs/mxisd.jar /usr/lib/mxisd/
+cp ./src/script/mxisd /usr/lib/mxisd
+chown -R mxisd /usr/lib/mxisd
+chmod a+x /usr/lib/mxisd/mxisd
 
 # Create symlink for easy exec
-ln -s /opt/mxisd/mxisd.jar /usr/bin/mxisd
+ln -s /usr/lib/mxisd/mxisd /usr/bin/mxisd
 ```
-2. Copy the sample config file `./mxisd.example.yaml` to `/etc/opt/mxisd/mxisd.yaml`, edit to your needs
-3. Copy `src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
-4. Enable service for auto-startup
+
+### Prepare config file
+Copy the sample config file `./mxisd.example.yaml` to `/etc/mxisd/mxisd.yaml`, edit to your needs
+
+### Prepare Systemd
+1. Copy `src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed
+2. Enable service for auto-startup
 ```bash
 systemctl enable mxisd
 ```
-5. Start mxisd
+
+### Run
 ```bash
 systemctl start mxisd
 ```
+
+## Debug
+mxisd logs to stdout, which is normally sent to `/var/log/syslog` or `/var/log/messages`.

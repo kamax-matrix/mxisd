@@ -22,19 +22,48 @@ package io.kamax.mxisd;
 
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.config.YamlConfigLoader;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Objects;
 
 public class MxisdStandaloneExec {
 
     public static void main(String[] args) throws IOException {
-        // FIXME no hard-coding, make it configurable via Build, Env and CLI parameters
-        MxisdConfig cfg = YamlConfigLoader.loadFromFile("mxisd.yaml");
-        HttpMxisd mxisd = new HttpMxisd(cfg);
+        MxisdConfig cfg = null;
 
-        Runtime.getRuntime().addShutdownHook(new Thread(mxisd::stop));
+        Iterator<String> argsIt = Arrays.asList(args).iterator();
+        while (argsIt.hasNext()) {
+            String arg = argsIt.next();
+            if (StringUtils.equals("-c", arg)) {
+                String cfgFile = argsIt.next();
+                cfg = YamlConfigLoader.loadFromFile(cfgFile);
+                System.out.println("Loaded configuration from " + cfgFile);
+            } else {
+                System.out.println("Invalid argument: " + arg);
+                System.exit(1);
+            }
+        }
 
-        mxisd.start();
+        if (Objects.isNull(cfg)) {
+            cfg = YamlConfigLoader.tryLoadFromFile("mxisd.yaml").orElseGet(MxisdConfig::new);
+        }
+
+        try {
+            HttpMxisd mxisd = new HttpMxisd(cfg);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                mxisd.stop();
+                System.out.println("------------- mxisd stopped -------------");
+            }));
+            mxisd.start();
+
+            System.out.println("------------- mxisd started -------------");
+        } catch (Throwable t) {
+            t.printStackTrace();
+            System.exit(1);
+        }
     }
 
 }

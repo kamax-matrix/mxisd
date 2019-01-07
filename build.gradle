@@ -25,7 +25,7 @@ apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'idea'
 
-def confFileName = "application.example.yaml"
+def confFileName = "mxisd.example.yaml"
 def distDir = "${project.buildDir}/dist"
 
 def debBinPath = "/usr/lib/mxisd"
@@ -33,7 +33,8 @@ def debConfPath = "/etc/mxisd"
 def debDataPath = "/var/lib/mxisd"
 def debSystemdPath = "/etc/systemd/system"
 
-def debConfFileName = "mxisd-sample.yaml"
+def debConfFileName = confFileName
+def debStartScriptFilename = "mxisd"
 
 def debBuildBasePath = "${project.buildDir}/tmp/debian"
 def debBuildDebianPath = "${debBuildBasePath}/DEBIAN"
@@ -115,8 +116,8 @@ dependencies {
     compile 'com.googlecode.libphonenumber:libphonenumber:8.7.1'
 
     // E-mail sending
-    compile 'com.sun.mail:javax.mail:1.6.2'
     compile 'javax.mail:javax.mail-api:1.6.2'
+    compile 'com.sun.mail:javax.mail:1.6.2'
 
     // Google Firebase Authentication backend
     compile 'com.google.firebase:firebase-admin:5.3.0'
@@ -163,7 +164,7 @@ task debBuild(dependsOn: shadowJar) {
         println "Version for package: ${debVersion}"
         mkdir distDir
         mkdir debBuildBasePath
-        mkdir "${debBuildBasePath}/DEBIAN"
+        mkdir debBuildDebianPath
         mkdir debBuildBinPath
         mkdir debBuildConfPath
         mkdir debBuildDataPath
@@ -174,10 +175,10 @@ task debBuild(dependsOn: shadowJar) {
             into debBuildBinPath
         }
 
-        ant.chmod(
-                file: "${debBuildBinPath}/mxisd.jar",
-                perm: 'a+x'
-        )
+        copy {
+            from "${project.file("src/script/" + debStartScriptFilename)}"
+            into debBuildBinPath
+        }
 
         copy {
             from(project.file(confFileName)) {
@@ -188,14 +189,14 @@ task debBuild(dependsOn: shadowJar) {
 
         ant.replaceregexp( // FIXME adapt to new config format
                 file: "${debBuildConfPath}/${debConfFileName}",
-                match: "key.path:(.*)",
-                replace: "key.path: '${debDataPath}/signing.key'"
+                match: "key:\\R  path:(.*)",
+                replace: "key:\n  path: '${debDataPath}/signing.key'"
         )
 
         ant.replaceregexp( // FIXME adapt to new config format
                 file: "${debBuildConfPath}/${debConfFileName}",
-                match: "storage.provider.sqlite.database:(.*)",
-                replace: "storage.provider.sqlite.database: '${debDataPath}/mxisd.db'"
+                match: "storage:\\R  provider:\\R    sqlite:\\R      database:(.*)",
+                replace: "storage:\n  provider:\n    sqlite:\n      database: '${debDataPath}/mxisd.db'"
         )
 
         copy {

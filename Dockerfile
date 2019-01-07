@@ -14,4 +14,5 @@ ENV SQLITE_DATABASE_PATH="/var/mxisd/mxisd.db"
 CMD [ "/start.sh" ]
 
 ADD src/docker/start.sh /start.sh
-ADD build/libs/mxisd.jar /mxisd.jar
+ADD src/script/mxisd /app/mxisd
+ADD build/libs/mxisd.jar /app/mxisd.jar

@@ -1,14 +1,14 @@
 # Sample configuration file explaining the minimum required keys to be set to run mxisd
 #
-# For a complete list of options, see https://github.com/kamax-matrix/mxisd
+# For a complete list of options, see https://github.com/kamax-matrix/mxisd/docs/README.md
 
 #######################
 # Matrix config items #
 #######################
 # Matrix domain, same as the domain configure in your Homeserver configuration.
-# (note: in Synapse Homeserver, the Matrix domain may be defined as 'server_name' in configuration file).
+# NOTE: in Synapse Homeserver, the Matrix domain is defined as 'server_name' in configuration file.
 #
-# This is used to build the various identifiers for identity, auth and directory.
+# This is used to build the various identifiers in all the features.
 matrix:
   domain: ''
 
@@ -17,29 +17,20 @@ matrix:
 # Signing keys #
 ################
 # Absolute path for the Identity Server signing key.
-# During testing, /var/tmp/mxisd.key is a possible value
+# This is **NOT** your homeserver key.
+# The signing key is auto-generated during execution time if not present.
 #
+# During testing, /var/tmp/mxisd.key is a possible value
 # For production, recommended location shall be one of the following:
 #   - /var/opt/mxisd/sign.key
 #   - /var/local/mxisd/sign.key
 #   - /var/lib/mxisd/sign.key
 #
-# The signing key is auto-generated during execution time if not present.
 key:
   path: ''
 
 
-############################
-# Persistence config items #
-############################
-
-# Configure the storage backend, usually a DB
-# Possible built-in values:
-#   sqlite                      SQLite backend, default
-#
-#storage.backend: 'sqlite'
-
-# Path to the SQLite DB file
+# Path to the SQLite DB file for mxisd internal storage
 #
 # Examples:
 #  - /var/opt/mxisd/mxisd.db
@@ -57,7 +48,7 @@ storage:
 ####################
 #
 # Root/Central servers to be used as final fallback when performing lookups.
-# By default, for privacy reasons, matrix.org servers are not enabled anymore.
+# By default, for privacy reasons, matrix.org servers are not enabled.
 # See the following issue: https://github.com/kamax-matrix/mxisd/issues/76
 #
 # If you would like to use them and trade away your privacy for convenience, uncomment the following option:
@@ -103,7 +94,6 @@ threepid:
 
       connectors:
         smtp:
-
           # SMTP host
           host: "smtp.example.org"
 
@@ -117,7 +107,7 @@ threepid:
           #  1    Enable TLS if supported by server (default)
           #  2    Force TLS and fail if not available
           #
-          # tls: 1
+          tls: 1
 
           # Login for SMTP
           login: "matrix-identity@example.org"

@@ -26,7 +26,9 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Optional;
 
 public class YamlConfigLoader {
 
@@ -37,6 +39,16 @@ public class YamlConfigLoader {
         Yaml yaml = new Yaml(new Constructor(MxisdConfig.class), rep);
         Object o = yaml.load(new FileInputStream(path));
         return GsonUtil.get().fromJson(GsonUtil.get().toJson(o), MxisdConfig.class);
+    }
+
+    public static Optional<MxisdConfig> tryLoadFromFile(String path) {
+        try {
+            return Optional.of(loadFromFile(path));
+        } catch (FileNotFoundException e) {
+            return Optional.empty();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

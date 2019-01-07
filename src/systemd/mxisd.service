@@ -4,8 +4,7 @@ After=syslog.target
 
 [Service]
 User=mxisd
-ExecStart=/usr/bin/mxisd --spring.config.location=/etc/mxisd/ --spring.config.name=mxisd --spring.profiles.active=systemd
-SuccessExitStatus=143
+ExecStart=/usr/bin/mxisd -c /etc/mxisd/mxisd.yaml
 
 [Install]
 WantedBy=multi-user.target
