@@ -76,9 +76,9 @@ public class HttpMxisd {
                 .get(EphemeralKeyIsValidHandler.Path, SaneHandler.around(new EphemeralKeyIsValidHandler()))
 
                 // Identity endpoints
-                .get(HelloHandler.Path, new HelloHandler())
-                .get(SingleLookupHandler.Path, new SingleLookupHandler(m.getIdentity(), m.getSign()))
-                .post(BulkLookupHandler.Path, new BulkLookupHandler(m.getIdentity()))
+                .get(HelloHandler.Path, SaneHandler.around(new HelloHandler()))
+                .get(SingleLookupHandler.Path, SaneHandler.around(new SingleLookupHandler(m.getIdentity(), m.getSign())))
+                .post(BulkLookupHandler.Path, SaneHandler.around(new BulkLookupHandler(m.getIdentity())))
                 .post(StoreInviteHandler.Path, storeInvHandler)
                 .post(SessionStartHandler.Path, SaneHandler.around(new SessionStartHandler(m.getSession())))
                 .get(SessionValidateHandler.Path, sessValidateHandler)
