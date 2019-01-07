@@ -36,7 +36,7 @@ public class NetIqLdapStoreSupplier implements IdentityStoreSupplier {
     }
 
     public void accept(MxisdConfig cfg) {
-        if (cfg.getLdap().isEnabled()) {
+        if (cfg.getNetiq().isEnabled()) {
             AuthProviders.register(() -> new NetIqLdapAuthProvider(cfg.getNetiq(), cfg.getMatrix()));
             DirectoryProviders.register(() -> new NetIqLdapDirectoryProvider(cfg.getNetiq(), cfg.getMatrix()));
             ThreePidProviders.register(() -> new NetIqLdapThreePidProvider(cfg.getNetiq(), cfg.getMatrix()));
