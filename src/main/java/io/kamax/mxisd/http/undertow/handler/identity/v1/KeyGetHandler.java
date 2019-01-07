@@ -45,7 +45,7 @@ public class KeyGetHandler extends BasicHttpHandler {
     @Override
     public void handleRequest(HttpServerExchange exchange) {
         String key = getQueryParameter(exchange, Key);
-        String[] v = key.split(":", 1);
+        String[] v = key.split(":", 2);
         String keyType = v[0];
         int keyId = Integer.parseInt(v[1]);
 
