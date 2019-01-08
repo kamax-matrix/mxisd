@@ -268,3 +268,10 @@ Structure with example values:
 }
 ```
 The base `profile` key is mandatory. `display_name`, `threepids` and `roles` are only to be returned on the relevant request.
+
+If there is no profile, the following response is expected:
+```json
+{
+  "profile": {}
+}
+```
