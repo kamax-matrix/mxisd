@@ -34,8 +34,8 @@ public class RestBackendConfig {
 
     public static class IdentityEndpoints {
 
-        private String single = "/_mxisd/backend/api/v1/identity/lookup/single";
-        private String bulk = "/_mxisd/backend/api/v1/identity/lookup/bulk";
+        private String single = "/_mxisd/backend/api/v1/identity/single";
+        private String bulk = "/_mxisd/backend/api/v1/identity/bulk";
 
         public String getSingle() {
             return single;
