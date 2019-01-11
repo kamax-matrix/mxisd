@@ -26,6 +26,7 @@ import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailTemplateConfig;
 import io.kamax.mxisd.threepid.generator.GenericTemplateNotificationGenerator;
+import org.apache.commons.lang3.StringUtils;
 
 public class GenericEmailNotificationGenerator extends GenericTemplateNotificationGenerator implements EmailGenerator {
 
@@ -46,8 +47,8 @@ public class GenericEmailNotificationGenerator extends GenericTemplateNotificati
     @Override
     protected String populateForCommon(ThreePid recipient, String body) {
         body = super.populateForCommon(recipient, body);
-        body = body.replace("%FROM_EMAIL%", cfg.getIdentity().getFrom());
-        body = body.replace("%FROM_NAME%", cfg.getIdentity().getName());
+        body = body.replace("%FROM_EMAIL%", StringUtils.defaultIfEmpty(cfg.getIdentity().getFrom(), ""));
+        body = body.replace("%FROM_NAME%", StringUtils.defaultIfEmpty(cfg.getIdentity().getName(), ""));
         return body;
     }
 
