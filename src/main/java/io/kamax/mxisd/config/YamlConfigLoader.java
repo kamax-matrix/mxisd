@@ -37,8 +37,10 @@ public class YamlConfigLoader {
         rep.getPropertyUtils().setAllowReadOnlyProperties(true);
         rep.getPropertyUtils().setSkipMissingProperties(true);
         Yaml yaml = new Yaml(new Constructor(MxisdConfig.class), rep);
-        Object o = yaml.load(new FileInputStream(path));
-        return GsonUtil.get().fromJson(GsonUtil.get().toJson(o), MxisdConfig.class);
+        try (FileInputStream is = new FileInputStream(path)) {
+            Object o = yaml.load(is);
+            return GsonUtil.get().fromJson(GsonUtil.get().toJson(o), MxisdConfig.class);
+        }
     }
 
     public static Optional<MxisdConfig> tryLoadFromFile(String path) {

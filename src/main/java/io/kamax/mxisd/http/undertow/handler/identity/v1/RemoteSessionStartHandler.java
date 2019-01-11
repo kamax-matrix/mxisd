@@ -24,11 +24,8 @@ import io.kamax.mxisd.config.ViewConfig;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.session.SessionMananger;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
+import io.kamax.mxisd.util.FileUtil;
 import io.undertow.server.HttpServerExchange;
-import org.apache.commons.io.IOUtils;
-
-import java.io.FileInputStream;
-import java.nio.charset.StandardCharsets;
 
 public class RemoteSessionStartHandler extends BasicHttpHandler {
 
@@ -46,8 +43,7 @@ public class RemoteSessionStartHandler extends BasicHttpHandler {
         String secret = getQueryParameter(exchange, "client_secret");
         IThreePidSession session = mgr.createRemote(sid, secret);
 
-        FileInputStream f = new FileInputStream(viewCfg.getSession().getRemote().getOnRequest().getSuccess());
-        String rawData = IOUtils.toString(f, StandardCharsets.UTF_8);
+        String rawData = FileUtil.load(viewCfg.getSession().getRemote().getOnRequest().getSuccess());
         String data = rawData.replace("${checkLink}", RemoteIdentityAPIv1.getSessionCheck(session.getId(), session.getSecret()));
         writeBodyAsUtf8(exchange, data);
     }

@@ -60,7 +60,9 @@ public class GoogleFirebaseBackend {
 
     private FirebaseCredential getCreds(String credsPath) throws IOException {
         if (StringUtils.isNotBlank(credsPath)) {
-            return FirebaseCredentials.fromCertificate(new FileInputStream(credsPath));
+            try (FileInputStream is = new FileInputStream(credsPath)) {
+                return FirebaseCredentials.fromCertificate(is);
+            }
         } else {
             return FirebaseCredentials.applicationDefault();
         }

@@ -31,14 +31,12 @@ import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.notification.NotificationHandler;
 import io.kamax.mxisd.threepid.generator.PlaceholderNotificationGenerator;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
-import org.apache.commons.io.IOUtils;
+import io.kamax.mxisd.util.FileUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static com.sendgrid.SendGrid.Email;
 import static com.sendgrid.SendGrid.Response;
@@ -78,7 +76,7 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
 
     private String getFromFile(String path) {
         try {
-            return IOUtils.toString(new FileInputStream(path), StandardCharsets.UTF_8);
+            return FileUtil.load(path);
         } catch (IOException e) {
             throw new RuntimeException("Couldn't create notification content using file " + path, e);
         }

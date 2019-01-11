@@ -27,18 +27,16 @@ import io.kamax.mxisd.http.io.identity.SuccessStatusJson;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.session.SessionMananger;
 import io.kamax.mxisd.session.ValidationResult;
+import io.kamax.mxisd.util.FileUtil;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 public class SessionValidateHandler extends BasicHttpHandler {
 
@@ -95,16 +93,13 @@ public class SessionValidateHandler extends BasicHttpHandler {
             exchange.getResponseHeaders().add(HttpString.tryFromString("Location"), url);
         } else {
             try {
+                String rawData = FileUtil.load(viewCfg.getSession().getLocalRemote().getOnTokenSubmit().getSuccess());
                 if (r.isCanRemote()) {
-                    FileInputStream f = new FileInputStream(viewCfg.getSession().getLocalRemote().getOnTokenSubmit().getSuccess());
                     String url = srvCfg.getPublicUrl() + RemoteIdentityAPIv1.getRequestToken(r.getSession().getId(), r.getSession().getSecret());
-                    String rawData = IOUtils.toString(f, StandardCharsets.UTF_8);
                     String data = rawData.replace("${remoteSessionLink}", url);
                     writeBodyAsUtf8(exchange, data);
                 } else {
-                    FileInputStream f = new FileInputStream(viewCfg.getSession().getLocalRemote().getOnTokenSubmit().getSuccess());
-                    String data = IOUtils.toString(f, StandardCharsets.UTF_8);
-                    writeBodyAsUtf8(exchange, data);
+                    writeBodyAsUtf8(exchange, rawData);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

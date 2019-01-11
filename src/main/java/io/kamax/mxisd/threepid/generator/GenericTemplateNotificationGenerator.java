@@ -27,16 +27,12 @@ import io.kamax.mxisd.config.threepid.medium.GenericTemplateConfig;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
-import org.apache.commons.io.IOUtils;
+import io.kamax.mxisd.util.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 
 public abstract class GenericTemplateNotificationGenerator extends PlaceholderNotificationGenerator implements NotificationGenerator {
 
@@ -51,14 +47,7 @@ public abstract class GenericTemplateNotificationGenerator extends PlaceholderNo
 
     private String getTemplateContent(String location) {
         try {
-            URI loc = URI.create(location);
-            InputStream is;
-            if (StringUtils.equals("classpath", loc.getScheme())) {
-                is = getClass().getResourceAsStream(loc.getSchemeSpecificPart());
-            } else {
-                is = new FileInputStream(location);
-            }
-            return IOUtils.toString(is, StandardCharsets.UTF_8);
+            return FileUtil.load(location);
         } catch (IOException e) {
             throw new InternalServerError("Unable to read template content at " + location + ": " + e.getMessage());
         }

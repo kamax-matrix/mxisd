@@ -24,11 +24,8 @@ import io.kamax.mxisd.config.ViewConfig;
 import io.kamax.mxisd.exception.SessionNotValidatedException;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.session.SessionMananger;
+import io.kamax.mxisd.util.FileUtil;
 import io.undertow.server.HttpServerExchange;
-import org.apache.commons.io.IOUtils;
-
-import java.io.FileInputStream;
-import java.nio.charset.StandardCharsets;
 
 public class RemoteSessionCheckHandler extends BasicHttpHandler {
 
@@ -45,18 +42,15 @@ public class RemoteSessionCheckHandler extends BasicHttpHandler {
         String sid = getQueryParameter(exchange, "sid");
         String secret = getQueryParameter(exchange, "client_secret");
 
+        String viewData;
         try {
-            FileInputStream f = new FileInputStream(viewCfg.getSession().getRemote().getOnCheck().getSuccess());
-            String viewData = IOUtils.toString(f, StandardCharsets.UTF_8);
-
             mgr.validateRemote(sid, secret);
-
-            writeBodyAsUtf8(exchange, viewData);
+            viewData = FileUtil.load(viewCfg.getSession().getRemote().getOnCheck().getSuccess());
         } catch (SessionNotValidatedException e) {
-            FileInputStream f = new FileInputStream(viewCfg.getSession().getRemote().getOnCheck().getFailure());
-            String viewData = IOUtils.toString(f, StandardCharsets.UTF_8);
-            writeBodyAsUtf8(exchange, viewData);
+            viewData = FileUtil.load(viewCfg.getSession().getRemote().getOnCheck().getFailure());
         }
+
+        writeBodyAsUtf8(exchange, viewData);
     }
 
 }
