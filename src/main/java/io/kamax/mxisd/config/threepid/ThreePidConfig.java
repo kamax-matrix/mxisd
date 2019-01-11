@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.config.threepid;
 
-import com.google.gson.JsonObject;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
@@ -31,18 +30,18 @@ import java.util.Map;
 
 public class ThreePidConfig {
 
-    private Map<String, JsonObject> medium = new HashMap<>();
+    private Map<String, Object> medium = new HashMap<>();
 
-    public ThreePidConfig() {
+    public ThreePidConfig() { // TODO Check if this is still needed
         medium.put(ThreePidMedium.Email.getId(), GsonUtil.makeObj(new EmailConfig()));
         medium.put(ThreePidMedium.PhoneNumber.getId(), GsonUtil.makeObj(new PhoneConfig()));
     }
 
-    public Map<String, JsonObject> getMedium() {
+    public Map<String, Object> getMedium() {
         return medium;
     }
 
-    public void setMedium(Map<String, JsonObject> medium) {
+    public void setMedium(Map<String, Object> medium) {
         this.medium = medium;
     }
 

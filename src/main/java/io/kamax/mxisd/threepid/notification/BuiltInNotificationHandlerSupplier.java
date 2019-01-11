@@ -63,9 +63,9 @@ public class BuiltInNotificationHandlerSupplier implements NotificationHandlerSu
 
     private void acceptEmail(String handler, Mxisd mxisd) {
         if (StringUtils.equals(EmailRawNotificationHandler.ID, handler)) {
-            JsonObject emailCfgJson = mxisd.getConfig().getThreepid().getMedium().get(ThreePidMedium.Email.getId());
-            if (Objects.nonNull(emailCfgJson)) {
-                EmailConfig emailCfg = GsonUtil.get().fromJson(emailCfgJson, EmailConfig.class);
+            Object o = mxisd.getConfig().getThreepid().getMedium().get(ThreePidMedium.Email.getId());
+            if (Objects.nonNull(o)) {
+                EmailConfig emailCfg = GsonUtil.get().fromJson(GsonUtil.makeObj(o), EmailConfig.class);
 
                 if (org.apache.commons.lang.StringUtils.isBlank(emailCfg.getGenerator())) {
                     throw new ConfigurationException("notification.email.generator");
@@ -105,9 +105,9 @@ public class BuiltInNotificationHandlerSupplier implements NotificationHandlerSu
 
     private void acceptPhone(String handler, Mxisd mxisd) {
         if (StringUtils.equals(PhoneNotificationHandler.ID, handler)) {
-            JsonObject cfgJson = mxisd.getConfig().getThreepid().getMedium().get(ThreePidMedium.PhoneNumber.getId());
-            if (Objects.nonNull(cfgJson)) {
-                PhoneConfig cfg = GsonUtil.get().fromJson(cfgJson, PhoneConfig.class);
+            Object o = mxisd.getConfig().getThreepid().getMedium().get(ThreePidMedium.PhoneNumber.getId());
+            if (Objects.nonNull(o)) {
+                PhoneConfig cfg = GsonUtil.get().fromJson(GsonUtil.makeObj(o), PhoneConfig.class);
 
                 List<PhoneGenerator> generators = StreamSupport
                         .stream(ServiceLoader.load(PhoneGeneratorSupplier.class).spliterator(), false)
