@@ -47,7 +47,7 @@ import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.profile.ProfileProviders;
 import io.kamax.mxisd.session.SessionMananger;
 import io.kamax.mxisd.storage.IStorage;
-import io.kamax.mxisd.storage.ormlite.OrmLiteSqliteStorage;
+import io.kamax.mxisd.storage.ormlite.OrmLiteSqlStorage;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
@@ -88,7 +88,7 @@ public class Mxisd {
 
         srvFetcher = new RemoteIdentityServerFetcher(httpClient);
 
-        store = new OrmLiteSqliteStorage(cfg);
+        store = new OrmLiteSqlStorage(cfg);
         keyMgr = CryptoFactory.getKeyManager(cfg.getKey());
         signMgr = CryptoFactory.getSignatureManager(keyMgr, cfg.getServer());
         ClientDnsOverwrite clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());

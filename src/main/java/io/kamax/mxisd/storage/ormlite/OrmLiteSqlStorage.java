@@ -40,7 +40,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -49,9 +48,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public class OrmLiteSqliteStorage implements IStorage {
+public class OrmLiteSqlStorage implements IStorage {
 
-    private transient final Logger log = LoggerFactory.getLogger(OrmLiteSqliteStorage.class);
+    private transient final Logger log = LoggerFactory.getLogger(OrmLiteSqlStorage.class);
 
     @FunctionalInterface
     private interface Getter<T> {
@@ -71,11 +70,11 @@ public class OrmLiteSqliteStorage implements IStorage {
     private Dao<ThreePidSessionDao, String> sessionDao;
     private Dao<ASTransactionDao, String> asTxnDao;
 
-    public OrmLiteSqliteStorage(MxisdConfig cfg) {
+    public OrmLiteSqlStorage(MxisdConfig cfg) {
         this(cfg.getStorage().getBackend(), cfg.getStorage().getProvider().getSqlite().getDatabase());
     }
 
-    public OrmLiteSqliteStorage(String backend, String path) {
+    public OrmLiteSqlStorage(String backend, String path) {
         if (StringUtils.isBlank(backend)) {
             throw new ConfigurationException("storage.backend");
         }
@@ -85,13 +84,6 @@ public class OrmLiteSqliteStorage implements IStorage {
         }
 
         withCatcher(() -> {
-            if (path.startsWith("/") && !path.startsWith("//")) {
-                File parent = new File(path).getParentFile();
-                if (!parent.mkdirs() && !parent.isDirectory()) {
-                    throw new RuntimeException("Unable to create DB parent directory: " + parent);
-                }
-            }
-
             ConnectionSource connPool = new JdbcConnectionSource("jdbc:" + backend + ":" + path);
             invDao = createDaoAndTable(connPool, ThreePidInviteIO.class);
             sessionDao = createDaoAndTable(connPool, ThreePidSessionDao.class);

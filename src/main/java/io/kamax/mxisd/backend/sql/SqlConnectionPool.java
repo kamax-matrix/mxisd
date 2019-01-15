@@ -37,11 +37,15 @@ public class SqlConnectionPool {
     private ComboPooledDataSource ds;
 
     public SqlConnectionPool(SqlConfig cfg) {
+        Drivers.load(cfg.getType());
+
         ds = new ComboPooledDataSource();
         ds.setJdbcUrl("jdbc:" + cfg.getType() + ":" + cfg.getConnection());
         ds.setMinPoolSize(1);
         ds.setMaxPoolSize(10);
         ds.setAcquireIncrement(2);
+        ds.setAcquireRetryAttempts(10);
+        ds.setAcquireRetryDelay(1000);
     }
 
     public Connection get() throws SQLException {

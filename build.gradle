@@ -129,7 +129,7 @@ dependencies {
     compile 'org.xerial:sqlite-jdbc:3.20.0'
 
     // PostgreSQL
-    compile 'org.postgresql:postgresql:42.1.4'
+    compile 'org.postgresql:postgresql:42.2.5'
 
     // MariaDB/MySQL
     compile 'org.mariadb.jdbc:mariadb-java-client:2.1.2'

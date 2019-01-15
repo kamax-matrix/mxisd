@@ -20,23 +20,23 @@
 
 package io.kamax.mxisd.test.storage;
 
-import io.kamax.mxisd.storage.ormlite.OrmLiteSqliteStorage;
+import io.kamax.mxisd.storage.ormlite.OrmLiteSqlStorage;
 import org.junit.Test;
 
 import java.time.Instant;
 
-public class OrmLiteSqliteStorageTest {
+public class OrmLiteSqlStorageTest {
 
     @Test
     public void insertAsTxnDuplicate() {
-        OrmLiteSqliteStorage store = new OrmLiteSqliteStorage("sqlite", ":memory:");
+        OrmLiteSqlStorage store = new OrmLiteSqlStorage("sqlite", ":memory:");
         store.insertTransactionResult("mxisd", "1", Instant.now(), "{}");
         store.insertTransactionResult("mxisd", "2", Instant.now(), "{}");
     }
 
     @Test(expected = RuntimeException.class)
     public void insertAsTxnSame() {
-        OrmLiteSqliteStorage store = new OrmLiteSqliteStorage("sqlite", ":memory:");
+        OrmLiteSqlStorage store = new OrmLiteSqlStorage("sqlite", ":memory:");
         store.insertTransactionResult("mxisd", "1", Instant.now(), "{}");
         store.insertTransactionResult("mxisd", "1", Instant.now(), "{}");
     }

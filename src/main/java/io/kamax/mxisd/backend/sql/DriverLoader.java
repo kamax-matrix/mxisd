@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2017 Kamax Sarl
+ * Copyright (C) 2019 Kamax Sàrl
  *
  * https://www.kamax.io/
  *
@@ -18,30 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.exception;
+package io.kamax.mxisd.backend.sql;
 
-import java.util.Optional;
+import java.util.function.Consumer;
 
-public class ConfigurationException extends RuntimeException {
-
-    private String key;
-    private String detailedMsg;
-
-    public ConfigurationException(String key) {
-        super("Invalid or empty value for configuration item: " + key);
-    }
-
-    public ConfigurationException(Throwable t) {
-        super(t.getMessage(), t);
-    }
-
-    public ConfigurationException(String key, String detailedMsg) {
-        this(key);
-        this.detailedMsg = detailedMsg;
-    }
-
-    public Optional<String> getDetailedMessage() {
-        return Optional.ofNullable(detailedMsg);
-    }
-
+public interface DriverLoader extends Consumer<String> {
 }
