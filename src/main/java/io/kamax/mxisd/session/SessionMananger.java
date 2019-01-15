@@ -214,6 +214,10 @@ public class SessionMananger {
     }
 
     public void bind(String sid, String secret, String mxidRaw) {
+        if (StringUtils.isEmpty(mxidRaw)) {
+            throw new IllegalArgumentException("No Matrix User ID provided");
+        }
+
         _MatrixID mxid = MatrixID.asAcceptable(mxidRaw);
         ThreePidSession session = getSessionIfValidated(sid, secret);
 

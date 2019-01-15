@@ -30,6 +30,7 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Optional;
 
 public abstract class BasicHttpHandler implements HttpHandler {
 
@@ -49,8 +53,16 @@ public abstract class BasicHttpHandler implements HttpHandler {
     }
 
     protected String getQueryParameter(HttpServerExchange exchange, String name) {
+        return getQueryParameter(exchange.getQueryParameters(), name);
+    }
+
+    protected String getQueryParameter(Map<String, Deque<String>> parms, String name) {
         try {
-            String raw = exchange.getQueryParameters().getOrDefault(name, new LinkedList<>()).peekFirst();
+            String raw = parms.getOrDefault(name, new LinkedList<>()).peekFirst();
+            if (StringUtils.isEmpty(raw)) {
+                return raw;
+            }
+
             return URLDecoder.decode(raw, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             throw new InternalServerError(e);
@@ -61,22 +73,33 @@ public abstract class BasicHttpHandler implements HttpHandler {
         return getQueryParameter(exchange, name);
     }
 
+    protected Optional<String> getContentType(HttpServerExchange exchange) {
+        return Optional.ofNullable(exchange.getRequestHeaders().getFirst("Content-Type"));
+    }
+
     protected void writeBodyAsUtf8(HttpServerExchange exchange, String body) {
         exchange.getResponseSender().send(body, StandardCharsets.UTF_8);
     }
 
-    protected <T> T parseJsonTo(HttpServerExchange exchange, Class<T> type) {
+    protected String getBodyUtf8(HttpServerExchange exchange) {
         try {
-            return GsonUtil.get().fromJson(IOUtils.toString(exchange.getInputStream(), StandardCharsets.UTF_8), type);
+            return IOUtils.toString(exchange.getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    protected <T> T parseJsonTo(HttpServerExchange exchange, Class<T> type) {
+        return GsonUtil.get().fromJson(getBodyUtf8(exchange), type);
+    }
+
     protected JsonObject parseJsonObject(HttpServerExchange exchange, String key) {
+        return GsonUtil.getObj(parseJsonObject(exchange), key);
+    }
+
+    protected JsonObject parseJsonObject(HttpServerExchange exchange) {
         try {
-            JsonObject base = GsonUtil.parseObj(IOUtils.toString(exchange.getInputStream(), StandardCharsets.UTF_8));
-            return GsonUtil.getObj(base, key);
+            return GsonUtil.parseObj(IOUtils.toString(exchange.getInputStream(), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
