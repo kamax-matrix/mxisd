@@ -95,17 +95,17 @@ public class ViewConfig {
         private Remote remote = new Remote();
 
         public Session() {
-            local.onTokenSubmit.success = "classpath:/session/local/tokenSubmitSuccess.html";
-            local.onTokenSubmit.failure = "classpath:/session/local/tokenSubmitFailure.html";
+            local.onTokenSubmit.success = "classpath:/templates/session/local/tokenSubmitSuccess.html";
+            local.onTokenSubmit.failure = "classpath:/templates/session/local/tokenSubmitFailure.html";
 
-            localRemote.onTokenSubmit.success = "classpath:/session/localRemote/tokenSubmitSuccess.html";
-            localRemote.onTokenSubmit.failure = "classpath:/session/local/tokenSubmitFailure.html";
+            localRemote.onTokenSubmit.success = "classpath:/templates/session/localRemote/tokenSubmitSuccess.html";
+            localRemote.onTokenSubmit.failure = "classpath:/templates/session/local/tokenSubmitFailure.html";
 
-            remote.onRequest.success = "classpath:/session/remote/requestSuccess.html";
-            remote.onRequest.failure = "classpath:/session/remote/requestFailure.html";
+            remote.onRequest.success = "classpath:/templates/session/remote/requestSuccess.html";
+            remote.onRequest.failure = "classpath:/templates/session/remote/requestFailure.html";
 
-            remote.onCheck.success = "classpath:/session/remote/checkSuccess.html";
-            remote.onCheck.failure = "classpath:/session/remote/checkFailure.html";
+            remote.onCheck.success = "classpath:/templates/session/remote/checkSuccess.html";
+            remote.onCheck.failure = "classpath:/templates/session/remote/checkFailure.html";
         }
 
         public Local getLocal() {
