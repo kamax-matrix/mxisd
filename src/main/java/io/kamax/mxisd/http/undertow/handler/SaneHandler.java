@@ -21,7 +21,9 @@
 package io.kamax.mxisd.http.undertow.handler;
 
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.MalformedJsonException;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.matrix.json.InvalidJsonException;
 import io.kamax.mxisd.exception.*;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -63,8 +65,10 @@ public class SaneHandler extends BasicHttpHandler {
                 respond(exchange, HttpStatus.SC_BAD_REQUEST, "M_ALREADY_EXISTS", e.getMessage());
             } catch (JsonMemberNotFoundException e) {
                 respond(exchange, HttpStatus.SC_BAD_REQUEST, "M_JSON_MISSING_KEYS", e.getMessage());
-            } catch (InvalidResponseJsonException | JsonSyntaxException e) {
+            } catch (InvalidResponseJsonException | JsonSyntaxException | MalformedJsonException e) {
                 respond(exchange, HttpStatus.SC_BAD_REQUEST, "M_INVALID_JSON", e.getMessage());
+            } catch (InvalidJsonException e) {
+                respond(exchange, HttpStatus.SC_BAD_REQUEST, e.getErrorCode(), e.getError());
             } catch (InvalidCredentialsException e) {
                 respond(exchange, HttpStatus.SC_UNAUTHORIZED, "M_UNAUTHORIZED", e.getMessage());
             } catch (ObjectNotFoundException e) {
