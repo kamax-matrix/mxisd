@@ -20,10 +20,16 @@
 
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import io.kamax.matrix.MatrixID;
+import io.kamax.matrix._MatrixID;
 import io.kamax.matrix.crypto.KeyManager;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.ServerConfig;
+import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.http.IsAPIv1;
+import io.kamax.mxisd.http.io.identity.StoreInviteRequest;
 import io.kamax.mxisd.http.io.identity.ThreePidInviteReplyIO;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.invitation.IThreePidInvite;
@@ -31,11 +37,13 @@ import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.invitation.InvitationManager;
 import io.kamax.mxisd.invitation.ThreePidInvite;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.QueryParameterUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class StoreInviteHandler extends BasicHttpHandler {
 
@@ -53,21 +61,39 @@ public class StoreInviteHandler extends BasicHttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {
-        Map<String, String> parameters = new HashMap<>();
+        String reqContentType = getContentType(exchange).orElse("application/octet-stream");
+        JsonObject invJson = new JsonObject();
 
-        for (Map.Entry<String, Deque<String>> entry : exchange.getQueryParameters().entrySet()) {
-            if (Objects.nonNull(entry.getValue().peekFirst())) {
-                parameters.put(entry.getKey(), entry.getValue().peekFirst());
-            }
+        if (StringUtils.startsWith(reqContentType, "application/json")) {
+            invJson = parseJsonObject(exchange);
         }
 
-        // TODO test with missing parameters to see behaviour
-        String sender = parameters.get("sender");
-        String medium = parameters.get("medium");
-        String address = parameters.get("address");
-        String roomId = parameters.get("room_id");
+        // Backward compatibility for pre-r0.1.0 implementations
+        else if (StringUtils.startsWith(reqContentType, "application/x-www-form-urlencoded")) {
+            String body = getBodyUtf8(exchange);
+            Map<String, Deque<String>> parms = QueryParameterUtils.parseQueryString(body, StandardCharsets.UTF_8.name());
+            for (Map.Entry<String, Deque<String>> entry : parms.entrySet()) {
+                if (entry.getValue().size() == 0) {
+                    return;
+                }
 
-        IThreePidInvite invite = new ThreePidInvite(MatrixID.asAcceptable(sender), medium, address, roomId, parameters);
+                if (entry.getValue().size() > 1) {
+                    throw new BadRequestException("key " + entry.getKey() + " has more than one value");
+                }
+
+                invJson.addProperty(entry.getKey(), entry.getValue().peekFirst());
+            }
+        } else {
+            throw new BadRequestException("Unsupported Content-Type: " + reqContentType);
+        }
+
+        Type parmType = new TypeToken<Map<String, String>>() {
+        }.getType();
+        Map<String, String> parameters = GsonUtil.get().fromJson(invJson, parmType);
+        StoreInviteRequest inv = GsonUtil.get().fromJson(invJson, StoreInviteRequest.class);
+        _MatrixID sender = MatrixID.asAcceptable(inv.getSender());
+
+        IThreePidInvite invite = new ThreePidInvite(sender, inv.getMedium(), inv.getAddress(), inv.getRoomId(), parameters);
         IThreePidInviteReply reply = invMgr.storeInvite(invite);
 
         respondJson(exchange, new ThreePidInviteReplyIO(reply, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex()), cfg.getPublicUrl()));

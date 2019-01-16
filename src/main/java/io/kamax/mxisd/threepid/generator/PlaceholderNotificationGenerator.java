@@ -30,6 +30,9 @@ import io.kamax.mxisd.threepid.session.IThreePidSession;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
+import static io.kamax.mxisd.http.io.identity.StoreInviteRequest.Keys.RoomName;
+import static io.kamax.mxisd.http.io.identity.StoreInviteRequest.Keys.SenderDisplayName;
+
 public abstract class PlaceholderNotificationGenerator {
 
     private MatrixConfig mxCfg;
@@ -51,9 +54,9 @@ public abstract class PlaceholderNotificationGenerator {
     }
 
     protected String populateForInvite(IMatrixIdInvite invite, String input) {
-        String senderName = invite.getProperties().getOrDefault("sender_display_name", "");
+        String senderName = invite.getProperties().getOrDefault(SenderDisplayName, "");
         String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getSender().getId());
-        String roomName = invite.getProperties().getOrDefault("room_name", "");
+        String roomName = invite.getProperties().getOrDefault(RoomName, "");
         String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getRoomId());
 
         return populateForCommon(new ThreePid(invite.getMedium(), invite.getAddress()), input)
@@ -69,9 +72,9 @@ public abstract class PlaceholderNotificationGenerator {
     protected String populateForReply(IThreePidInviteReply invite, String input) {
         ThreePid tpid = new ThreePid(invite.getInvite().getMedium(), invite.getInvite().getAddress());
 
-        String senderName = invite.getInvite().getProperties().getOrDefault("sender_display_name", "");
+        String senderName = invite.getInvite().getProperties().getOrDefault(SenderDisplayName, "");
         String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getInvite().getSender().getId());
-        String roomName = invite.getInvite().getProperties().getOrDefault("room_name", "");
+        String roomName = invite.getInvite().getProperties().getOrDefault(RoomName, "");
         String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
 
         return populateForCommon(tpid, input)
