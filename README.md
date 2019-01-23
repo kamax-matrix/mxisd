@@ -8,6 +8,7 @@ mxisd - Federated Matrix Identity Server
 - [Getting Started](#getting-started)
 - [Support](#support)
 - [Contribute](#contribute)
+- [Powered by mxisd](#powered-by-mxisd)
 - [FAQ](#faq)
 - [Contact](#contact)
 
@@ -95,6 +96,11 @@ You can contribute as an organisation/corporation by:
 - Get a [support contract](#commercial). This is the best way you can help us as it ensures mxisd is
 maintained regularly and you get direct access to the support team.
 - Sponsoring new features or bug fixes. [Get in touch](#contact) so we can discuss it further.
+
+# Powered by mxisd
+The following projects use mxisd under the hood for some or all their features. Check them out!
+- [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy)
+- [matrix-register-bot](https://github.com/krombel/matrix-register-bot)
 
 # FAQ
 See the [dedicated document](docs/faq.md)

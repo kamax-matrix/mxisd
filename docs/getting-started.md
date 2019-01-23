@@ -10,6 +10,15 @@ Following these quick start instructions, you will have a basic setup that can p
 talk to the central Matrix.org Identity server.  
 This will be a good ground work for further integration with features and your existing Identity stores.
 
+---
+
+If you would like a more fully integrated setup out of the box, the [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy)
+project provides a turn-key full-stack solution, including LDAP and the various mxisd features enabled and ready.  
+We work closely with the project owner so the latest mxisd version is always supported.
+
+If you choose to use it, this Getting Started guide is not applicable - See the project documentation. You may then
+directly go to the [Next steps](#next-steps).
+
 ## Preparation
 You will need:
 - Working Homeserver, ideally with working federation
