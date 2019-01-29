@@ -98,11 +98,7 @@ public abstract class BasicHttpHandler implements HttpHandler {
     }
 
     protected JsonObject parseJsonObject(HttpServerExchange exchange) {
-        try {
-            return GsonUtil.parseObj(IOUtils.toString(exchange.getInputStream(), StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return GsonUtil.parseObj(getBodyUtf8(exchange));
     }
 
     protected void respond(HttpServerExchange ex, int statusCode, JsonElement bodyJson) {
