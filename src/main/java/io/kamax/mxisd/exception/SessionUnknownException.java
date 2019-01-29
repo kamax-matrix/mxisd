@@ -20,6 +20,8 @@
 
 package io.kamax.mxisd.exception;
 
+import org.apache.http.HttpStatus;
+
 public class SessionUnknownException extends HttpMatrixException {
 
     public SessionUnknownException() {
@@ -27,7 +29,7 @@ public class SessionUnknownException extends HttpMatrixException {
     }
 
     public SessionUnknownException(String error) {
-        super(200, "M_NO_VALID_SESSION", error);
+        super(HttpStatus.SC_NOT_FOUND, "M_NO_VALID_SESSION", error);
     }
 
 }

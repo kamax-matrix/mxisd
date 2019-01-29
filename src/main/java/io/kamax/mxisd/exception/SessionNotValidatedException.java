@@ -25,7 +25,7 @@ import org.apache.http.HttpStatus;
 public class SessionNotValidatedException extends HttpMatrixException {
 
     public SessionNotValidatedException() {
-        super(HttpStatus.SC_OK, "M_SESSION_NOT_VALIDATED", "This validation session has not yet been completed");
+        super(HttpStatus.SC_BAD_REQUEST, "M_SESSION_NOT_VALIDATED", "This validation session has not yet been completed");
     }
 
 }
