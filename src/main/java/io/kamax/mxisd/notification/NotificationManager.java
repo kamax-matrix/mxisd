@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.notification;
 
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.config.threepid.notification.NotificationConfig;
 import io.kamax.mxisd.exception.NotImplementedException;
@@ -79,6 +80,10 @@ public class NotificationManager {
 
     public void sendForRemoteValidation(IThreePidSession session) {
         ensureMedium(session.getThreePid().getMedium()).sendForRemoteValidation(session);
+    }
+
+    public void sendForFraudulentUnbind(ThreePid tpid) throws NotImplementedException {
+        ensureMedium(tpid.getMedium()).sendForFraudulentUnbind(tpid);
     }
 
 }

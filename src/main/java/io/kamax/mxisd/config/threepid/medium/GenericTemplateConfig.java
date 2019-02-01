@@ -62,7 +62,22 @@ public class GenericTemplateConfig {
 
         }
 
+        public static class SessionUnbind {
+
+            private String fraudulent;
+
+            public String getFraudulent() {
+                return fraudulent;
+            }
+
+            public void setFraudulent(String fraudulent) {
+                this.fraudulent = fraudulent;
+            }
+
+        }
+
         private SessionValidation validation = new SessionValidation();
+        private SessionUnbind unbind = new SessionUnbind();
 
         public SessionValidation getValidation() {
             return validation;
@@ -70,6 +85,14 @@ public class GenericTemplateConfig {
 
         public void setValidation(SessionValidation validation) {
             this.validation = validation;
+        }
+
+        public SessionUnbind getUnbind() {
+            return unbind;
+        }
+
+        public void setUnbind(SessionUnbind unbind) {
+            this.unbind = unbind;
         }
 
     }

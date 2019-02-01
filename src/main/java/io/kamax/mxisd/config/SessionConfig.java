@@ -125,6 +125,34 @@ public class SessionConfig {
 
         }
 
+        public static class PolicyUnbind {
+
+            public static class PolicyUnbindFraudulent {
+
+                private boolean sendWarning = true;
+
+                public boolean getSendWarning() {
+                    return sendWarning;
+                }
+
+                public void setSendWarning(boolean sendWarning) {
+                    this.sendWarning = sendWarning;
+                }
+            }
+
+
+            private PolicyUnbindFraudulent fraudulent = new PolicyUnbindFraudulent();
+
+            public PolicyUnbindFraudulent getFraudulent() {
+                return fraudulent;
+            }
+
+            public void setFraudulent(PolicyUnbindFraudulent fraudulent) {
+                this.fraudulent = fraudulent;
+            }
+
+        }
+
         public Policy() {
             validation.enabled = true;
             validation.forLocal.enabled = true;
@@ -139,6 +167,7 @@ public class SessionConfig {
         }
 
         private PolicyTemplate validation = new PolicyTemplate();
+        private PolicyUnbind unbind = new PolicyUnbind();
 
         public PolicyTemplate getValidation() {
             return validation;
@@ -146,6 +175,14 @@ public class SessionConfig {
 
         public void setValidation(PolicyTemplate validation) {
             this.validation = validation;
+        }
+
+        public PolicyUnbind getUnbind() {
+            return unbind;
+        }
+
+        public void setUnbind(PolicyUnbind unbind) {
+            this.unbind = unbind;
         }
 
     }

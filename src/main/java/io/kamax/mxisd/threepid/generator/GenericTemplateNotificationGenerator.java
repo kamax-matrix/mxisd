@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.threepid.generator;
 
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.ServerConfig;
@@ -80,6 +81,12 @@ public abstract class GenericTemplateNotificationGenerator extends PlaceholderNo
     public String getForRemoteValidation(IThreePidSession session) {
         log.info("Generating notification content for remote-only 3PID session");
         return populateForRemoteValidation(session, getTemplateContent(cfg.getSession().getValidation().getRemote()));
+    }
+
+    @Override
+    public String getForFraudulentUnbind(ThreePid tpid) {
+        log.info("Generating notification content for fraudulent unbind");
+        return populateForFraudulentUndind(tpid, getTemplateContent(cfg.getSession().getUnbind().getFraudulent()));
     }
 
 }

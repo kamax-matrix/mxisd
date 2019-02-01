@@ -1,0 +1,1 @@
+INFORMATIONAL ONLY - Someone attempted to change your Matrix 3PIDs, with a potential data leak. Please contact your system administrator.

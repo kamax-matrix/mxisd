@@ -32,6 +32,7 @@ public class EmailTemplateConfig extends GenericTemplateConfig {
         getGeneric().put("matrixId", "classpath:/threepids/email/mxid-template.eml");
         getSession().getValidation().setLocal("classpath:/threepids/email/validate-local-template.eml");
         getSession().getValidation().setRemote("classpath:/threepids/email/validate-remote-template.eml");
+        getSession().getUnbind().setFraudulent("classpath:/threepids/email/unbind-fraudulent.eml");
     }
 
     public EmailTemplateConfig build() {

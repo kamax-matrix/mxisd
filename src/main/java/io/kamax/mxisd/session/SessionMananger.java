@@ -28,12 +28,15 @@ import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.ThreePid;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
+import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.SessionConfig;
 import io.kamax.mxisd.exception.*;
 import io.kamax.mxisd.http.io.identity.RequestTokenResponse;
 import io.kamax.mxisd.http.undertow.handler.identity.v1.RemoteIdentityAPIv1;
+import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidValidation;
+import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.matrix.IdentityServerUtils;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
@@ -71,6 +74,7 @@ public class SessionMananger {
     private MatrixConfig mxCfg;
     private IStorage storage;
     private NotificationManager notifMgr;
+    private LookupStrategy lookupMgr;
 
     private GsonParser parser = new GsonParser();
     private PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance(); // FIXME refactor for sessions handling their own stuff
@@ -78,11 +82,19 @@ public class SessionMananger {
     // FIXME export into central class, set version
     private CloseableHttpClient client;
 
-    public SessionMananger(SessionConfig cfg, MatrixConfig mxCfg, IStorage storage, NotificationManager notifMgr, CloseableHttpClient client) {
+    public SessionMananger(
+            SessionConfig cfg,
+            MatrixConfig mxCfg,
+            IStorage storage,
+            NotificationManager notifMgr,
+            LookupStrategy lookupMgr,
+            CloseableHttpClient client
+    ) {
         this.cfg = cfg;
         this.mxCfg = mxCfg;
         this.storage = storage;
         this.notifMgr = notifMgr;
+        this.lookupMgr = lookupMgr;
         this.client = client;
     }
 
@@ -257,6 +269,54 @@ public class SessionMananger {
             log.error("Session {} for {}: I/O Error when trying to bind mxid {}", sid, session.getThreePid(), mxid);
             throw new RemoteIdentityServerException(e.getMessage());
         }
+    }
+
+    public void unbind(JsonObject reqData) {
+        // TODO also check for HS header to know which domain attempting the unbind
+        if (reqData.entrySet().size() == 2 && reqData.has("mxid") && reqData.has("threepid")) {
+            /* This is a HS request to remove a 3PID and is considered:
+             * - An attack on user privacy
+             * - A baffling spec breakage requiring IS and HS 3PID info to be independent [1]
+             * - A baffling spec breakage that 3PID (un)bind is only one way [2]
+             *
+             * Given the lack of response on our extensive feedback on the proposal [3] which has not landed in the spec yet [4],
+             * We'll be denying such unbind requests and will inform users using their 3PID that a fraudulent attempt of
+             * removing their 3PID binding has been attempted and blocked.
+             *
+             * [1]: https://matrix.org/docs/spec/client_server/r0.4.0.html#adding-account-administrative-contact-information
+             * [2]: https://matrix.org/docs/spec/identity_service/r0.1.0.html#privacy
+             * [3]: https://docs.google.com/document/d/135g2muVxmuml0iUnLoTZxk8M2ZSt3kJzg81chGh51yg/edit
+             * [4]: https://github.com/matrix-org/matrix-doc/issues/1194
+             */
+
+            log.warn("A remote host attempted to unbind without proper authorization. Request was denied");
+
+            if (!cfg.getPolicy().getUnbind().getFraudulent().getSendWarning()) {
+                log.info("Not sending notification to 3PID owner as per configuration");
+            } else {
+                log.info("Sending notification to 3PID owner as per configuration");
+
+                ThreePid tpid = GsonUtil.get().fromJson(GsonUtil.getObj(reqData, "threepid"), ThreePid.class);
+                Optional<SingleLookupReply> lookup = lookupMgr.findLocal(tpid.getMedium(), tpid.getAddress());
+                if (!lookup.isPresent()) {
+                    log.info("No 3PID owner found, not sending any notification");
+                } else {
+                    log.info("3PID owner found, sending notification");
+                    try {
+                        notifMgr.sendForFraudulentUnbind(tpid);
+                        log.info("Notification sent");
+                    } catch (NotImplementedException e) {
+                        log.warn("Unable to send notification: {}", e.getMessage());
+                    } catch (RuntimeException e) {
+                        log.warn("Unable to send notification due to unknown error. See stacktrace below", e);
+                    }
+                }
+            }
+        }
+
+        log.info("Denying request");
+        throw new NotAllowedException("You have attempted to alter 3PID bindings, which can only be done by the 3PID owner directly. " +
+                "We have informed the 3PID owner of your fraudulent attempt.");
     }
 
     public IThreePidSession createRemote(String sid, String secret) {

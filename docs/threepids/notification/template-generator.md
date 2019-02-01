@@ -20,7 +20,9 @@ threepid:
           session:
             validation:
               local: '/path/to/validate-local-template.eml'
-              remote: 'path/to/validate-remote-template.eml'
+              remote: '/path/to/validate-remote-template.eml'
+            unbind:
+              frandulent: '/path/to/unbind-fraudulent-template.eml'
           generic:
             matrixId: '/path/to/mxid-invite-template.eml'
 ```

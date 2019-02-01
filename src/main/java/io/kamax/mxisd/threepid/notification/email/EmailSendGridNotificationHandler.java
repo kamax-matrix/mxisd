@@ -22,6 +22,7 @@ package io.kamax.mxisd.threepid.notification.email;
 
 import com.sendgrid.SendGrid;
 import com.sendgrid.SendGridException;
+import io.kamax.matrix.ThreePid;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.config.MxisdConfig;
@@ -107,7 +108,7 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
 
     @Override
     public void sendForValidation(IThreePidSession session) {
-        EmailTemplate template = cfg.getTemplates().getSession().getLocal();
+        EmailTemplate template = cfg.getTemplates().getSession().getValidation().getLocal();
         Email email = getEmail();
         email.setSubject(populateForValidation(session, template.getSubject()));
         email.setText(populateForValidation(session, getFromFile(template.getBody().getText())));
@@ -118,13 +119,24 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
 
     @Override
     public void sendForRemoteValidation(IThreePidSession session) {
-        EmailTemplate template = cfg.getTemplates().getSession().getLocal();
+        EmailTemplate template = cfg.getTemplates().getSession().getValidation().getRemote();
         Email email = getEmail();
         email.setSubject(populateForRemoteValidation(session, template.getSubject()));
         email.setText(populateForRemoteValidation(session, getFromFile(template.getBody().getText())));
         email.setHtml(populateForRemoteValidation(session, getFromFile(template.getBody().getHtml())));
 
         send(session.getThreePid().getAddress(), email);
+    }
+
+    @Override
+    public void sendForFraudulentUnbind(ThreePid tpid) {
+        EmailTemplate template = cfg.getTemplates().getSession().getUnbind().getFraudulent();
+        Email email = getEmail();
+        email.setSubject(populateForCommon(tpid, template.getSubject()));
+        email.setText(populateForCommon(tpid, getFromFile(template.getBody().getText())));
+        email.setHtml(populateForCommon(tpid, getFromFile(template.getBody().getHtml())));
+
+        send(tpid.getAddress(), email);
     }
 
     private void send(String recipient, Email email) {

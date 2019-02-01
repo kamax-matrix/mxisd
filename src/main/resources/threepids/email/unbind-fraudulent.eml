@@ -1,0 +1,125 @@
+Subject: IMPORTANT - %DOMAIN% Matrix Identity Server - Unauthorized 3PID unbind blocked
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ"
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hi,
+
+**THIS IS IMPORTANT, PLEASE READ CAREFULLY**.
+If you are the system administrator of the Matrix installation, read the second section.
+
+This is a notification email that a possibly unauthorized entity has attempted to alter your
+3PIDs (email, phone numbers, etc.) settings. The request was denied and no change has been made.
+
+This is so you are aware of a possible failure in case you just tried to remove a 3PID from your account.
+
+If you do not understand this email, please forward it to your System administrator.
+
+-----------
+
+As the system administrator:
+
+If you are using synapse as a Homeserver, this is a known issue and abuse of separation of concerns. As a privacy-centric
+product and given that it is not possible to remove 3PIDs using mxisd as those only exists in your Identity stores, the
+request was actively blocked.
+
+We have open an issue on the synapse repos to reflect the related privacy concerns and GDPR violation(s) and would
+appreciate if you could comment on it or simply adds a thumbs up so the concerns are finally dealt with by the synapse dev team.
+Issue: https://github.com/matrix-org/synapse/issues/4540
+
+If you are using another Homeserver or this came following no action from your own users, then you have been the target
+of an unbind attack from a rogue entity which was blocked. You may want to check your logs to see the exact source of
+the attack and take relevant actions following your policy.
+
+If you would like to disable these notifications, please see the 3PID sessions configuration documentation.
+
+Thanks,
+
+%DOMAIN_PRETTY% Admins
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ
+Content-Type: multipart/related;
+	boundary="M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR";
+	type="text/html"
+
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR
+Content-Type: text/html; charset=UTF-8
+Content-Disposition: inline
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <style type="text/css">
+body {
+    margin: 0px;
+}
+
+pre, code {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+#page {
+    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+    font-color: #454545;
+    font-size: 12pt;
+    width: 100%%;
+    padding: 20px;
+}
+
+#inner {
+    width: 640px;
+}
+        </style>
+    </head>
+    <body>
+        <table id="page">
+            <tr>
+                <td> </td>
+                <td id="inner">
+<p>Hi,</p>
+
+<p><b>THIS IS IMPORTANT, PLEASE READ CAREFULLY</b>.<br/>
+If you are the system administrator of the Matrix installation, read the second section.</p>
+
+<p>This is a notification email that a possibly unauthorized entity has attempted to alter your
+   3PIDs (email, phone numbers, etc.) settings. The request was denied and no change has been made.</p>
+
+<p>This is so you are aware of a possible failure in case you just tried to remove a 3PID from your account.</p>
+
+<p>If you do not understand this email, please forward it to your System administrator.</p>
+
+<hr>
+
+<p>As the system administrator:</p>
+
+<p>If you are using synapse as a Homeserver, this is a known issue and abuse of separation of concerns. As a privacy-centric
+   product and given that it is not possible to remove 3PIDs using mxisd as those only exists in your Identity stores, the
+   request was actively blocked.</p>
+
+<p>We have open an issue on the synapse repos to reflect the related privacy concerns and GDPR violation(s) and would
+   appreciate if you could comment on it or simply adds a thumbs up so the concerns are finally dealt with by the synapse dev team.<br/>
+   Issue: <a href="https://github.com/matrix-org/synapse/issues/4540">https://github.com/matrix-org/synapse/issues/4540</a></p>
+
+<p>If you are using another Homeserver or this came following no action from your own users, then you have been the target
+   of an unbind attack from a rogue entity which was blocked. You may want to check your logs to see the exact source of
+   the attack and take relevant actions following your policy.</p>
+
+<p>If you would like to disable these notifications, please see the 3PID sessions configuration documentation.</p>
+
+<p>Thanks,</p>
+
+<p>%DOMAIN_PRETTY% Admins</p>
+                </td>
+                <td> </td>
+            </tr>
+        </table>
+    </body>
+</html>
+--M3yzHl5YZehm9v4bAM8sKEdcOoVnRnKR--
+
+--7REaIwWQCioQ6NaBlAQlg8ztbUQj6PKJ--

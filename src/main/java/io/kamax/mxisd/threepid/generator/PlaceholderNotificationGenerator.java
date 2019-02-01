@@ -106,4 +106,8 @@ public abstract class PlaceholderNotificationGenerator {
         return populateForValidation(session, input);
     }
 
+    protected String populateForFraudulentUndind(ThreePid tpid, String input) {
+        return populateForCommon(tpid, input);
+    }
+
 }

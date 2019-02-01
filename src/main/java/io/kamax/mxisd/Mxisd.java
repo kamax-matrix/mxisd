@@ -102,7 +102,7 @@ public class Mxisd {
         idStrategy = new RecursivePriorityLookupStrategy(cfg.getLookup(), ThreePidProviders.get(), bridgeFetcher);
         pMgr = new ProfileManager(ProfileProviders.get(), clientDns, httpClient);
         notifMgr = new NotificationManager(cfg.getNotification(), NotificationHandlers.get());
-        sessMgr = new SessionMananger(cfg.getSession(), cfg.getMatrix(), store, notifMgr, httpClient);
+        sessMgr = new SessionMananger(cfg.getSession(), cfg.getMatrix(), store, notifMgr, idStrategy, httpClient);
         invMgr = new InvitationManager(cfg.getInvite(), store, idStrategy, signMgr, fedDns, notifMgr);
         authMgr = new AuthManager(cfg, AuthProviders.get(), idStrategy, invMgr, clientDns, httpClient);
         dirMgr = new DirectoryManager(cfg.getDirectory(), clientDns, httpClient, DirectoryProviders.get());

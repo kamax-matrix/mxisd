@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.threepid.notification;
 
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
@@ -74,6 +75,11 @@ public abstract class GenericNotificationHandler<A extends ThreePidConnector, B 
     @Override
     public void sendForRemoteValidation(IThreePidSession session) {
         send(connector, session.getThreePid().getAddress(), generator.getForRemoteValidation(session));
+    }
+
+    @Override
+    public void sendForFraudulentUnbind(ThreePid tpid) {
+        send(connector, tpid.getAddress(), generator.getForFraudulentUnbind(tpid));
     }
 
 }

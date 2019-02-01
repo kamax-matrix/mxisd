@@ -32,6 +32,7 @@ public class PhoneSmsTemplateConfig extends GenericTemplateConfig {
         getGeneric().put("matrixId", "classpath:/threepids/email/mxid-template.eml");
         getSession().getValidation().setLocal("classpath:/threepids/sms/validate-local-template.txt");
         getSession().getValidation().setRemote("classpath:/threepids/sms/validate-remote-template.txt");
+        getSession().getUnbind().setFraudulent("classpath:/threepids/sms/unbind-fraudulent.txt");
     }
 
     public PhoneSmsTemplateConfig build() {

@@ -149,6 +149,9 @@ session:
         toRemote:
           enabled: true
           server: 'configExample'  # Not to be included in config! Already present in default config!
+    unbind:
+      fraudulent:
+        sendWarning: true
 # DO NOT COPY/PASTE THIS IN YOUR CONFIGURATION
 # CONFIGURATION EXAMPLE
 ```
@@ -167,6 +170,14 @@ Each scope is divided into three parts:
 
 If both `toLocal` and `toRemote` are enabled, the user will be offered to initiate a remote session once their 3PID
 locally validated.
+
+---
+
+`unbind.fraudulent` controls warning notifications if an illegal/fraudulent 3PID removal is attempted on the Identity server.  
+This is directly related to synapse disregard for privacy and new GDPR laws in Europe in an attempt to inform users about
+potential privacy leaks.
+
+For more information, see the corresponding [synapse issue](https://github.com/matrix-org/synapse/issues/4540).
 
 ### Web views
 Once a user click on a validation link, it is taken to the Identity Server validation page where the token is submitted.  

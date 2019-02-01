@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.notification;
 
+import io.kamax.matrix.ThreePid;
 import io.kamax.mxisd.as.IMatrixIdInvite;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
@@ -37,5 +38,7 @@ public interface NotificationHandler {
     void sendForValidation(IThreePidSession session);
 
     void sendForRemoteValidation(IThreePidSession session);
+
+    void sendForFraudulentUnbind(ThreePid tpid);
 
 }
