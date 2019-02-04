@@ -46,7 +46,7 @@ public class BulkLookupHandler extends LookupHandler {
     }
 
     @Override
-    public void handleRequest(HttpServerExchange exchange) {
+    public void handleRequest(HttpServerExchange exchange) throws Exception {
         ClientBulkLookupRequest input = parseJsonTo(exchange, ClientBulkLookupRequest.class);
         BulkLookupRequest lookupRequest = new BulkLookupRequest();
         setRequesterInfo(lookupRequest, exchange);
@@ -63,7 +63,9 @@ public class BulkLookupHandler extends LookupHandler {
         lookupRequest.setMappings(mappings);
 
         ClientBulkLookupAnswer answer = new ClientBulkLookupAnswer();
-        answer.addAll(strategy.find(lookupRequest));
+        answer.addAll(strategy.find(lookupRequest).get());
+        log.info("Finished bulk lookup request from {}", lookupRequest.getRequester());
+
         respondJson(exchange, answer);
     }
 

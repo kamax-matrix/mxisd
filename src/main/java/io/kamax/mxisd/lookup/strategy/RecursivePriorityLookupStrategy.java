@@ -21,19 +21,21 @@
 package io.kamax.mxisd.lookup.strategy;
 
 import edazdarevic.commons.net.CIDRUtils;
+import io.kamax.matrix.json.GsonUtil;
+import io.kamax.matrix.json.MatrixJson;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.lookup.*;
 import io.kamax.mxisd.lookup.fetcher.IBridgeFetcher;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class RecursivePriorityLookupStrategy implements LookupStrategy {
@@ -43,6 +45,8 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
     private MxisdConfig.Lookup cfg;
     private List<IThreePidProvider> providers;
     private IBridgeFetcher bridge;
+
+    private Map<String, CompletableFuture<List<ThreePidMapping>>> bulkLookupInProgress = new ConcurrentHashMap<>();
 
     private List<CIDRUtils> allowedCidr = new ArrayList<>();
 
@@ -182,11 +186,27 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
     }
 
     @Override
-    public List<ThreePidMapping> find(BulkLookupRequest request) {
+    public CompletableFuture<List<ThreePidMapping>> find(BulkLookupRequest request) {
         if (!cfg.getBulk().getEnabled()) {
-            return Collections.emptyList();
+            return CompletableFuture.completedFuture(new ArrayList<>());
         }
 
+        String payloadId = DigestUtils.md5Hex(MatrixJson.encodeCanonical(GsonUtil.makeObj(request)));
+
+        log.info("Computed Payload ID: {}", payloadId);
+        synchronized (this) {
+            CompletableFuture<List<ThreePidMapping>> f = bulkLookupInProgress.get(payloadId);
+            if (Objects.nonNull(f)) {
+                log.info("Returning existing future for Payload ID {}", payloadId);
+                return f;
+            }
+
+            bulkLookupInProgress.put(payloadId, new CompletableFuture<>());
+        }
+
+        log.info("Processing Payload ID {}", payloadId);
+
+        CompletableFuture<List<ThreePidMapping>> result = bulkLookupInProgress.get(payloadId);
         List<ThreePidMapping> mapToDo = new ArrayList<>(request.getMappings());
         List<ThreePidMapping> mapFoundAll = new ArrayList<>();
 
@@ -205,7 +225,9 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
             mapToDo.removeAll(mapFound);
         }
 
-        return mapFoundAll;
+        log.info("Processed Payload ID {}", payloadId);
+        result.complete(mapFoundAll);
+        return bulkLookupInProgress.remove(payloadId);
     }
 
 }

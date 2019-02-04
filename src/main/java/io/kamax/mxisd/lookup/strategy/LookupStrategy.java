@@ -28,6 +28,7 @@ import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface LookupStrategy {
 
@@ -43,6 +44,6 @@ public interface LookupStrategy {
 
     Optional<SingleLookupReply> findRecursive(SingleLookupRequest request);
 
-    List<ThreePidMapping> find(BulkLookupRequest requests);
+    CompletableFuture<List<ThreePidMapping>> find(BulkLookupRequest requests);
 
 }
