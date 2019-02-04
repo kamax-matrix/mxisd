@@ -1,5 +1,5 @@
 # Identity
-**WARNING**: This document is incomplete and can be missleading.
+**WARNING**: This document is incomplete and can be misleading.
 
 Implementation of the [Unofficial Matrix Identity Service API](https://kamax.io/matrix/api/identity_service/unstable.html).
 

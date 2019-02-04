@@ -38,12 +38,12 @@ matrix:
         - 'https://other1.example.org'
         - 'https://other2.example.org'
 ```
-Create a list under the label `root` containing a single Identity server, `https://matrix.org`
+Create a list under the label `myOtherServers` containing two Identity servers: `https://other1.example.org` and `https://other2.example.org`.
 
 ## Server
 - `server.name`: Public hostname of mxisd, if different from the Matrix domain.
 - `server.port`: HTTP port to listen on (unencrypted)
-- `server.publicUrl`: Defaults to `https://${server.name}`
+- `server.publicUrl`: Defaults to `https://{server.name}`
 
 ## Storage
 ### SQLite
