@@ -28,7 +28,7 @@ import io.kamax.mxisd.http.io.identity.RequestTokenResponse;
 import io.kamax.mxisd.http.io.identity.SessionEmailTokenRequestJson;
 import io.kamax.mxisd.http.io.identity.SessionPhoneTokenRequestJson;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
-import io.kamax.mxisd.session.SessionMananger;
+import io.kamax.mxisd.session.SessionManager;
 import io.undertow.server.HttpServerExchange;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -41,9 +41,9 @@ public class SessionStartHandler extends BasicHttpHandler {
 
     private transient final Logger log = LoggerFactory.getLogger(SessionStartHandler.class);
 
-    private SessionMananger mgr;
+    private SessionManager mgr;
 
-    public SessionStartHandler(SessionMananger mgr) {
+    public SessionStartHandler(SessionManager mgr) {
         this.mgr = mgr;
     }
 

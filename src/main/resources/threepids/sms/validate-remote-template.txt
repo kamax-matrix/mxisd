@@ -1,1 +1,0 @@
-Your phone number will be made publicly searchable. To continue, you will need to enter two codes. Your first code is %VALIDATION_TOKEN%

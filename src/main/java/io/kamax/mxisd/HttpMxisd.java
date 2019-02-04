@@ -86,8 +86,6 @@ public class HttpMxisd {
                 .get(SessionTpidGetValidatedHandler.Path, SaneHandler.around(new SessionTpidGetValidatedHandler(m.getSession())))
                 .post(SessionTpidBindHandler.Path, SaneHandler.around(new SessionTpidBindHandler(m.getSession(), m.getInvitationManager())))
                 .post(SessionTpidUnbindHandler.Path, SaneHandler.around(new SessionTpidUnbindHandler(m.getSession())))
-                .get(RemoteIdentityAPIv1.SESSION_REQUEST_TOKEN, SaneHandler.around(new RemoteSessionStartHandler(m.getSession(), m.getConfig().getView())))
-                .get(RemoteIdentityAPIv1.SESSION_CHECK, SaneHandler.around(new RemoteSessionCheckHandler(m.getSession(), m.getConfig().getView())))
 
                 // Profile endpoints
                 .get(ProfileHandler.Path, SaneHandler.around(new ProfileHandler(m.getProfile())))

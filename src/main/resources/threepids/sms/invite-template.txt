@@ -1,1 +1,1 @@
-You have been invited to a Matrix room by %SENDER_NAME_OR_ID%. Visit https://riot.im/ or any public server to join and  start chatting!
+You have been invited to a Matrix room by %SENDER_NAME_OR_ID%. Please get in touch with them for further instructions.

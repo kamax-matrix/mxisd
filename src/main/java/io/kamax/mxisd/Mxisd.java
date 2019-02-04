@@ -45,7 +45,7 @@ import io.kamax.mxisd.notification.NotificationHandlers;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.profile.ProfileProviders;
-import io.kamax.mxisd.session.SessionMananger;
+import io.kamax.mxisd.session.SessionManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.ormlite.OrmLiteSqlStorage;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -72,7 +72,7 @@ public class Mxisd {
     protected InvitationManager invMgr;
     protected ProfileManager pMgr;
     protected AppSvcManager asHander;
-    protected SessionMananger sessMgr;
+    protected SessionManager sessMgr;
     protected NotificationManager notifMgr;
 
     public Mxisd(MxisdConfig cfg) {
@@ -102,7 +102,7 @@ public class Mxisd {
         idStrategy = new RecursivePriorityLookupStrategy(cfg.getLookup(), ThreePidProviders.get(), bridgeFetcher);
         pMgr = new ProfileManager(ProfileProviders.get(), clientDns, httpClient);
         notifMgr = new NotificationManager(cfg.getNotification(), NotificationHandlers.get());
-        sessMgr = new SessionMananger(cfg.getSession(), cfg.getMatrix(), store, notifMgr, idStrategy, httpClient);
+        sessMgr = new SessionManager(cfg.getSession(), cfg.getMatrix(), store, notifMgr, idStrategy, httpClient);
         invMgr = new InvitationManager(cfg.getInvite(), store, idStrategy, signMgr, fedDns, notifMgr);
         authMgr = new AuthManager(cfg, AuthProviders.get(), idStrategy, invMgr, clientDns, httpClient);
         dirMgr = new DirectoryManager(cfg.getDirectory(), clientDns, httpClient, DirectoryProviders.get());
@@ -137,7 +137,7 @@ public class Mxisd {
         return authMgr;
     }
 
-    public SessionMananger getSession() {
+    public SessionManager getSession() {
         return sessMgr;
     }
 

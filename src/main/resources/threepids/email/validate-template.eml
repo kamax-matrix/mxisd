@@ -9,7 +9,7 @@ Content-Disposition: inline
 
 Hello there!
 
-We have received a request to link this email address with your Matrix account.
+You or a server on your behalf requested to validate your email.
 
 If it was really you who made this request, you can click on the following link to
 complete the verification of your email address:
@@ -66,7 +66,7 @@ pre, code {
                 <td id="inner">
                     <p>Hello there!</p>
 
-                    <p>We have received a request to link this email address with your Matrix account.</p>
+                    <p>You or a server on your behalf requested to validate your email.</p>
 
                     <p>If it was really you who made this request, you can click on the following link to
                     complete the verification of your email address:</p>

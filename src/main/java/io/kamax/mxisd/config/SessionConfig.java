@@ -32,68 +32,7 @@ public class SessionConfig {
 
         public static class PolicyTemplate {
 
-            public static class PolicySource {
-
-                public static class PolicySourceRemote {
-
-                    private boolean enabled;
-                    private String server;
-
-                    public boolean isEnabled() {
-                        return enabled;
-                    }
-
-                    public void setEnabled(boolean enabled) {
-                        this.enabled = enabled;
-                    }
-
-                    public String getServer() {
-                        return server;
-                    }
-
-                    public void setServer(String server) {
-                        this.server = server;
-                    }
-
-                }
-
-                private boolean enabled;
-                private boolean toLocal;
-                private PolicySourceRemote toRemote = new PolicySourceRemote();
-
-                public boolean isEnabled() {
-                    return enabled;
-                }
-
-                public void setEnabled(boolean enabled) {
-                    this.enabled = enabled;
-                }
-
-                public boolean toLocal() {
-                    return toLocal;
-                }
-
-                public void setToLocal(boolean toLocal) {
-                    this.toLocal = toLocal;
-                }
-
-                public boolean toRemote() {
-                    return toRemote.isEnabled();
-                }
-
-                public PolicySourceRemote getToRemote() {
-                    return toRemote;
-                }
-
-                public void setToRemote(PolicySourceRemote toRemote) {
-                    this.toRemote = toRemote;
-                }
-
-            }
-
             private boolean enabled;
-            private PolicySource forLocal = new PolicySource();
-            private PolicySource forRemote = new PolicySource();
 
             public boolean isEnabled() {
                 return enabled;
@@ -101,26 +40,6 @@ public class SessionConfig {
 
             public void setEnabled(boolean enabled) {
                 this.enabled = enabled;
-            }
-
-            public PolicySource getForLocal() {
-                return forLocal;
-            }
-
-            public PolicySource forLocal() {
-                return forLocal;
-            }
-
-            public PolicySource getForRemote() {
-                return forRemote;
-            }
-
-            public PolicySource forRemote() {
-                return forRemote;
-            }
-
-            public PolicySource forIf(boolean isLocal) {
-                return isLocal ? forLocal : forRemote;
             }
 
         }
@@ -155,15 +74,6 @@ public class SessionConfig {
 
         public Policy() {
             validation.enabled = true;
-            validation.forLocal.enabled = true;
-            validation.forLocal.toLocal = true;
-            validation.forLocal.toRemote.enabled = true;
-            validation.forLocal.toRemote.server = "matrix-org";
-
-            validation.forRemote.enabled = true;
-            validation.forRemote.toLocal = false;
-            validation.forRemote.toRemote.enabled = true;
-            validation.forRemote.toRemote.server = "matrix-org";
         }
 
         private PolicyTemplate validation = new PolicyTemplate();

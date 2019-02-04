@@ -23,27 +23,23 @@ package io.kamax.mxisd.http.undertow.handler.identity.v1;
 import com.google.gson.JsonObject;
 import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
-import io.kamax.mxisd.session.SessionMananger;
+import io.kamax.mxisd.session.SessionManager;
 import io.undertow.server.HttpServerExchange;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SessionTpidUnbindHandler extends BasicHttpHandler {
 
     public static final String Path = IsAPIv1.Base + "/3pid/unbind";
 
-    private static final Logger log = LoggerFactory.getLogger(SessionTpidUnbindHandler.class);
+    private final SessionManager sessionMgr;
 
-    private final SessionMananger sessMgr;
-
-    public SessionTpidUnbindHandler(SessionMananger sessMgr) {
-        this.sessMgr = sessMgr;
+    public SessionTpidUnbindHandler(SessionManager sessionMgr) {
+        this.sessionMgr = sessionMgr;
     }
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {
         JsonObject body = parseJsonObject(exchange);
-        sessMgr.unbind(body);
+        sessionMgr.unbind(body);
         writeBodyAsUtf8(exchange, "{}");
     }
 

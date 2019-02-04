@@ -27,20 +27,14 @@ import java.util.Optional;
 public class ValidationResult {
 
     private IThreePidSession session;
-    private boolean canRemote;
     private String nextUrl;
 
-    public ValidationResult(IThreePidSession session, boolean canRemote) {
+    public ValidationResult(IThreePidSession session) {
         this.session = session;
-        this.canRemote = canRemote;
     }
 
     public IThreePidSession getSession() {
         return session;
-    }
-
-    public boolean isCanRemote() {
-        return canRemote;
     }
 
     public Optional<String> getNextUrl() {

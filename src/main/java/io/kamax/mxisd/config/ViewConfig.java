@@ -21,12 +21,13 @@
 package io.kamax.mxisd.config;
 
 import io.kamax.matrix.json.GsonUtil;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ViewConfig {
 
-    private transient final Logger log = LoggerFactory.getLogger(ViewConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(ViewConfig.class);
 
     public static class Session {
 
@@ -67,45 +68,13 @@ public class ViewConfig {
 
         }
 
-        public static class Remote {
-
-            private Paths onRequest = new Paths();
-            private Paths onCheck = new Paths();
-
-            public Paths getOnRequest() {
-                return onRequest;
-            }
-
-            public void setOnRequest(Paths onRequest) {
-                this.onRequest = onRequest;
-            }
-
-            public Paths getOnCheck() {
-                return onCheck;
-            }
-
-            public void setOnCheck(Paths onCheck) {
-                this.onCheck = onCheck;
-            }
-
-        }
-
+        // Legacy option
         private Local local = new Local();
-        private Local localRemote = new Local();
-        private Remote remote = new Remote();
+        private Paths onTokenSubmit = new Paths();
 
         public Session() {
-            local.onTokenSubmit.success = "classpath:/templates/session/local/tokenSubmitSuccess.html";
-            local.onTokenSubmit.failure = "classpath:/templates/session/local/tokenSubmitFailure.html";
-
-            localRemote.onTokenSubmit.success = "classpath:/templates/session/localRemote/tokenSubmitSuccess.html";
-            localRemote.onTokenSubmit.failure = "classpath:/templates/session/local/tokenSubmitFailure.html";
-
-            remote.onRequest.success = "classpath:/templates/session/remote/requestSuccess.html";
-            remote.onRequest.failure = "classpath:/templates/session/remote/requestFailure.html";
-
-            remote.onCheck.success = "classpath:/templates/session/remote/checkSuccess.html";
-            remote.onCheck.failure = "classpath:/templates/session/remote/checkFailure.html";
+            onTokenSubmit.success = "classpath:/templates/session/tokenSubmitSuccess.html";
+            onTokenSubmit.failure = "classpath:/templates/session/tokenSubmitFailure.html";
         }
 
         public Local getLocal() {
@@ -116,21 +85,14 @@ public class ViewConfig {
             this.local = local;
         }
 
-        public Local getLocalRemote() {
-            return localRemote;
+        public Paths getOnTokenSubmit() {
+            return onTokenSubmit;
         }
 
-        public void setLocalRemote(Local localRemote) {
-            this.localRemote = localRemote;
+        public void setOnTokenSubmit(Paths onTokenSubmit) {
+            this.onTokenSubmit = onTokenSubmit;
         }
 
-        public Remote getRemote() {
-            return remote;
-        }
-
-        public void setRemote(Remote remote) {
-            this.remote = remote;
-        }
     }
 
     private Session session = new Session();
@@ -144,6 +106,17 @@ public class ViewConfig {
     }
 
     public void build() {
+        if (StringUtils.isNotBlank(session.local.onTokenSubmit.success) && StringUtils.isBlank(session.onTokenSubmit.success)) {
+            log.warn("Legacy option session.local.onTokenSubmit.success in use, please switch to session.onTokenSubmit.success");
+            session.onTokenSubmit.success = session.local.onTokenSubmit.success;
+        }
+
+        if (StringUtils.isNotBlank(session.local.onTokenSubmit.failure) && StringUtils.isBlank(session.onTokenSubmit.failure)) {
+            log.warn("Legacy option session.local.onTokenSubmit.failure in use, please switch to session.onTokenSubmit.failure");
+            session.onTokenSubmit.failure = session.local.onTokenSubmit.failure;
+        }
+
+
         log.info("--- View config ---");
         log.info("Session: {}", GsonUtil.get().toJson(session));
     }

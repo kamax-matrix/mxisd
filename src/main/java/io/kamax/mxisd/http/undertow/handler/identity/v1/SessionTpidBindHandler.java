@@ -26,7 +26,7 @@ import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.http.io.identity.BindRequest;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.invitation.InvitationManager;
-import io.kamax.mxisd.session.SessionMananger;
+import io.kamax.mxisd.session.SessionManager;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.QueryParameterUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,10 +44,10 @@ public class SessionTpidBindHandler extends BasicHttpHandler {
 
     private transient final Logger log = LoggerFactory.getLogger(SessionTpidBindHandler.class);
 
-    private SessionMananger mgr;
+    private SessionManager mgr;
     private InvitationManager invMgr;
 
-    public SessionTpidBindHandler(SessionMananger mgr, InvitationManager invMgr) {
+    public SessionTpidBindHandler(SessionManager mgr, InvitationManager invMgr) {
         this.mgr = mgr;
         this.invMgr = invMgr;
     }

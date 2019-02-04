@@ -25,7 +25,7 @@ import io.kamax.mxisd.config.ViewConfig;
 import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.http.io.identity.SuccessStatusJson;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
-import io.kamax.mxisd.session.SessionMananger;
+import io.kamax.mxisd.session.SessionManager;
 import io.kamax.mxisd.session.ValidationResult;
 import io.kamax.mxisd.util.FileUtil;
 import io.undertow.server.HttpServerExchange;
@@ -44,11 +44,11 @@ public class SessionValidateHandler extends BasicHttpHandler {
 
     private transient final Logger log = LoggerFactory.getLogger(SessionValidateHandler.class);
 
-    private SessionMananger mgr;
+    private SessionManager mgr;
     private ServerConfig srvCfg;
     private ViewConfig viewCfg;
 
-    public SessionValidateHandler(SessionMananger mgr, ServerConfig srvCfg, ViewConfig viewCfg) {
+    public SessionValidateHandler(SessionManager mgr, ServerConfig srvCfg, ViewConfig viewCfg) {
         this.mgr = mgr;
         this.srvCfg = srvCfg;
         this.viewCfg = viewCfg;
@@ -72,11 +72,11 @@ public class SessionValidateHandler extends BasicHttpHandler {
         if (isHtmlRequest) {
             handleHtmlRequest(exchange, medium, sid, secret, token);
         } else {
-            handleJsonRequest(exchange, medium, sid, secret, token);
+            handleJsonRequest(exchange, sid, secret, token);
         }
     }
 
-    public void handleHtmlRequest(HttpServerExchange exchange, String medium, String sid, String secret, String token) {
+    private void handleHtmlRequest(HttpServerExchange exchange, String medium, String sid, String secret, String token) {
         log.info("Validating session {} for medium {}", sid, medium);
         ValidationResult r = mgr.validate(sid, secret, token);
         log.info("Session {} was validated", sid);
@@ -93,24 +93,18 @@ public class SessionValidateHandler extends BasicHttpHandler {
             exchange.getResponseHeaders().add(HttpString.tryFromString("Location"), url);
         } else {
             try {
-                String rawData = FileUtil.load(viewCfg.getSession().getLocalRemote().getOnTokenSubmit().getSuccess());
-                if (r.isCanRemote()) {
-                    String url = srvCfg.getPublicUrl() + RemoteIdentityAPIv1.getRequestToken(r.getSession().getId(), r.getSession().getSecret());
-                    String data = rawData.replace("${remoteSessionLink}", url);
-                    writeBodyAsUtf8(exchange, data);
-                } else {
-                    writeBodyAsUtf8(exchange, rawData);
-                }
+                String data = FileUtil.load(viewCfg.getSession().getOnTokenSubmit().getSuccess());
+                writeBodyAsUtf8(exchange, data);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public void handleJsonRequest(HttpServerExchange exchange, String medium, String sid, String secret, String token) {
+    private void handleJsonRequest(HttpServerExchange exchange, String sid, String secret, String token) {
         log.info("Requested: {}", exchange.getRequestURL());
 
-        ValidationResult r = mgr.validate(sid, secret, token);
+        mgr.validate(sid, secret, token);
         log.info("Session {} was validated", sid);
 
         respondJson(exchange, new SuccessStatusJson(true));
