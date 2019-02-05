@@ -21,6 +21,7 @@
 package io.kamax.mxisd;
 
 import io.kamax.mxisd.config.MxisdConfig;
+import io.kamax.mxisd.http.undertow.handler.OptionsHandler;
 import io.kamax.mxisd.http.undertow.handler.SaneHandler;
 import io.kamax.mxisd.http.undertow.handler.as.v1.AsNotFoundHandler;
 import io.kamax.mxisd.http.undertow.handler.as.v1.AsTransactionHandler;
@@ -58,6 +59,8 @@ public class HttpMxisd {
         HttpHandler sessValidateHandler = SaneHandler.around(new SessionValidateHandler(m.getSession(), m.getConfig().getServer(), m.getConfig().getView()));
 
         httpSrv = Undertow.builder().addHttpListener(m.getConfig().getServer().getPort(), "0.0.0.0").setHandler(Handlers.routing()
+
+                .add("OPTIONS", "/**", SaneHandler.around(new OptionsHandler()))
 
                 // Status endpoints
                 .get(StatusHandler.Path, SaneHandler.around(new StatusHandler()))

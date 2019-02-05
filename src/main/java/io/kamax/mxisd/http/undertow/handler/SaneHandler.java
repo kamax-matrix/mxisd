@@ -27,6 +27,7 @@ import io.kamax.matrix.json.InvalidJsonException;
 import io.kamax.mxisd.exception.*;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -56,6 +57,11 @@ public class SaneHandler extends BasicHttpHandler {
             exchange.dispatch(this);
         } else {
             try {
+                // CORS headers as per spec
+                exchange.getResponseHeaders().put(HttpString.tryFromString("Access-Control-Allow-Origin"), "*");
+                exchange.getResponseHeaders().put(HttpString.tryFromString("Access-Control-Allow-Methods"), "GET, POST, PUT, DELETE, OPTIONS");
+                exchange.getResponseHeaders().put(HttpString.tryFromString("Access-Control-Allow-Headers"), "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
                 child.handleRequest(exchange);
             } catch (IllegalArgumentException e) {
                 respond(exchange, HttpStatus.SC_BAD_REQUEST, GsonUtil.makeObj("error", e.getMessage()));
