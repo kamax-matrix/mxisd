@@ -16,15 +16,24 @@ of the Matrix protocol is required for some advanced features.
 If all fails, come over to [the project room](https://matrix.to/#/#mxisd:kamax.io) and we'll do our best to get you
 started and answer questions you might have.
 
+### What kind of setup is mxisd really designed for?
+mxisd is primarily designed for setups that:
+- Care for their privacy
+- Have their own domains
+- Use that domain for their email addresses and all other services
+- Already have an Identity store, typically LDAP-based.
+
+If you meet all the conditions, then you are the prime use case we designed mxisd for. 
+
+If you meet some of the conditions, but not all, mxisd will still be a good fit for you but you won't fully enjoy all its
+features.
+
 ### Do I need to use mxisd if I run a Homeserver?
 No, but it is strongly recommended, even if you don't use any Identity store or integration.
 
 In its default configuration, mxisd uses other federated public servers when performing queries.  
 It can also [be configured](features/identity.md#lookups) to use the central matrix.org servers, giving you access to at
 least the same information as if you were not running it.
-
-It will also give your users a choice to make their 3PIDs available publicly, ensuring they are made aware of the
-privacy consequences, which is not the case with the central Matrix.org servers.
 
 So mxisd is like your gatekeeper and guardian angel. It does not change what you already know, just adds some nice
 simple features on top of it.
@@ -47,13 +56,14 @@ Accounts cannot currently migrate/move from one server to another.
 See a [brief explanation document](concepts.md) about Matrix and mxisd concepts and vocabulary.
 
 ### I already use the synapse LDAP3 auth provider. Why should I care about mxisd?
-The [synapse LDAP3 auth provider](https://github.com/matrix-org/matrix-synapse-ldap3) is not longer maintained and
-only handles on specific flow: validate credentials at login.
+The [synapse LDAP3 auth provider](https://github.com/matrix-org/matrix-synapse-ldap3) is not longer maintained despite
+saying so and only handles on specific flow: validate credentials at login.
 
 It does not:
 - Auto-provision user profiles
 - Integrate with Identity management
 - Integrate with Directory searches
+- Integrate with Profile data
 
 mxisd is a replacement and enhancement of it, offering coherent results in all areas, which the LDAP3 auth provider
 does not.
@@ -74,7 +84,7 @@ No.
 In its default configuration, mxisd does not talk to the central Identity server matrix.org to avoid leaking your private
 data and those of people you might know.
 
-mxisd [can be configured](features/identity.md#lookups) to talk to the central Identity servers if you wish.
+[You can configure it](features/identity.md#lookups) to talk to the central Identity servers if you wish.
 
 ### So mxisd is just a big hack! I don't want to use non-official features!
 mxisd primary concerns are your privacy and to always be compatible with the Matrix ecosystem and the Identity service API.  

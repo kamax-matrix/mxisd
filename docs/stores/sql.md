@@ -6,12 +6,12 @@
 - SQLite
 
 ## Features
-|      Name      | Supported? |
-|----------------|------------|
-| Authentication | No         |
-| Directory      | Yes        |
-| Identity       | Yes        |
-| Profile        | Yes        |
+|                       Name                      | Supported |
+|-------------------------------------------------|-----------|
+| [Authentication](../features/authentication.md) | No        |
+| [Directory](../features/directory.md)           | Yes       |
+| [Identity](../features/identity.md)             | Yes       |
+| [Profile](../features/profile.md)               | Yes       |
 
 Due to the implementation complexity of supporting arbitrary hashing/encoding mechanisms or auth flow, Authentication
 will be out of scope of SQL Identity stores and should be done via one of the other identity stores, typically

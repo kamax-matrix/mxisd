@@ -8,12 +8,12 @@
 For NetIQ, replace all the `ldap` prefix in the configuration by `netiq`.
 
 ## Features
-|      Name      | Supported? |
-|----------------|------------|
-| Authentication | Yes        |
-| Directory      | Yes        |
-| Identity       | Yes        |
-| Profile        | Yes        |
+|                       Name                      | Supported |
+|-------------------------------------------------|-----------|
+| [Authentication](../features/authentication.md) | Yes       |
+| [Directory](../features/directory.md)           | Yes       |
+| [Identity](../features/identity.md)             | Yes       |
+| [Profile](../features/profile.md)               | Yes       |
 
 ## Getting started
 ### Base
@@ -113,16 +113,18 @@ configuration item is needed to get started.
 - `ldap.identity.medium`: Namespace to overwrite generated queries from the list of attributes for each 3PID medium.
 
 ### Authentication
-No further configuration is needed to use the Authentication feature with LDAP once globally enabled and configured.
+After you have configured and enabled the [feature itself](../features/authentication.md), no further configuration is
+needed with this identity store to make it work.
 
 Profile auto-fill is enabled by default. It will use the `ldap.attribute.name` and `ldap.attribute.threepid` configuration
 options to get a lit of attributes to be used to build the user profile to pass on to synapse during authentication.
 
 #### Configuration
-- `ldap.auth.filter`: Specific user filter applied during identity search. Global filter is used if blank/not set.
+- `ldap.auth.filter`: Specific user filter applied during username search. Global filter is used if blank/not set.
 
 ### Directory
-No further configuration is needed to use the Directory feature with LDAP once globally enabled and configured.
+After you have configured and enabled the [feature itself](../features/directory.md), no further configuration is
+needed with this identity store to make it work.
 
 #### Configuration
 To set a specific filter applied during directory search, use `ldap.directory.filter`

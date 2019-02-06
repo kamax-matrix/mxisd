@@ -39,7 +39,7 @@
 | [Authentication](../features/authentication.md) | Yes       |
 | [Directory](../features/directory.md)           | Yes       |
 | [Identity](../features/identity.md)             | Yes       |
-| [Profile](#profile)                             | Yes       |
+| [Profile](../features/profile.md)               | Yes       |
 
 This Identity Store lets you run arbitrary commands to handle the various requests in each support feature.  
 It is the most versatile Identity store of mxisd, allowing you to connect any kind of logic with any executable/script.
@@ -199,7 +199,7 @@ exec:
     DOMAIN: '{domain}'
 ```
 With Authentication enabled, run `/opt/mxisd-exec/auth.sh` when validating credentials, providing:
-- A single command-line argument to provide the `localoart` as username 
+- A single command-line argument to provide the `localpart` as username 
 - A plain text string with the password token for standard input, which will be replaced by the password to check
 - A single environment variable `DOMAIN` containing Matrix ID domain, if given
 
@@ -207,7 +207,7 @@ The command will use the default values for:
 - Success exit status of `0`
 - Failure exit status of `1`
 - Any other exit status considered as error
-- The standard output processing as not processed
+- Standard output will not be processed
 
 #### Advanced
 Given the fictional `placeholder` feature:

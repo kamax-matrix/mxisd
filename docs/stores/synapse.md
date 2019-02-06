@@ -2,12 +2,12 @@
 Synapse's Database itself can be used as an Identity store.
 
 ## Features
-|      Name      | Supported? |
-|----------------|------------|
-| Authentication | No         |
-| Directory      | Yes        |
-| Identity       | Yes        |
-| Profile        | Yes        |
+|                       Name                      | Supported |
+|-------------------------------------------------|-----------|
+| [Authentication](../features/authentication.md) | No        |
+| [Directory](../features/directory.md)           | Yes       |
+| [Identity](../features/identity.md)             | Yes       |
+| [Profile](../features/profile.md)               | Yes       |
 
 Authentication is done by Synapse itself.
 

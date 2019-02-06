@@ -5,12 +5,12 @@ Two types of connections are required for full support:
 - Direct SQL access
 
 ## Features
-|      Name      | Supported? |
-|----------------|------------|
-| Authentication | Yes        |
-| Directory      | Yes        |
-| Identity       | Yes        |
-| Profile        | No         |
+|                       Name                      | Supported |
+|-------------------------------------------------|-----------|
+| [Authentication](../features/authentication.md) | Yes       |
+| [Directory](../features/directory.md)           | Yes       |
+| [Identity](../features/identity.md)             | Yes       |
+| [Profile](../features/profile.md)               | No        |
 
 ## Requirements
 - [Wordpress](https://wordpress.org/download/) >= 4.4

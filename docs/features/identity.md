@@ -1,7 +1,7 @@
 # Identity
 **WARNING**: This document is incomplete and can be misleading.
 
-Implementation of the [Unofficial Matrix Identity Service API](https://kamax.io/matrix/api/identity_service/unstable.html).
+Implementation of the [Identity Service API r0.1.0](https://matrix.org/docs/spec/identity_service/r0.1.0.html).
 
 ## Lookups
 If you would like to use the central matrix.org Identity server to ensure maximum discovery at the cost of potentially

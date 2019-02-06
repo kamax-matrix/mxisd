@@ -6,8 +6,7 @@
 5. [Validate](#validate)
 6. [Next steps](#next-steps)
 
-Following these quick start instructions, you will have a basic setup that can perform recursive/federated lookups and
-talk to the central Matrix.org Identity server.  
+Following these quick start instructions, you will have a basic setup that can perform recursive/federated lookups.  
 This will be a good ground work for further integration with features and your existing Identity stores.
 
 ---
@@ -24,13 +23,17 @@ You will need:
 - Working Homeserver, ideally with working federation
 - Reverse proxy with regular TLS/SSL certificate (Let's encrypt) for your mxisd domain
 
-As synapse requires an HTTPS connection when talking to an Identity service, **a reverse proxy is required** as mxisd does
-not support HTTPS listener at this time.
+If you use synapse:
+- It requires an HTTPS connection when talking to an Identity service, **a reverse proxy is required** as mxisd does
+  not support HTTPS listener at this time.
+- HTTPS is hardcoded when talking to the Identity server. If your Identity server URL in your client is `https://matrix.example.org/`,
+  then you need to ensure `https://matrix.example.org/_matrix/identity/api/v1/...` will reach mxisd if called from the synapse host.
+  In doubt, test with `curl` or similar. 
 
-For maximum integration, it is best to have your Homeserver and mxisd reachable via the same hostname.
+For maximum integration, it is best to have your Homeserver and mxisd reachable via the same public hostname.
 
 Be aware of a [NAT/Reverse proxy gotcha](https://github.com/kamax-matrix/mxisd/wiki/Gotchas#nating) if you use the same
-hostname.
+host.
 
 The following Quick Start guide assumes you will host the Homeserver and mxisd under the same hostname.  
 If you would like a high-level view of the infrastructure and how each feature is integrated, see the
@@ -83,7 +86,7 @@ ProxyPass /_matrix/identity http://0.0.0.0:8090/_matrix/identity
 Typical configuration would look like:
 ```apache
 <VirtualHost *:443>
-    ServerName example.org
+    ServerName matrix.example.org
     
     ...
     
@@ -107,7 +110,7 @@ Typical configuration would look like:
 ```nginx
 server {
     listen 443 ssl;
-    server_name example.org;
+    server_name matrix.example.org;
     
     ...
     
@@ -130,17 +133,17 @@ Add your mxisd domain into the `homeserver.yaml` at `trusted_third_party_id_serv
 In a typical configuration, you would end up with something similar to:
 ```yaml
 trusted_third_party_id_servers:
-    - example.org
+    - matrix.example.org
 ```
-It is recommended to remove `matrix.org` and `vector.im` (or any other default entry) from your configuration so only
-your own Identity server is authoritative for your HS.
+It is **highly recommended** to remove `matrix.org` and `vector.im` (or any other default entry) from your configuration
+so only your own Identity server is authoritative for your HS.
 
 ## Validate
 **NOTE:** In case your homeserver has no working federation, step 5 will not happen. If step 4 took place, consider
 your installation validated.
 
-1. Log in using your Matrix client and set `https://example.org` as your Identity server URL, replacing `example.org` by
-the relevant hostname which you configured in your reverse proxy.
+1. Log in using your Matrix client and set `https://matrix.example.org` as your Identity server URL, replacing `matrix.example.org`
+by the relevant hostname which you configured in your reverse proxy.
 2. Create a new empty room. All further actions will take place in this room.
 3. Invite `mxisd-federation-test@kamax.io`
 4. The 3PID invite should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`.

@@ -2,12 +2,12 @@
 https://firebase.google.com/
 
 ## Features
-|      Name      | Supported? |
-|----------------|------------|
-| Authentication | Yes        |
-| Directory      | No         |
-| Identity       | Yes        |
-| Profile        | No         |
+|                       Name                      | Supported |
+|-------------------------------------------------|-----------|
+| [Authentication](../features/authentication.md) | Yes       |
+| [Directory](../features/directory.md)           | No        |
+| [Identity](../features/identity.md)             | Yes       |
+| [Profile](../features/profile.md)               | No        |
 
 ## Requirements
 This backend requires a suitable Matrix client capable of performing Firebase authentication and passing the following
