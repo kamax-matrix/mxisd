@@ -20,7 +20,8 @@ It is the one stop shop for anything regarding Authentication, Directory and Ide
 single coherent product.
   
 mxisd is specifically designed to connect to an existing on-premise Identity store (AD/Samba/LDAP, SQL Database,
-Web services/app, etc.) and ease the integration of a Matrix infrastructure within an existing one.
+Web services/app, etc.) and ease the integration of a Matrix infrastructure within an existing one.  
+Check [our FAQ entry](docs/faq.md#what-kind-of-setup-is-mxisd-really-designed-for) to know if mxisd is a good fit for you.
 
 The core principle of mxisd is to map between Matrix IDs and 3PIDs (Third-Party IDentifiers) for the Homeserver and its
 users. 3PIDs can be anything that uniquely and globally identify a user, like:
@@ -66,6 +67,8 @@ As an enhanced Identity service:
   currently **cannot be removed**
 - Users can directly find each other using whatever attribute is relevant within your Identity store
 - Federate your Identity server so you can discover others and/or others can discover you
+
+Also, check [our FAQ entry](docs/faq.md#what-kind-of-setup-is-mxisd-really-designed-for) to know if mxisd is a good fit for you.
 
 # Getting started
 See the [dedicated document](docs/getting-started.md)

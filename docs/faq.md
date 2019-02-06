@@ -18,10 +18,10 @@ started and answer questions you might have.
 
 ### What kind of setup is mxisd really designed for?
 mxisd is primarily designed for setups that:
-- Care for their privacy
-- Have their own domains
-- Use that domain for their email addresses and all other services
-- Already have an Identity store, typically LDAP-based.
+- [Care for their privacy](https://github.com/kamax-matrix/mxisd/wiki/mxisd-and-your-privacy)
+- Have their own [domains](https://en.wikipedia.org/wiki/Domain_name)
+- Use those domains for their email addresses and all other services
+- Already have an [Identity store](stores/README.md), typically [LDAP-based](stores/ldap.md).
 
 If you meet all the conditions, then you are the prime use case we designed mxisd for. 
 
