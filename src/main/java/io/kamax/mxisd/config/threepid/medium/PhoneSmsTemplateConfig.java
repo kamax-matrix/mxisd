@@ -29,18 +29,17 @@ public class PhoneSmsTemplateConfig extends GenericTemplateConfig {
 
     public PhoneSmsTemplateConfig() {
         setInvite("classpath:/threepids/sms/invite-template.txt");
-        getGeneric().put("matrixId", "classpath:/threepids/email/mxid-template.eml");
-        getSession().getValidation().setLocal("classpath:/threepids/sms/validate-local-template.txt");
-        getSession().getValidation().setRemote("classpath:/threepids/sms/validate-remote-template.txt");
+        getSession().setValidation("classpath:/threepids/sms/validate-template.txt");
         getSession().getUnbind().setFraudulent("classpath:/threepids/sms/unbind-fraudulent.txt");
     }
 
     public PhoneSmsTemplateConfig build() {
         log.info("--- SMS Generator templates config ---");
         log.info("Invite: {}", getName(getInvite()));
-        log.info("Session validation:");
-        log.info("\tLocal: {}", getName(getSession().getValidation().getLocal()));
-        log.info("\tRemote: {}", getName(getSession().getValidation().getRemote()));
+        log.info("Session:");
+        log.info("\tValidation: {}", getSession().getValidation());
+        log.info("\tUnbind:");
+        log.info("\t\tFraudulent: {}", getSession().getUnbind().getFraudulent());
 
         return this;
     }

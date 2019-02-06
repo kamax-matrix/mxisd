@@ -39,29 +39,6 @@ public class GenericTemplateConfig {
 
     public static class Session {
 
-        public static class SessionValidation {
-
-            private String local;
-            private String remote;
-
-            public String getLocal() {
-                return local;
-            }
-
-            public void setLocal(String local) {
-                this.local = local;
-            }
-
-            public String getRemote() {
-                return remote;
-            }
-
-            public void setRemote(String remote) {
-                this.remote = remote;
-            }
-
-        }
-
         public static class SessionUnbind {
 
             private String fraudulent;
@@ -76,14 +53,14 @@ public class GenericTemplateConfig {
 
         }
 
-        private SessionValidation validation = new SessionValidation();
+        private String validation;
         private SessionUnbind unbind = new SessionUnbind();
 
-        public SessionValidation getValidation() {
+        public String getValidation() {
             return validation;
         }
 
-        public void setValidation(SessionValidation validation) {
+        public void setValidation(String validation) {
             this.validation = validation;
         }
 

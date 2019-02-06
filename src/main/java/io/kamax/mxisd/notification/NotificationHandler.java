@@ -37,8 +37,6 @@ public interface NotificationHandler {
 
     void sendForValidation(IThreePidSession session);
 
-    void sendForRemoteValidation(IThreePidSession session);
-
     void sendForFraudulentUnbind(ThreePid tpid);
 
 }

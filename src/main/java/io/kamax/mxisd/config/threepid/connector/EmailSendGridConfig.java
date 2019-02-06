@@ -115,28 +115,6 @@ public class EmailSendGridConfig {
 
     public static class Templates {
 
-        public static class TemplateSessionValidation {
-
-            private EmailTemplate local = new EmailTemplate();
-            private EmailTemplate remote = new EmailTemplate();
-
-            public EmailTemplate getLocal() {
-                return local;
-            }
-
-            public void setLocal(EmailTemplate local) {
-                this.local = local;
-            }
-
-            public EmailTemplate getRemote() {
-                return remote;
-            }
-
-            public void setRemote(EmailTemplate remote) {
-                this.remote = remote;
-            }
-        }
-
         public static class TemplateSessionUnbind {
 
             private EmailTemplate fraudulent = new EmailTemplate();
@@ -153,14 +131,14 @@ public class EmailSendGridConfig {
 
         public static class TemplateSession {
 
-            private TemplateSessionValidation validation = new TemplateSessionValidation();
+            private EmailTemplate validation = new EmailTemplate();
             private TemplateSessionUnbind unbind = new TemplateSessionUnbind();
 
-            public TemplateSessionValidation getValidation() {
+            public EmailTemplate getValidation() {
                 return validation;
             }
 
-            public void setValidation(TemplateSessionValidation validation) {
+            public void setValidation(EmailTemplate validation) {
                 this.validation = validation;
             }
 

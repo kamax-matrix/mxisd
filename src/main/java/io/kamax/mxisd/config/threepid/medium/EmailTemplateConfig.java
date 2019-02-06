@@ -30,17 +30,17 @@ public class EmailTemplateConfig extends GenericTemplateConfig {
     public EmailTemplateConfig() {
         setInvite("classpath:/threepids/email/invite-template.eml");
         getGeneric().put("matrixId", "classpath:/threepids/email/mxid-template.eml");
-        getSession().getValidation().setLocal("classpath:/threepids/email/validate-local-template.eml");
-        getSession().getValidation().setRemote("classpath:/threepids/email/validate-remote-template.eml");
+        getSession().setValidation("classpath:/threepids/email/validate-template.eml");
         getSession().getUnbind().setFraudulent("classpath:/threepids/email/unbind-fraudulent.eml");
     }
 
     public EmailTemplateConfig build() {
         log.info("--- E-mail Generator templates config ---");
         log.info("Invite: {}", getName(getInvite()));
-        log.info("Session validation:");
-        log.info("\tLocal: {}", getName(getSession().getValidation().getLocal()));
-        log.info("\tRemote: {}", getName(getSession().getValidation().getRemote()));
+        log.info("Session:");
+        log.info("\tValidation: {}", getSession().getValidation());
+        log.info("\tUnbind:");
+        log.info("\t\tFraudulent: {}", getSession().getUnbind().getFraudulent());
 
         return this;
     }

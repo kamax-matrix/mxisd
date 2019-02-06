@@ -18,9 +18,7 @@ threepid:
         template:
           invite: '/path/to/invite-template.eml'
           session:
-            validation:
-              local: '/path/to/validate-local-template.eml'
-              remote: '/path/to/validate-remote-template.eml'
+            validation: '/path/to/validate-template.eml'
             unbind:
               frandulent: '/path/to/unbind-fraudulent-template.eml'
           generic:

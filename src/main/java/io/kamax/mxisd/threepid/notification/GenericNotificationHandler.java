@@ -73,11 +73,6 @@ public abstract class GenericNotificationHandler<A extends ThreePidConnector, B 
     }
 
     @Override
-    public void sendForRemoteValidation(IThreePidSession session) {
-        send(connector, session.getThreePid().getAddress(), generator.getForRemoteValidation(session));
-    }
-
-    @Override
     public void sendForFraudulentUnbind(ThreePid tpid) {
         send(connector, tpid.getAddress(), generator.getForFraudulentUnbind(tpid));
     }

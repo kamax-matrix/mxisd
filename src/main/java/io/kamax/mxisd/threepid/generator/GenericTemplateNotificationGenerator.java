@@ -74,13 +74,7 @@ public abstract class GenericTemplateNotificationGenerator extends PlaceholderNo
     @Override
     public String getForValidation(IThreePidSession session) {
         log.info("Generating notification content for 3PID Session validation");
-        return populateForValidation(session, getTemplateContent(cfg.getSession().getValidation().getLocal()));
-    }
-
-    @Override
-    public String getForRemoteValidation(IThreePidSession session) {
-        log.info("Generating notification content for remote-only 3PID session");
-        return populateForRemoteValidation(session, getTemplateContent(cfg.getSession().getValidation().getRemote()));
+        return populateForValidation(session, getTemplateContent(cfg.getSession().getValidation()));
     }
 
     @Override
