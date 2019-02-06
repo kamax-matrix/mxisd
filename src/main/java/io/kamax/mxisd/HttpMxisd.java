@@ -53,6 +53,7 @@ public class HttpMxisd {
     public void start() {
         m.start();
 
+        HttpHandler helloHandler = SaneHandler.around(new HelloHandler());
         HttpHandler asNotFoundHandler = SaneHandler.around(new AsNotFoundHandler(m.getAs()));
         HttpHandler asTxnHandler = SaneHandler.around(new AsTransactionHandler(m.getAs()));
         HttpHandler storeInvHandler = SaneHandler.around(new StoreInviteHandler(m.getConfig().getServer(), m.getInvitationManager(), m.getKeyManager()));
@@ -79,7 +80,8 @@ public class HttpMxisd {
                 .get(EphemeralKeyIsValidHandler.Path, SaneHandler.around(new EphemeralKeyIsValidHandler()))
 
                 // Identity endpoints
-                .get(HelloHandler.Path, SaneHandler.around(new HelloHandler()))
+                .get(HelloHandler.Path, helloHandler)
+                .get(HelloHandler.Path + "/", helloHandler) // Be lax with possibly trailing slash
                 .get(SingleLookupHandler.Path, SaneHandler.around(new SingleLookupHandler(m.getIdentity(), m.getSign())))
                 .post(BulkLookupHandler.Path, SaneHandler.around(new BulkLookupHandler(m.getIdentity())))
                 .post(StoreInviteHandler.Path, storeInvHandler)

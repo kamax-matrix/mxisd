@@ -3,6 +3,7 @@ package io.kamax.mxisd.matrix;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import io.kamax.mxisd.http.IsAPIv1;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class IdentityServerUtils {
 
         try {
             // FIXME use Apache HTTP client
-            HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(remote + "/_matrix/identity/api/v1/").openConnection();
+            HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(remote + IsAPIv1.Base).openConnection();
             // TODO turn this into a configuration property
             rootSrvConn.setConnectTimeout(2000);
 
