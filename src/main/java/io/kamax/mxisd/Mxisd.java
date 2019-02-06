@@ -40,6 +40,7 @@ import io.kamax.mxisd.lookup.provider.BridgeFetcher;
 import io.kamax.mxisd.lookup.provider.RemoteIdentityServerFetcher;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.lookup.strategy.RecursivePriorityLookupStrategy;
+import io.kamax.mxisd.matrix.IdentityServerUtils;
 import io.kamax.mxisd.notification.NotificationHandlerSupplier;
 import io.kamax.mxisd.notification.NotificationHandlers;
 import io.kamax.mxisd.notification.NotificationManager;
@@ -86,6 +87,7 @@ public class Mxisd {
                 .setMaxConnTotal(Integer.MAX_VALUE)
                 .build();
 
+        IdentityServerUtils.setHttpClient(httpClient);
         srvFetcher = new RemoteIdentityServerFetcher(httpClient);
 
         store = new OrmLiteSqlStorage(cfg);

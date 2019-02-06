@@ -6,13 +6,17 @@ import com.google.gson.JsonParser;
 import io.kamax.mxisd.http.IsAPIv1;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.*;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -21,31 +25,41 @@ import java.util.List;
 import java.util.Optional;
 
 // FIXME placeholder, this must go in matrix-java-sdk for 1.0
+// FIXME this class is just a mistake and should never have happened. Make sure to get rid of for v2.x
 public class IdentityServerUtils {
 
     private static Logger log = LoggerFactory.getLogger(IdentityServerUtils.class);
     private static JsonParser parser = new JsonParser();
 
+    private static CloseableHttpClient client;
+
+    public static void setHttpClient(CloseableHttpClient client) {
+        IdentityServerUtils.client = client;
+    }
+
     public static boolean isUsable(String remote) {
         if (StringUtils.isBlank(remote)) {
+            log.info("IS URL is blank, not usable");
             return false;
         }
 
-        try {
-            // FIXME use Apache HTTP client
-            HttpURLConnection rootSrvConn = (HttpURLConnection) new URL(remote + IsAPIv1.Base).openConnection();
-            // TODO turn this into a configuration property
-            rootSrvConn.setConnectTimeout(2000);
+        HttpGet req = new HttpGet(URI.create(remote + IsAPIv1.Base));
+        req.setConfig(RequestConfig.custom()
+                .setConnectTimeout(2000)
+                .setConnectionRequestTimeout(2000)
+                .build()
+        );
 
-            int status = rootSrvConn.getResponseCode();
+        try (CloseableHttpResponse res = client.execute(req)) {
+            int status = res.getStatusLine().getStatusCode();
             if (status != 200) {
                 log.info("Usability of {} as Identity server: answer status: {}", remote, status);
                 return false;
             }
 
-            JsonElement el = parser.parse(IOUtils.toString(rootSrvConn.getInputStream(), StandardCharsets.UTF_8));
+            JsonElement el = parser.parse(IOUtils.toString(res.getEntity().getContent(), StandardCharsets.UTF_8));
             if (!el.isJsonObject()) {
-                log.debug("IS {} did not send back a JSON object for single 3PID lookup");
+                log.debug("IS {} did not send back an empty JSON object as per spec, not a valid IS");
                 return false;
             }
 

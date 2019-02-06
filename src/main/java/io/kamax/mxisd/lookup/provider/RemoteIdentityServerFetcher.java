@@ -25,6 +25,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.exception.InvalidResponseJsonException;
+import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.http.io.identity.ClientBulkLookupRequest;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
@@ -73,7 +74,7 @@ public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher
 
         try {
             URIBuilder b = new URIBuilder(remote);
-            b.setPath("/_matrix/identity/api/v1/lookup");
+            b.setPath(IsAPIv1.Base + "/lookup");
             b.addParameter("medium", request.getType());
             b.addParameter("address", request.getThreePid());
             HttpGet req = new HttpGet(b.build());
@@ -116,7 +117,7 @@ public class RemoteIdentityServerFetcher implements IRemoteIdentityServerFetcher
         ClientBulkLookupRequest mappingRequest = new ClientBulkLookupRequest();
         mappingRequest.setMappings(mappings);
 
-        String url = remote + "/_matrix/identity/api/v1/bulk_lookup";
+        String url = remote + IsAPIv1.Base + "/bulk_lookup";
         try {
             HttpPost request = RestClientUtils.post(url, mappingRequest);
             try (CloseableHttpResponse response = client.execute(request)) {
