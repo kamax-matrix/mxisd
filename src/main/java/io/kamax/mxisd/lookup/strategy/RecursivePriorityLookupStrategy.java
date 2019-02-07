@@ -57,7 +57,7 @@ public class RecursivePriorityLookupStrategy implements LookupStrategy {
 
         try {
             log.info("Found {} providers", providers.size());
-            providers.forEach(p -> log.info("\t- {}", p.getClass().getName()));
+            providers.forEach(p -> log.info("  - {}", p.getClass().getName()));
             providers.sort((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority()));
 
             log.info("Recursive lookup enabled: {}", cfg.getRecursive().isEnabled());

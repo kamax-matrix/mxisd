@@ -61,7 +61,7 @@ public class NotificationConfig {
     public void build() {
         log.info("--- Notification config ---");
         log.info("Handlers:");
-        handler.forEach((k, v) -> log.info("\t{}: {}", k, v));
+        handler.forEach((k, v) -> log.info("  {}: {}", k, v));
     }
 
 }

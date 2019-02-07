@@ -21,6 +21,8 @@
 package io.kamax.mxisd.config;
 
 import io.kamax.matrix.json.GsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -32,21 +34,29 @@ import java.util.Optional;
 
 public class YamlConfigLoader {
 
+    private static final Logger log = LoggerFactory.getLogger(YamlConfigLoader.class);
+
     public static MxisdConfig loadFromFile(String path) throws IOException {
+        log.debug("Reading config from {}", path);
         Representer rep = new Representer();
         rep.getPropertyUtils().setAllowReadOnlyProperties(true);
         rep.getPropertyUtils().setSkipMissingProperties(true);
         Yaml yaml = new Yaml(new Constructor(MxisdConfig.class), rep);
         try (FileInputStream is = new FileInputStream(path)) {
             Object o = yaml.load(is);
-            return GsonUtil.get().fromJson(GsonUtil.get().toJson(o), MxisdConfig.class);
+            log.debug("Read config in memory from {}", path);
+            MxisdConfig cfg = GsonUtil.get().fromJson(GsonUtil.get().toJson(o), MxisdConfig.class);
+            log.info("Loaded config from {}", path);
+            return cfg;
         }
     }
 
     public static Optional<MxisdConfig> tryLoadFromFile(String path) {
+        log.debug("Attempting to read config from {}", path);
         try {
             return Optional.of(loadFromFile(path));
         } catch (FileNotFoundException e) {
+            log.info("No config file at {}", path);
             return Optional.empty();
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -56,31 +56,31 @@ import java.util.ServiceLoader;
 
 public class Mxisd {
 
-    protected MxisdConfig cfg;
+    private MxisdConfig cfg;
 
-    protected CloseableHttpClient httpClient;
-    protected IRemoteIdentityServerFetcher srvFetcher;
+    private CloseableHttpClient httpClient;
+    private IRemoteIdentityServerFetcher srvFetcher;
 
-    protected IStorage store;
+    private IStorage store;
 
-    protected KeyManager keyMgr;
-    protected SignatureManager signMgr;
+    private KeyManager keyMgr;
+    private SignatureManager signMgr;
 
     // Features
-    protected AuthManager authMgr;
-    protected DirectoryManager dirMgr;
-    protected LookupStrategy idStrategy;
-    protected InvitationManager invMgr;
-    protected ProfileManager pMgr;
-    protected AppSvcManager asHander;
-    protected SessionManager sessMgr;
-    protected NotificationManager notifMgr;
+    private AuthManager authMgr;
+    private DirectoryManager dirMgr;
+    private LookupStrategy idStrategy;
+    private InvitationManager invMgr;
+    private ProfileManager pMgr;
+    private AppSvcManager asHander;
+    private SessionManager sessMgr;
+    private NotificationManager notifMgr;
 
     public Mxisd(MxisdConfig cfg) {
         this.cfg = cfg.build();
     }
 
-    protected void build() {
+    private void build() {
         httpClient = HttpClients.custom()
                 .setUserAgent("mxisd")
                 .setMaxConnPerRoute(Integer.MAX_VALUE)

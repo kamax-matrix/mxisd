@@ -58,7 +58,7 @@ public class ProfileManager {
         this.providers = new ArrayList<>(providers);
 
         log.info("Profile Providers:");
-        providers.forEach(p -> log.info("\t- {}", p.getClass().getSimpleName()));
+        providers.forEach(p -> log.info("  - {}", p.getClass().getSimpleName()));
     }
 
     public <T> List<T> getList(Function<ProfileProvider, List<T>> function) {

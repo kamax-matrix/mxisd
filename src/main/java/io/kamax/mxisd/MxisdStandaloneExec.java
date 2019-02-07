@@ -23,6 +23,8 @@ package io.kamax.mxisd;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.config.YamlConfigLoader;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -31,7 +33,10 @@ import java.util.Objects;
 
 public class MxisdStandaloneExec {
 
+    private static final Logger log = LoggerFactory.getLogger("");
+
     public static void main(String[] args) throws IOException {
+        log.info("------------- mxisd starting -------------");
         MxisdConfig cfg = null;
 
         Iterator<String> argsIt = Arrays.asList(args).iterator();
@@ -40,9 +45,8 @@ public class MxisdStandaloneExec {
             if (StringUtils.equals("-c", arg)) {
                 String cfgFile = argsIt.next();
                 cfg = YamlConfigLoader.loadFromFile(cfgFile);
-                System.out.println("Loaded configuration from " + cfgFile);
             } else {
-                System.out.println("Invalid argument: " + arg);
+                log.info("Invalid argument: {}", arg);
                 System.exit(1);
             }
         }
@@ -55,11 +59,11 @@ public class MxisdStandaloneExec {
             HttpMxisd mxisd = new HttpMxisd(cfg);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 mxisd.stop();
-                System.out.println("------------- mxisd stopped -------------");
+                log.info("------------- mxisd stopped -------------");
             }));
             mxisd.start();
 
-            System.out.println("------------- mxisd started -------------");
+            log.info("------------- mxisd started -------------");
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);

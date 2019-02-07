@@ -62,7 +62,7 @@ public class DirectoryManager {
         this.providers = new ArrayList<>(providers);
 
         log.info("Directory providers:");
-        this.providers.forEach(p -> log.info("\t- {}", p.getClass().getName()));
+        this.providers.forEach(p -> log.info("  - {}", p.getClass().getName()));
     }
 
     public UserDirectorySearchResult search(URI target, String accessToken, String query) {

@@ -421,9 +421,9 @@ public abstract class LdapConfig {
         log.info("Port: {}", connection.getPort());
         log.info("TLS: {}", connection.isTls());
         log.info("Bind DN: {}", connection.getBindDn());
-        log.info("Base DNs: {}");
+        log.info("Base DNs:");
         for (String baseDN : connection.getBaseDNs()) {
-            log.info("\t- {}", baseDN);
+            log.info("  - {}", baseDN);
         }
 
         log.info("Attribute: {}", GsonUtil.get().toJson(attribute));

@@ -111,7 +111,6 @@ public class HttpMxisd {
 
     public void stop() {
         httpSrv.stop();
-
         m.stop();
     }
 

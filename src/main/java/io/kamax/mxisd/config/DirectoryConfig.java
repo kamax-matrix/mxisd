@@ -64,8 +64,8 @@ public class DirectoryConfig {
     public void build() {
         log.info("--- Directory config ---");
         log.info("Exclude:");
-        log.info("\tHomeserver: {}", getExclude().getHomeserver());
-        log.info("\t3PID: {}", getExclude().getThreepid());
+        log.info("  Homeserver: {}", getExclude().getHomeserver());
+        log.info("  3PID: {}", getExclude().getThreepid());
     }
 
 }

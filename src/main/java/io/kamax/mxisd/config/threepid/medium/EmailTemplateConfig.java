@@ -38,9 +38,9 @@ public class EmailTemplateConfig extends GenericTemplateConfig {
         log.info("--- E-mail Generator templates config ---");
         log.info("Invite: {}", getName(getInvite()));
         log.info("Session:");
-        log.info("\tValidation: {}", getSession().getValidation());
-        log.info("\tUnbind:");
-        log.info("\t\tFraudulent: {}", getSession().getUnbind().getFraudulent());
+        log.info("  Validation: {}", getSession().getValidation());
+        log.info("  Unbind:");
+        log.info("    Fraudulent: {}", getSession().getUnbind().getFraudulent());
 
         return this;
     }
