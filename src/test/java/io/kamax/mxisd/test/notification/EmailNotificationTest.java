@@ -1,8 +1,29 @@
-package io.kamax.mxisd.test;
+/*
+ * mxisd - Matrix Identity Server Daemon
+ * Copyright (C) 2019 Kamax Sarl
+ *
+ * https://www.kamax.io/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package io.kamax.mxisd.test.notification;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import io.kamax.matrix.MatrixID;
+import io.kamax.matrix.ThreePid;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix.json.GsonUtil;
@@ -12,18 +33,24 @@ import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.threepid.connector.email.EmailSmtpConnector;
+import io.kamax.mxisd.threepid.session.ThreePidSession;
+import org.apache.commons.lang.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.IOException;
 import java.util.Collections;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
-public class MxisdEmailNotifTest {
+public class EmailNotificationTest {
 
     private final String domain = "localhost";
     private Mxisd m;
@@ -75,6 +102,36 @@ public class MxisdEmailNotifTest {
         assertEquals(1, msg.getFrom().length);
         assertEquals("\"Mxisd Server (Unit Test)\" <mxisd@localhost>", msg.getFrom()[0].toString());
         assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
+    }
+
+    @Test
+    public void forValidation() throws MessagingException, IOException {
+        gm.setUser("mxisd", "mxisd");
+
+        String token = RandomStringUtils.randomAlphanumeric(128);
+        ThreePidSession session = new ThreePidSession(
+                "",
+                "",
+                new ThreePid(ThreePidMedium.Email.getId(), "john@" + domain),
+                "",
+                1,
+                "",
+                token
+        );
+
+        m.getNotif().sendForValidation(session);
+
+        assertEquals(1, gm.getReceivedMessages().length);
+        MimeMessage msg = gm.getReceivedMessages()[0];
+        assertEquals(1, msg.getFrom().length);
+        assertEquals("\"Mxisd Server (Unit Test)\" <mxisd@localhost>", msg.getFrom()[0].toString());
+        assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
+
+        // We just check on the text/plain one. HTML is multipart and it's difficult so we skip
+        MimeMultipart content = (MimeMultipart) msg.getContent();
+        MimeBodyPart mbp = (MimeBodyPart) content.getBodyPart(0);
+        String mbpContent = mbp.getContent().toString();
+        assertTrue(mbpContent.contains(token));
     }
 
 }
