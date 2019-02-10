@@ -25,8 +25,14 @@ import org.apache.http.HttpStatus;
 
 public class NotAllowedException extends HttpMatrixException {
 
+    public static final String ErrCode = "M_FORBIDDEN";
+
+    public NotAllowedException(int code, String s) {
+        super(code, ErrCode, s);
+    }
+
     public NotAllowedException(String s) {
-        super(HttpStatus.SC_FORBIDDEN, "M_FORBIDDEN", s);
+        super(HttpStatus.SC_FORBIDDEN, ErrCode, s);
     }
 
 }

@@ -37,4 +37,5 @@ public class LookupSingleRequestJson {
     public String getAddress() {
         return address;
     }
+
 }

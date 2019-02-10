@@ -7,7 +7,7 @@ Follow the [build instructions](../build.md) then:
 # Create a dedicated user
 useradd -r mxisd
 
-# Create config directory and set ownership
+# Create config directory
 mkdir -p /etc/mxisd
 
 # Create data directory and set ownership
@@ -26,7 +26,7 @@ ln -s /usr/lib/mxisd/mxisd /usr/bin/mxisd
 ```
 
 ### Prepare config file
-Copy the sample config file `./mxisd.example.yaml` to `/etc/mxisd/mxisd.yaml`, edit to your needs
+Copy the configuration file you've created following the build instructions to `/etc/mxisd/mxisd.yaml`
 
 ### Prepare Systemd
 1. Copy `src/systemd/mxisd.service` to `/etc/systemd/system/` and edit if needed

@@ -178,7 +178,6 @@ public class SessionManager {
     }
 
     public void unbind(JsonObject reqData) {
-        // TODO also check for HS header to know which domain attempting the unbind
         if (reqData.entrySet().size() == 2 && reqData.has("mxid") && reqData.has("threepid")) {
             /* This is a HS request to remove a 3PID and is considered:
              * - An attack on user privacy
@@ -218,11 +217,13 @@ public class SessionManager {
                     }
                 }
             }
+
+            throw new NotAllowedException("You have attempted to alter 3PID bindings, which can only be done by the 3PID owner directly. " +
+                    "We have informed the 3PID owner of your fraudulent attempt.");
         }
 
-        log.info("Denying request");
-        throw new NotAllowedException("You have attempted to alter 3PID bindings, which can only be done by the 3PID owner directly. " +
-                "We have informed the 3PID owner of your fraudulent attempt.");
+        log.info("Denying unbind request as the endpoint is not defined in the spec.");
+        throw new NotAllowedException(499, "This endpoint does not exist in the spec and therefore is not supported.");
     }
 
 }

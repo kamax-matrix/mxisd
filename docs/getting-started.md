@@ -54,17 +54,10 @@ See the [Latest release](https://github.com/kamax-matrix/mxisd/releases/latest) 
   
 > **NOTE**: Details about configuration syntax and format are described [here](configure.md)
 
-Create/edit a minimal configuration (see installer doc for the location):
-```yaml
-matrix:
-  domain: 'example.org'
-key:
-  path: '/path/to/signing.key.file'
-storage:
-  provider:
-    sqlite:
-      database: '/path/to/mxisd.db'
-```  
+If you haven't created a configuration file yet, copy `mxisd.example.yaml` to where the configuration file is stored given
+your installation method and edit to your needs.
+
+The following items must be at least configured:
 - `matrix.domain` should be set to your Homeserver domain (`server_name` in synapse configuration)
 - `key.path` will store the signing keys, which must be kept safe! If the file does not exist, keys will be generated for you.
 - `storage.provider.sqlite.database` is the location of the SQLite Database file which will hold state (invites, etc.)
@@ -88,7 +81,7 @@ Typical configuration would look like:
 <VirtualHost *:443>
     ServerName matrix.example.org
     
-    ...
+    # ...
     
     ProxyPreserveHost on
     ProxyPass /_matrix/identity http://localhost:8090/_matrix/identity
@@ -112,7 +105,7 @@ server {
     listen 443 ssl;
     server_name matrix.example.org;
     
-    ...
+    # ...
     
     location /_matrix/identity {
         proxy_pass http://localhost:8090/_matrix/identity;

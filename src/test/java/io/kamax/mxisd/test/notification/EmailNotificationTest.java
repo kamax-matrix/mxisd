@@ -53,6 +53,12 @@ import static junit.framework.TestCase.assertTrue;
 public class EmailNotificationTest {
 
     private final String domain = "localhost";
+    private final String user = "mxisd";
+    private final String notifiee = "john";
+    private final String sender = user + "@" + domain;
+    private final String senderEmail = "\"Mxisd Server (Unit Test)\" <" + sender + ">";
+    private final String target = notifiee + "@" + domain;
+
     private Mxisd m;
     private GreenMail gm;
 
@@ -60,12 +66,12 @@ public class EmailNotificationTest {
     public void before() {
         EmailSmtpConfig smtpCfg = new EmailSmtpConfig();
         smtpCfg.setPort(3025);
-        smtpCfg.setLogin("mxisd");
-        smtpCfg.setPassword("mxisd");
+        smtpCfg.setLogin(user);
+        smtpCfg.setPassword(user);
 
         EmailConfig eCfg = new EmailConfig();
         eCfg.setConnector(EmailSmtpConnector.ID);
-        eCfg.getIdentity().setFrom("mxisd@" + domain);
+        eCfg.getIdentity().setFrom(sender);
         eCfg.getIdentity().setName("Mxisd Server (Unit Test)");
         eCfg.getConnectors().put(EmailSmtpConnector.ID, GsonUtil.makeObj(smtpCfg));
 
@@ -92,27 +98,35 @@ public class EmailNotificationTest {
     public void forMatrixIdInvite() throws MessagingException {
         gm.setUser("mxisd", "mxisd");
 
-        _MatrixID sender = MatrixID.asAcceptable("mxisd", domain);
-        _MatrixID recipient = MatrixID.asAcceptable("john", domain);
-        MatrixIdInvite idInvite = new MatrixIdInvite("!rid:" + domain, sender, recipient, ThreePidMedium.Email.getId(), "john@" + domain, Collections.emptyMap());
+        _MatrixID sender = MatrixID.asAcceptable(user, domain);
+        _MatrixID recipient = MatrixID.asAcceptable(notifiee, domain);
+        MatrixIdInvite idInvite = new MatrixIdInvite(
+                "!rid:" + domain,
+                sender,
+                recipient,
+                ThreePidMedium.Email.getId(),
+                target,
+                Collections.emptyMap()
+        );
+
         m.getNotif().sendForInvite(idInvite);
 
         assertEquals(1, gm.getReceivedMessages().length);
         MimeMessage msg = gm.getReceivedMessages()[0];
         assertEquals(1, msg.getFrom().length);
-        assertEquals("\"Mxisd Server (Unit Test)\" <mxisd@localhost>", msg.getFrom()[0].toString());
+        assertEquals(senderEmail, msg.getFrom()[0].toString());
         assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
     }
 
     @Test
     public void forValidation() throws MessagingException, IOException {
-        gm.setUser("mxisd", "mxisd");
+        gm.setUser(user, user);
 
         String token = RandomStringUtils.randomAlphanumeric(128);
         ThreePidSession session = new ThreePidSession(
                 "",
                 "",
-                new ThreePid(ThreePidMedium.Email.getId(), "john@" + domain),
+                new ThreePid(ThreePidMedium.Email.getId(), target),
                 "",
                 1,
                 "",
@@ -124,7 +138,7 @@ public class EmailNotificationTest {
         assertEquals(1, gm.getReceivedMessages().length);
         MimeMessage msg = gm.getReceivedMessages()[0];
         assertEquals(1, msg.getFrom().length);
-        assertEquals("\"Mxisd Server (Unit Test)\" <mxisd@localhost>", msg.getFrom()[0].toString());
+        assertEquals(senderEmail, msg.getFrom()[0].toString());
         assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
 
         // We just check on the text/plain one. HTML is multipart and it's difficult so we skip
