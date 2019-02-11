@@ -22,40 +22,40 @@ package io.kamax.mxisd;
 
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.config.YamlConfigLoader;
+import io.kamax.mxisd.exception.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 
 public class MxisdStandaloneExec {
 
-    private static final Logger log = LoggerFactory.getLogger("");
+    private static final Logger log = LoggerFactory.getLogger("App");
 
-    public static void main(String[] args) throws IOException {
-        log.info("------------- mxisd starting -------------");
-        MxisdConfig cfg = null;
-
-        Iterator<String> argsIt = Arrays.asList(args).iterator();
-        while (argsIt.hasNext()) {
-            String arg = argsIt.next();
-            if (StringUtils.equals("-c", arg)) {
-                String cfgFile = argsIt.next();
-                cfg = YamlConfigLoader.loadFromFile(cfgFile);
-            } else {
-                log.info("Invalid argument: {}", arg);
-                System.exit(1);
-            }
-        }
-
-        if (Objects.isNull(cfg)) {
-            cfg = YamlConfigLoader.tryLoadFromFile("mxisd.yaml").orElseGet(MxisdConfig::new);
-        }
-
+    public static void main(String[] args) {
         try {
+            log.info("------------- mxisd starting -------------");
+            MxisdConfig cfg = null;
+
+            Iterator<String> argsIt = Arrays.asList(args).iterator();
+            while (argsIt.hasNext()) {
+                String arg = argsIt.next();
+                if (StringUtils.equals("-c", arg)) {
+                    String cfgFile = argsIt.next();
+                    cfg = YamlConfigLoader.loadFromFile(cfgFile);
+                } else {
+                    log.info("Invalid argument: {}", arg);
+                    System.exit(1);
+                }
+            }
+
+            if (Objects.isNull(cfg)) {
+                cfg = YamlConfigLoader.tryLoadFromFile("mxisd.yaml").orElseGet(MxisdConfig::new);
+            }
+
             HttpMxisd mxisd = new HttpMxisd(cfg);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 mxisd.stop();
@@ -64,6 +64,10 @@ public class MxisdStandaloneExec {
             mxisd.start();
 
             log.info("------------- mxisd started -------------");
+        } catch (ConfigurationException e) {
+            log.error(e.getDetailedMessage());
+            log.error(e.getMessage());
+            System.exit(2);
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);

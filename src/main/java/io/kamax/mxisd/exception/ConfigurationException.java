@@ -20,11 +20,8 @@
 
 package io.kamax.mxisd.exception;
 
-import java.util.Optional;
-
 public class ConfigurationException extends RuntimeException {
 
-    private String key;
     private String detailedMsg;
 
     public ConfigurationException(String key) {
@@ -40,8 +37,8 @@ public class ConfigurationException extends RuntimeException {
         this.detailedMsg = detailedMsg;
     }
 
-    public Optional<String> getDetailedMessage() {
-        return Optional.ofNullable(detailedMsg);
+    public String getDetailedMessage() {
+        return detailedMsg;
     }
 
 }

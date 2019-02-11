@@ -21,12 +21,15 @@
 package io.kamax.mxisd.config;
 
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.exception.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.representer.Representer;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,12 +40,13 @@ public class YamlConfigLoader {
     private static final Logger log = LoggerFactory.getLogger(YamlConfigLoader.class);
 
     public static MxisdConfig loadFromFile(String path) throws IOException {
-        log.debug("Reading config from {}", path);
+        File f = new File(path).getAbsoluteFile();
+        log.info("Reading config from {}", f.toString());
         Representer rep = new Representer();
         rep.getPropertyUtils().setAllowReadOnlyProperties(true);
         rep.getPropertyUtils().setSkipMissingProperties(true);
         Yaml yaml = new Yaml(new Constructor(MxisdConfig.class), rep);
-        try (FileInputStream is = new FileInputStream(path)) {
+        try (FileInputStream is = new FileInputStream(f)) {
             MxisdConfig raw = yaml.load(is);
             log.debug("Read config in memory from {}", path);
 
@@ -53,6 +57,8 @@ public class YamlConfigLoader {
 
             log.info("Loaded config from {}", path);
             return cfg;
+        } catch (ParserException t) {
+            throw new ConfigurationException(t.getMessage(), "Could not parse YAML config file - Please check indentation and that the configuration options exist");
         }
     }
 
