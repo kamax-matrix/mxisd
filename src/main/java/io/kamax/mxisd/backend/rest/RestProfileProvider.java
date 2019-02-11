@@ -32,7 +32,7 @@ import io.kamax.mxisd.profile.JsonProfileRequest;
 import io.kamax.mxisd.profile.JsonProfileResult;
 import io.kamax.mxisd.profile.ProfileProvider;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -49,7 +49,7 @@ import java.util.function.Function;
 
 public class RestProfileProvider extends RestProvider implements ProfileProvider {
 
-    private transient final Logger log = LoggerFactory.getLogger(RestProfileProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(RestProfileProvider.class);
 
     public RestProfileProvider(RestBackendConfig cfg) {
         super(cfg);
@@ -60,64 +60,71 @@ public class RestProfileProvider extends RestProvider implements ProfileProvider
             Function<RestBackendConfig.ProfileEndpoints, Optional<String>> endpoint,
             Function<JsonProfileResult, Optional<T>> value
     ) {
-        return cfg.getEndpoints().getProfile()
-                // We get the endpoint
-                .flatMap(endpoint)
-                // We only continue if there is a value
-                .filter(StringUtils::isNotBlank)
-                // We use the endpoint
-                .flatMap(url -> {
-                    try {
-                        URIBuilder builder = new URIBuilder(url);
-                        HttpPost req = new HttpPost(builder.build());
-                        req.setEntity(new StringEntity(GsonUtil.get().toJson(new JsonProfileRequest(userId)), ContentType.APPLICATION_JSON));
-                        try (CloseableHttpResponse res = client.execute(req)) {
-                            int sc = res.getStatusLine().getStatusCode();
-                            if (sc == 404) {
-                                log.info("Got 404 - No result found");
-                                return Optional.empty();
-                            }
+        Optional<String> url = endpoint.apply(cfg.getEndpoints().getProfile());
+        if (!url.isPresent()) {
+            return Optional.empty();
+        }
 
-                            if (sc != 200) {
-                                throw new InternalServerError("Unexpected backed status code: " + sc);
-                            }
+        try {
+            URIBuilder builder = new URIBuilder(url.get());
+            HttpPost req = new HttpPost(builder.build());
+            req.setEntity(new StringEntity(GsonUtil.get().toJson(new JsonProfileRequest(userId)), ContentType.APPLICATION_JSON));
+            try (CloseableHttpResponse res = client.execute(req)) {
+                int sc = res.getStatusLine().getStatusCode();
+                if (sc == 404) {
+                    log.info("Got 404 - No result found");
+                    return Optional.empty();
+                }
 
-                            String body = IOUtils.toString(res.getEntity().getContent(), StandardCharsets.UTF_8);
-                            if (StringUtils.isBlank(body)) {
-                                log.warn("Backend response body is empty/blank, expected JSON object with profile key");
-                                return Optional.empty();
-                            }
+                if (sc != 200) {
+                    throw new InternalServerError("Unexpected backed status code: " + sc);
+                }
 
-                            Optional<JsonObject> pJson = GsonUtil.findObj(GsonUtil.parseObj(body), "profile");
-                            if (!pJson.isPresent()) {
-                                log.warn("Backend response body is invalid, expected JSON object with profile key");
-                                return Optional.empty();
-                            }
+                String body = IOUtils.toString(res.getEntity().getContent(), StandardCharsets.UTF_8);
+                if (StringUtils.isBlank(body)) {
+                    log.warn("Backend response body is empty/blank, expected JSON object with profile key");
+                    return Optional.empty();
+                }
 
-                            JsonProfileResult profile = gson.fromJson(pJson.get(), JsonProfileResult.class);
-                            return value.apply(profile);
-                        }
-                    } catch (JsonSyntaxException | InvalidJsonException e) {
-                        log.error("Unable to parse backend response as JSON", e);
-                        throw new InternalServerError(e);
-                    } catch (URISyntaxException e) {
-                        log.error("Unable to build a valid request URL", e);
-                        throw new InternalServerError(e);
-                    } catch (IOException e) {
-                        log.error("I/O Error during backend request", e);
-                        throw new InternalServerError();
-                    }
-                });
+                Optional<JsonObject> pJson = GsonUtil.findObj(GsonUtil.parseObj(body), "profile");
+                if (!pJson.isPresent()) {
+                    log.warn("Backend response body is invalid, expected JSON object with profile key");
+                    return Optional.empty();
+                }
+
+                JsonProfileResult profile = gson.fromJson(pJson.get(), JsonProfileResult.class);
+                return value.apply(profile);
+            }
+        } catch (JsonSyntaxException | InvalidJsonException e) {
+            log.error("Unable to parse backend response as JSON", e);
+            throw new InternalServerError(e);
+        } catch (URISyntaxException e) {
+            log.error("Unable to build a valid request URL", e);
+            throw new InternalServerError(e);
+        } catch (IOException e) {
+            log.error("I/O Error during backend request", e);
+            throw new InternalServerError();
+        }
     }
 
     @Override
     public Optional<String> getDisplayName(_MatrixID userId) {
-        return doRequest(userId, p -> Optional.ofNullable(p.getDisplayName()), profile -> Optional.ofNullable(profile.getDisplayName()));
+        return doRequest(userId, p -> {
+            if (StringUtils.isBlank(p.getDisplayName())) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(p.getDisplayName());
+        }, profile -> Optional.ofNullable(profile.getDisplayName()));
     }
 
     @Override
     public List<_ThreePid> getThreepids(_MatrixID userId) {
-        return doRequest(userId, p -> Optional.ofNullable(p.getThreepids()), profile -> {
+        return doRequest(userId, p -> {
+            if (StringUtils.isBlank(p.getThreepids())) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(p.getThreepids());
+        }, profile -> {
             List<_ThreePid> t = new ArrayList<>();
             if (Objects.nonNull(profile.getThreepids())) {
                 t.addAll(profile.getThreepids());
@@ -128,7 +135,12 @@ public class RestProfileProvider extends RestProvider implements ProfileProvider
 
     @Override
     public List<String> getRoles(_MatrixID userId) {
-        return doRequest(userId, p -> Optional.ofNullable(p.getRoles()), profile -> {
+        return doRequest(userId, p -> {
+            if (StringUtils.isBlank(p.getRoles())) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(p.getRoles());
+        }, profile -> {
             List<String> t = new ArrayList<>();
             if (Objects.nonNull(profile.getRoles())) {
                 t.addAll(profile.getRoles());

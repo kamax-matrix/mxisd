@@ -23,6 +23,7 @@ package io.kamax.mxisd.test.backend.rest;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
+import io.kamax.matrix._ThreePid;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.backend.rest.RestProfileProvider;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
@@ -34,6 +35,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -42,27 +44,40 @@ import static org.junit.Assert.*;
 
 public class RestProfileProviderTest {
 
+    private static final int MockHttpPort = 65000;
+    private static final String MockHttpHost = "localhost";
+
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(65000);
+    public WireMockRule wireMockRule = new WireMockRule(MockHttpPort);
 
     private final String displayNameEndpoint = "/displayName";
 
-    private final _MatrixID userId = MatrixID.from("john", "matrix.localhost").valid();
+    private final _MatrixID userId = MatrixID.from("john", "matrix." + MockHttpHost).valid();
 
     private RestProfileProvider p;
 
-    @Before
-    public void before() {
-        ProfileEndpoints endpoints = new ProfileEndpoints();
-        endpoints.setDisplayName(displayNameEndpoint);
-
+    private RestBackendConfig getCfg(RestBackendConfig.Endpoints endpoints) {
         RestBackendConfig cfg = new RestBackendConfig();
         cfg.setEnabled(true);
-        cfg.setHost("http://localhost:65000");
-        cfg.getEndpoints().setProfile(endpoints);
+        cfg.setHost("http://" + MockHttpHost + ":" + MockHttpPort);
+        cfg.setEndpoints(endpoints);
         cfg.build();
 
-        p = new RestProfileProvider(cfg);
+        return cfg;
+    }
+
+    private RestProfileProvider get(RestBackendConfig cfg) {
+        return new RestProfileProvider(cfg);
+    }
+
+    @Before
+    public void before() {
+        ProfileEndpoints pEndpoints = new ProfileEndpoints();
+        pEndpoints.setDisplayName(displayNameEndpoint);
+        RestBackendConfig.Endpoints endpoints = new RestBackendConfig.Endpoints();
+        endpoints.setProfile(pEndpoints);
+
+        p = get(getCfg(endpoints));
     }
 
     @Test
@@ -142,6 +157,28 @@ public class RestProfileProviderTest {
                     .withRequestBody(equalTo(GsonUtil.get().toJson(new JsonProfileRequest(userId))))
             );
         }
+    }
+
+    @Test
+    public void forEmptyEndpoints() {
+        ProfileEndpoints pEndpoints = new ProfileEndpoints();
+        pEndpoints.setDisplayName("");
+        pEndpoints.setThreepids("");
+        pEndpoints.setRoles("");
+
+        RestBackendConfig.Endpoints endpoints = new RestBackendConfig.Endpoints();
+        endpoints.setProfile(pEndpoints);
+
+        RestProfileProvider p = get(getCfg(endpoints));
+
+        Optional<String> dn = p.getDisplayName(userId);
+        assertFalse(dn.isPresent());
+
+        List<String> roles = p.getRoles(userId);
+        assertTrue(roles.isEmpty());
+
+        List<_ThreePid> tpids = p.getThreepids(userId);
+        assertTrue(tpids.isEmpty());
     }
 
 }

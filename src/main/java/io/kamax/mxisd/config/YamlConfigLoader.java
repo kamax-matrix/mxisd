@@ -43,9 +43,14 @@ public class YamlConfigLoader {
         rep.getPropertyUtils().setSkipMissingProperties(true);
         Yaml yaml = new Yaml(new Constructor(MxisdConfig.class), rep);
         try (FileInputStream is = new FileInputStream(path)) {
-            Object o = yaml.load(is);
+            MxisdConfig raw = yaml.load(is);
             log.debug("Read config in memory from {}", path);
-            MxisdConfig cfg = GsonUtil.get().fromJson(GsonUtil.get().toJson(o), MxisdConfig.class);
+
+            // SnakeYaml set objects to null when there is no value set in the config, even a full sub-tree.
+            // This is problematic for default config values and objects, to avoid NPEs.
+            // Therefore, we'll use Gson to re-parse the data in a way that avoids us checking the whole config for nulls.
+            MxisdConfig cfg = GsonUtil.get().fromJson(GsonUtil.get().toJson(raw), MxisdConfig.class);
+
             log.info("Loaded config from {}", path);
             return cfg;
         }

@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
-import java.util.Optional;
 
 public class RestBackendConfig {
 
@@ -118,8 +117,8 @@ public class RestBackendConfig {
             this.identity = identity;
         }
 
-        public Optional<ProfileEndpoints> getProfile() {
-            return Optional.ofNullable(profile);
+        public ProfileEndpoints getProfile() {
+            return profile;
         }
 
         public void setProfile(ProfileEndpoints profile) {
@@ -128,7 +127,7 @@ public class RestBackendConfig {
 
     }
 
-    private transient final Logger log = LoggerFactory.getLogger(RestBackendConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(RestBackendConfig.class);
 
     private boolean enabled;
     private String host;
@@ -197,6 +196,11 @@ public class RestBackendConfig {
             log.info("Directory endpoint: {}", endpoints.getDirectory());
             log.info("Identity Single endpoint: {}", endpoints.identity.getSingle());
             log.info("Identity Bulk endpoint: {}", endpoints.identity.getBulk());
+
+            log.info("Profile endpoints:");
+            log.info("  - Display name: {}", getEndpoints().getProfile().getDisplayName());
+            log.info("  - 3PIDs: {}", getEndpoints().getProfile().getThreepids());
+            log.info("  - Roles: {}", getEndpoints().getProfile().getRoles());
         }
     }
 
