@@ -101,7 +101,7 @@ dependencies {
     compile 'com.j256.ormlite:ormlite-jdbc:5.0'
 
     // ed25519 handling
-    compile 'net.i2p.crypto:eddsa:0.1.0'
+    compile 'net.i2p.crypto:eddsa:0.3.0'
 
     // LDAP connector
     compile 'org.apache.directory.api:api-all:1.0.0'

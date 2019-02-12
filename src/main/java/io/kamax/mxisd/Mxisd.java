@@ -20,8 +20,6 @@
 
 package io.kamax.mxisd;
 
-import io.kamax.matrix.crypto.KeyManager;
-import io.kamax.matrix.crypto.SignatureManager;
 import io.kamax.mxisd.as.AppSvcManager;
 import io.kamax.mxisd.auth.AuthManager;
 import io.kamax.mxisd.auth.AuthProviders;
@@ -48,6 +46,9 @@ import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.profile.ProfileProviders;
 import io.kamax.mxisd.session.SessionManager;
 import io.kamax.mxisd.storage.IStorage;
+import io.kamax.mxisd.storage.crypto.Ed25519KeyManager;
+import io.kamax.mxisd.storage.crypto.KeyManager;
+import io.kamax.mxisd.storage.crypto.SignatureManager;
 import io.kamax.mxisd.storage.ormlite.OrmLiteSqlStorage;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -63,7 +64,7 @@ public class Mxisd {
 
     private IStorage store;
 
-    private KeyManager keyMgr;
+    private Ed25519KeyManager keyMgr;
     private SignatureManager signMgr;
 
     // Features
@@ -92,7 +93,7 @@ public class Mxisd {
 
         store = new OrmLiteSqlStorage(cfg);
         keyMgr = CryptoFactory.getKeyManager(cfg.getKey());
-        signMgr = CryptoFactory.getSignatureManager(keyMgr, cfg.getServer());
+        signMgr = CryptoFactory.getSignatureManager(keyMgr);
         ClientDnsOverwrite clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());
         FederationDnsOverwrite fedDns = new FederationDnsOverwrite(cfg.getDns().getOverwrite());
         Synapse synapse = new Synapse(cfg.getSynapseSql());
@@ -105,7 +106,7 @@ public class Mxisd {
         pMgr = new ProfileManager(ProfileProviders.get(), clientDns, httpClient);
         notifMgr = new NotificationManager(cfg.getNotification(), NotificationHandlers.get());
         sessMgr = new SessionManager(cfg.getSession(), cfg.getMatrix(), store, notifMgr, idStrategy, httpClient);
-        invMgr = new InvitationManager(cfg.getInvite(), store, idStrategy, signMgr, fedDns, notifMgr);
+        invMgr = new InvitationManager(cfg, store, idStrategy, signMgr, fedDns, notifMgr);
         authMgr = new AuthManager(cfg, AuthProviders.get(), idStrategy, invMgr, clientDns, httpClient);
         dirMgr = new DirectoryManager(cfg.getDirectory(), clientDns, httpClient, DirectoryProviders.get());
         asHander = new AppSvcManager(cfg, store, pMgr, notifMgr, synapse);

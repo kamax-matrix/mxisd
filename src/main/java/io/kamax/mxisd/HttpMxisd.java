@@ -82,7 +82,7 @@ public class HttpMxisd {
                 // Identity endpoints
                 .get(HelloHandler.Path, helloHandler)
                 .get(HelloHandler.Path + "/", helloHandler) // Be lax with possibly trailing slash
-                .get(SingleLookupHandler.Path, SaneHandler.around(new SingleLookupHandler(m.getIdentity(), m.getSign())))
+                .get(SingleLookupHandler.Path, SaneHandler.around(new SingleLookupHandler(m.getConfig(), m.getIdentity(), m.getSign())))
                 .post(BulkLookupHandler.Path, SaneHandler.around(new BulkLookupHandler(m.getIdentity())))
                 .post(StoreInviteHandler.Path, storeInvHandler)
                 .post(SessionStartHandler.Path, SaneHandler.around(new SessionStartHandler(m.getSession())))

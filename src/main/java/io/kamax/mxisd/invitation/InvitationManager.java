@@ -23,9 +23,10 @@ package io.kamax.mxisd.invitation;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
-import io.kamax.matrix.crypto.SignatureManager;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.InvitationConfig;
+import io.kamax.mxisd.config.MxisdConfig;
+import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.dns.FederationDnsOverwrite;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
@@ -34,6 +35,7 @@ import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
+import io.kamax.mxisd.storage.crypto.SignatureManager;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -67,6 +69,7 @@ public class InvitationManager {
     private transient final Logger log = LoggerFactory.getLogger(InvitationManager.class);
 
     private InvitationConfig cfg;
+    private ServerConfig srvCfg;
     private IStorage storage;
     private LookupStrategy lookupMgr;
     private SignatureManager signMgr;
@@ -79,14 +82,15 @@ public class InvitationManager {
     private Map<String, IThreePidInviteReply> invitations = new ConcurrentHashMap<>();
 
     public InvitationManager(
-            InvitationConfig cfg,
+            MxisdConfig mxisdCfg,
             IStorage storage,
             LookupStrategy lookupMgr,
             SignatureManager signMgr,
             FederationDnsOverwrite dns,
             NotificationManager notifMgr
     ) {
-        this.cfg = cfg;
+        this.cfg = mxisdCfg.getInvite();
+        this.srvCfg = mxisdCfg.getServer();
         this.storage = storage;
         this.lookupMgr = lookupMgr;
         this.signMgr = signMgr;
@@ -280,7 +284,7 @@ public class InvitationManager {
             JsonObject obj = new JsonObject();
             obj.addProperty("mxid", mxid);
             obj.addProperty("token", reply.getToken());
-            obj.add("signatures", signMgr.signMessageGson(obj.toString()));
+            obj.add("signatures", signMgr.signMessageGson(srvCfg.getName(), obj.toString()));
 
             JsonObject objUp = new JsonObject();
             objUp.addProperty("mxid", mxid);
@@ -298,7 +302,7 @@ public class InvitationManager {
             content.addProperty("address", address);
             content.addProperty("mxid", mxid);
 
-            content.add("signatures", signMgr.signMessageGson(content.toString()));
+            content.add("signatures", signMgr.signMessageGson(srvCfg.getName(), content.toString()));
 
             StringEntity entity = new StringEntity(content.toString(), StandardCharsets.UTF_8);
             entity.setContentType("application/json");

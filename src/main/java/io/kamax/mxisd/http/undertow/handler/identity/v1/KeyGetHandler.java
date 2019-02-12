@@ -21,10 +21,11 @@
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
 import com.google.gson.JsonObject;
-import io.kamax.matrix.crypto.KeyManager;
-import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
+import io.kamax.mxisd.storage.crypto.GenericKeyIdentifier;
+import io.kamax.mxisd.storage.crypto.KeyManager;
+import io.kamax.mxisd.storage.crypto.KeyType;
 import io.undertow.server.HttpServerExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,16 +47,12 @@ public class KeyGetHandler extends BasicHttpHandler {
     public void handleRequest(HttpServerExchange exchange) {
         String key = getQueryParameter(exchange, Key);
         String[] v = key.split(":", 2);
-        String keyType = v[0];
-        int keyId = Integer.parseInt(v[1]);
+        String keyAlgo = v[0];
+        String keyId = v[1];
 
-        if (!"ed25519".contentEquals(keyType)) {
-            throw new BadRequestException("Invalid algorithm: " + keyType);
-        }
-
-        log.info("Key {}:{} was requested", keyType, keyId);
+        log.info("Key {}:{} was requested", keyAlgo, keyId);
         JsonObject obj = new JsonObject();
-        obj.addProperty("public_key", mgr.getPublicKeyBase64(keyId));
+        obj.addProperty("public_key", mgr.getPublicKeyBase64(new GenericKeyIdentifier(KeyType.Regular, keyAlgo, keyId)));
         respond(exchange, obj);
     }
 

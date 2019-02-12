@@ -24,7 +24,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix._MatrixID;
-import io.kamax.matrix.crypto.KeyManager;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.exception.BadRequestException;
@@ -36,6 +35,7 @@ import io.kamax.mxisd.invitation.IThreePidInvite;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.invitation.InvitationManager;
 import io.kamax.mxisd.invitation.ThreePidInvite;
+import io.kamax.mxisd.storage.crypto.KeyManager;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.QueryParameterUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -96,7 +96,8 @@ public class StoreInviteHandler extends BasicHttpHandler {
         IThreePidInvite invite = new ThreePidInvite(sender, inv.getMedium(), inv.getAddress(), inv.getRoomId(), parameters);
         IThreePidInviteReply reply = invMgr.storeInvite(invite);
 
-        respondJson(exchange, new ThreePidInviteReplyIO(reply, keyMgr.getPublicKeyBase64(keyMgr.getCurrentIndex()), cfg.getPublicUrl()));
+        // FIXME the key info must be set by the invitation manager in the reply object!
+        respondJson(exchange, new ThreePidInviteReplyIO(reply, keyMgr.getPublicKeyBase64(keyMgr.getServerSigningKey().getId()), cfg.getPublicUrl()));
     }
 
 }

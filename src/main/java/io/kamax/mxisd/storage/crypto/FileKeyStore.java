@@ -1,0 +1,78 @@
+/*
+ * mxisd - Matrix Identity Server Daemon
+ * Copyright (C) 2019 Kamax Sàrl
+ *
+ * https://www.kamax.io/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package io.kamax.mxisd.storage.crypto;
+
+import io.kamax.mxisd.exception.ObjectNotFoundException;
+
+import java.util.List;
+import java.util.Optional;
+
+public class FileKeyStore implements KeyStore {
+
+    public FileKeyStore(String path) {
+    }
+
+    @Override
+    public boolean has(KeyIdentifier id) {
+        return false;
+    }
+
+    @Override
+    public List<KeyIdentifier> list() {
+        return null;
+    }
+
+    @Override
+    public List<KeyIdentifier> list(KeyType type) {
+        return null;
+    }
+
+    @Override
+    public Key get(KeyIdentifier id) throws ObjectNotFoundException {
+        return null;
+    }
+
+    @Override
+    public void add(Key key) throws IllegalStateException {
+
+    }
+
+    @Override
+    public void update(Key key) throws ObjectNotFoundException {
+
+    }
+
+    @Override
+    public void delete(KeyIdentifier id) throws ObjectNotFoundException {
+
+    }
+
+    @Override
+    public void setCurrentKey(KeyIdentifier id) throws IllegalArgumentException {
+
+    }
+
+    @Override
+    public Optional<KeyIdentifier> getCurrentKey() {
+        return Optional.empty();
+    }
+
+}
