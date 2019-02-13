@@ -33,6 +33,7 @@ import io.kamax.mxisd.http.undertow.handler.directory.v1.UserDirectorySearchHand
 import io.kamax.mxisd.http.undertow.handler.identity.v1.*;
 import io.kamax.mxisd.http.undertow.handler.profile.v1.InternalProfileHandler;
 import io.kamax.mxisd.http.undertow.handler.profile.v1.ProfileHandler;
+import io.kamax.mxisd.http.undertow.handler.register.v1.Register3pidRequestTokenHandler;
 import io.kamax.mxisd.http.undertow.handler.status.StatusHandler;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -96,6 +97,9 @@ public class HttpMxisd {
                 // Profile endpoints
                 .get(ProfileHandler.Path, SaneHandler.around(new ProfileHandler(m.getProfile())))
                 .get(InternalProfileHandler.Path, SaneHandler.around(new InternalProfileHandler(m.getProfile())))
+
+                // Registration endpoints
+                .post(Register3pidRequestTokenHandler.Path, SaneHandler.around(new Register3pidRequestTokenHandler(m.getReg(), m.getClientDns(), m.getHttpClient())))
 
                 // Application Service endpoints
                 .get("/_matrix/app/v1/users/**", asNotFoundHandler)

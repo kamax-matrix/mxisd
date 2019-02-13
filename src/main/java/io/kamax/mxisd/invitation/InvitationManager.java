@@ -23,6 +23,7 @@ package io.kamax.mxisd.invitation;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
+import io.kamax.matrix.ThreePid;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.InvitationConfig;
 import io.kamax.mxisd.config.MxisdConfig;
@@ -264,6 +265,22 @@ public class InvitationManager {
         log.info("A new invite has been created for {}:{} on HS {}", invitation.getMedium(), invitation.getAddress(), invitation.getSender().getDomain());
 
         return reply;
+    }
+
+    public boolean hasInvite(ThreePid tpid) {
+        for (IThreePidInviteReply reply : invitations.values()) {
+            if (!StringUtils.equals(tpid.getMedium(), reply.getInvite().getMedium())) {
+                continue;
+            }
+
+            if (!StringUtils.equals(tpid.getAddress(), reply.getInvite().getAddress())) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public void lookupMappingsForInvites() {

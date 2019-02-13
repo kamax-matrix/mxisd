@@ -44,6 +44,7 @@ import io.kamax.mxisd.notification.NotificationHandlers;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.profile.ProfileProviders;
+import io.kamax.mxisd.registration.RegistrationManager;
 import io.kamax.mxisd.session.SessionManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.crypto.Ed25519KeyManager;
@@ -66,6 +67,7 @@ public class Mxisd {
 
     private Ed25519KeyManager keyMgr;
     private SignatureManager signMgr;
+    private ClientDnsOverwrite clientDns;
 
     // Features
     private AuthManager authMgr;
@@ -76,6 +78,7 @@ public class Mxisd {
     private AppSvcManager asHander;
     private SessionManager sessMgr;
     private NotificationManager notifMgr;
+    private RegistrationManager regMgr;
 
     public Mxisd(MxisdConfig cfg) {
         this.cfg = cfg.build();
@@ -94,7 +97,7 @@ public class Mxisd {
         store = new OrmLiteSqlStorage(cfg);
         keyMgr = CryptoFactory.getKeyManager(cfg.getKey());
         signMgr = CryptoFactory.getSignatureManager(keyMgr);
-        ClientDnsOverwrite clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());
+        clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());
         FederationDnsOverwrite fedDns = new FederationDnsOverwrite(cfg.getDns().getOverwrite());
         Synapse synapse = new Synapse(cfg.getSynapseSql());
         BridgeFetcher bridgeFetcher = new BridgeFetcher(cfg.getLookup().getRecursive().getBridge(), srvFetcher);
@@ -109,6 +112,7 @@ public class Mxisd {
         invMgr = new InvitationManager(cfg, store, idStrategy, keyMgr, signMgr, fedDns, notifMgr);
         authMgr = new AuthManager(cfg, AuthProviders.get(), idStrategy, invMgr, clientDns, httpClient);
         dirMgr = new DirectoryManager(cfg.getDirectory(), clientDns, httpClient, DirectoryProviders.get());
+        regMgr = new RegistrationManager(httpClient, clientDns, idStrategy, invMgr);
         asHander = new AppSvcManager(cfg, store, pMgr, notifMgr, synapse);
     }
 
@@ -118,6 +122,10 @@ public class Mxisd {
 
     public CloseableHttpClient getHttpClient() {
         return httpClient;
+    }
+
+    public ClientDnsOverwrite getClientDns() {
+        return clientDns;
     }
 
     public IRemoteIdentityServerFetcher getServerFetcher() {
@@ -154,6 +162,10 @@ public class Mxisd {
 
     public SignatureManager getSign() {
         return signMgr;
+    }
+
+    public RegistrationManager getReg() {
+        return regMgr;
     }
 
     public AppSvcManager getAs() {
