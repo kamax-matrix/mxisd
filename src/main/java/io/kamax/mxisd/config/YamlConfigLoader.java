@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.representer.Representer;
 
@@ -43,6 +44,7 @@ public class YamlConfigLoader {
         File f = new File(path).getAbsoluteFile();
         log.info("Reading config from {}", f.toString());
         Representer rep = new Representer();
+        rep.getPropertyUtils().setBeanAccess(BeanAccess.FIELD);
         rep.getPropertyUtils().setAllowReadOnlyProperties(true);
         rep.getPropertyUtils().setSkipMissingProperties(true);
         Yaml yaml = new Yaml(new Constructor(MxisdConfig.class), rep);
