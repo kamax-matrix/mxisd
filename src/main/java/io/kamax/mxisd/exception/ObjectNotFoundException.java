@@ -22,8 +22,12 @@ package io.kamax.mxisd.exception;
 
 public class ObjectNotFoundException extends RuntimeException {
 
+    public ObjectNotFoundException(String message) {
+        super(message);
+    }
+
     public ObjectNotFoundException(String type, String id) {
-        super(type + " with ID " + id + " does not exist");
+        this(type + " with ID " + id + " does not exist");
     }
 
 }

@@ -20,18 +20,24 @@
 
 package io.kamax.mxisd.invitation;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class ThreePidInviteReply implements IThreePidInviteReply {
 
     private String id;
     private IThreePidInvite invite;
     private String token;
     private String displayName;
+    private List<String> publicKeys;
 
-    public ThreePidInviteReply(String id, IThreePidInvite invite, String token, String displayName) {
+    public ThreePidInviteReply(String id, IThreePidInvite invite, String token, String displayName, List<String> publicKeys) {
         this.id = id;
         this.invite = invite;
         this.token = token;
         this.displayName = displayName;
+        this.publicKeys = Collections.unmodifiableList(new ArrayList<>(publicKeys));
     }
 
     @Override
@@ -52,6 +58,11 @@ public class ThreePidInviteReply implements IThreePidInviteReply {
     @Override
     public String getDisplayName() {
         return displayName;
+    }
+
+    @Override
+    public List<String> getPublicKeys() {
+        return publicKeys;
     }
 
 }

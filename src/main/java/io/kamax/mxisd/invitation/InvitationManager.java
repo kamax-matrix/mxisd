@@ -30,16 +30,17 @@ import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.dns.FederationDnsOverwrite;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
+import io.kamax.mxisd.exception.ObjectNotFoundException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
-import io.kamax.mxisd.storage.crypto.SignatureManager;
+import io.kamax.mxisd.storage.crypto.*;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -72,6 +73,7 @@ public class InvitationManager {
     private ServerConfig srvCfg;
     private IStorage storage;
     private LookupStrategy lookupMgr;
+    private KeyManager keyMgr;
     private SignatureManager signMgr;
     private FederationDnsOverwrite dns;
     private NotificationManager notifMgr;
@@ -85,6 +87,7 @@ public class InvitationManager {
             MxisdConfig mxisdCfg,
             IStorage storage,
             LookupStrategy lookupMgr,
+            KeyManager keyMgr,
             SignatureManager signMgr,
             FederationDnsOverwrite dns,
             NotificationManager notifMgr
@@ -93,6 +96,7 @@ public class InvitationManager {
         this.srvCfg = mxisdCfg.getServer();
         this.storage = storage;
         this.lookupMgr = lookupMgr;
+        this.keyMgr = keyMgr;
         this.signMgr = signMgr;
         this.dns = dns;
         this.notifMgr = notifMgr;
@@ -109,7 +113,7 @@ public class InvitationManager {
                     io.getProperties()
             );
 
-            ThreePidInviteReply reply = new ThreePidInviteReply(getId(invite), invite, io.getToken(), "");
+            ThreePidInviteReply reply = new ThreePidInviteReply(getId(invite), invite, io.getToken(), "", Collections.emptyList());
             invitations.put(reply.getId(), reply);
         });
 
@@ -221,7 +225,7 @@ public class InvitationManager {
             log.info("Invite is already pending for {}:{}, returning data", invitation.getMedium(), invitation.getAddress());
             if (!StringUtils.equals(invitation.getRoomId(), reply.getInvite().getRoomId())) {
                 log.info("Sending new notification as new invite room {} is different from the original {}", invitation.getRoomId(), reply.getInvite().getRoomId());
-                notifMgr.sendForReply(new ThreePidInviteReply(reply.getId(), invitation, reply.getToken(), reply.getDisplayName()));
+                notifMgr.sendForReply(new ThreePidInviteReply(reply.getId(), invitation, reply.getToken(), reply.getDisplayName(), reply.getPublicKeys()));
             } else {
                 // FIXME we should check attempt and send if bigger
             }
@@ -236,8 +240,20 @@ public class InvitationManager {
 
         String token = RandomStringUtils.randomAlphanumeric(64);
         String displayName = invitation.getAddress().substring(0, 3) + "...";
+        KeyIdentifier pKeyId = keyMgr.getServerSigningKey().getId();
+        KeyIdentifier eKeyId = keyMgr.generateKey(KeyType.Ephemeral);
 
-        reply = new ThreePidInviteReply(invId, invitation, token, displayName);
+        String pPubKey = keyMgr.getPublicKeyBase64(pKeyId);
+        String ePubKey = keyMgr.getPublicKeyBase64(eKeyId);
+
+        invitation.getProperties().put("p_key_algo", pKeyId.getAlgorithm());
+        invitation.getProperties().put("p_key_serial", pKeyId.getSerial());
+        invitation.getProperties().put("p_key_public", pPubKey);
+        invitation.getProperties().put("e_key_algo", eKeyId.getAlgorithm());
+        invitation.getProperties().put("e_key_serial", eKeyId.getSerial());
+        invitation.getProperties().put("e_key_public", ePubKey);
+
+        reply = new ThreePidInviteReply(invId, invitation, token, displayName, Arrays.asList(pPubKey, ePubKey));
 
         log.info("Performing invite to {}:{}", invitation.getMedium(), invitation.getAddress());
         notifMgr.sendForReply(reply);
@@ -268,6 +284,28 @@ public class InvitationManager {
                 publishMapping(reply, threePid.getMxid());
             }
         }
+    }
+
+    public IThreePidInviteReply getInvite(String token, String privKey) {
+        for (IThreePidInviteReply reply : invitations.values()) {
+            if (StringUtils.equals(reply.getToken(), token)) {
+                String algo = reply.getInvite().getProperties().get("e_key_algo");
+                String serial = reply.getInvite().getProperties().get("e_key_serial");
+
+                if (StringUtils.isAnyBlank(algo, serial)) {
+                    continue;
+                }
+
+                String storedPrivKey = keyMgr.getKey(new GenericKeyIdentifier(KeyType.Ephemeral, algo, serial)).getPrivateKeyBase64();
+                if (!StringUtils.equals(storedPrivKey, privKey)) {
+                    continue;
+                }
+
+                return reply;
+            }
+        }
+
+        throw new ObjectNotFoundException("No invite with such token and/or private key");
     }
 
     private void publishMapping(IThreePidInviteReply reply, String mxid) {

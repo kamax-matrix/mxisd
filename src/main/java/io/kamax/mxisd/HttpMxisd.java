@@ -91,6 +91,7 @@ public class HttpMxisd {
                 .get(SessionTpidGetValidatedHandler.Path, SaneHandler.around(new SessionTpidGetValidatedHandler(m.getSession())))
                 .post(SessionTpidBindHandler.Path, SaneHandler.around(new SessionTpidBindHandler(m.getSession(), m.getInvitationManager())))
                 .post(SessionTpidUnbindHandler.Path, SaneHandler.around(new SessionTpidUnbindHandler(m.getSession())))
+                .post(SignEd25519Handler.Path, SaneHandler.around(new SignEd25519Handler(m.getConfig(), m.getInvitationManager(), m.getSign())))
 
                 // Profile endpoints
                 .get(ProfileHandler.Path, SaneHandler.around(new ProfileHandler(m.getProfile())))
