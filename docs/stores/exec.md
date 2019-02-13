@@ -212,21 +212,25 @@ The command will use the default values for:
 #### Advanced
 Given the fictional `placeholder` feature:
 ```yaml
-exec.enabled: true
-exec.token.mxid: '{matrixId}'
-
-exec.placeholder.token.localpart: '{username}'
-exec.placeholder.command: '/path/to/executable'
-exec.placeholder.args:
-  - '-u'
-  - '{username}'
-exec.placeholder.env:
-  MATRIX_DOMAIN: '{domain}'
-  MATRIX_USER_ID: '{matrixId}'
-  
-exec.placeholder.output.type: 'json'
-exec.placeholder.exit.success: [0, 128]
-exec.placeholder.exit.failure: [1, 129]
+exec:
+  enabled: true
+  token:
+    mxid: '{matrixId}'
+  auth:
+    token:
+      localpart: '{username}'
+    command: '/path/to/executable'
+    args:
+      - '-u'
+      - '{username}'
+    env:
+      MATRIX_DOMAIN: '{domain}'
+      MATRIX_USER_ID: '{matrixId}'
+    output:
+      type: 'json'
+    exit:
+      success: [0, 128]
+      failure: [1, 129]
 ```
 With:
 - The Identity store enabled for all features

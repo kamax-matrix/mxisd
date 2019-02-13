@@ -55,11 +55,8 @@ public class ExecIdentityStore extends ExecStore implements IThreePidProvider {
     private final MatrixConfig mxCfg;
 
     public ExecIdentityStore(ExecConfig cfg, MatrixConfig mxCfg) {
-        this(cfg.getIdentity(), mxCfg);
-    }
-
-    public ExecIdentityStore(ExecConfig.Identity cfg, MatrixConfig mxCfg) {
-        this.cfg = cfg;
+        super(cfg);
+        this.cfg = cfg.getIdentity();
         this.mxCfg = mxCfg;
     }
 

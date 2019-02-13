@@ -70,28 +70,28 @@ public class ExecProfileStoreTest extends ExecStoreTest {
 
     }
 
-    private ExecConfig.Profile getCfg() {
-        ExecConfig.Profile cfg = new ExecConfig().build().getProfile();
+    private ExecConfig getCfg() {
+        ExecConfig cfg = new ExecConfig().build();
         assertFalse(cfg.isEnabled());
         cfg.setEnabled(true);
         assertTrue(cfg.isEnabled());
-        cfg.getDisplayName().getOutput().setType(ExecStore.JsonType);
-        cfg.getThreePid().getOutput().setType(ExecStore.JsonType);
-        cfg.getRole().getOutput().setType(ExecStore.JsonType);
+        cfg.getProfile().getDisplayName().getOutput().setType(ExecStore.JsonType);
+        cfg.getProfile().getThreePid().getOutput().setType(ExecStore.JsonType);
+        cfg.getProfile().getRole().getOutput().setType(ExecStore.JsonType);
         return cfg;
     }
 
-    private ExecProfileStore getStore(ExecConfig.Profile cfg) {
+    private ExecProfileStore getStore(ExecConfig cfg) {
         ExecProfileStore store = new ExecProfileStore(cfg);
         store.setExecutorSupplier(this::build);
         return store;
     }
 
     private ExecProfileStore getStore(String command) {
-        ExecConfig.Profile cfg = getCfg();
-        cfg.getDisplayName().setCommand(command);
-        cfg.getThreePid().setCommand(command);
-        cfg.getRole().setCommand(command);
+        ExecConfig cfg = getCfg();
+        cfg.getProfile().getDisplayName().setCommand(command);
+        cfg.getProfile().getThreePid().setCommand(command);
+        cfg.getProfile().getRole().setCommand(command);
         return getStore(cfg);
     }
 

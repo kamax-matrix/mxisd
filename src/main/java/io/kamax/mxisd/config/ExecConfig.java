@@ -20,13 +20,11 @@
 
 package io.kamax.mxisd.config;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.*;
 
 public class ExecConfig {
 
-    public class IO {
+    public static class IO {
 
         private String type;
         private String template;
@@ -49,7 +47,7 @@ public class ExecConfig {
 
     }
 
-    public class Exit {
+    public static class Exit {
 
         private List<Integer> success = Collections.singletonList(0);
         private List<Integer> failure = Collections.singletonList(1);
@@ -72,84 +70,7 @@ public class ExecConfig {
 
     }
 
-    public class TokenOverride {
-
-        private String localpart;
-        private String domain;
-        private String mxid;
-        private String password;
-        private String medium;
-        private String address;
-        private String type;
-        private String query;
-
-        public String getLocalpart() {
-            return StringUtils.defaultIfEmpty(localpart, getToken().getLocalpart());
-        }
-
-        public void setLocalpart(String localpart) {
-            this.localpart = localpart;
-        }
-
-        public String getDomain() {
-            return StringUtils.defaultIfEmpty(domain, getToken().getDomain());
-        }
-
-        public void setDomain(String domain) {
-            this.domain = domain;
-        }
-
-        public String getMxid() {
-            return StringUtils.defaultIfEmpty(mxid, getToken().getMxid());
-        }
-
-        public void setMxid(String mxid) {
-            this.mxid = mxid;
-        }
-
-        public String getPassword() {
-            return StringUtils.defaultIfEmpty(password, getToken().getPassword());
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public String getMedium() {
-            return StringUtils.defaultIfEmpty(medium, getToken().getMedium());
-        }
-
-        public void setMedium(String medium) {
-            this.medium = medium;
-        }
-
-        public String getAddress() {
-            return StringUtils.defaultIfEmpty(address, getToken().getAddress());
-        }
-
-        public void setAddress(String address) {
-            this.address = address;
-        }
-
-        public String getType() {
-            return StringUtils.defaultIfEmpty(type, getToken().getType());
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public String getQuery() {
-            return StringUtils.defaultIfEmpty(query, getToken().getQuery());
-        }
-
-        public void setQuery(String query) {
-            this.query = query;
-        }
-
-    }
-
-    public class Token {
+    public static class Token {
 
         private String localpart = "{localpart}";
         private String domain = "{domain}";
@@ -226,9 +147,9 @@ public class ExecConfig {
 
     }
 
-    public class Process {
+    public static class Process {
 
-        private TokenOverride token = new TokenOverride();
+        private Token token = new Token();
         private String command;
 
         private List<String> args = new ArrayList<>();
@@ -238,11 +159,11 @@ public class ExecConfig {
         private Exit exit = new Exit();
         private IO output = new IO();
 
-        public TokenOverride getToken() {
+        public Token getToken() {
             return token;
         }
 
-        public void setToken(TokenOverride token) {
+        public void setToken(Token token) {
             this.token = token;
         }
 
@@ -300,7 +221,7 @@ public class ExecConfig {
 
     }
 
-    public class Auth extends Process {
+    public static class Auth extends Process {
 
         private Boolean enabled;
 
@@ -314,9 +235,9 @@ public class ExecConfig {
 
     }
 
-    public class Directory {
+    public static class Directory {
 
-        public class Search {
+        public static class Search {
 
             private Process byName = new Process();
             private Process byThreepid = new Process();
@@ -360,7 +281,7 @@ public class ExecConfig {
 
     }
 
-    public class Lookup {
+    public static class Lookup {
 
         private Process single = new Process();
         private Process bulk = new Process();
@@ -383,7 +304,7 @@ public class ExecConfig {
 
     }
 
-    public class Identity {
+    public static class Identity {
 
         private Boolean enabled;
         private int priority;
@@ -415,7 +336,7 @@ public class ExecConfig {
 
     }
 
-    public class Profile {
+    public static class Profile {
 
         private Boolean enabled;
         private Process displayName = new Process();

@@ -36,11 +36,12 @@ public class ExecDirectoryStore extends ExecStore implements DirectoryProvider {
     private MatrixConfig mxCfg;
 
     public ExecDirectoryStore(MxisdConfig cfg) {
-        this(cfg.getExec().getDirectory(), cfg.getMatrix());
+        this(cfg.getExec(), cfg.getMatrix());
     }
 
-    public ExecDirectoryStore(ExecConfig.Directory cfg, MatrixConfig mxCfg) {
-        this.cfg = cfg;
+    public ExecDirectoryStore(ExecConfig cfg, MatrixConfig mxCfg) {
+        super(cfg);
+        this.cfg = cfg.getDirectory();
         this.mxCfg = mxCfg;
     }
 

@@ -38,11 +38,8 @@ public class ExecProfileStore extends ExecStore implements ProfileProvider {
     private ExecConfig.Profile cfg;
 
     public ExecProfileStore(ExecConfig cfg) {
-        this(cfg.getProfile());
-    }
-
-    public ExecProfileStore(ExecConfig.Profile cfg) {
-        this.cfg = cfg;
+        super(cfg);
+        this.cfg = cfg.getProfile();
     }
 
     private Optional<JsonProfileResult> getFull(_MatrixID userId, ExecConfig.Process cfg) {

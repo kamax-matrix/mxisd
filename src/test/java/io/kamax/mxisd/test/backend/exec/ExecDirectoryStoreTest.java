@@ -56,32 +56,32 @@ public class ExecDirectoryStoreTest extends ExecStoreTest {
         }));
     }
 
-    private ExecConfig.Directory getCfg() {
-        ExecConfig.Directory cfg = new ExecConfig().build().getDirectory();
+    private ExecConfig getCfg() {
+        ExecConfig cfg = new ExecConfig().build();
         assertFalse(cfg.isEnabled());
         cfg.setEnabled(true);
         assertTrue(cfg.isEnabled());
-        cfg.getSearch().getByName().getOutput().setType(ExecStore.JsonType);
+        cfg.getDirectory().getSearch().getByName().getOutput().setType(ExecStore.JsonType);
         return cfg;
     }
 
-    private ExecDirectoryStore getStore(ExecConfig.Directory cfg) {
+    private ExecDirectoryStore getStore(ExecConfig cfg) {
         ExecDirectoryStore store = new ExecDirectoryStore(cfg, getMatrixCfg());
         store.setExecutorSupplier(this::build);
         return store;
     }
 
     private ExecDirectoryStore getStore(String command) {
-        ExecConfig.Directory cfg = getCfg();
-        cfg.getSearch().getByName().setCommand(command);
-        cfg.getSearch().getByThreepid().setCommand(command);
+        ExecConfig cfg = getCfg();
+        cfg.getDirectory().getSearch().getByName().setCommand(command);
+        cfg.getDirectory().getSearch().getByThreepid().setCommand(command);
         return getStore(cfg);
     }
 
     @Test
     public void byNameNoCommandDefined() {
-        ExecConfig.Directory cfg = getCfg();
-        assertTrue(StringUtils.isEmpty(cfg.getSearch().getByName().getCommand()));
+        ExecConfig cfg = getCfg();
+        assertTrue(StringUtils.isEmpty(cfg.getDirectory().getSearch().getByName().getCommand()));
         ExecDirectoryStore store = getStore(cfg);
 
         UserDirectorySearchResult result = store.searchByDisplayName("user");

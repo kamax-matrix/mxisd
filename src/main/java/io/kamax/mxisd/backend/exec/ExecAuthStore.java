@@ -44,6 +44,7 @@ public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
     private ExecConfig.Auth cfg;
 
     public ExecAuthStore(ExecConfig cfg) {
+        super(cfg);
         this.cfg = Objects.requireNonNull(cfg.getAuth());
     }
 

@@ -62,17 +62,17 @@ public class ExecIdentityStoreTest extends ExecStoreTest {
         }));
     }
 
-    private ExecConfig.Identity getCfg() {
-        ExecConfig.Identity cfg = new ExecConfig().build().getIdentity();
+    private ExecConfig getCfg() {
+        ExecConfig cfg = new ExecConfig().build();
         assertFalse(cfg.isEnabled());
         cfg.setEnabled(true);
         assertTrue(cfg.isEnabled());
-        cfg.getLookup().getSingle().getOutput().setType(ExecStore.JsonType);
-        cfg.getLookup().getBulk().getOutput().setType(ExecStore.JsonType);
+        cfg.getIdentity().getLookup().getSingle().getOutput().setType(ExecStore.JsonType);
+        cfg.getIdentity().getLookup().getBulk().getOutput().setType(ExecStore.JsonType);
         return cfg;
     }
 
-    private ExecIdentityStore getStore(ExecConfig.Identity cfg) {
+    private ExecIdentityStore getStore(ExecConfig cfg) {
         ExecIdentityStore store = new ExecIdentityStore(cfg, getMatrixCfg());
         store.setExecutorSupplier(this::build);
         assertTrue(store.isLocal());
@@ -80,9 +80,9 @@ public class ExecIdentityStoreTest extends ExecStoreTest {
     }
 
     private ExecIdentityStore getStore(String command) {
-        ExecConfig.Identity cfg = getCfg();
-        cfg.getLookup().getSingle().setCommand(command);
-        cfg.getLookup().getBulk().setCommand(command);
+        ExecConfig cfg = getCfg();
+        cfg.getIdentity().getLookup().getSingle().setCommand(command);
+        cfg.getIdentity().getLookup().getBulk().setCommand(command);
         return getStore(cfg);
     }
 

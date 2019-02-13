@@ -43,13 +43,18 @@ public class ExecStore {
     public static final String JsonType = "json";
     public static final String PlainType = "plain";
 
+    private static final Logger log = LoggerFactory.getLogger(ExecStore.class);
+
     protected static String toJson(Object o) {
         return GsonUtil.get().toJson(o);
     }
 
-    private transient final Logger log = LoggerFactory.getLogger(ExecStore.class);
-
+    private final ExecConfig cfg;
     private Supplier<ProcessExecutor> executorSupplier = () -> new ProcessExecutor().readOutput(true);
+
+    public ExecStore(ExecConfig cfg) {
+        this.cfg = cfg;
+    }
 
     public void setExecutorSupplier(Supplier<ProcessExecutor> supplier) {
         executorSupplier = supplier;
@@ -64,7 +69,7 @@ public class ExecStore {
         private Function<String, String> inputUnknownTypeMapper;
         private Map<String, Supplier<String>> inputTypeSuppliers;
 
-        private Map<String, Function<ExecConfig.TokenOverride, String>> inputTypeTemplates;
+        private Map<String, Function<ExecConfig.Token, String>> inputTypeTemplates;
         private Supplier<String> inputTypeNoTemplateHandler;
         private Map<String, Supplier<String>> tokenMappers;
         private Function<String, String> tokenHandler;
@@ -156,11 +161,11 @@ public class ExecStore {
             inputTypeSuppliers.put(type, handler);
         }
 
-        protected void addInputTemplate(String type, Function<ExecConfig.TokenOverride, String> template) {
+        protected void addInputTemplate(String type, Function<ExecConfig.Token, String> template) {
             inputTypeTemplates.put(type, template);
         }
 
-        public void addJsonInputTemplate(Function<ExecConfig.TokenOverride, Object> template) {
+        public void addJsonInputTemplate(Function<ExecConfig.Token, Object> template) {
             inputTypeTemplates.put(JsonType, token -> GsonUtil.get().toJson(template.apply(token)));
         }
 
