@@ -54,37 +54,31 @@ public class FileKeyStore implements KeyStore {
         base = new File(path).getAbsoluteFile().toString();
         File f = new File(base);
 
-        if (!f.exists()) {
-            if (!f.mkdir()) {
-                throw new RuntimeException("Unable to create key store at " + f.toString());
+        if (f.exists() && f.isFile()) {
+            try {
+                log.info("Found old key store format at {}, migrating...", base);
+                File oldStorePath = new File(f.toString() + ".backup-before-migration");
+                FileUtils.moveFile(f, oldStorePath);
+                FileUtils.forceMkdir(f);
+
+
+                String privKey = new KeyFileStore(oldStorePath.toString()).load().orElse("");
+                if (StringUtils.isBlank(privKey)) {
+                    log.info("Empty file, nothing to migrate");
+                } else {
+                    // We ensure this is valid Base64 data before migrating
+                    Base64.decodeBase64(privKey);
+
+                    // We store the new key
+                    add(new GenericKey(new GenericKeyIdentifier(KeyType.Regular, KeyAlgorithm.Ed25519, "0"), true, privKey));
+
+                    log.info("Store migrated to new directory format");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to migrate store from old single file format to new directory format", e);
             }
         } else {
-            if (!f.isFile()) {
-                log.debug("Key store is already in directory format");
-            } else {
-                try {
-                    log.info("Found old key store format, migrating...");
-                    File oldStorePath = new File(f.toString() + ".backup-before-migration");
-                    FileUtils.moveFile(f, oldStorePath);
-                    FileUtils.forceMkdir(f);
-
-
-                    String privKey = new KeyFileStore(oldStorePath.toString()).load().orElse("");
-                    if (StringUtils.isBlank(privKey)) {
-                        throw new IllegalStateException("Signing key file is empty. Either fix or delete");
-                    } else {
-                        // We ensure this is valid Base64 data before migrating
-                        Base64.decodeBase64(privKey);
-
-                        // We store the new key
-                        add(new GenericKey(new GenericKeyIdentifier(KeyType.Regular, KeyAlgorithm.Ed25519, "0"), true, privKey));
-
-                        log.info("Store migrated to new directory format");
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException("Unable to migrate store from old single file format to new directory format", e);
-                }
-            }
+            log.info("Key store is already in directory format");
         }
 
         if (!f.isDirectory()) {
@@ -137,7 +131,7 @@ public class FileKeyStore implements KeyStore {
         File algoDir = Paths.get(base, toDirName(type)).toFile();
         File[] algos = algoDir.listFiles();
         if (Objects.isNull(algos)) {
-            throw new IllegalStateException("Cannot list stored key algorithms: was expecting " + algoDir.toString() + " to be a directory");
+            return keyIds;
         }
 
         for (File algo : algos) {
