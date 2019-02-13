@@ -190,13 +190,13 @@ task debBuild(dependsOn: shadowJar) {
         ant.replaceregexp( // FIXME adapt to new config format
                 file: "${debBuildConfPath}/${debConfFileName}",
                 match: "key:\\R  path:(.*)",
-                replace: "key:\n  path: '${debDataPath}/signing.key'"
+                replace: "key:\n  path: '${debDataPath}/keys'"
         )
 
         ant.replaceregexp( // FIXME adapt to new config format
                 file: "${debBuildConfPath}/${debConfFileName}",
                 match: "storage:\\R  provider:\\R    sqlite:\\R      database:(.*)",
-                replace: "storage:\n  provider:\n    sqlite:\n      database: '${debDataPath}/mxisd.db'"
+                replace: "storage:\n  provider:\n    sqlite:\n      database: '${debDataPath}/store.db'"
         )
 
         copy {

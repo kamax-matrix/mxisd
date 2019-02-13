@@ -229,8 +229,12 @@ exec:
     output:
       type: 'json'
     exit:
-      success: [0, 128]
-      failure: [1, 129]
+      success:
+        - 0
+        - 128
+      failure:
+        - 1
+        - 129
 ```
 With:
 - The Identity store enabled for all features

@@ -51,7 +51,7 @@ This template is used when someone is invited into a room using an email address
 | `%ROOM_NAME%`         | The Name of the room in which the invite took place. If not available/set, empty         |
 | `%ROOM_NAME_OR_ID%`   | The Name of the room in which the invite took place. If not available/set, its Matrix ID |
 
-### Local validation of 3PID Session
+### Validation of 3PID Session
 This template is used when to user which added their 3PID address to their profile/settings and the session policy
 allows at least local sessions.  
 
@@ -59,17 +59,5 @@ allows at least local sessions.
 | Placeholder          | Purpose                                                                              |
 |----------------------|--------------------------------------------------------------------------------------|
 | `%VALIDATION_LINK%`  | URL, including token, to validate the 3PID session.                                  |
-| `%VALIDATION_TOKEN%` | The token needed to validate the local session, in case the user cannot use the link |
-
-### Remote validation of 3PID Session
-This template is used when to user which added their 3PID address to their profile/settings and the session policy only
-allows remote sessions.
-
-**NOTE:** 3PID session always require local validation of a token, even if a remote session is enforced.  
-One cannot bind a Matrix ID to the session until both local and remote sessions have been validated.
-
-#### Placeholders
-| Placeholder          | Purpose                                                |
-|----------------------|--------------------------------------------------------|
-| `%VALIDATION_TOKEN%` | The token needed to validate the session               |
-| `%NEXT_URL%`         | URL to continue with remote validation of the session. |
+| `%VALIDATION_TOKEN%` | The token needed to validate the session, in case the user cannot use the link.      |
+| `%NEXT_URL%`         | URL to redirect to after the sessions has been validated.                            |

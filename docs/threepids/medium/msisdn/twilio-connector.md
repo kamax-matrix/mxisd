@@ -1,6 +1,4 @@
 # SMS notifications - Twilio connector
-Enabled by default.
-
 Connector ID: `twilio`
 
 ## Configuration

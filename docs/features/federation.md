@@ -46,15 +46,6 @@ lookup:
 invite:
   resolution:
     recursive: false
-session:
-  policy:
-    validation:
-      forLocal:
-        toRemote:
-          enabled: false
-      forRemote:
-        toRemote:
-          enabled: false
 ``` 
 
 There is currently no way to selectively disable federation towards specific servers, but this feature is planned.

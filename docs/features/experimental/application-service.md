@@ -26,7 +26,7 @@ synapseSql:
   connection: '<DB CONNECTION URL>'
 ```
 
-The `synapseSql` section is used to retrieve display names which are not directly accessible in this mode.
+The `synapseSql` section is optional. It is used to retrieve display names which are not directly accessible in this mode.
 For details about `type` and `connection`, see the [relevant documentation](../../stores/synapse.md).
 If you do not configure it, some placeholders will not be available in the notification, like the Room name.
 

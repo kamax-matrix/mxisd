@@ -1,6 +1,4 @@
 # Identity
-**WARNING**: This document is incomplete and can be misleading.
-
 Implementation of the [Identity Service API r0.1.0](https://matrix.org/docs/spec/identity_service/r0.1.0.html).
 
 ## Lookups

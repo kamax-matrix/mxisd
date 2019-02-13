@@ -1,6 +1,4 @@
 # Email notifications - SMTP connector
-Enabled by default.
-
 Connector ID: `smtp`
 
 ## Configuration

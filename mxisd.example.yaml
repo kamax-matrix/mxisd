@@ -1,6 +1,11 @@
 # Sample configuration file explaining the minimum required keys to be set to run mxisd
 #
 # For a complete list of options, see https://github.com/kamax-matrix/mxisd/docs/README.md
+#
+# Please follow the Getting Started guide if this is your first time using/configuring mxisd
+#
+#  -- https://github.com/kamax-matrix/mxisd/blob/master/docs/getting-started.md#getting-started
+#
 
 #######################
 # Matrix config items #
@@ -16,26 +21,27 @@ matrix:
 ################
 # Signing keys #
 ################
-# Absolute path for the Identity Server signing key.
-# This is **NOT** your homeserver key.
-# The signing key is auto-generated during execution time if not present.
+# Absolute path for the Identity Server signing keys database.
+# /!\ THIS MUST **NOT** BE YOUR HOMESERVER KEYS FILE /!\
+# If this path does not exist, it will be auto-generated.
 #
-# During testing, /var/tmp/mxisd.key is a possible value
+# During testing, /var/tmp/mxisd/keys is a possible value
 # For production, recommended location shall be one of the following:
-#   - /var/opt/mxisd/sign.key
-#   - /var/local/mxisd/sign.key
-#   - /var/lib/mxisd/sign.key
+#   - /var/lib/mxisd/keys
+#   - /var/opt/mxisd/keys
+#   - /var/local/mxisd/keys
 #
 key:
   path: ''
 
 
 # Path to the SQLite DB file for mxisd internal storage
+# /!\ THIS MUST **NOT** BE YOUR HOMESERVER DATABASE /!\
 #
 # Examples:
-#  - /var/opt/mxisd/mxisd.db
-#  - /var/local/mxisd/mxisd.db
-#  - /var/lib/mxisd/mxisd.db
+#  - /var/opt/mxisd/store.db
+#  - /var/local/mxisd/store.db
+#  - /var/lib/mxisd/store.db
 #
 storage:
   provider:
@@ -43,48 +49,31 @@ storage:
       database: '/path/to/mxisd.db'
 
 
-####################
-# Fallback servers #
-####################
+###################
+# Identity Stores #
+###################
+# If you are using synapse standalone and do not have an Identity store,
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/synapse.md#synapse-identity-store
 #
-# Root/Central servers to be used as final fallback when performing lookups.
-# By default, for privacy reasons, matrix.org servers are not enabled.
-# See the following issue: https://github.com/kamax-matrix/mxisd/issues/76
-#
-# If you would like to use them and trade away your privacy for convenience, uncomment the following option:
-#
-#forward:
-#  servers: ['matrix-org']
-
-
-################
-# LDAP Backend #
-################
 # If you would like to integrate with your AD/Samba/LDAP server,
 # see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/ldap.md
-
-
-###############
-# SQL Backend #
-###############
-# If you would like to integrate with a MySQL/MariaDB/PostgreQL/SQLite DB,
-# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/sql.md
-
-
-################
-# REST Backend #
-################
-# If you would like to integrate with an existing web service/webapp,
-# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/rest.md
+#
+# For any other Identity store, or to simply discover them,
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/README.md
 
 
 #################################################
 # Notifications for invites/addition to profile #
 #################################################
-# If you would like to change the content,
+# This is mandatory to deal with anything e-mail related.
+#
+# For an introduction to sessions, invites and 3PIDs in general,
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/threepids/session/session.md#3pid-sessions
+#
+# If you would like to change the content of the notifications,
 # see https://github.com/kamax-matrix/mxisd/blob/master/docs/threepids/notification/template-generator.md
 #
-#### E-mail invite sender
+#### E-mail connector
 threepid:
   medium:
     email:
@@ -100,12 +89,13 @@ threepid:
           # SMTP port
           port: 587
 
-          # TLS mode for the connection.
+          # STARTLS mode for the connection.
+          # SSL/TLS is currently not supported. See https://github.com/kamax-matrix/mxisd/issues/125
           #
           # Possible values:
-          #  0    Disable TLS entirely
-          #  1    Enable TLS if supported by server (default)
-          #  2    Force TLS and fail if not available
+          #  0    Disable any kind of TLS entirely
+          #  1    Enable STARTLS if supported by server (default)
+          #  2    Force STARTLS and fail if not available
           #
           tls: 1
 
