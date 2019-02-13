@@ -21,6 +21,7 @@
 package io.kamax.mxisd.config.sql;
 
 import io.kamax.mxisd.util.GsonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -314,7 +315,8 @@ public abstract class SqlConfig {
         log.info("Enabled: {}", isEnabled());
         if (isEnabled()) {
             log.info("Type: {}", getType());
-            log.info("Connection: {}", getConnection());
+            log.info("Has connection info? {}", !StringUtils.isEmpty(getConnection()));
+            log.debug("Connection: {}", getConnection());
             log.info("Auth enabled: {}", getAuth().isEnabled());
             log.info("Directory queries: {}", GsonUtil.build().toJson(getDirectory().getQuery()));
             log.info("Identity type: {}", getIdentity().getType());
