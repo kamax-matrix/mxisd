@@ -36,9 +36,8 @@ public class DirectoryConfig {
             return homeserver;
         }
 
-        public Exclude setHomeserver(boolean homeserver) {
+        public void setHomeserver(boolean homeserver) {
             this.homeserver = homeserver;
-            return this;
         }
 
         public boolean getThreepid() {
