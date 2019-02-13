@@ -21,6 +21,8 @@
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
 import io.kamax.mxisd.http.IsAPIv1;
+import io.kamax.mxisd.storage.crypto.KeyManager;
+import io.kamax.mxisd.storage.crypto.KeyType;
 import io.undertow.server.HttpServerExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +33,19 @@ public class EphemeralKeyIsValidHandler extends KeyIsValidHandler {
 
     private transient final Logger log = LoggerFactory.getLogger(EphemeralKeyIsValidHandler.class);
 
+    private KeyManager mgr;
+
+    public EphemeralKeyIsValidHandler(KeyManager mgr) {
+        this.mgr = mgr;
+    }
+
     @Override
     public void handleRequest(HttpServerExchange exchange) {
-        log.warn("Ephemeral key was requested but no ephemeral key are generated, replying not valid");
+        // FIXME process + correctly in query parameter handling
+        String pubKey = getQueryParameter(exchange, "public_key").replace(" ", "+");
+        log.info("Validating ephemeral public key {}", pubKey);
 
-        respondJson(exchange, invalidKey);
+        respondJson(exchange, mgr.isValid(KeyType.Ephemeral, pubKey) ? validKey : invalidKey);
     }
 
 }

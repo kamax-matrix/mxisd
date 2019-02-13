@@ -27,13 +27,14 @@ import io.kamax.mxisd.storage.crypto.GenericKeyIdentifier;
 import io.kamax.mxisd.storage.crypto.KeyManager;
 import io.kamax.mxisd.storage.crypto.KeyType;
 import io.undertow.server.HttpServerExchange;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KeyGetHandler extends BasicHttpHandler {
 
     public static final String Key = "key";
-    public static final String Path = IsAPIv1.Base + "/pubkey/{key}";
+    public static final String Path = IsAPIv1.Base + "/pubkey/{" + Key + "}";
 
     private transient final Logger log = LoggerFactory.getLogger(KeyGetHandler.class);
 
@@ -46,7 +47,11 @@ public class KeyGetHandler extends BasicHttpHandler {
     @Override
     public void handleRequest(HttpServerExchange exchange) {
         String key = getQueryParameter(exchange, Key);
-        String[] v = key.split(":", 2);
+        if (StringUtils.isBlank(key)) {
+            throw new IllegalArgumentException("Key ID cannot be empty or blank");
+        }
+
+        String[] v = key.split(":", 2); // Maybe use regex?
         String keyAlgo = v[0];
         String keyId = v[1];
 

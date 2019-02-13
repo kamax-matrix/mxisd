@@ -20,35 +20,42 @@
 
 package io.kamax.mxisd.storage.crypto;
 
-/**
- * Identifying data for a given Key.
- */
-public interface KeyIdentifier {
+public class FileKeyJson {
 
-    /**
-     * Type of key.
-     *
-     * @return The type of the key
-     */
-    KeyType getType();
+    public static FileKeyJson get(Key key) {
+        FileKeyJson json = new FileKeyJson();
+        json.setVersion("0");
+        json.setKey(key.getPrivateKeyBase64());
+        json.setValid(key.isValid());
+        return json;
+    }
 
-    /**
-     * Algorithm of the key. Typically <code>ed25519</code>.
-     *
-     * @return The algorithm of the key
-     */
-    String getAlgorithm();
+    private String version;
+    private boolean isValid;
+    private String key;
 
-    /**
-     * Serial of the key, unique for the algorithm.
-     * It is typically made of random alphanumerical characters.
-     *
-     * @return The serial of the key
-     */
-    String getSerial();
+    public String getVersion() {
+        return version;
+    }
 
-    default String getId() {
-        return getAlgorithm().toLowerCase() + ":" + getSerial();
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public void setValid(boolean valid) {
+        isValid = valid;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
 }

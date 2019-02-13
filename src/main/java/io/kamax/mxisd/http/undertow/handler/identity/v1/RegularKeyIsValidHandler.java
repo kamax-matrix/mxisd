@@ -41,7 +41,8 @@ public class RegularKeyIsValidHandler extends KeyIsValidHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {
-        String pubKey = getQueryParameter(exchange, "public_key");
+        // FIXME process + correctly in query parameter handling
+        String pubKey = getQueryParameter(exchange, "public_key").replace(" ", "+");
         log.info("Validating public key {}", pubKey);
 
         respondJson(exchange, mgr.isValid(KeyType.Regular, pubKey) ? validKey : invalidKey);

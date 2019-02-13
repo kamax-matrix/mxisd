@@ -77,7 +77,7 @@ public class HttpMxisd {
                 // Key endpoints
                 .get(KeyGetHandler.Path, SaneHandler.around(new KeyGetHandler(m.getKeyManager())))
                 .get(RegularKeyIsValidHandler.Path, SaneHandler.around(new RegularKeyIsValidHandler(m.getKeyManager())))
-                .get(EphemeralKeyIsValidHandler.Path, SaneHandler.around(new EphemeralKeyIsValidHandler()))
+                .get(EphemeralKeyIsValidHandler.Path, SaneHandler.around(new EphemeralKeyIsValidHandler(m.getKeyManager())))
 
                 // Identity endpoints
                 .get(HelloHandler.Path, helloHandler)
