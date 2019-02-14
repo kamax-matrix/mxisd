@@ -20,13 +20,16 @@
 
 package io.kamax.mxisd.config;
 
-import io.kamax.mxisd.util.GsonUtil;
+import io.kamax.matrix.json.GsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class InvitationConfig {
 
-    private transient final Logger log = LoggerFactory.getLogger(InvitationConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(InvitationConfig.class);
 
     public static class Resolution {
 
@@ -51,7 +54,34 @@ public class InvitationConfig {
 
     }
 
+    public static class SenderPolicy {
+
+        private List<String> hasRole = new ArrayList<>();
+
+        public List<String> getHasRole() {
+            return hasRole;
+        }
+
+        public void setHasRole(List<String> hasRole) {
+            this.hasRole = hasRole;
+        }
+    }
+
+    public static class Policies {
+
+        private SenderPolicy ifSender = new SenderPolicy();
+
+        public SenderPolicy getIfSender() {
+            return ifSender;
+        }
+
+        public void setIfSender(SenderPolicy ifSender) {
+            this.ifSender = ifSender;
+        }
+    }
+
     private Resolution resolution = new Resolution();
+    private Policies policy = new Policies();
 
     public Resolution getResolution() {
         return resolution;
@@ -61,9 +91,18 @@ public class InvitationConfig {
         this.resolution = resolution;
     }
 
+    public Policies getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(Policies policy) {
+        this.policy = policy;
+    }
+
     public void build() {
         log.info("--- Invite config ---");
-        log.info("Resolution: {}", GsonUtil.build().toJson(resolution));
+        log.info("Resolution: {}", GsonUtil.get().toJson(getResolution()));
+        log.info("Policies: {}", GsonUtil.get().toJson(getPolicy()));
     }
 
 }

@@ -24,6 +24,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
 import io.kamax.matrix.ThreePid;
+import io.kamax.matrix._MatrixID;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.InvitationConfig;
 import io.kamax.mxisd.config.MxisdConfig;
@@ -36,6 +37,7 @@ import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.notification.NotificationManager;
+import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.crypto.*;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
@@ -78,6 +80,7 @@ public class InvitationManager {
     private SignatureManager signMgr;
     private FederationDnsOverwrite dns;
     private NotificationManager notifMgr;
+    private ProfileManager profileMgr;
 
     private CloseableHttpClient client;
     private Timer refreshTimer;
@@ -91,7 +94,8 @@ public class InvitationManager {
             KeyManager keyMgr,
             SignatureManager signMgr,
             FederationDnsOverwrite dns,
-            NotificationManager notifMgr
+            NotificationManager notifMgr,
+            ProfileManager profileMgr
     ) {
         this.cfg = mxisdCfg.getInvite();
         this.srvCfg = mxisdCfg.getServer();
@@ -101,6 +105,7 @@ public class InvitationManager {
         this.signMgr = signMgr;
         this.dns = dns;
         this.notifMgr = notifMgr;
+        this.profileMgr = profileMgr;
 
         log.info("Loading saved invites");
         Collection<ThreePidInviteIO> ioList = storage.getInvites();
@@ -212,6 +217,30 @@ public class InvitationManager {
         }
 
         return lookupMgr.find(medium, address, cfg.getResolution().isRecursive());
+    }
+
+    public boolean canInvite(_MatrixID sender, JsonObject request) {
+        if (!request.has("medium")) {
+            log.info("Not a 3PID invite, allowing");
+            return true;
+        }
+        log.info("3PID invite detected, checking policies...");
+
+        List<String> allowedRoles = cfg.getPolicy().getIfSender().getHasRole();
+        if (Objects.isNull(allowedRoles)) {
+            log.info("No allowed role configured for sender, allowing");
+            return true;
+        }
+
+        List<String> userRoles = profileMgr.getRoles(sender);
+        if (Collections.disjoint(userRoles, allowedRoles)) {
+            log.info("Sender does not have any of the required roles, denying");
+            return false;
+        }
+        log.info("Sender has at least one of the required roles");
+
+        log.info("Sender pass all policies to invite, allowing");
+        return true;
     }
 
     public synchronized IThreePidInviteReply storeInvite(IThreePidInvite invitation) { // TODO better sync

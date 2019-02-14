@@ -31,6 +31,7 @@ import io.kamax.mxisd.http.undertow.handler.auth.v1.LoginHandler;
 import io.kamax.mxisd.http.undertow.handler.auth.v1.LoginPostHandler;
 import io.kamax.mxisd.http.undertow.handler.directory.v1.UserDirectorySearchHandler;
 import io.kamax.mxisd.http.undertow.handler.identity.v1.*;
+import io.kamax.mxisd.http.undertow.handler.invite.v1.RoomInviteHandler;
 import io.kamax.mxisd.http.undertow.handler.profile.v1.InternalProfileHandler;
 import io.kamax.mxisd.http.undertow.handler.profile.v1.ProfileHandler;
 import io.kamax.mxisd.http.undertow.handler.register.v1.Register3pidRequestTokenHandler;
@@ -100,6 +101,9 @@ public class HttpMxisd {
 
                 // Registration endpoints
                 .post(Register3pidRequestTokenHandler.Path, SaneHandler.around(new Register3pidRequestTokenHandler(m.getReg(), m.getClientDns(), m.getHttpClient())))
+
+                // Invite endpoints
+                .post(RoomInviteHandler.Path, SaneHandler.around(new RoomInviteHandler(m.getHttpClient(), m.getClientDns(), m.getInvitationManager())))
 
                 // Application Service endpoints
                 .get("/_matrix/app/v1/users/**", asNotFoundHandler)

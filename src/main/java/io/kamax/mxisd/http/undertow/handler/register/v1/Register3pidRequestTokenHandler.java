@@ -25,25 +25,15 @@ import io.kamax.matrix.ThreePid;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
-import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.exception.NotAllowedException;
 import io.kamax.mxisd.http.io.identity.SessionEmailTokenRequestJson;
 import io.kamax.mxisd.http.io.identity.SessionPhoneTokenRequestJson;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.registration.RegistrationManager;
-import io.kamax.mxisd.util.RestClientUtils;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HttpString;
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
 
 public class Register3pidRequestTokenHandler extends BasicHttpHandler {
 
@@ -77,25 +67,11 @@ public class Register3pidRequestTokenHandler extends BasicHttpHandler {
         }
 
         ThreePid tpid = new ThreePid(medium, address);
-        if (!mgr.allow(tpid)) {
+        if (!mgr.isAllowed(tpid)) {
             throw new NotAllowedException("Your " + medium + " address cannot be used for registration");
         }
 
-        String target = dns.transform(URI.create(exchange.getRequestURL())).toString();
-        log.info("Requesting remote: {}", target);
-        HttpPost req = RestClientUtils.post(target, GsonUtil.get(), body);
-        try (CloseableHttpResponse res = client.execute(req)) {
-            exchange.setStatusCode(res.getStatusLine().getStatusCode());
-            for (Header h : res.getAllHeaders()) {
-                for (HeaderElement el : h.getElements()) {
-                    exchange.getResponseHeaders().add(HttpString.tryFromString(h.getName()), el.getValue());
-                }
-            }
-            res.getEntity().writeTo(exchange.getOutputStream());
-            exchange.endExchange();
-        } catch (IOException e) {
-            throw new InternalServerError(e);
-        }
+        proxyPost(exchange, body, client, dns);
     }
 
 }

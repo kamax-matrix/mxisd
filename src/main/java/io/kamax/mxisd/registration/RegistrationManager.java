@@ -95,7 +95,7 @@ public class RegistrationManager {
         }
     }
 
-    public boolean allow(ThreePid tpid) {
+    public boolean isAllowed(ThreePid tpid) {
         return invMgr.hasInvite(tpid);
     }
 

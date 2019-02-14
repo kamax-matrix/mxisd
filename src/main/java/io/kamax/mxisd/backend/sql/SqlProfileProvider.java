@@ -23,7 +23,9 @@ package io.kamax.mxisd.backend.sql;
 import io.kamax.matrix.ThreePid;
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
+import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.config.sql.SqlConfig;
+import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.profile.ProfileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,21 +35,25 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class SqlProfileProvider implements ProfileProvider {
 
-    private transient final Logger log = LoggerFactory.getLogger(SqlProfileProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(SqlProfileProvider.class);
 
     private SqlConfig.Profile cfg;
-
     private SqlConnectionPool pool;
 
     public SqlProfileProvider(SqlConfig cfg) {
         this.cfg = cfg.getProfile();
         this.pool = new SqlConnectionPool(cfg);
+    }
+
+    private void setParameters(PreparedStatement stmt, String value) throws SQLException {
+        for (int i = 1; i <= stmt.getParameterMetaData().getParameterCount(); i++) {
+            stmt.setString(i, value);
+        }
     }
 
     @Override
@@ -94,7 +100,33 @@ public abstract class SqlProfileProvider implements ProfileProvider {
 
     @Override
     public List<String> getRoles(_MatrixID user) {
-        return Collections.emptyList();
+        log.info("Querying roles for {}", user.getId());
+
+        List<String> roles = new ArrayList<>();
+
+        String stmtSql = cfg.getRole().getQuery();
+        try (Connection conn = pool.get()) {
+            PreparedStatement stmt = conn.prepareStatement(stmtSql);
+            if (UserIdType.Localpart.is(cfg.getRole().getType())) {
+                setParameters(stmt, user.getLocalPart());
+            } else if (UserIdType.MatrixID.is(cfg.getRole().getType())) {
+                setParameters(stmt, user.getId());
+            } else {
+                throw new InternalServerError("Unsupported user type in SQL Role fetching: " + cfg.getRole().getType());
+            }
+
+            ResultSet rSet = stmt.executeQuery();
+            while (rSet.next()) {
+                String role = rSet.getString(1);
+                roles.add(role);
+                log.debug("Found role {}", role);
+            }
+
+            log.info("Got {} roles", roles.size());
+            return roles;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -26,8 +26,12 @@ import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.directory.DirectoryProviders;
 import io.kamax.mxisd.lookup.ThreePidProviders;
 import io.kamax.mxisd.profile.ProfileProviders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SynapseSqlStoreSupplier implements IdentityStoreSupplier {
+
+    private static final Logger log = LoggerFactory.getLogger(SynapseSqlStoreSupplier.class);
 
     @Override
     public void accept(Mxisd mxisd) {
@@ -44,6 +48,7 @@ public class SynapseSqlStoreSupplier implements IdentityStoreSupplier {
         }
 
         if (cfg.getSynapseSql().getProfile().isEnabled()) {
+            log.debug("Profile is enabled, registering provider");
             ProfileProviders.register(() -> new SynapseSqlProfileProvider(cfg.getSynapseSql()));
         }
     }

@@ -43,6 +43,10 @@ public class SynapseQueries {
         return "SELECT medium, address FROM user_threepids WHERE user_id = ?";
     }
 
+    public static String getRoles() {
+        return "SELECT DISTINCT(group_id) FROM group_users WHERE user_id = ?";
+    }
+
     public static String findByDisplayName(String type, String domain) {
         if (StringUtils.equals("sqlite", type)) {
             return "select " + getUserId(type, domain) + ", displayname from profiles p where displayname like ?";
