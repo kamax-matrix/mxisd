@@ -51,12 +51,15 @@ import io.kamax.mxisd.storage.crypto.Ed25519KeyManager;
 import io.kamax.mxisd.storage.crypto.KeyManager;
 import io.kamax.mxisd.storage.crypto.SignatureManager;
 import io.kamax.mxisd.storage.ormlite.OrmLiteSqlStorage;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.util.ServiceLoader;
 
 public class Mxisd {
+
+    public static final String Version = StringUtils.defaultIfBlank(Mxisd.class.getPackage().getImplementationVersion(), "UNKNOWN");
 
     private MxisdConfig cfg;
 
@@ -86,7 +89,7 @@ public class Mxisd {
 
     private void build() {
         httpClient = HttpClients.custom()
-                .setUserAgent("mxisd")
+                .setUserAgent("mxisd/" + Version)
                 .setMaxConnPerRoute(Integer.MAX_VALUE)
                 .setMaxConnTotal(Integer.MAX_VALUE)
                 .build();

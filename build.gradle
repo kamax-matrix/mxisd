@@ -152,6 +152,14 @@ dependencies {
     testCompile 'com.icegreen:greenmail:1.5.9'
 }
 
+jar {
+    manifest {
+        attributes(
+            'Implementation-Version': mxisdVersion()
+        )
+    }
+}
+
 shadowJar {
     baseName = project.name
     classifier = null

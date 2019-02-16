@@ -36,9 +36,12 @@ import io.kamax.mxisd.http.undertow.handler.profile.v1.InternalProfileHandler;
 import io.kamax.mxisd.http.undertow.handler.profile.v1.ProfileHandler;
 import io.kamax.mxisd.http.undertow.handler.register.v1.Register3pidRequestTokenHandler;
 import io.kamax.mxisd.http.undertow.handler.status.StatusHandler;
+import io.kamax.mxisd.http.undertow.handler.status.VersionHandler;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
+
+import java.util.Objects;
 
 public class HttpMxisd {
 
@@ -67,6 +70,7 @@ public class HttpMxisd {
 
                 // Status endpoints
                 .get(StatusHandler.Path, SaneHandler.around(new StatusHandler()))
+                .get(VersionHandler.Path, SaneHandler.around(new VersionHandler()))
 
                 // Authentication endpoints
                 .get(LoginHandler.Path, SaneHandler.around(new LoginGetHandler(m.getAuth(), m.getHttpClient())))
@@ -119,7 +123,9 @@ public class HttpMxisd {
     }
 
     public void stop() {
-        httpSrv.stop();
+        // Because it might have never been initialized if an exception is thrown early
+        if (Objects.nonNull(httpSrv)) httpSrv.stop();
+
         m.stop();
     }
 

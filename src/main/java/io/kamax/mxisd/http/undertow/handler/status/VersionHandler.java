@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2018 Kamax Sarl
+ * Copyright (C) 2019 Kamax Sarl
  *
  * https://www.kamax.io/
  *
@@ -21,23 +21,28 @@
 package io.kamax.mxisd.http.undertow.handler.status;
 
 import com.google.gson.JsonObject;
+import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.Mxisd;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.undertow.server.HttpServerExchange;
 
-public class StatusHandler extends BasicHttpHandler {
+public class VersionHandler extends BasicHttpHandler {
 
-    public static final String Path = "/status";
+    public static final String Path = "/version";
+
+    private final String body;
+
+    public VersionHandler() {
+        JsonObject server = new JsonObject();
+        server.addProperty("name", "mxisd");
+        server.addProperty("version", Mxisd.Version);
+
+        body = GsonUtil.getPrettyForLog(GsonUtil.makeObj("server", server));
+    }
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {
-        // TODO link to backend
-        JsonObject status = new JsonObject();
-        status.addProperty("health", "OK");
-
-        JsonObject obj = new JsonObject();
-        obj.add("status", status);
-
-        respond(exchange, obj);
+        respondJson(exchange, body);
     }
 
 }
