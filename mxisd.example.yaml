@@ -14,6 +14,11 @@
 # NOTE: in Synapse Homeserver, the Matrix domain is defined as 'server_name' in configuration file.
 #
 # This is used to build the various identifiers in all the features.
+#
+# If the hostname of the public URL used to reach your Matrix services is different from your Matrix domain,
+# per example matrix.domain.tld vs domain.tld, then use the server.name configuration option.
+# See the "Configure" section of the Getting Started guide for more info.
+#
 matrix:
   domain: ''
 
