@@ -101,6 +101,10 @@ public abstract class BasicHttpHandler implements HttpHandler {
         return GsonUtil.parseObj(getBodyUtf8(exchange));
     }
 
+    protected void putHeader(HttpServerExchange ex, String name, String value) {
+        ex.getResponseHeaders().put(HttpString.tryFromString(name), value);
+    }
+
     protected void respond(HttpServerExchange ex, int statusCode, JsonElement bodyJson) {
         respondJson(ex, statusCode, GsonUtil.get().toJson(bodyJson));
     }

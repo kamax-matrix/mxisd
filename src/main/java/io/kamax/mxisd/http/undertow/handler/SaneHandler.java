@@ -27,8 +27,7 @@ import io.kamax.matrix.json.InvalidJsonException;
 import io.kamax.mxisd.exception.*;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HttpString;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,15 +36,22 @@ import java.time.Instant;
 
 public class SaneHandler extends BasicHttpHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(SaneHandler.class);
+
+    private static final String CorsOriginName = "Access-Control-Allow-Origin";
+    private static final String CorsOriginValue = "*";
+    private static final String CorsMethodsName = "Access-Control-Allow-Methods";
+    private static final String CorsMethodsValue = "GET, POST, PUT, DELETE, OPTIONS";
+    private static final String CorsHeadersName = "Access-Control-Allow-Headers";
+    private static final String CorsHeadersValue = "Origin, X-Requested-With, Content-Type, Accept, Authorization";
+
     public static SaneHandler around(HttpHandler h) {
         return new SaneHandler(h);
     }
 
-    private transient final Logger log = LoggerFactory.getLogger(SaneHandler.class);
+    private final HttpHandler child;
 
-    private HttpHandler child;
-
-    public SaneHandler(HttpHandler child) {
+    private SaneHandler(HttpHandler child) {
         this.child = child;
     }
 
@@ -58,9 +64,9 @@ public class SaneHandler extends BasicHttpHandler {
         } else {
             try {
                 // CORS headers as per spec
-                exchange.getResponseHeaders().put(HttpString.tryFromString("Access-Control-Allow-Origin"), "*");
-                exchange.getResponseHeaders().put(HttpString.tryFromString("Access-Control-Allow-Methods"), "GET, POST, PUT, DELETE, OPTIONS");
-                exchange.getResponseHeaders().put(HttpString.tryFromString("Access-Control-Allow-Headers"), "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+                putHeader(exchange, CorsOriginName, CorsOriginValue);
+                putHeader(exchange, CorsMethodsName, CorsMethodsValue);
+                putHeader(exchange, CorsHeadersName, CorsHeadersValue);
 
                 child.handleRequest(exchange);
             } catch (IllegalArgumentException e) {
@@ -89,9 +95,9 @@ public class SaneHandler extends BasicHttpHandler {
                 handleException(exchange, e);
             } catch (InternalServerError e) {
                 if (StringUtils.isNotBlank(e.getInternalReason())) {
-                    log.error("Reference #{} - {}", e.getReference(), e.getInternalReason());
+                    log.error("Transaction #{} - {}", e.getReference(), e.getInternalReason());
                 } else {
-                    log.error("Reference #{}", e);
+                    log.error("Transaction #{}", e);
                 }
 
                 handleException(exchange, e);
@@ -105,14 +111,11 @@ public class SaneHandler extends BasicHttpHandler {
                 respond(exchange, e.getStatus(), buildErrorBody(exchange, e.getErrorCode(), e.getError()));
             } catch (RuntimeException e) {
                 log.error("Unknown error when handling {}", exchange.getRequestURL(), e);
-                respond(exchange, HttpStatus.SC_INTERNAL_SERVER_ERROR, buildErrorBody(exchange,
-                        "M_UNKNOWN",
-                        StringUtils.defaultIfBlank(
-                                e.getMessage(),
-                                "An internal server error occurred. If this error persists, please contact support with reference #" +
-                                        Instant.now().toEpochMilli()
-                        )
-                ));
+                String message = e.getMessage();
+                if (StringUtils.isBlank(message)) {
+                    message = "An internal server error occurred. Contact your administrator with reference Transaction #" + Instant.now().toEpochMilli();
+                }
+                respond(exchange, HttpStatus.SC_INTERNAL_SERVER_ERROR, buildErrorBody(exchange, "M_UNKNOWN", message));
             } finally {
                 exchange.endExchange();
             }

@@ -144,7 +144,8 @@ by the relevant hostname which you configured in your reverse proxy.
 **NOTE:** You might not see a suggestion for the e-mail address, which is normal. Still proceed with the invite.
   
 If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  
-If it did not work, [get in touch](../README.md#support) and we'll do our best to get you started.
+If it did not work, read the basic [troubleshooting guide](troubleshooting.md), [get in touch](../README.md#support) and
+we'll do our best to get you started.
 
 ## Next steps
 Once your mxisd server is up and running, there are several ways you can enhance and integrate further with your

@@ -74,6 +74,9 @@ Also, check [our FAQ entry](docs/faq.md#what-kind-of-setup-is-mxisd-really-desig
 See the [dedicated document](docs/getting-started.md)
 
 # Support
+## Troubleshooting
+A basic troubleshooting guide is available [here](docs/troubleshooting.md).
+
 ## Community
 Over Matrix: [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io) ([Preview](https://view.matrix.org/room/!NPRUEisLjcaMtHIzDr:kamax.io/))
 
