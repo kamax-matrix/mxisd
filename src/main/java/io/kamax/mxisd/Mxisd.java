@@ -115,7 +115,7 @@ public class Mxisd {
         invMgr = new InvitationManager(cfg, store, idStrategy, keyMgr, signMgr, fedDns, notifMgr, pMgr);
         authMgr = new AuthManager(cfg, AuthProviders.get(), idStrategy, invMgr, clientDns, httpClient);
         dirMgr = new DirectoryManager(cfg.getDirectory(), clientDns, httpClient, DirectoryProviders.get());
-        regMgr = new RegistrationManager(httpClient, clientDns, idStrategy, invMgr);
+        regMgr = new RegistrationManager(cfg.getRegister(), httpClient, clientDns, invMgr);
         asHander = new AppSvcManager(cfg, store, pMgr, notifMgr, synapse);
     }
 

@@ -97,6 +97,7 @@ public class MxisdConfig {
     private MemoryStoreConfig memory = new MemoryStoreConfig();
     private NotificationConfig notification = new NotificationConfig();
     private NetIqLdapConfig netiq = new NetIqLdapConfig();
+    private RegisterConfig register = new RegisterConfig();
     private ServerConfig server = new ServerConfig();
     private SessionConfig session = new SessionConfig();
     private StorageConfig storage = new StorageConfig();
@@ -219,6 +220,14 @@ public class MxisdConfig {
         this.netiq = netiq;
     }
 
+    public RegisterConfig getRegister() {
+        return register;
+    }
+
+    public void setRegister(RegisterConfig register) {
+        this.register = register;
+    }
+
     public ServerConfig getServer() {
         return server;
     }
@@ -310,6 +319,7 @@ public class MxisdConfig {
         getMemory().build();
         getNetiq().build();
         getNotification().build();
+        getRegister().build();
         getRest().build();
         getSession().build();
         getServer().build();

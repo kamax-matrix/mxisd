@@ -23,11 +23,11 @@ package io.kamax.mxisd.registration;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.ThreePid;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.config.RegisterConfig;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.exception.NotImplementedException;
 import io.kamax.mxisd.exception.RemoteHomeServerException;
 import io.kamax.mxisd.invitation.InvitationManager;
-import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -40,24 +40,23 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegistrationManager {
 
     private static final Logger log = LoggerFactory.getLogger(RegistrationManager.class);
 
+    private final RegisterConfig cfg;
     private final CloseableHttpClient client;
     private final ClientDnsOverwrite dns;
-    private final LookupStrategy lookup;
     private final InvitationManager invMgr;
 
-    private Map<String, Boolean> sessions = new ConcurrentHashMap<>();
-
-    public RegistrationManager(CloseableHttpClient client, ClientDnsOverwrite dns, LookupStrategy lookup, InvitationManager invMgr) {
+    public RegistrationManager(RegisterConfig cfg, CloseableHttpClient client, ClientDnsOverwrite dns, InvitationManager invMgr) {
+        this.cfg = cfg;
         this.client = client;
         this.dns = dns;
-        this.lookup = lookup;
         this.invMgr = invMgr;
     }
 
@@ -96,7 +95,48 @@ public class RegistrationManager {
     }
 
     public boolean isAllowed(ThreePid tpid) {
-        return invMgr.hasInvite(tpid);
+        // We check if the policy allows registration for invites, and if there is an invite for the 3PID
+        if (cfg.getPolicy().forInvite() && invMgr.hasInvite(tpid)) {
+            log.info("Registration allowed for pending invite");
+            return true;
+        }
+
+        // The following section deals with patterns which can either be built at startup time, or for each invite at runtime.
+        // Registration is a very rare occurrence relatively speaking, so we make the choice to build the patterns each time
+        // at runtime to save on RAM.
+
+        Object policy = cfg.getPolicy().getThreepid().get(tpid.getMedium());
+        if (Objects.nonNull(policy)) {
+            RegisterConfig.ThreepidPolicy tpidPolicy = GsonUtil.get().fromJson(GsonUtil.get().toJson(policy), RegisterConfig.ThreepidPolicy.class);
+            log.info("Found registration policy for {}", tpid.getMedium());
+
+            log.info("Processing pattern blacklist");
+            for (String pattern : tpidPolicy.getPattern().getBlacklist()) {
+                log.info("Processing pattern {}", pattern);
+
+                // We compile the pattern
+                Matcher m = Pattern.compile(pattern).matcher(tpid.getAddress());
+                if (m.matches()) { // We only care about those who match...
+                    log.info("Found matching blacklist entry, denying registration");
+                    return false; // ... and get denied as per blacklist
+                }
+            }
+
+            log.info("Processing pattern whitelist");
+            for (String pattern : tpidPolicy.getPattern().getWhitelist()) {
+                log.info("Processing pattern {}", pattern);
+
+                // We compile the pattern
+                Matcher m = Pattern.compile(pattern).matcher(tpid.getAddress());
+                if (m.matches()) { // We only care about those who match...
+                    log.info("Found matching whitelist entry, allowing registration");
+                    return true; // ... and get accepted as per whitelist
+                }
+            }
+        }
+
+        log.info("Returning default registration policy: {}", cfg.getPolicy().isAllowed());
+        return cfg.getPolicy().isAllowed();
     }
 
 }
