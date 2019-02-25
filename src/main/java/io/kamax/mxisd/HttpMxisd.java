@@ -21,6 +21,7 @@
 package io.kamax.mxisd;
 
 import io.kamax.mxisd.config.MxisdConfig;
+import io.kamax.mxisd.http.undertow.handler.InternalInfoHandler;
 import io.kamax.mxisd.http.undertow.handler.OptionsHandler;
 import io.kamax.mxisd.http.undertow.handler.SaneHandler;
 import io.kamax.mxisd.http.undertow.handler.as.v1.AsNotFoundHandler;
@@ -116,6 +117,9 @@ public class HttpMxisd {
                 .get("/rooms/**", asNotFoundHandler) // Legacy endpoint
                 .put(AsTransactionHandler.Path, asTxnHandler)
                 .put("/transactions/{" + AsTransactionHandler.ID + "}", asTxnHandler) // Legacy endpoint
+
+                // Banned endpoints
+                .get(InternalInfoHandler.Path, SaneHandler.around(new InternalInfoHandler()))
 
         ).build();
 
