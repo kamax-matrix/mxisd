@@ -47,7 +47,7 @@ public class Ed25519KeyManager implements KeyManager {
     private final KeyStore store;
 
     public Ed25519KeyManager(KeyStore store) {
-        this.keySpecs = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
+        this.keySpecs = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.CURVE_ED25519_SHA512);
         this.store = store;
 
         if (!store.getCurrentKey().isPresent()) {
@@ -106,7 +106,7 @@ public class Ed25519KeyManager implements KeyManager {
     }
 
     public EdDSAPrivateKeySpec getPrivateKeySpecs(KeyIdentifier id) {
-        return new EdDSAPrivateKeySpec(java.util.Base64.getDecoder().decode(getKey(id).getPrivateKeyBase64()), keySpecs);
+        return new EdDSAPrivateKeySpec(Base64.decodeBase64(getKey(id).getPrivateKeyBase64()), keySpecs);
     }
 
     public EdDSAPrivateKey getPrivateKey(KeyIdentifier id) {

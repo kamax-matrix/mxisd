@@ -43,7 +43,6 @@ public class Ed25519SignatureManager implements SignatureManager {
         Signature sign = sign(message);
 
         JsonObject keySignature = new JsonObject();
-        // FIXME should create a signing key object what would give this ed and index values
         keySignature.addProperty(sign.getKey().getAlgorithm() + ":" + sign.getKey().getSerial(), sign.getSignature());
         JsonObject signature = new JsonObject();
         signature.add(domain, keySignature);
@@ -53,7 +52,6 @@ public class Ed25519SignatureManager implements SignatureManager {
 
     @Override
     public Signature sign(JsonObject obj) {
-
         return sign(MatrixJson.encodeCanonical(obj));
     }
 

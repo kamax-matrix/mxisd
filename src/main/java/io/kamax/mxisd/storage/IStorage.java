@@ -38,6 +38,8 @@ public interface IStorage {
 
     void deleteInvite(String id);
 
+    void insertHistoricalInvite(IThreePidInviteReply data, String resolvedTo, Instant resolvedAt, boolean couldPublish);
+
     Optional<IThreePidSessionDao> getThreePidSession(String sid);
 
     Optional<IThreePidSessionDao> findThreePidSession(ThreePid tpid, String secret);
