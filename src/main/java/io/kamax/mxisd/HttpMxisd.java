@@ -52,6 +52,12 @@ public class HttpMxisd {
     // I/O
     private Undertow httpSrv;
 
+    static {
+        // Used in XNIO package, dependency of Undertow
+        // We switch to slf4j
+        System.setProperty("org.jboss.logging.provider", "slf4j");
+    }
+
     public HttpMxisd(MxisdConfig cfg) {
         m = new Mxisd(cfg);
     }
