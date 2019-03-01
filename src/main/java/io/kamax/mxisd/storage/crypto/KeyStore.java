@@ -73,6 +73,12 @@ public interface KeyStore {
      */
     void add(Key key) throws IllegalStateException;
 
+    /**
+     * Update key properties in the store
+     *
+     * @param key They key to update. <code>getId()</code> will be used to identify the key to update
+     * @throws ObjectNotFoundException If no key is found for that identifier
+     */
     void update(Key key) throws ObjectNotFoundException;
 
     /**
