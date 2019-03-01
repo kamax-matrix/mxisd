@@ -21,7 +21,11 @@
 package io.kamax.mxisd.crypto;
 
 import io.kamax.mxisd.config.KeyConfig;
-import io.kamax.mxisd.storage.crypto.*;
+import io.kamax.mxisd.crypto.ed25519.Ed25519KeyManager;
+import io.kamax.mxisd.crypto.ed25519.Ed25519SignatureManager;
+import io.kamax.mxisd.storage.crypto.FileKeyStore;
+import io.kamax.mxisd.storage.crypto.KeyStore;
+import io.kamax.mxisd.storage.crypto.MemoryKeyStore;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 

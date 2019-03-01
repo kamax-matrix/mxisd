@@ -18,12 +18,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto;
 
-public interface Signature {
+public class GenericKey implements Key {
 
-    KeyIdentifier getKey();
+    private final KeyIdentifier id;
+    private final boolean isValid;
+    private final String privKey;
 
-    String getSignature();
+    public GenericKey(KeyIdentifier id, boolean isValid, String privKey) {
+        this.id = new GenericKeyIdentifier(id);
+        this.isValid = isValid;
+        this.privKey = privKey;
+    }
+
+
+    @Override
+    public KeyIdentifier getId() {
+        return id;
+    }
+
+    @Override
+    public boolean isValid() {
+        return isValid;
+    }
+
+    @Override
+    public String getPrivateKeyBase64() {
+        return privKey;
+    }
 
 }

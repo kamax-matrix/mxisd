@@ -18,12 +18,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.test.storage.crypto;
 
-public class RegularKeyIdentifier extends GenericKeyIdentifier {
+import io.kamax.mxisd.storage.crypto.KeyStore;
+import io.kamax.mxisd.storage.crypto.MemoryKeyStore;
 
-    public RegularKeyIdentifier(String algo, String serial) {
-        super(KeyType.Regular, algo, serial);
+public class MemoryKeyStoreTest extends KeyStoreTest {
+
+    @Override
+    public KeyStore create() {
+        return new MemoryKeyStore();
     }
 
 }

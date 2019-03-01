@@ -18,22 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto;
 
 /**
- * Types of keys used by an Identity server.
- * See https://matrix.org/docs/spec/identity_service/r0.1.0.html#key-management
+ * A signing key
  */
-public enum KeyType {
+public interface Key {
+
+    KeyIdentifier getId();
 
     /**
-     * Ephemeral keys are related to 3PID invites and are only valid while the invite is pending.
+     * If the key is currently valid
+     *
+     * @return true if the key is valid, false if not
      */
-    Ephemeral,
+    boolean isValid();
 
     /**
-     * Regular keys are used by the Identity Server itself to sign requests/responses
+     * Get the private key
+     *
+     * @return the private key encoded as Base64
      */
-    Regular
+    String getPrivateKeyBase64();
 
 }

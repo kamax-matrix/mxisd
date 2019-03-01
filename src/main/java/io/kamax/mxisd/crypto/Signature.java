@@ -18,37 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto;
 
-public class GenericKeyIdentifier implements KeyIdentifier {
+public interface Signature {
 
-    private final KeyType type;
-    private final String algo;
-    private final String serial;
+    KeyIdentifier getKey();
 
-    public GenericKeyIdentifier(KeyIdentifier id) {
-        this(id.getType(), id.getAlgorithm(), id.getSerial());
-    }
-
-    public GenericKeyIdentifier(KeyType type, String algo, String serial) {
-        this.type = type;
-        this.algo = algo;
-        this.serial = serial;
-    }
-
-    @Override
-    public KeyType getType() {
-        return type;
-    }
-
-    @Override
-    public String getAlgorithm() {
-        return algo;
-    }
-
-    @Override
-    public String getSerial() {
-        return serial;
-    }
+    String getSignature();
 
 }

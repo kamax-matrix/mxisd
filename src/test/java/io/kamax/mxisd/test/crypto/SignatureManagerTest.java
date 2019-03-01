@@ -18,12 +18,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.test.storage.crypto;
+package io.kamax.mxisd.test.crypto;
 
 import com.google.gson.JsonObject;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.matrix.json.MatrixJson;
-import io.kamax.mxisd.storage.crypto.*;
+import io.kamax.mxisd.crypto.Signature;
+import io.kamax.mxisd.crypto.SignatureManager;
+import io.kamax.mxisd.crypto.ed25519.Ed25519Key;
+import io.kamax.mxisd.crypto.ed25519.Ed25519KeyManager;
+import io.kamax.mxisd.crypto.ed25519.Ed25519RegularKeyIdentifier;
+import io.kamax.mxisd.crypto.ed25519.Ed25519SignatureManager;
+import io.kamax.mxisd.storage.crypto.KeyStore;
+import io.kamax.mxisd.storage.crypto.MemoryKeyStore;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -36,7 +43,7 @@ public class SignatureManagerTest {
     private static SignatureManager signMgr;
 
     private static SignatureManager build(String keySeed) {
-        Ed25519Key key = new Ed25519Key(new Ed2219RegularKeyIdentifier("0"), keySeed);
+        Ed25519Key key = new Ed25519Key(new Ed25519RegularKeyIdentifier("0"), keySeed);
         KeyStore store = new MemoryKeyStore();
         store.add(key);
 

@@ -18,11 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto.ed25519;
 
 import com.google.gson.JsonObject;
 import io.kamax.matrix.codec.MxBase64;
 import io.kamax.matrix.json.MatrixJson;
+import io.kamax.mxisd.crypto.KeyIdentifier;
+import io.kamax.mxisd.crypto.Signature;
+import io.kamax.mxisd.crypto.SignatureManager;
 import net.i2p.crypto.eddsa.EdDSAEngine;
 
 import java.security.InvalidKeyException;

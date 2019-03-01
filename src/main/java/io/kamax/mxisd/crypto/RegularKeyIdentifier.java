@@ -18,14 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.test.storage.crypto;
+package io.kamax.mxisd.crypto;
 
-public class KeyTest {
+public class RegularKeyIdentifier extends GenericKeyIdentifier {
 
-    // As per https://matrix.org/docs/spec/appendices.html#signing-key
-    public static final String Private = "YJDBA9Xnr2sVqXD9Vj7XVUnmFZcZrlw8Md7kMW+3XA1";
-
-    // The corresponding public key, not being documented in the spec
-    public static final String Public = "XGX0JRS2Af3be3knz2fBiRbApjm2Dh61gXDJA8kcJNI";
+    public RegularKeyIdentifier(String algo, String serial) {
+        super(KeyType.Regular, algo, serial);
+    }
 
 }

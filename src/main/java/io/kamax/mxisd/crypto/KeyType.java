@@ -18,40 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto;
 
-import com.google.gson.JsonObject;
-
-import java.nio.charset.StandardCharsets;
-
-public interface SignatureManager {
-
-    JsonObject signMessageGson(String domain, String message);
+/**
+ * Types of keys used by an Identity server.
+ * See https://matrix.org/docs/spec/identity_service/r0.1.0.html#key-management
+ */
+public enum KeyType {
 
     /**
-     * Sign the canonical form of a JSON object
-     *
-     * @param obj The JSON object to canonicalize and sign
-     * @return The signature
+     * Ephemeral keys are related to 3PID invites and are only valid while the invite is pending.
      */
-    Signature sign(JsonObject obj);
+    Ephemeral,
 
     /**
-     * Sign the message, using UTF-8 as decoding character set
-     *
-     * @param message The UTF-8 encoded message
-     * @return
+     * Regular keys are used by the Identity Server itself to sign requests/responses
      */
-    default Signature sign(String message) {
-        return sign(message.getBytes(StandardCharsets.UTF_8));
-    }
-
-    /**
-     * Sign the data
-     *
-     * @param data The data to sign
-     * @return The signature
-     */
-    Signature sign(byte[] data);
+    Regular
 
 }

@@ -18,10 +18,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto.ed25519;
 
-public interface KeyAlgorithm {
+import io.kamax.mxisd.crypto.KeyAlgorithm;
+import io.kamax.mxisd.crypto.RegularKeyIdentifier;
 
-    String Ed25519 = "ed25519";
+public class Ed25519RegularKeyIdentifier extends RegularKeyIdentifier {
+
+    public Ed25519RegularKeyIdentifier(String serial) {
+        super(KeyAlgorithm.Ed25519, serial);
+    }
 
 }

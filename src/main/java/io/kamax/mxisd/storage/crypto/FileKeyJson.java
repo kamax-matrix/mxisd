@@ -20,6 +20,8 @@
 
 package io.kamax.mxisd.storage.crypto;
 
+import io.kamax.mxisd.crypto.Key;
+
 public class FileKeyJson {
 
     public static FileKeyJson get(Key key) {

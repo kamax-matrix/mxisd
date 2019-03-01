@@ -18,27 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto;
 
-/**
- * A signing key
- */
-public interface Key {
+import java.util.List;
 
-    KeyIdentifier getId();
+public interface KeyManager {
 
-    /**
-     * If the key is currently valid
-     *
-     * @return true if the key is valid, false if not
-     */
-    boolean isValid();
+    KeyIdentifier generateKey(KeyType type);
 
-    /**
-     * Get the private key
-     *
-     * @return the private key encoded as Base64
-     */
-    String getPrivateKeyBase64();
+    List<KeyIdentifier> getKeys(KeyType type);
+
+    Key getServerSigningKey();
+
+    Key getKey(KeyIdentifier id);
+
+    void disableKey(KeyIdentifier id);
+
+    String getPublicKeyBase64(KeyIdentifier id);
+
+    boolean isValid(KeyType type, String publicKeyBase64);
 
 }

@@ -18,17 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto.ed25519;
 
-public class GenericKey implements Key {
+import io.kamax.mxisd.crypto.GenericKeyIdentifier;
+import io.kamax.mxisd.crypto.Key;
+import io.kamax.mxisd.crypto.KeyAlgorithm;
+import io.kamax.mxisd.crypto.KeyIdentifier;
 
-    private final KeyIdentifier id;
-    private final boolean isValid;
-    private final String privKey;
+public class Ed25519Key implements Key {
 
-    public GenericKey(KeyIdentifier id, boolean isValid, String privKey) {
+    private KeyIdentifier id;
+    private String privKey;
+
+    public Ed25519Key(KeyIdentifier id, String privKey) {
+        if (!KeyAlgorithm.Ed25519.equals(id.getAlgorithm())) {
+            throw new IllegalArgumentException();
+        }
+
         this.id = new GenericKeyIdentifier(id);
-        this.isValid = isValid;
         this.privKey = privKey;
     }
 
@@ -40,7 +47,7 @@ public class GenericKey implements Key {
 
     @Override
     public boolean isValid() {
-        return isValid;
+        return true;
     }
 
     @Override

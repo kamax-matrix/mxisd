@@ -20,18 +20,18 @@
 
 package io.kamax.mxisd.storage.crypto;
 
+import io.kamax.mxisd.crypto.*;
 import io.kamax.mxisd.exception.ObjectNotFoundException;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryKeyStore implements KeyStore {
 
-    private Map<KeyType, Map<String, Map<String, String>>> keys = new ConcurrentHashMap<>();
+    private Map<KeyType, Map<String, Map<String, FileKeyJson>>> keys = new ConcurrentHashMap<>();
     private KeyIdentifier current;
 
-    private Map<String, String> getMap(KeyType type, String algo) {
+    private Map<String, FileKeyJson> getMap(KeyType type, String algo) {
         return keys.computeIfAbsent(type, k -> new ConcurrentHashMap<>()).computeIfAbsent(algo, k -> new ConcurrentHashMap<>());
     }
 
@@ -56,23 +56,23 @@ public class MemoryKeyStore implements KeyStore {
 
     @Override
     public Key get(KeyIdentifier id) throws ObjectNotFoundException {
-        String data = getMap(id.getType(), id.getAlgorithm()).get(id.getSerial());
+        FileKeyJson data = getMap(id.getType(), id.getAlgorithm()).get(id.getSerial());
         if (Objects.isNull(data)) {
             throw new ObjectNotFoundException("Key", id.getType() + ":" + id.getAlgorithm() + ":" + id.getSerial());
         }
 
-        return new GenericKey(new GenericKeyIdentifier(id), StringUtils.isEmpty(data), data);
+        return new GenericKey(new GenericKeyIdentifier(id), data.isValid(), data.getKey());
     }
 
     private void set(Key key) {
-        String data = key.isValid() ? key.getPrivateKeyBase64() : "";
+        FileKeyJson data = FileKeyJson.get(key);
         getMap(key.getId().getType(), key.getId().getAlgorithm()).put(key.getId().getSerial(), data);
     }
 
     @Override
     public void add(Key key) throws IllegalStateException {
         if (has(key.getId())) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Key " + key.getId().getId() + " already exists");
         }
 
         set(key);
@@ -89,13 +89,17 @@ public class MemoryKeyStore implements KeyStore {
 
     @Override
     public void delete(KeyIdentifier id) throws ObjectNotFoundException {
+        if (!has(id)) {
+            throw new ObjectNotFoundException("Key", id.getType() + ":" + id.getAlgorithm() + ":" + id.getSerial());
+        }
+
         keys.computeIfAbsent(id.getType(), k -> new ConcurrentHashMap<>()).computeIfAbsent(id.getAlgorithm(), k -> new ConcurrentHashMap<>()).remove(id.getSerial());
     }
 
     @Override
-    public void setCurrentKey(KeyIdentifier id) throws ObjectNotFoundException {
+    public void setCurrentKey(KeyIdentifier id) throws IllegalArgumentException {
         if (!has(id)) {
-            throw new ObjectNotFoundException("Key", id.getType() + ":" + id.getAlgorithm() + ":" + id.getSerial());
+            throw new IllegalArgumentException("Key " + id.getType() + ":" + id.getAlgorithm() + ":" + id.getSerial() + " is not known to the store");
         }
 
         current = id;

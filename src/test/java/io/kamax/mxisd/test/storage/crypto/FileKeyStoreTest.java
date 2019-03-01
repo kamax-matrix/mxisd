@@ -18,37 +18,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.test.storage.crypto;
 
-/**
- * Identifying data for a given Key.
- */
-public interface KeyIdentifier {
+import io.kamax.mxisd.storage.crypto.FileKeyStore;
+import io.kamax.mxisd.storage.crypto.KeyStore;
+import org.apache.commons.io.FileUtils;
 
-    /**
-     * Type of key.
-     *
-     * @return The type of the key
-     */
-    KeyType getType();
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 
-    /**
-     * Algorithm of the key. Typically <code>ed25519</code>.
-     *
-     * @return The algorithm of the key
-     */
-    String getAlgorithm();
+public class FileKeyStoreTest extends KeyStoreTest {
 
-    /**
-     * Serial of the key, unique for the algorithm.
-     * It is typically made of random alphanumerical characters.
-     *
-     * @return The serial of the key
-     */
-    String getSerial();
-
-    default String getId() {
-        return getAlgorithm().toLowerCase() + ":" + getSerial();
+    @Override
+    public KeyStore create() throws IOException {
+        String path = FileUtils.getTempDirectoryPath() +
+                "/mxisd-test-key-store-" +
+                UUID.randomUUID().toString().replace("-", "");
+        FileUtils.forceDeleteOnExit(new File(path));
+        return new FileKeyStore(path);
     }
 
 }

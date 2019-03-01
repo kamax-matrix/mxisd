@@ -20,9 +20,9 @@
 
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
+import io.kamax.mxisd.crypto.KeyManager;
+import io.kamax.mxisd.crypto.KeyType;
 import io.kamax.mxisd.http.IsAPIv1;
-import io.kamax.mxisd.storage.crypto.KeyManager;
-import io.kamax.mxisd.storage.crypto.KeyType;
 import io.undertow.server.HttpServerExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -18,36 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.test.crypto;
 
-public class Ed25519Key implements Key {
+public class KeyTest {
 
-    private KeyIdentifier id;
-    private String privKey;
+    // As per https://matrix.org/docs/spec/appendices.html#signing-key
+    public static final String Private = "YJDBA9Xnr2sVqXD9Vj7XVUnmFZcZrlw8Md7kMW+3XA1";
 
-    public Ed25519Key(KeyIdentifier id, String privKey) {
-        if (!KeyAlgorithm.Ed25519.equals(id.getAlgorithm())) {
-            throw new IllegalArgumentException();
-        }
-
-        this.id = new GenericKeyIdentifier(id);
-        this.privKey = privKey;
-    }
-
-
-    @Override
-    public KeyIdentifier getId() {
-        return id;
-    }
-
-    @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
-    public String getPrivateKeyBase64() {
-        return privKey;
-    }
+    // The corresponding public key, not being documented in the spec
+    public static final String Public = "XGX0JRS2Af3be3knz2fBiRbApjm2Dh61gXDJA8kcJNI";
 
 }

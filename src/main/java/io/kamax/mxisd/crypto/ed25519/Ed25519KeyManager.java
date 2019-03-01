@@ -18,9 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto.ed25519;
 
 import io.kamax.matrix.codec.MxBase64;
+import io.kamax.mxisd.crypto.*;
+import io.kamax.mxisd.storage.crypto.KeyStore;
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.KeyPairGenerator;
@@ -38,6 +40,7 @@ import java.nio.ByteBuffer;
 import java.security.KeyPair;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Ed25519KeyManager implements KeyManager {
 
@@ -51,7 +54,12 @@ public class Ed25519KeyManager implements KeyManager {
         this.store = store;
 
         if (!store.getCurrentKey().isPresent()) {
-            List<KeyIdentifier> keys = store.list(KeyType.Regular);
+            List<KeyIdentifier> keys = store.list(KeyType.Regular).stream()
+                    .map(this::getKey)
+                    .filter(Key::isValid)
+                    .map(Key::getId)
+                    .collect(Collectors.toList());
+
             if (keys.isEmpty()) {
                 keys.add(generateKey(KeyType.Regular));
             }
@@ -60,17 +68,17 @@ public class Ed25519KeyManager implements KeyManager {
         }
     }
 
-    protected String generateId() {
+    private String generateId() {
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(Instant.now().toEpochMilli() - 1546297200000L); // TS since 2019-01-01T00:00:00Z to keep IDs short
         return Base64.encodeBase64URLSafeString(buffer.array()) + RandomStringUtils.randomAlphanumeric(1);
     }
 
-    protected String getPrivateKeyBase64(EdDSAPrivateKey key) {
+    private String getPrivateKeyBase64(EdDSAPrivateKey key) {
         return MxBase64.encode(key.getSeed());
     }
 
-    public EdDSAParameterSpec getKeySpecs() {
+    EdDSAParameterSpec getKeySpecs() {
         return keySpecs;
     }
 
@@ -105,15 +113,15 @@ public class Ed25519KeyManager implements KeyManager {
         return store.get(id);
     }
 
-    public EdDSAPrivateKeySpec getPrivateKeySpecs(KeyIdentifier id) {
+    private EdDSAPrivateKeySpec getPrivateKeySpecs(KeyIdentifier id) {
         return new EdDSAPrivateKeySpec(Base64.decodeBase64(getKey(id).getPrivateKeyBase64()), keySpecs);
     }
 
-    public EdDSAPrivateKey getPrivateKey(KeyIdentifier id) {
+    EdDSAPrivateKey getPrivateKey(KeyIdentifier id) {
         return new EdDSAPrivateKey(getPrivateKeySpecs(id));
     }
 
-    public EdDSAPublicKey getPublicKey(KeyIdentifier id) {
+    private EdDSAPublicKey getPublicKey(KeyIdentifier id) {
         EdDSAPrivateKeySpec privKeySpec = getPrivateKeySpecs(id);
         EdDSAPublicKeySpec pubKeySpec = new EdDSAPublicKeySpec(privKeySpec.getA(), keySpecs);
         return new EdDSAPublicKey(pubKeySpec);

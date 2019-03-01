@@ -23,6 +23,7 @@ package io.kamax.mxisd.storage.crypto;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.crypto.KeyFileStore;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.crypto.*;
 import io.kamax.mxisd.exception.ObjectNotFoundException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -54,31 +55,39 @@ public class FileKeyStore implements KeyStore {
         base = new File(path).getAbsoluteFile().toString();
         File f = new File(base);
 
-        if (f.exists() && f.isFile()) {
+        if (!f.exists()) {
             try {
-                log.info("Found old key store format at {}, migrating...", base);
-                File oldStorePath = new File(f.toString() + ".backup-before-migration");
-                FileUtils.moveFile(f, oldStorePath);
                 FileUtils.forceMkdir(f);
-
-
-                String privKey = new KeyFileStore(oldStorePath.toString()).load().orElse("");
-                if (StringUtils.isBlank(privKey)) {
-                    log.info("Empty file, nothing to migrate");
-                } else {
-                    // We ensure this is valid Base64 data before migrating
-                    Base64.decodeBase64(privKey);
-
-                    // We store the new key
-                    add(new GenericKey(new GenericKeyIdentifier(KeyType.Regular, KeyAlgorithm.Ed25519, "0"), true, privKey));
-
-                    log.info("Store migrated to new directory format");
-                }
             } catch (IOException e) {
-                throw new RuntimeException("Unable to migrate store from old single file format to new directory format", e);
+                throw new RuntimeException("Unable to create key store");
             }
         } else {
-            log.info("Key store is already in directory format");
+            if (f.isFile()) {
+                try {
+                    log.info("Found old key store format at {}, migrating...", base);
+                    File oldStorePath = new File(f.toString() + ".backup-before-migration");
+                    FileUtils.moveFile(f, oldStorePath);
+                    FileUtils.forceMkdir(f);
+
+
+                    String privKey = new KeyFileStore(oldStorePath.toString()).load().orElse("");
+                    if (StringUtils.isBlank(privKey)) {
+                        log.info("Empty file, nothing to migrate");
+                    } else {
+                        // We ensure this is valid Base64 data before migrating
+                        Base64.decodeBase64(privKey);
+
+                        // We store the new key
+                        add(new GenericKey(new GenericKeyIdentifier(KeyType.Regular, KeyAlgorithm.Ed25519, "0"), true, privKey));
+
+                        log.info("Store migrated to new directory format");
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("Unable to migrate store from old single file format to new directory format", e);
+                }
+            } else {
+                log.info("Key store is already in directory format");
+            }
         }
 
         if (!f.isDirectory()) {
@@ -207,6 +216,10 @@ public class FileKeyStore implements KeyStore {
 
     @Override
     public void setCurrentKey(KeyIdentifier id) throws IllegalArgumentException {
+        if (!has(id)) {
+            throw new IllegalArgumentException("Key " + id.getType() + ":" + id.getAlgorithm() + ":" + id.getSerial() + " is not known to the store");
+        }
+
         JsonObject json = new JsonObject();
         json.addProperty("type", id.getType().name());
         json.addProperty("algo", id.getAlgorithm());

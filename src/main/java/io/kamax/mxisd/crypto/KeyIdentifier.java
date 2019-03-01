@@ -18,12 +18,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto;
 
-public class Ed2219RegularKeyIdentifier extends RegularKeyIdentifier {
+/**
+ * Identifying data for a given Key.
+ */
+public interface KeyIdentifier {
 
-    public Ed2219RegularKeyIdentifier(String serial) {
-        super(KeyAlgorithm.Ed25519, serial);
+    /**
+     * Type of key.
+     *
+     * @return The type of the key
+     */
+    KeyType getType();
+
+    /**
+     * Algorithm of the key. Typically <code>ed25519</code>.
+     *
+     * @return The algorithm of the key
+     */
+    String getAlgorithm();
+
+    /**
+     * Serial of the key, unique for the algorithm.
+     * It is typically made of random alphanumerical characters.
+     *
+     * @return The serial of the key
+     */
+    String getSerial();
+
+    default String getId() {
+        return getAlgorithm().toLowerCase() + ":" + getSerial();
     }
 
 }

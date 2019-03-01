@@ -20,6 +20,9 @@
 
 package io.kamax.mxisd.storage.crypto;
 
+import io.kamax.mxisd.crypto.Key;
+import io.kamax.mxisd.crypto.KeyIdentifier;
+import io.kamax.mxisd.crypto.KeyType;
 import io.kamax.mxisd.exception.ObjectNotFoundException;
 
 import java.util.List;
@@ -84,9 +87,9 @@ public interface KeyStore {
      * Store the information of which key is the current signing key
      *
      * @param id The key identifier
-     * @throws ObjectNotFoundException If the key is not known to the store
+     * @throws IllegalArgumentException If the key is not known to the store
      */
-    void setCurrentKey(KeyIdentifier id) throws ObjectNotFoundException;
+    void setCurrentKey(KeyIdentifier id) throws IllegalArgumentException;
 
     /**
      * Retrieve the previously stored information of which key is the current signing key, if any

@@ -21,11 +21,11 @@
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
 import com.google.gson.JsonObject;
+import io.kamax.mxisd.crypto.GenericKeyIdentifier;
+import io.kamax.mxisd.crypto.KeyManager;
+import io.kamax.mxisd.crypto.KeyType;
 import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
-import io.kamax.mxisd.storage.crypto.GenericKeyIdentifier;
-import io.kamax.mxisd.storage.crypto.KeyManager;
-import io.kamax.mxisd.storage.crypto.KeyType;
 import io.undertow.server.HttpServerExchange;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

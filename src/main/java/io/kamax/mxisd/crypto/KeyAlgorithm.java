@@ -18,24 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.storage.crypto;
+package io.kamax.mxisd.crypto;
 
-import java.util.List;
+public interface KeyAlgorithm {
 
-public interface KeyManager {
-
-    KeyIdentifier generateKey(KeyType type);
-
-    List<KeyIdentifier> getKeys(KeyType type);
-
-    Key getServerSigningKey();
-
-    Key getKey(KeyIdentifier id);
-
-    void disableKey(KeyIdentifier id);
-
-    String getPublicKeyBase64(KeyIdentifier id);
-
-    boolean isValid(KeyType type, String publicKeyBase64);
+    String Ed25519 = "ed25519";
 
 }
