@@ -26,7 +26,6 @@ import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
 import io.kamax.matrix.event.EventKey;
-import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.backend.sql.synapse.Synapse;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.notification.NotificationManager;
@@ -63,7 +62,7 @@ public class MembershipProcessor implements EventTypeProcessor {
             return ev;
         });
 
-        if (!StringUtils.equals("invite", GsonUtil.getStringOrNull(content, "membership"))) {
+        if (!StringUtils.equals("invite", EventKey.Membership.getStringOrNull(content))) {
             log.debug("This is not an invite event, skipping");
             return;
         }

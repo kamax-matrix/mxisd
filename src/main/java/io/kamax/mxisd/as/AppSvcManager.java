@@ -35,11 +35,18 @@ import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.ormlite.dao.ASTransactionDao;
 import io.kamax.mxisd.util.GsonParser;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.introspector.BeanAccess;
+import org.yaml.snakeyaml.representer.Representer;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -65,6 +72,26 @@ public class AppSvcManager {
         transactionsInProgress = new ConcurrentHashMap<>();
 
         processors.put("m.room.member", new MembershipProcessor(cfg.getMatrix(), profiler, notif, synapse));
+
+        processConfig();
+    }
+
+    private void processConfig() {
+        String synapseRegFile = cfg.getListener().getSynapse().getRegistrationFile();
+        if (StringUtils.isNotBlank(synapseRegFile)) {
+            SynapseRegistrationYaml syncCfg = SynapseRegistrationYaml.parse(cfg.getListener());
+
+            Representer rep = new Representer();
+            rep.getPropertyUtils().setBeanAccess(BeanAccess.FIELD);
+            Yaml yaml = new Yaml(rep);
+            String synCfgRaw = yaml.dump(syncCfg);
+
+            try {
+                IOUtils.write(synCfgRaw, new FileOutputStream(synapseRegFile), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to write synapse appservice registration file", e);
+            }
+        }
     }
 
     public AppSvcManager withToken(String token) {

@@ -25,8 +25,47 @@ import org.apache.commons.lang.StringUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ListenerConfig {
+
+    public static class Synpase {
+
+        private String registrationFile;
+
+        public String getRegistrationFile() {
+            return registrationFile;
+        }
+
+        public void setRegistrationFile(String registrationFile) {
+            this.registrationFile = registrationFile;
+        }
+
+    }
+
+    public static class UserTemplate {
+
+        private String type = "regex";
+        private String template;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getTemplate() {
+            return template;
+        }
+
+        public void setTemplate(String template) {
+            this.template = template;
+        }
+
+    }
 
     public static class Token {
 
@@ -51,10 +90,22 @@ public class ListenerConfig {
 
     }
 
-    private transient URL csUrl;
+    private String id = "appservice-mxisd";
     private String url;
-    private String localpart;
+    private String localpart = "mxisd";
     private Token token = new Token();
+    private List<UserTemplate> users = new ArrayList<>();
+    private Synpase synapse = new Synpase();
+
+    private transient URL csUrl;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public URL getUrl() {
         return csUrl;
@@ -80,6 +131,22 @@ public class ListenerConfig {
         this.token = token;
     }
 
+    public List<UserTemplate> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<UserTemplate> users) {
+        this.users = users;
+    }
+
+    public Synpase getSynapse() {
+        return synapse;
+    }
+
+    public void setSynapse(Synpase synapse) {
+        this.synapse = synapse;
+    }
+
     public void build() {
         try {
             if (StringUtils.isBlank(url)) {
@@ -87,6 +154,10 @@ public class ListenerConfig {
             }
 
             csUrl = new URL(url);
+
+            if (org.apache.commons.lang3.StringUtils.isBlank(getId())) {
+                throw new IllegalArgumentException("Matrix Listener ID is not set");
+            }
 
             if (StringUtils.isBlank(getLocalpart())) {
                 throw new IllegalArgumentException("localpart for matrix listener is not set");
