@@ -21,7 +21,7 @@ It allows to use Identity stores configured in mxisd to authenticate users on yo
 
 Authentication is divided into two parts:
 - [Basic](#basic): authenticate with a regular username.
-- [Advanced](#advanced): same as basic with extra ability to authenticate using a 3PID.
+- [Advanced](#advanced): same as basic with extra abilities like authenticate using a 3PID or do username rewrite.
 
 ## Basic
 Authentication by username is possible by linking synapse and mxisd together using a specific module for synapse, also
@@ -145,7 +145,49 @@ Your VirtualHost should now look similar to:
 </VirtualHost>
 ```
 
+##### nginx
+
+The specific configuration to add under the relevant `server`:
+
+```nginx
+location /_matrix/client/r0/login {
+    proxy_pass http://localhost:8090;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+}
+```
+
+Your `server` section should now look similar to:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name matrix.example.org;
+    
+    # ...
+    
+    location /_matrix/client/r0/login {
+        proxy_pass http://localhost:8090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+    
+    location /_matrix/identity {
+        proxy_pass http://localhost:8090/_matrix/identity;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+    
+    location /_matrix {
+        proxy_pass http://localhost:8008/_matrix;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+}
+```
+
 #### DNS Overwrite
+
 Just like you need to configure a reverse proxy to send client requests to mxisd, you also need to configure mxisd with
 the internal IP of the Homeserver so it can talk to it directly to integrate its directory search.
 
@@ -164,6 +206,12 @@ In case the hostname is the same as your Matrix domain and `server.name` is not 
 `matrix.domain` and will still probably have the correct value.
 
 `value` is the base internal URL of the Homeserver, without any `/_matrix/..` or trailing `/`.
+
+### Optional features
+
+The following features are available after you have a working Advanced setup:
+
+- Username rewrite: Allows you to rewrite the username of a regular login/pass authentication to a 3PID, that then gets resolved using the regular lookup process. Most common use case is to allow login with numerical usernames on synapse, which is not possible out of the box.
 
 #### Username rewrite
 In mxisd config:
