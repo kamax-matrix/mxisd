@@ -83,6 +83,7 @@ public class MxisdConfig {
 
     }
 
+    private AppServiceConfig appsvc = new AppServiceConfig();
     private AuthenticationConfig auth = new AuthenticationConfig();
     private DirectoryConfig directory = new DirectoryConfig();
     private Dns dns = new Dns();
@@ -107,6 +108,14 @@ public class MxisdConfig {
     private ThreePidConfig threepid = new ThreePidConfig();
     private ViewConfig view = new ViewConfig();
     private WordpressConfig wordpress = new WordpressConfig();
+
+    public AppServiceConfig getAppsvc() {
+        return appsvc;
+    }
+
+    public void setAppsvc(AppServiceConfig appsvc) {
+        this.appsvc = appsvc;
+    }
 
     public AuthenticationConfig getAuth() {
         return auth;
@@ -306,6 +315,7 @@ public class MxisdConfig {
             log.debug("server.name is empty, using matrix.domain");
         }
 
+        getAppsvc().build();
         getAuth().build();
         getDirectory().build();
         getExec().build();

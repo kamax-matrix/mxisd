@@ -22,6 +22,7 @@ package io.kamax.mxisd.threepid.connector.email;
 
 import com.sun.mail.smtp.SMTPTransport;
 import io.kamax.matrix.ThreePidMedium;
+import io.kamax.mxisd.Mxisd;
 import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
 import io.kamax.mxisd.exception.FeatureNotAvailable;
 import io.kamax.mxisd.exception.InternalServerError;
@@ -92,7 +93,7 @@ public class EmailSmtpConnector implements EmailConnector {
         try {
             InternetAddress sender = new InternetAddress(senderAddress, senderName);
             MimeMessage msg = new MimeMessage(session, IOUtils.toInputStream(content, StandardCharsets.UTF_8));
-            msg.setHeader("X-Mailer", "mxisd"); // FIXME set version
+            msg.setHeader("X-Mailer", Mxisd.Agent);
             msg.setSentDate(new Date());
             msg.setFrom(sender);
             msg.setRecipients(Message.RecipientType.TO, recipient);

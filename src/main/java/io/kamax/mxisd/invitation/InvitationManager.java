@@ -186,7 +186,12 @@ public class InvitationManager {
             }
 
             if (StringUtils.isBlank(cfg.getInvite().getExpiration().getResolveTo())) {
-                throw new ConfigurationException("Invitation expiration resolution target cannot be empty/blank");
+                String localpart = cfg.getAppsvc().getUser().getInviteExpired();
+                if (StringUtils.isBlank(localpart)) {
+                    throw new ConfigurationException("Could not compute the Invitation expiration resolution target from App service user: not set");
+                }
+
+                cfg.getInvite().getExpiration().setResolveTo(MatrixID.asAcceptable(localpart, cfg.getMatrix().getDomain()).getId());
             }
 
             try {
@@ -395,8 +400,8 @@ public class InvitationManager {
                 Instant ts = Instant.ofEpochMilli(Long.parseLong(tsRaw));
                 Instant targetTs = ts.plusSeconds(cfg.getExpiration().getAfter() * 60);
                 Instant now = Instant.now();
-                log.debug("Invite {} - Created at {} - Expire at {} - Current time is {}", reply.getId(), ts, targetTs, now);
-                if (targetTs.isBefore(Instant.now())) {
+                log.debug("Invite {} - Created at {} - Expires at {} - Current time is {}", reply.getId(), ts, targetTs, now);
+                if (targetTs.isAfter(now)) {
                     log.debug("Invite {} has not expired yet, skipping", reply.getId());
                     continue;
                 }
@@ -494,6 +499,7 @@ public class InvitationManager {
 
             Instant resolvedAt = Instant.now();
             boolean couldPublish = false;
+            boolean shouldArchive = true;
             try {
                 log.info("Posting onBind event to {}", req.getURI());
                 CloseableHttpResponse response = client.execute(req);
@@ -501,7 +507,12 @@ public class InvitationManager {
                 log.info("Answer code: {}", statusCode);
                 if (statusCode >= 300 && statusCode != 403) {
                     log.info("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
-                    log.warn("HS returned an error. Invite can be found in historical storage for manual re-processing");
+                    log.warn("HS returned an error.");
+
+                    shouldArchive = statusCode != 502;
+                    if (shouldArchive) {
+                        log.info("Invite can be found in historical storage for manual re-processing");
+                    }
                 } else {
                     couldPublish = true;
                     if (statusCode == 403) {
@@ -512,10 +523,12 @@ public class InvitationManager {
             } catch (IOException e) {
                 log.warn("Unable to tell HS {} about invite being mapped", domain, e);
             } finally {
-                synchronized (this) {
-                    storage.insertHistoricalInvite(reply, mxid, resolvedAt, couldPublish);
-                    removeInvite(reply);
-                    log.info("Moved invite {} to historical table", reply.getId());
+                if (shouldArchive) {
+                    synchronized (this) {
+                        storage.insertHistoricalInvite(reply, mxid, resolvedAt, couldPublish);
+                        removeInvite(reply);
+                        log.info("Moved invite {} to historical table", reply.getId());
+                    }
                 }
             }
         }).start();

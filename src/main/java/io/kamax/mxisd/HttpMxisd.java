@@ -26,6 +26,7 @@ import io.kamax.mxisd.http.undertow.handler.OptionsHandler;
 import io.kamax.mxisd.http.undertow.handler.SaneHandler;
 import io.kamax.mxisd.http.undertow.handler.as.v1.AsNotFoundHandler;
 import io.kamax.mxisd.http.undertow.handler.as.v1.AsTransactionHandler;
+import io.kamax.mxisd.http.undertow.handler.as.v1.AsUserHandler;
 import io.kamax.mxisd.http.undertow.handler.auth.RestAuthHandler;
 import io.kamax.mxisd.http.undertow.handler.auth.v1.LoginGetHandler;
 import io.kamax.mxisd.http.undertow.handler.auth.v1.LoginHandler;
@@ -66,8 +67,11 @@ public class HttpMxisd {
         m.start();
 
         HttpHandler helloHandler = SaneHandler.around(new HelloHandler());
-        HttpHandler asNotFoundHandler = SaneHandler.around(new AsNotFoundHandler(m.getAs()));
+
+        HttpHandler asUserHandler = SaneHandler.around(new AsUserHandler(m.getAs()));
         HttpHandler asTxnHandler = SaneHandler.around(new AsTransactionHandler(m.getAs()));
+        HttpHandler asNotFoundHandler = SaneHandler.around(new AsNotFoundHandler(m.getAs()));
+
         HttpHandler storeInvHandler = SaneHandler.around(new StoreInviteHandler(m.getConfig().getServer(), m.getInvitationManager(), m.getKeyManager()));
         HttpHandler sessValidateHandler = SaneHandler.around(new SessionValidateHandler(m.getSession(), m.getConfig().getServer(), m.getConfig().getView()));
 
@@ -117,11 +121,12 @@ public class HttpMxisd {
                 .post(RoomInviteHandler.Path, SaneHandler.around(new RoomInviteHandler(m.getHttpClient(), m.getClientDns(), m.getInvitationManager())))
 
                 // Application Service endpoints
-                .get("/_matrix/app/v1/users/**", asNotFoundHandler)
-                .get("/users/**", asNotFoundHandler) // Legacy endpoint
+                .get(AsUserHandler.Path, asUserHandler)
                 .get("/_matrix/app/v1/rooms/**", asNotFoundHandler)
-                .get("/rooms/**", asNotFoundHandler) // Legacy endpoint
                 .put(AsTransactionHandler.Path, asTxnHandler)
+
+                .get("/users/{" + AsUserHandler.ID + "}", asUserHandler) // Legacy endpoint
+                .get("/rooms/**", asNotFoundHandler) // Legacy endpoint
                 .put("/transactions/{" + AsTransactionHandler.ID + "}", asTxnHandler) // Legacy endpoint
 
                 // Banned endpoints

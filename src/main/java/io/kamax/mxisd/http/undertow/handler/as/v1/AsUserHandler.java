@@ -18,31 +18,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.http.undertow.handler.status;
+package io.kamax.mxisd.http.undertow.handler.as.v1;
 
-import com.google.gson.JsonObject;
-import io.kamax.matrix.json.GsonUtil;
-import io.kamax.mxisd.Mxisd;
-import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
+import io.kamax.mxisd.as.AppSvcManager;
 import io.undertow.server.HttpServerExchange;
 
-public class VersionHandler extends BasicHttpHandler {
+import java.util.LinkedList;
 
-    public static final String Path = "/version";
+public class AsUserHandler extends ApplicationServiceHandler {
 
-    private final String body;
+    public static final String ID = "userId";
+    public static final String Path = "/_matrix/app/v1/users/{" + ID + "}";
 
-    public VersionHandler() {
-        JsonObject server = new JsonObject();
-        server.addProperty("name", Mxisd.Name);
-        server.addProperty("version", Mxisd.Version);
+    private final AppSvcManager app;
 
-        body = GsonUtil.getPrettyForLog(GsonUtil.makeObj("server", server));
+    public AsUserHandler(AppSvcManager app) {
+        this.app = app;
     }
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {
-        respondJson(exchange, body);
+        String userId = exchange.getQueryParameters().getOrDefault(ID, new LinkedList<>()).peekFirst();
+        app.withToken(getToken(exchange)).processUser(userId);
+        respondJson(exchange, "{}");
     }
 
 }

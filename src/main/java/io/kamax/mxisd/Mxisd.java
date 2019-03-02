@@ -59,7 +59,9 @@ import java.util.ServiceLoader;
 
 public class Mxisd {
 
+    public static final String Name = StringUtils.defaultIfBlank(Mxisd.class.getPackage().getImplementationTitle(), "mxisd");
     public static final String Version = StringUtils.defaultIfBlank(Mxisd.class.getPackage().getImplementationVersion(), "UNKNOWN");
+    public static final String Agent = Name + "/" + Version;
 
     private MxisdConfig cfg;
 
@@ -89,7 +91,7 @@ public class Mxisd {
 
     private void build() {
         httpClient = HttpClients.custom()
-                .setUserAgent("mxisd/" + Version)
+                .setUserAgent(Agent)
                 .setMaxConnPerRoute(Integer.MAX_VALUE)
                 .setMaxConnTotal(Integer.MAX_VALUE)
                 .build();

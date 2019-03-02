@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.as;
 
-import io.kamax.mxisd.config.ListenerConfig;
+import io.kamax.mxisd.config.AppServiceConfig;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,20 +29,28 @@ import java.util.Objects;
 
 public class SynapseRegistrationYaml {
 
-    public static SynapseRegistrationYaml parse(ListenerConfig cfg) {
+    public static SynapseRegistrationYaml parse(AppServiceConfig cfg, String domain) {
         SynapseRegistrationYaml yaml = new SynapseRegistrationYaml();
 
-        yaml.setId("appservice-mxisd");
-        yaml.setUrl(cfg.getUrl());
-        yaml.setAsToken(cfg.getToken().getAs());
-        yaml.setHsToken(cfg.getToken().getHs());
-        yaml.setSenderLocalpart(cfg.getLocalpart());
-        cfg.getUsers().forEach(template -> {
+        yaml.setId(cfg.getRegistration().getSynapse().getId());
+        yaml.setUrl(cfg.getEndpoint().getToAS().getUrl());
+        yaml.setAsToken(cfg.getEndpoint().getToHS().getToken());
+        yaml.setHsToken(cfg.getEndpoint().getToAS().getToken());
+        yaml.setSenderLocalpart(cfg.getUser().getMain());
+
+        if (cfg.getFeature().getCleanExpiredInvite()) {
             Namespace ns = new Namespace();
-            ns.setRegex(template.getTemplate());
             ns.setExclusive(true);
+            ns.setRegex("@" + cfg.getUser().getInviteExpired() + ":" + domain);
             yaml.getNamespaces().getUsers().add(ns);
-        });
+        }
+
+        if (cfg.getFeature().getInviteById()) {
+            Namespace ns = new Namespace();
+            ns.setExclusive(false);
+            ns.setRegex("@*:" + domain);
+            yaml.getNamespaces().getUsers().add(ns);
+        }
 
         return yaml;
     }
