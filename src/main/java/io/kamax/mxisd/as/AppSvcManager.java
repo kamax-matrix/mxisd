@@ -27,18 +27,16 @@ import io.kamax.matrix.client.MatrixClientContext;
 import io.kamax.matrix.client.as.MatrixApplicationServiceClient;
 import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.Mxisd;
 import io.kamax.mxisd.as.processor.event.EventTypeProcessor;
 import io.kamax.mxisd.as.processor.event.MembershipEventProcessor;
 import io.kamax.mxisd.as.processor.event.MessageEventProcessor;
 import io.kamax.mxisd.as.registration.SynapseRegistrationYaml;
-import io.kamax.mxisd.backend.sql.synapse.Synapse;
 import io.kamax.mxisd.config.AppServiceConfig;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.exception.HttpMatrixException;
 import io.kamax.mxisd.exception.NotAllowedException;
-import io.kamax.mxisd.notification.NotificationManager;
-import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.ormlite.dao.ASTransactionDao;
 import io.kamax.mxisd.util.GsonParser;
@@ -72,9 +70,9 @@ public class AppSvcManager {
     private Map<String, EventTypeProcessor> processors = new HashMap<>();
     private Map<String, CompletableFuture<String>> transactionsInProgress = new ConcurrentHashMap<>();
 
-    public AppSvcManager(MxisdConfig mxisdCfg, IStorage store, ProfileManager profiler, NotificationManager notif, Synapse synapse) {
-        this.cfg = mxisdCfg.getAppsvc();
-        this.store = store;
+    public AppSvcManager(Mxisd m) {
+        this.cfg = m.getConfig().getAppsvc();
+        this.store = m.getStore();
 
         /*
         We process the configuration to make sure all is fine and setting default values if needed
@@ -129,15 +127,15 @@ public class AppSvcManager {
         }
 
         MatrixClientContext mxContext = new MatrixClientContext();
-        mxContext.setDomain(mxisdCfg.getMatrix().getDomain());
+        mxContext.setDomain(m.getConfig().getMatrix().getDomain());
         mxContext.setToken(cfg.getEndpoint().getToHS().getToken());
         mxContext.setHsBaseUrl(cfg.getEndpoint().getToHS().getUrl());
         client = new MatrixApplicationServiceClient(mxContext);
 
-        processors.put("m.room.member", new MembershipEventProcessor(client, mxisdCfg, profiler, notif, synapse));
-        processors.put("m.room.message", new MessageEventProcessor(client));
+        processors.put("m.room.member", new MembershipEventProcessor(client, m));
+        processors.put("m.room.message", new MessageEventProcessor(m, client));
 
-        processSynapseConfig(mxisdCfg);
+        processSynapseConfig(m.getConfig());
     }
 
     private void processSynapseConfig(MxisdConfig cfg) {

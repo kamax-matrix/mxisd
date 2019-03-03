@@ -271,6 +271,19 @@ public class InvitationManager {
         return lookupMgr.find(medium, address, cfg.getResolution().isRecursive());
     }
 
+    public List<IThreePidInviteReply> listInvites() {
+        return new ArrayList<>(invitations.values());
+    }
+
+    public IThreePidInviteReply getInvite(String id) {
+        IThreePidInviteReply v = invitations.get(id);
+        if (Objects.isNull(v)) {
+            throw new ObjectNotFoundException("Invite", id);
+        }
+
+        return v;
+    }
+
     public boolean canInvite(_MatrixID sender, JsonObject request) {
         if (!request.has("medium")) {
             log.info("Not a 3PID invite, allowing");
@@ -415,6 +428,10 @@ public class InvitationManager {
         }
 
         log.debug("Invite expiration: finished");
+    }
+
+    public void expireInvite(String id) {
+        publishMapping(getInvite(id), cfg.getExpiration().getResolveTo());
     }
 
     public void lookupMappingsForInvites() {

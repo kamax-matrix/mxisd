@@ -85,6 +85,9 @@ public class Mxisd {
     private NotificationManager notifMgr;
     private RegistrationManager regMgr;
 
+    // HS-specific classes
+    private Synapse synapse;
+
     public Mxisd(MxisdConfig cfg) {
         this.cfg = cfg.build();
     }
@@ -104,7 +107,7 @@ public class Mxisd {
         signMgr = CryptoFactory.getSignatureManager(keyMgr);
         clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());
         FederationDnsOverwrite fedDns = new FederationDnsOverwrite(cfg.getDns().getOverwrite());
-        Synapse synapse = new Synapse(cfg.getSynapseSql());
+        synapse = new Synapse(cfg.getSynapseSql());
         BridgeFetcher bridgeFetcher = new BridgeFetcher(cfg.getLookup().getRecursive().getBridge(), srvFetcher);
 
         ServiceLoader.load(IdentityStoreSupplier.class).iterator().forEachRemaining(p -> p.accept(this));
@@ -118,7 +121,7 @@ public class Mxisd {
         authMgr = new AuthManager(cfg, AuthProviders.get(), idStrategy, invMgr, clientDns, httpClient);
         dirMgr = new DirectoryManager(cfg.getDirectory(), clientDns, httpClient, DirectoryProviders.get());
         regMgr = new RegistrationManager(cfg.getRegister(), httpClient, clientDns, invMgr);
-        asHander = new AppSvcManager(cfg, store, pMgr, notifMgr, synapse);
+        asHander = new AppSvcManager(this);
     }
 
     public MxisdConfig getConfig() {
@@ -141,7 +144,7 @@ public class Mxisd {
         return keyMgr;
     }
 
-    public InvitationManager getInvitationManager() {
+    public InvitationManager getInvite() {
         return invMgr;
     }
 
@@ -179,6 +182,14 @@ public class Mxisd {
 
     public NotificationManager getNotif() {
         return notifMgr;
+    }
+
+    public IStorage getStore() {
+        return store;
+    }
+
+    public Synapse getSynapse() {
+        return synapse;
     }
 
     public void start() {

@@ -23,31 +23,80 @@ package io.kamax.mxisd.as.processor.command;
 import io.kamax.matrix.client._MatrixClient;
 import io.kamax.matrix.hs._MatrixRoom;
 import io.kamax.mxisd.Mxisd;
+import io.kamax.mxisd.invitation.IThreePidInviteReply;
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrBuilder;
+
+import java.util.List;
 
 public class InviteCommandProcessor implements CommandProcessor {
 
     public static final String Command = "invite";
 
     @Override
-    public void process(Mxisd m, _MatrixClient client, _MatrixRoom room, String command, String[] arguments) {
-        if (arguments.length < 1) {
-            room.sendText(buildHelp());
-        }
-
-        String subcmd = arguments[0];
-        String response;
-        if (StringUtils.equals("list", subcmd)) {
-            response = buildError("This command is not supported yet", false);
-        } else if (StringUtils.endsWith("show", subcmd)) {
-            response = buildError("This command is not supported yet", false);
-        } else if (StringUtils.equals("revoke", subcmd)) {
-            response = buildError("This command is not supported yet", false);
+    public void process(Mxisd m, _MatrixClient client, _MatrixRoom room, CommandLine cmdLine) {
+        if (cmdLine.getArgs().length < 2) {
+            room.sendNotice(buildHelp());
         } else {
-            response = buildError("Unknown command: " + subcmd, true);
-        }
+            String arg = cmdLine.getArgList().get(1);
+            String response;
+            if (StringUtils.equals("list", arg)) {
 
-        room.sendText(response);
+                StrBuilder b = new StrBuilder();
+
+                List<IThreePidInviteReply> invites = m.getInvite().listInvites();
+                if (invites.isEmpty()) {
+                    b.appendln("No invites!");
+                    response = b.toString();
+                } else {
+                    b.appendln("Invites:");
+
+
+                    for (IThreePidInviteReply invite : invites) {
+                        b.appendNewLine().append("ID: ").append(invite.getId());
+                        b.appendNewLine().append("Room: ").append(invite.getInvite().getRoomId());
+                        b.appendNewLine().append("Medium: ").append(invite.getInvite().getMedium());
+                        b.appendNewLine().append("Address: ").append(invite.getInvite().getAddress());
+                        b.appendNewLine();
+                    }
+
+                    response = b.appendNewLine().append("Total: " + invites.size()).toString();
+                }
+            } else if (StringUtils.equals("show", arg)) {
+                if (cmdLine.getArgList().size() < 3) {
+                    response = buildHelp();
+                } else {
+                    String id = cmdLine.getArgList().get(2);
+                    IThreePidInviteReply invite = m.getInvite().getInvite(id);
+                    StrBuilder b = new StrBuilder();
+                    b.appendln("Details for Invitation #" + id);
+                    b.appendNewLine().append("Room: ").append(invite.getInvite().getRoomId());
+                    b.appendNewLine().append("Sender: ").append(invite.getInvite().getSender().toString());
+                    b.appendNewLine().append("Medium: ").append(invite.getInvite().getMedium());
+                    b.appendNewLine().append("Address: ").append(invite.getInvite().getAddress());
+                    b.appendNewLine().append("Display name: ").append(invite.getDisplayName());
+                    b.appendNewLine().appendNewLine().append("Properties:");
+                    invite.getInvite().getProperties().forEach((k, v) -> {
+                        b.appendNewLine().append("\t").append(k).append("=").append(v);
+                    });
+                    b.appendNewLine();
+
+                    response = b.toString();
+                }
+            } else if (StringUtils.equals("revoke", arg)) {
+                if (cmdLine.getArgList().size() < 3) {
+                    response = buildHelp();
+                } else {
+                    m.getInvite().expireInvite(cmdLine.getArgList().get(2));
+                    response = "OK";
+                }
+            } else {
+                response = buildError("Unknown invite action: " + arg, true);
+            }
+
+            room.sendNotice(response);
+        }
     }
 
     private String buildError(String message, boolean showHelp) {
@@ -61,8 +110,8 @@ public class InviteCommandProcessor implements CommandProcessor {
     private String buildHelp() {
         return "Available actions:\n\n" +
                 "list - List invites\n" +
-                "show - Show detailed info about a specific invite\n" +
-                "revoke - Revoke a pending invite by resolving it to the configured Expiration user\n";
+                "show ID - Show detailed info about a specific invite\n" +
+                "revoke ID - Revoke a pending invite by resolving it to the configured Expiration user\n";
     }
 
 }

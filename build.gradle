@@ -145,6 +145,9 @@ dependencies {
 
     // HTTP server
     compile 'io.undertow:undertow-core:2.0.16.Final'
+    
+    // Command parser for AS interface
+    implementation 'commons-cli:commons-cli:1.4'
 
     testCompile 'junit:junit:4.12'
     testCompile 'com.github.tomakehurst:wiremock:2.8.0'

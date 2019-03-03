@@ -72,7 +72,7 @@ public class HttpMxisd {
         HttpHandler asTxnHandler = SaneHandler.around(new AsTransactionHandler(m.getAs()));
         HttpHandler asNotFoundHandler = SaneHandler.around(new AsNotFoundHandler(m.getAs()));
 
-        HttpHandler storeInvHandler = SaneHandler.around(new StoreInviteHandler(m.getConfig().getServer(), m.getInvitationManager(), m.getKeyManager()));
+        HttpHandler storeInvHandler = SaneHandler.around(new StoreInviteHandler(m.getConfig().getServer(), m.getInvite(), m.getKeyManager()));
         HttpHandler sessValidateHandler = SaneHandler.around(new SessionValidateHandler(m.getSession(), m.getConfig().getServer(), m.getConfig().getView()));
 
         httpSrv = Undertow.builder().addHttpListener(m.getConfig().getServer().getPort(), "0.0.0.0").setHandler(Handlers.routing()
@@ -106,9 +106,9 @@ public class HttpMxisd {
                 .get(SessionValidateHandler.Path, sessValidateHandler)
                 .post(SessionValidateHandler.Path, sessValidateHandler)
                 .get(SessionTpidGetValidatedHandler.Path, SaneHandler.around(new SessionTpidGetValidatedHandler(m.getSession())))
-                .post(SessionTpidBindHandler.Path, SaneHandler.around(new SessionTpidBindHandler(m.getSession(), m.getInvitationManager())))
+                .post(SessionTpidBindHandler.Path, SaneHandler.around(new SessionTpidBindHandler(m.getSession(), m.getInvite())))
                 .post(SessionTpidUnbindHandler.Path, SaneHandler.around(new SessionTpidUnbindHandler(m.getSession())))
-                .post(SignEd25519Handler.Path, SaneHandler.around(new SignEd25519Handler(m.getConfig(), m.getInvitationManager(), m.getSign())))
+                .post(SignEd25519Handler.Path, SaneHandler.around(new SignEd25519Handler(m.getConfig(), m.getInvite(), m.getSign())))
 
                 // Profile endpoints
                 .get(ProfileHandler.Path, SaneHandler.around(new ProfileHandler(m.getProfile())))
@@ -118,7 +118,7 @@ public class HttpMxisd {
                 .post(Register3pidRequestTokenHandler.Path, SaneHandler.around(new Register3pidRequestTokenHandler(m.getReg(), m.getClientDns(), m.getHttpClient())))
 
                 // Invite endpoints
-                .post(RoomInviteHandler.Path, SaneHandler.around(new RoomInviteHandler(m.getHttpClient(), m.getClientDns(), m.getInvitationManager())))
+                .post(RoomInviteHandler.Path, SaneHandler.around(new RoomInviteHandler(m.getHttpClient(), m.getClientDns(), m.getInvite())))
 
                 // Application Service endpoints
                 .get(AsUserHandler.Path, asUserHandler)

@@ -23,14 +23,15 @@ package io.kamax.mxisd.as.processor.command;
 import io.kamax.matrix.client._MatrixClient;
 import io.kamax.matrix.hs._MatrixRoom;
 import io.kamax.mxisd.Mxisd;
+import org.apache.commons.cli.CommandLine;
 
 public class PingCommandProcessor implements CommandProcessor {
 
     public static final String Command = "ping";
 
     @Override
-    public void process(Mxisd m, _MatrixClient client, _MatrixRoom room, String command, String[] arguments) {
-        room.sendText("Pong!");
+    public void process(Mxisd m, _MatrixClient client, _MatrixRoom room, CommandLine cmdLine) {
+        room.sendNotice("Pong!");
     }
 
 }

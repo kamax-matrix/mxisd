@@ -28,6 +28,7 @@ import io.kamax.matrix._ThreePid;
 import io.kamax.matrix.client.as.MatrixApplicationServiceClient;
 import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.hs._MatrixRoom;
+import io.kamax.mxisd.Mxisd;
 import io.kamax.mxisd.backend.sql.synapse.Synapse;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.invitation.IMatrixIdInvite;
@@ -38,7 +39,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,16 +57,13 @@ public class MembershipEventProcessor implements EventTypeProcessor {
 
     public MembershipEventProcessor(
             MatrixApplicationServiceClient client,
-            MxisdConfig cfg,
-            ProfileManager profiler,
-            NotificationManager notif,
-            Synapse synapse
+            Mxisd m
     ) {
         this.client = client;
-        this.cfg = cfg;
-        this.profiler = profiler;
-        this.notif = notif;
-        this.synapse = synapse;
+        this.cfg = m.getConfig();
+        this.profiler = m.getProfile();
+        this.notif = m.getNotif();
+        this.synapse = m.getSynapse();
     }
 
     @Override
@@ -121,8 +118,8 @@ public class MembershipEventProcessor implements EventTypeProcessor {
     }
 
     private void processForMainUser(String roomId, _MatrixID sender) {
-        List<String> roles = profiler.getRoles(sender);
-        if (Collections.disjoint(roles, cfg.getAppsvc().getFeature().getAdmin().getAllowedRoles())) {
+        boolean isAllowed = profiler.hasAnyRole(sender, cfg.getAppsvc().getFeature().getAdmin().getAllowedRoles());
+        if (!isAllowed) {
             log.info("Sender does not have any of the required roles, denying");
             client.getRoom(roomId).tryLeave().ifPresent(err -> {
                 log.warn("Could not decline invite to room {}: {} - {}", roomId, err.getErrcode(), err.getError());
