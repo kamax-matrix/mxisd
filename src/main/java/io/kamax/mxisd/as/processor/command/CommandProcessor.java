@@ -18,13 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.as;
+package io.kamax.mxisd.as.processor.command;
 
-import com.google.gson.JsonObject;
-import io.kamax.matrix._MatrixID;
+import io.kamax.matrix.client._MatrixClient;
+import io.kamax.matrix.hs._MatrixRoom;
+import io.kamax.mxisd.Mxisd;
 
-public interface EventTypeProcessor {
+public interface CommandProcessor {
 
-    void process(JsonObject ev, _MatrixID sender, String roomId);
+    void process(Mxisd m, _MatrixClient client, _MatrixRoom room, String command, String[] arguments);
 
 }

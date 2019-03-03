@@ -26,12 +26,16 @@ import io.kamax.matrix._MatrixUserProfile;
 import io.kamax.matrix.client.as.MatrixApplicationServiceClient;
 import io.kamax.matrix.hs._MatrixRoom;
 import io.kamax.matrix.json.event.MatrixJsonRoomMessageEvent;
-import io.kamax.mxisd.as.EventTypeProcessor;
+import io.kamax.mxisd.as.processor.command.CommandProcessor;
+import io.kamax.mxisd.as.processor.command.InviteCommandProcessor;
+import io.kamax.mxisd.as.processor.command.PingCommandProcessor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MessageEventProcessor implements EventTypeProcessor {
@@ -39,9 +43,14 @@ public class MessageEventProcessor implements EventTypeProcessor {
     private static final Logger log = LoggerFactory.getLogger(MessageEventProcessor.class);
 
     private final MatrixApplicationServiceClient client;
+    private Map<String, CommandProcessor> processors;
 
     public MessageEventProcessor(MatrixApplicationServiceClient client) {
         this.client = client;
+
+        processors = new HashMap<>();
+        processors.put(PingCommandProcessor.Command, new PingCommandProcessor());
+        processors.put(InviteCommandProcessor.Command, new InviteCommandProcessor());
     }
 
     @Override

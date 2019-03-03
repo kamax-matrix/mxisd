@@ -27,6 +27,7 @@ import io.kamax.matrix.client.MatrixClientContext;
 import io.kamax.matrix.client.as.MatrixApplicationServiceClient;
 import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.as.processor.event.EventTypeProcessor;
 import io.kamax.mxisd.as.processor.event.MembershipEventProcessor;
 import io.kamax.mxisd.as.processor.event.MessageEventProcessor;
 import io.kamax.mxisd.as.registration.SynapseRegistrationYaml;

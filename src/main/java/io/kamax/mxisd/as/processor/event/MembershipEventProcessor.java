@@ -28,7 +28,6 @@ import io.kamax.matrix._ThreePid;
 import io.kamax.matrix.client.as.MatrixApplicationServiceClient;
 import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.hs._MatrixRoom;
-import io.kamax.mxisd.as.EventTypeProcessor;
 import io.kamax.mxisd.backend.sql.synapse.Synapse;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.invitation.IMatrixIdInvite;
