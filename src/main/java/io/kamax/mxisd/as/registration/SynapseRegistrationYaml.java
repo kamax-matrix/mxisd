@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.as;
+package io.kamax.mxisd.as.registration;
 
 import io.kamax.mxisd.config.AppServiceConfig;
 

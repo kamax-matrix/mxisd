@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.as.processor;
+package io.kamax.mxisd.as.processor.event;
 
 import com.google.gson.JsonObject;
 import io.kamax.matrix._MatrixID;

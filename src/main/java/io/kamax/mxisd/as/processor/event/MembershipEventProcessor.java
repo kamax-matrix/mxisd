@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.as.processor;
+package io.kamax.mxisd.as.processor.event;
 
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
@@ -29,10 +29,10 @@ import io.kamax.matrix.client.as.MatrixApplicationServiceClient;
 import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.hs._MatrixRoom;
 import io.kamax.mxisd.as.EventTypeProcessor;
-import io.kamax.mxisd.as.IMatrixIdInvite;
-import io.kamax.mxisd.as.MatrixIdInvite;
 import io.kamax.mxisd.backend.sql.synapse.Synapse;
 import io.kamax.mxisd.config.MxisdConfig;
+import io.kamax.mxisd.invitation.IMatrixIdInvite;
+import io.kamax.mxisd.invitation.MatrixIdInvite;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.profile.ProfileManager;
 import org.apache.commons.lang.StringUtils;
