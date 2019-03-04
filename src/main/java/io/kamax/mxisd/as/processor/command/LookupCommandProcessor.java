@@ -57,11 +57,16 @@ public class LookupCommandProcessor implements CommandProcessor {
 
         SingleLookupReply lookup = r.get();
         StrBuilder b = new StrBuilder();
-        b.append("Result for 3PID lookup on ").append(medium).append(" ").appendln(address).appendNewLine();
+        b.append("Result for 3PID lookup of ").append(medium).append(" ").appendln(address).appendNewLine();
         b.append("Matrix ID: ").appendln(lookup.getMxid().getId());
         b.appendln("Validity:")
-                .append("\tNot Before: ").appendln(lookup.getNotBefore())
-                .append("\tNot After: ").appendln(lookup.getNotAfter());
+                .append("  Not Before: ").appendln(lookup.getNotBefore())
+                .append("  Not After: ").appendln(lookup.getNotAfter());
+        b.appendln("Signatures:");
+        lookup.getSignatures().forEach((host, signs) -> {
+            b.append("  ").append(host).appendln(":");
+            signs.forEach((key, sign) -> b.append("    ").append(key).append(" -> ").appendln("OK"));
+        });
 
         room.sendNotice(b.toString());
     }

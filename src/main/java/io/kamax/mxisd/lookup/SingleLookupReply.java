@@ -27,6 +27,8 @@ import io.kamax.matrix._MatrixID;
 import io.kamax.mxisd.http.io.identity.SingeLookupReplyJson;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SingleLookupReply {
 
@@ -39,6 +41,7 @@ public class SingleLookupReply {
     private Instant notBefore;
     private Instant notAfter;
     private Instant timestamp;
+    private Map<String, Map<String, String>> signatures = new HashMap<>();
 
     public static SingleLookupReply fromRecursive(SingleLookupRequest request, String body) {
         SingleLookupReply reply = new SingleLookupReply();
@@ -52,6 +55,7 @@ public class SingleLookupReply {
             reply.notAfter = Instant.ofEpochMilli(json.getNot_after());
             reply.notBefore = Instant.ofEpochMilli(json.getNot_before());
             reply.timestamp = Instant.ofEpochMilli(json.getTs());
+            reply.signatures = new HashMap<>(json.getSignatures());
         } catch (JsonSyntaxException e) {
             // stub - we only want to try, nothing more
         }
@@ -105,6 +109,14 @@ public class SingleLookupReply {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    public Map<String, Map<String, String>> getSignatures() {
+        return signatures;
+    }
+
+    public Map<String, String> getSignature(String host) {
+        return signatures.computeIfAbsent(host, k -> new HashMap<>());
     }
 
 }
