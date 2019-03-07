@@ -20,7 +20,7 @@ threepid:
           session:
             validation: '/path/to/validate-template.eml'
             unbind:
-              frandulent: '/path/to/unbind-fraudulent-template.eml'
+              fraudulent: '/path/to/unbind-fraudulent-template.eml'
           generic:
             matrixId: '/path/to/mxid-invite-template.eml'
 ```
