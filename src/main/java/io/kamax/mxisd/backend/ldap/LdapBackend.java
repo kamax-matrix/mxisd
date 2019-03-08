@@ -72,7 +72,11 @@ public abstract class LdapBackend {
     }
 
     protected synchronized LdapConnection getConn() {
-        return new LdapNetworkConnection(cfg.getConnection().getHost(), cfg.getConnection().getPort(), cfg.getConnection().isTls());
+        return getConn(cfg.getConnection().getHost());
+    }
+
+    protected synchronized LdapConnection getConn(String host) {
+        return new LdapNetworkConnection(host, cfg.getConnection().getPort(), cfg.getConnection().isTls());
     }
 
     protected void bind(LdapConnection conn) throws LdapException {

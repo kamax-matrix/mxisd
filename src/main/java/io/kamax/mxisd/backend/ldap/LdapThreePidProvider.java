@@ -28,6 +28,7 @@ import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import io.kamax.mxisd.util.GsonUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.cursor.CursorLdapReferralException;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
@@ -37,8 +38,10 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xbill.DNS.*;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +94,10 @@ public class LdapThreePidProvider extends LdapBackend implements IThreePidProvid
                     return Optional.of(buildMatrixIdFromUid(data.get()));
                 }
             } catch (CursorLdapReferralException e) {
-                log.warn("3PID {} is only available via referral, skipping", value);
+                log.info("Got referral info: {}", e.getReferralInfo());
+
+                return followReferral(medium, value, e.getReferralInfo());
+                //log.warn("3PID {} is only available via referral, skipping", value);
             } catch (IOException | LdapException | CursorException e) {
                 throw new InternalServerError(e);
             }
@@ -104,12 +110,50 @@ public class LdapThreePidProvider extends LdapBackend implements IThreePidProvid
     public Optional<SingleLookupReply> find(SingleLookupRequest request) {
         log.info("Performing LDAP lookup {} of type {}", request.getThreePid(), request.getType());
 
-        try (LdapConnection conn = getConn()) {
-            bind(conn);
-            return lookup(conn, request.getType(), request.getThreePid()).map(id -> new SingleLookupReply(request, id));
-        } catch (LdapException | IOException e) {
-            throw new InternalServerError(e);
+        List<String> hosts = new ArrayList<>();
+
+        String domain = getCfg().getConnection().getDomain();
+        if (StringUtils.isNotBlank(domain)) {
+            try {
+                Record[] records = new Lookup("_ldap._tcp.DomainDnsZones." + domain, Type.SRV).run();
+                if (records == null || records.length == 0) {
+                    log.warn("No LDAP server found for domain {}", domain);
+                    return Optional.empty();
+                }
+
+                for (Record record : records) {
+                    if (record instanceof SRVRecord) {
+                        SRVRecord srvRec = (SRVRecord) record;
+                        hosts.add(srvRec.getTarget().toString(true));
+                    }
+                }
+
+                if (hosts.isEmpty()) {
+                    return Optional.empty();
+                }
+            } catch (TextParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            hosts.add(getCfg().getConnection().getHost());
         }
+
+        for (String host : hosts) {
+            log.info("Trying host {}", host);
+            try (LdapConnection conn = getConn(host)) {
+                bind(conn);
+                Optional<SingleLookupReply> reply = lookup(conn, request.getType(), request.getThreePid()).map(id -> new SingleLookupReply(request, id));
+                if (reply.isPresent()) return reply;
+            } catch (LdapException | IOException e) {
+                if (hosts.size() == 1) {
+                    throw new InternalServerError(e);
+                } else {
+                    log.warn("Unable to query {}: {}", host, e.getMessage());
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -135,6 +179,53 @@ public class LdapThreePidProvider extends LdapBackend implements IThreePidProvid
         }
 
         return mappingsFound;
+    }
+
+    private Optional<String> followReferral(String medium, String value, String ref) {
+        URI uri = URI.create(ref);
+
+        Optional<String> tPidQueryOpt = getCfg().getIdentity().getQuery(medium);
+        if (!tPidQueryOpt.isPresent()) {
+            log.warn("{} is not a configured 3PID type for LDAP lookup", medium);
+            return Optional.empty();
+        }
+
+        LdapConnection conn = getConn(uri.getHost());
+        try {
+            bind(conn);
+        } catch (LdapException e) {
+            throw new RuntimeException(e);
+        }
+
+        // we merge 3PID specific query with global/specific filter, if one exists.
+        String tPidQuery = tPidQueryOpt.get().replaceAll(getCfg().getIdentity().getToken(), value);
+        String searchQuery = buildWithFilter(tPidQuery, getCfg().getIdentity().getFilter());
+        log.debug("Query: {}", searchQuery);
+        log.debug("Attributes: {}", GsonUtil.build().toJson(getUidAtt()));
+
+        try (EntryCursor cursor = conn.search(uri.getPath().substring(1), searchQuery, SearchScope.SUBTREE, getUidAtt())) {
+            while (cursor.next()) {
+                Entry entry = cursor.get();
+                log.info("Found possible match, DN: {}", entry.getDn().getName());
+
+                Optional<String> data = getAttribute(entry, getUidAtt());
+                if (!data.isPresent()) {
+                    continue;
+                }
+
+                log.info("DN {} is a valid match", entry.getDn().getName());
+                return Optional.of(buildMatrixIdFromUid(data.get()));
+            }
+
+            return Optional.empty();
+        } catch (CursorLdapReferralException e) {
+            log.info("Got referral info: {}", e.getReferralInfo());
+
+            return followReferral(medium, value, e.getReferralInfo());
+            //log.warn("3PID {} is only available via referral, skipping", value);
+        } catch (IOException | LdapException | CursorException e) {
+            throw new InternalServerError(e);
+        }
     }
 
 }

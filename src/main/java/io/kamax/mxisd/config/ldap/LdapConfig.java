@@ -125,6 +125,7 @@ public abstract class LdapConfig {
 
         private boolean tls = false;
         private String host;
+        private String domain;
         private int port = 389;
         private String bindDn;
         private String bindPassword;
@@ -145,6 +146,14 @@ public abstract class LdapConfig {
 
         public void setHost(String host) {
             this.host = host;
+        }
+
+        public String getDomain() {
+            return domain;
+        }
+
+        public void setDomain(String domain) {
+            this.domain = domain;
         }
 
         public int getPort() {
