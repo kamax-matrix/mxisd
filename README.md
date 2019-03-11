@@ -80,8 +80,6 @@ A basic troubleshooting guide is available [here](docs/troubleshooting.md).
 ## Community
 Over Matrix: [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io) ([Preview](https://view.matrix.org/room/!NPRUEisLjcaMtHIzDr:kamax.io/))
 
-For more high-level discussion about the Identity Server architecture/API, go to  [#matrix-identity:kamax.io](https://matrix.to/#/#matrix-identity:kamax.io)
-
 ## Commercial
 If you would prefer professional support/custom development for mxisd and/or for Matrix in general, including other open
 source technologies/products:
