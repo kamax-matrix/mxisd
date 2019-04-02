@@ -34,7 +34,7 @@ public class InvitationConfig {
     public static class Expiration {
 
         private Boolean enabled;
-        private long after;
+        private long after = 60 * 24 * 7; // One calendar week (60min/1h * 24 = 1d * 7 = 1w)
         private String resolveTo;
 
         public Boolean isEnabled() {

@@ -172,12 +172,6 @@ public class InvitationManager {
 
             // Enabled by default
             cfg.getInvite().getExpiration().setEnabled(true);
-
-            // We'll resolve to our computed User ID
-            cfg.getInvite().getExpiration().setResolveTo(mxId);
-
-            // One calendar week (60min/1h * 24 = 1d * 7 = 1w)
-            cfg.getInvite().getExpiration().setAfter(60 * 24 * 7);
         }
 
         if (cfg.getInvite().getExpiration().isEnabled()) {
