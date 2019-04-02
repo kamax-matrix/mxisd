@@ -31,7 +31,7 @@ users. 3PIDs can be anything that uniquely and globally identify a user, like:
 - Twitter handle
 - Facebook ID
 
-If you are unfamiliar with the Identity vocabulary and concepts in Matrix, **please read this [introduction](docs/concepts.md)**.
+If you are unfamiliar with the Identity vocabulary and concepts in Matrix, **please read this [introduction](docs/concepts.md)**.  
 
 # Features
 [Identity](docs/features/identity.md): As a [regular Matrix Identity service](https://matrix.org/docs/spec/identity_service/r0.1.0.html#general-principles):
@@ -53,6 +53,7 @@ As an enhanced Identity service:
   - Central Matrix Identity servers
 - [Session Control](docs/threepids/session/session.md): Extensive control of where 3PIDs are transmitted so they are not
   leaked publicly by users
+- [Registration control](docs/features/registration.md): Control and restrict user registration based on 3PID patterns or criterias, like a pending invite
 - [Authentication](docs/features/authentication.md): Use your Identity stores to perform authentication in [synapse](https://github.com/matrix-org/synapse)
   via the [REST password provider](https://github.com/kamax-io/matrix-synapse-rest-auth)
 - [Directory search](docs/features/directory.md) which allows you to search for users within your organisation,
