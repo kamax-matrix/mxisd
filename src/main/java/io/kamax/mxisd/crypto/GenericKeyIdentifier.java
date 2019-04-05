@@ -36,7 +36,7 @@ public class GenericKeyIdentifier implements KeyIdentifier {
 
     public GenericKeyIdentifier(KeyType type, String algo, String serial) {
         if (StringUtils.isAnyBlank(algo, serial)) {
-            throw new IllegalArgumentException("Aglorith and/or Serial cannot be blank");
+            throw new IllegalArgumentException("Algorithm and/or Serial cannot be blank");
         }
 
         this.type = Objects.requireNonNull(type);
