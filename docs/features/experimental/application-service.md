@@ -2,7 +2,7 @@
 **WARNING:** These features are currently highly experimental. They can be removed or modified without notice.  
 All the features requires a Homeserver capable of connecting [Application Services](https://matrix.org/docs/spec/application_service/r0.1.0.html).
 
-The following capabilities are provided in this features:
+The following capabilities are provided in this feature:
 - [Admin commands](#admin-commands)
 - [Email Notification about room invites by Matrix IDs](#email-notification-about-room-invites-by-matrix-ids)
 - [Auto-reject of expired 3PID invites](#auto-reject-of-expired-3pid-invites)
@@ -26,7 +26,7 @@ Under the `appsvc` namespace:
 | `endpoint.toHS.url`   | string  | Yes      | *None*  | Base URL to the Homeserver                                     |
 | `endpoint.toHS.token` | string  | Yes      | *None*  | Token to use when sending requests to the Homeserver           |
 | `endpoint.toAS.url`   | string  | Yes      | *None*  | Base URL to mxisd from the Homeserver                          |
-| `endpoint.toHS.token` | string  | Yes      | *None*  | Token for the Homeserver to use when sending requests to mxisd |
+| `endpoint.toAS.token` | string  | Yes      | *None*  | Token for the Homeserver to use when sending requests to mxisd |
 
 #### Example
 ```yaml
@@ -88,7 +88,7 @@ The following steps assume:
 - `appsvc.user.main` set to `mxisd` or not set
 
 1. Invite `@mxisd:example.org` to a new direct chat
-2. Type `!help`
+2. Type `!help` to get all available commands
 
 ### Email Notification about room invites by Matrix IDs
 This feature allows for users found in Identity stores to be instantly notified about Room Invites, regardless if their

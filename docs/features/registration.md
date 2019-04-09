@@ -6,6 +6,9 @@
     - [Apache](#apache)
   - [Homeserver](#homeserver)
     - [synapse](#synapse)
+- [Configuration](#configuration)
+  - [Example](#example)
+- [Usage](#usage)
 
 ## Overview
 **NOTE**: This feature is beta: it is considered stable enough for production but is incomplete and may contain bugs.
@@ -22,7 +25,7 @@ can register on a given server in a implementation-agnostic manner.
 the registration process.  
 As such, it relies on the homeserver to require 3PIDs with the registration flows.
 
-This feature is not part of the Matrix spec.
+This feature is not part of the Matrix Identity Server spec.
 
 ## Integration
 mxisd needs to be integrated at several levels for this feature to work:
@@ -87,7 +90,7 @@ The following table illustrates pattern and maching status against example value
 | `.example.org` | No                    | Yes                       |
 | `example.org`  | Yes                   | No                        |
 
-### Full example
+### Example
 For the following example configuration:
 ```yaml
 register:

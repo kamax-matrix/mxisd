@@ -29,7 +29,7 @@ To provide this functionality, mxisd uses a workaround: resolve the invite to a 
 controlled by mxisd or a bot/service that will then reject the invite.
 
 If this dedicated User ID is to be controlled by mxisd, the [Application Service](experimental/application-service.md)
-feature must be configured and integrated with your Homeserver.
+feature must be configured and integrated with your Homeserver, as well as the *Auto-reject 3PID invite capability*.
 
 #### Configuration
 ```yaml
@@ -52,9 +52,23 @@ invite:
 - Default: Computed from `appsvc.user.inviteExpired` and `matrix.domain`
 
 ### Policies
+3PID invite policies are the companion feature of [Registration](registration.md). While the Registration feature acts on
+requirements for the invitee/register, this feature acts on requirement for the one(s) performing 3PID invites, ensuring
+a coherent system.
+
+It relies on only allowing people with specific [Roles](profile.md) to perform 3PID invites. This would typically allow
+a tight-control on a server setup with is "invite-only" or semi-open (relying on trusted people to invite new members).
+
+It's a middle ground between a closed server, where every user must be created or already exists in an Identity store,
+and an open server, where anyone can register.
+ 
 #### Integration
+Because Identity Servers do not control 3PID invites as per Matrix spec, mxisd needs to intercept a set of Homeserver
+endpoints to apply the policies.
+
 ##### Reverse Proxy
 ###### nginx
+**IMPORTANT**: Must be placed before your global `/_matrix` entry:
 ```nginx
 location ~* ^/_matrix/client/r0/rooms/([^/]+)/invite$ {
     proxy_pass		    http://127.0.0.1:8090;
@@ -63,7 +77,9 @@ location ~* ^/_matrix/client/r0/rooms/([^/]+)/invite$ {
 }
 ```
 
-##### Configuration
+#### Configuration
+The only policy currently available is to restrict 3PID invite to users having a specific (set of) role(s), like so:
+
 ```yaml
 invite:
   policy:
