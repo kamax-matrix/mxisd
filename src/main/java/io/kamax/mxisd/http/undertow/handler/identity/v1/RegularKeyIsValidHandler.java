@@ -20,10 +20,10 @@
 
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
-import io.kamax.matrix.crypto.KeyManager;
+import io.kamax.mxisd.crypto.KeyManager;
+import io.kamax.mxisd.crypto.KeyType;
 import io.kamax.mxisd.http.IsAPIv1;
 import io.undertow.server.HttpServerExchange;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +41,11 @@ public class RegularKeyIsValidHandler extends KeyIsValidHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {
-        String pubKey = getQueryParameter(exchange, "public_key");
+        // FIXME process + correctly in query parameter handling
+        String pubKey = getQueryParameter(exchange, "public_key").replace(" ", "+");
         log.info("Validating public key {}", pubKey);
 
-        // TODO do in manager
-        boolean valid = StringUtils.equals(pubKey, mgr.getPublicKeyBase64(mgr.getCurrentIndex()));
-        respondJson(exchange, valid ? validKey : invalidKey);
+        respondJson(exchange, mgr.isValid(KeyType.Regular, pubKey) ? validKey : invalidKey);
     }
 
 }

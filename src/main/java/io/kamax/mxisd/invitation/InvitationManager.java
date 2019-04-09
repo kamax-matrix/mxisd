@@ -23,21 +23,29 @@ package io.kamax.mxisd.invitation;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.MatrixID;
-import io.kamax.matrix.crypto.SignatureManager;
+import io.kamax.matrix.ThreePid;
+import io.kamax.matrix._MatrixID;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.InvitationConfig;
+import io.kamax.mxisd.config.MxisdConfig;
+import io.kamax.mxisd.config.ServerConfig;
+import io.kamax.mxisd.crypto.*;
 import io.kamax.mxisd.dns.FederationDnsOverwrite;
 import io.kamax.mxisd.exception.BadRequestException;
+import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
+import io.kamax.mxisd.exception.ObjectNotFoundException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.notification.NotificationManager;
+import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -57,6 +65,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
@@ -64,14 +74,20 @@ import java.util.concurrent.TimeUnit;
 
 public class InvitationManager {
 
-    private transient final Logger log = LoggerFactory.getLogger(InvitationManager.class);
+    private static final Logger log = LoggerFactory.getLogger(InvitationManager.class);
+    private static final String CreatedAtPropertyKey = "created_at";
+
+    private final String defaultCreateTs = Long.toString(Instant.now().toEpochMilli());
 
     private InvitationConfig cfg;
+    private ServerConfig srvCfg;
     private IStorage storage;
     private LookupStrategy lookupMgr;
+    private KeyManager keyMgr;
     private SignatureManager signMgr;
     private FederationDnsOverwrite dns;
     private NotificationManager notifMgr;
+    private ProfileManager profileMgr;
 
     private CloseableHttpClient client;
     private Timer refreshTimer;
@@ -79,23 +95,29 @@ public class InvitationManager {
     private Map<String, IThreePidInviteReply> invitations = new ConcurrentHashMap<>();
 
     public InvitationManager(
-            InvitationConfig cfg,
+            MxisdConfig mxisdCfg,
             IStorage storage,
             LookupStrategy lookupMgr,
+            KeyManager keyMgr,
             SignatureManager signMgr,
             FederationDnsOverwrite dns,
-            NotificationManager notifMgr
+            NotificationManager notifMgr,
+            ProfileManager profileMgr
     ) {
-        this.cfg = cfg;
+        this.cfg = requireValid(mxisdCfg);
+        this.srvCfg = mxisdCfg.getServer();
         this.storage = storage;
         this.lookupMgr = lookupMgr;
+        this.keyMgr = keyMgr;
         this.signMgr = signMgr;
         this.dns = dns;
         this.notifMgr = notifMgr;
+        this.profileMgr = profileMgr;
 
         log.info("Loading saved invites");
         Collection<ThreePidInviteIO> ioList = storage.getInvites();
         ioList.forEach(io -> {
+            io.getProperties().putIfAbsent(CreatedAtPropertyKey, defaultCreateTs);
             log.info("Processing invite {}", GsonUtil.get().toJson(io));
             ThreePidInvite invite = new ThreePidInvite(
                     MatrixID.asAcceptable(io.getSender()),
@@ -105,7 +127,7 @@ public class InvitationManager {
                     io.getProperties()
             );
 
-            ThreePidInviteReply reply = new ThreePidInviteReply(getId(invite), invite, io.getToken(), "");
+            ThreePidInviteReply reply = new ThreePidInviteReply(io.getId(), invite, io.getToken(), "", Collections.emptyList());
             invitations.put(reply.getId(), reply);
         });
 
@@ -122,25 +144,63 @@ public class InvitationManager {
 
         log.info("Setting up invitation mapping refresh timer");
         refreshTimer = new Timer();
-        refreshTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    lookupMappingsForInvites();
-                } catch (Throwable t) {
-                    log.error("Error when running background mapping refresh", t);
-                }
-            }
-        }, 5000L, TimeUnit.MILLISECONDS.convert(cfg.getResolution().getTimer(), TimeUnit.MINUTES));
 
+        // We add a shutdown hook to cancel the hook and wait for pending resolutions
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             refreshTimer.cancel();
             ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.MINUTES);
         }));
+
+        // We set the refresh timer for background tasks
+        refreshTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    doMaintenance();
+                } catch (Throwable t) {
+                    log.error("Error when running background maintenance", t);
+                }
+            }
+        }, 5000L, TimeUnit.MILLISECONDS.convert(cfg.getResolution().getTimer(), TimeUnit.MINUTES));
     }
 
-    private String getId(IThreePidInvite invite) {
-        return invite.getSender().getDomain().toLowerCase() + invite.getMedium().toLowerCase() + invite.getAddress().toLowerCase();
+    private InvitationConfig requireValid(MxisdConfig cfg) {
+        // This is not configured, we'll apply a default configuration
+        if (Objects.isNull(cfg.getInvite().getExpiration().isEnabled())) {
+            // We compute our own user, so it can be used if we bridge as well
+            String mxId = MatrixID.asAcceptable("_mxisd-expired_invite", cfg.getMatrix().getDomain()).getId();
+
+            // Enabled by default
+            cfg.getInvite().getExpiration().setEnabled(true);
+        }
+
+        if (cfg.getInvite().getExpiration().isEnabled()) {
+            if (cfg.getInvite().getExpiration().getAfter() < 1) {
+                throw new ConfigurationException("Invitation expiration delay must be greater or equal to 1");
+            }
+
+            if (StringUtils.isBlank(cfg.getInvite().getExpiration().getResolveTo())) {
+                String localpart = cfg.getAppsvc().getUser().getInviteExpired();
+                if (StringUtils.isBlank(localpart)) {
+                    throw new ConfigurationException("Could not compute the Invitation expiration resolution target from App service user: not set");
+                }
+
+                cfg.getInvite().getExpiration().setResolveTo(MatrixID.asAcceptable(localpart, cfg.getMatrix().getDomain()).getId());
+            }
+
+            try {
+                MatrixID.asAcceptable(cfg.getInvite().getExpiration().getResolveTo());
+            } catch (IllegalArgumentException e) {
+                throw new ConfigurationException("Invitation expiration resolution target is not a valid Matrix ID: " + e.getMessage());
+            }
+        }
+
+        return cfg.getInvite();
+    }
+
+    private String computeId(IThreePidInvite invite) {
+        String rawId = invite.getSender().getDomain().toLowerCase() + invite.getMedium().toLowerCase() + invite.getAddress().toLowerCase();
+        return Base64.encodeBase64URLSafeString(rawId.getBytes(StandardCharsets.UTF_8));
     }
 
     private String getIdForLog(IThreePidInviteReply reply) {
@@ -205,19 +265,56 @@ public class InvitationManager {
         return lookupMgr.find(medium, address, cfg.getResolution().isRecursive());
     }
 
+    public List<IThreePidInviteReply> listInvites() {
+        return new ArrayList<>(invitations.values());
+    }
+
+    public IThreePidInviteReply getInvite(String id) {
+        IThreePidInviteReply v = invitations.get(id);
+        if (Objects.isNull(v)) {
+            throw new ObjectNotFoundException("Invite", id);
+        }
+
+        return v;
+    }
+
+    public boolean canInvite(_MatrixID sender, JsonObject request) {
+        if (!request.has("medium")) {
+            log.info("Not a 3PID invite, allowing");
+            return true;
+        }
+        log.info("3PID invite detected, checking policies...");
+
+        List<String> allowedRoles = cfg.getPolicy().getIfSender().getHasRole();
+        if (Objects.isNull(allowedRoles)) {
+            log.info("No allowed role configured for sender, allowing");
+            return true;
+        }
+
+        List<String> userRoles = profileMgr.getRoles(sender);
+        if (Collections.disjoint(userRoles, allowedRoles)) {
+            log.info("Sender does not have any of the required roles, denying");
+            return false;
+        }
+        log.info("Sender has at least one of the required roles");
+
+        log.info("Sender pass all policies to invite, allowing");
+        return true;
+    }
+
     public synchronized IThreePidInviteReply storeInvite(IThreePidInvite invitation) { // TODO better sync
         if (!notifMgr.isMediumSupported(invitation.getMedium())) {
             throw new BadRequestException("Medium type " + invitation.getMedium() + " is not supported");
         }
 
-        String invId = getId(invitation);
+        String invId = computeId(invitation);
         log.info("Handling invite for {}:{} from {} in room {}", invitation.getMedium(), invitation.getAddress(), invitation.getSender(), invitation.getRoomId());
         IThreePidInviteReply reply = invitations.get(invId);
         if (reply != null) {
             log.info("Invite is already pending for {}:{}, returning data", invitation.getMedium(), invitation.getAddress());
             if (!StringUtils.equals(invitation.getRoomId(), reply.getInvite().getRoomId())) {
                 log.info("Sending new notification as new invite room {} is different from the original {}", invitation.getRoomId(), reply.getInvite().getRoomId());
-                notifMgr.sendForReply(new ThreePidInviteReply(reply.getId(), invitation, reply.getToken(), reply.getDisplayName()));
+                notifMgr.sendForReply(new ThreePidInviteReply(reply.getId(), invitation, reply.getToken(), reply.getDisplayName(), reply.getPublicKeys()));
             } else {
                 // FIXME we should check attempt and send if bigger
             }
@@ -232,8 +329,21 @@ public class InvitationManager {
 
         String token = RandomStringUtils.randomAlphanumeric(64);
         String displayName = invitation.getAddress().substring(0, 3) + "...";
+        KeyIdentifier pKeyId = keyMgr.getServerSigningKey().getId();
+        KeyIdentifier eKeyId = keyMgr.generateKey(KeyType.Ephemeral);
 
-        reply = new ThreePidInviteReply(invId, invitation, token, displayName);
+        String pPubKey = keyMgr.getPublicKeyBase64(pKeyId);
+        String ePubKey = keyMgr.getPublicKeyBase64(eKeyId);
+
+        invitation.getProperties().put(CreatedAtPropertyKey, Long.toString(Instant.now().toEpochMilli()));
+        invitation.getProperties().put("p_key_algo", pKeyId.getAlgorithm());
+        invitation.getProperties().put("p_key_serial", pKeyId.getSerial());
+        invitation.getProperties().put("p_key_public", pPubKey);
+        invitation.getProperties().put("e_key_algo", eKeyId.getAlgorithm());
+        invitation.getProperties().put("e_key_serial", eKeyId.getSerial());
+        invitation.getProperties().put("e_key_public", ePubKey);
+
+        reply = new ThreePidInviteReply(invId, invitation, token, displayName, Arrays.asList(pPubKey, ePubKey));
 
         log.info("Performing invite to {}:{}", invitation.getMedium(), invitation.getAddress());
         notifMgr.sendForReply(reply);
@@ -244,6 +354,78 @@ public class InvitationManager {
         log.info("A new invite has been created for {}:{} on HS {}", invitation.getMedium(), invitation.getAddress(), invitation.getSender().getDomain());
 
         return reply;
+    }
+
+    public boolean hasInvite(ThreePid tpid) {
+        for (IThreePidInviteReply reply : invitations.values()) {
+            if (!StringUtils.equals(tpid.getMedium(), reply.getInvite().getMedium())) {
+                continue;
+            }
+
+            if (!StringUtils.equals(tpid.getAddress(), reply.getInvite().getAddress())) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void removeInvite(IThreePidInviteReply reply) {
+        invitations.remove(reply.getId());
+        storage.deleteInvite(reply.getId());
+    }
+
+    /**
+     * Trigger the periodic maintenance tasks
+     */
+    public void doMaintenance() {
+        lookupMappingsForInvites();
+        expireInvites();
+    }
+
+    public void expireInvites() {
+        log.debug("Invite expiration: started");
+
+        if (!cfg.getExpiration().isEnabled()) {
+            log.debug("Invite expiration is disabled, skipping");
+            return;
+        }
+
+        if (invitations.isEmpty()) {
+            log.debug("No invite to expired, skipping");
+            return;
+        }
+
+        String targetMxid = cfg.getExpiration().getResolveTo();
+        for (IThreePidInviteReply reply : invitations.values()) {
+            log.debug("Processing invite {}", reply.getId());
+
+            String tsRaw = reply.getInvite().getProperties().computeIfAbsent(CreatedAtPropertyKey, k -> defaultCreateTs);
+            try {
+                Instant ts = Instant.ofEpochMilli(Long.parseLong(tsRaw));
+                Instant targetTs = ts.plusSeconds(cfg.getExpiration().getAfter() * 60);
+                Instant now = Instant.now();
+                log.debug("Invite {} - Created at {} - Expires at {} - Current time is {}", reply.getId(), ts, targetTs, now);
+                if (targetTs.isAfter(now)) {
+                    log.debug("Invite {} has not expired yet, skipping", reply.getId());
+                    continue;
+                }
+
+                log.info("Invite {} has expired at TS {} - Expiring and resolving to {}", targetTs, targetMxid);
+                publishMapping(reply, targetMxid);
+            } catch (NumberFormatException | DateTimeException e) {
+                log.warn("Invite {} has an invalid creation TS, setting to default value of {}", reply.getId(), defaultCreateTs);
+                reply.getInvite().getProperties().put(CreatedAtPropertyKey, defaultCreateTs);
+            }
+        }
+
+        log.debug("Invite expiration: finished");
+    }
+
+    public void expireInvite(String id) {
+        publishMapping(getInvite(id), cfg.getExpiration().getResolveTo());
     }
 
     public void lookupMappingsForInvites() {
@@ -266,6 +448,28 @@ public class InvitationManager {
         }
     }
 
+    public IThreePidInviteReply getInvite(String token, String privKey) {
+        for (IThreePidInviteReply reply : invitations.values()) {
+            if (StringUtils.equals(reply.getToken(), token)) {
+                String algo = reply.getInvite().getProperties().get("e_key_algo");
+                String serial = reply.getInvite().getProperties().get("e_key_serial");
+
+                if (StringUtils.isAnyBlank(algo, serial)) {
+                    continue;
+                }
+
+                String storedPrivKey = keyMgr.getKey(new GenericKeyIdentifier(KeyType.Ephemeral, algo, serial)).getPrivateKeyBase64();
+                if (!StringUtils.equals(storedPrivKey, privKey)) {
+                    continue;
+                }
+
+                return reply;
+            }
+        }
+
+        throw new ObjectNotFoundException("No invite with such token and/or private key");
+    }
+
     private void publishMapping(IThreePidInviteReply reply, String mxid) {
         String medium = reply.getInvite().getMedium();
         String address = reply.getInvite().getAddress();
@@ -280,7 +484,7 @@ public class InvitationManager {
             JsonObject obj = new JsonObject();
             obj.addProperty("mxid", mxid);
             obj.addProperty("token", reply.getToken());
-            obj.add("signatures", signMgr.signMessageGson(obj.toString()));
+            obj.add("signatures", signMgr.signMessageGson(srvCfg.getName(), obj.toString()));
 
             JsonObject objUp = new JsonObject();
             objUp.addProperty("mxid", mxid);
@@ -298,30 +502,45 @@ public class InvitationManager {
             content.addProperty("address", address);
             content.addProperty("mxid", mxid);
 
-            content.add("signatures", signMgr.signMessageGson(content.toString()));
+            content.add("signatures", signMgr.signMessageGson(srvCfg.getName(), content.toString()));
 
             StringEntity entity = new StringEntity(content.toString(), StandardCharsets.UTF_8);
             entity.setContentType("application/json");
             req.setEntity(entity);
+
+            Instant resolvedAt = Instant.now();
+            boolean couldPublish = false;
+            boolean shouldArchive = true;
             try {
                 log.info("Posting onBind event to {}", req.getURI());
                 CloseableHttpResponse response = client.execute(req);
                 int statusCode = response.getStatusLine().getStatusCode();
                 log.info("Answer code: {}", statusCode);
                 if (statusCode >= 300 && statusCode != 403) {
-                    log.warn("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
-                } else {
-                    if (statusCode == 403) {
-                        log.info("Invite was obsolete");
-                    }
+                    log.info("Answer body: {}", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
+                    log.warn("HS returned an error.");
 
-                    invitations.remove(getId(reply.getInvite()));
-                    storage.deleteInvite(reply.getId());
-                    log.info("Removed invite from internal store");
+                    shouldArchive = statusCode != 502;
+                    if (shouldArchive) {
+                        log.info("Invite can be found in historical storage for manual re-processing");
+                    }
+                } else {
+                    couldPublish = true;
+                    if (statusCode == 403) {
+                        log.info("Invite is obsolete or no longer under our control");
+                    }
                 }
                 response.close();
             } catch (IOException e) {
                 log.warn("Unable to tell HS {} about invite being mapped", domain, e);
+            } finally {
+                if (shouldArchive) {
+                    synchronized (this) {
+                        storage.insertHistoricalInvite(reply, mxid, resolvedAt, couldPublish);
+                        removeInvite(reply);
+                        log.info("Moved invite {} to historical table", reply.getId());
+                    }
+                }
             }
         }).start();
     }
@@ -337,7 +556,7 @@ public class InvitationManager {
         @Override
         public void run() {
             try {
-                log.info("Searching for mapping created since invite {} was created", getIdForLog(reply));
+                log.info("Searching for mapping created after invite {} was created", getIdForLog(reply));
                 Optional<SingleLookupReply> result = lookup3pid(reply.getInvite().getMedium(), reply.getInvite().getAddress());
                 if (result.isPresent()) {
                     SingleLookupReply lookup = result.get();

@@ -23,20 +23,29 @@ package io.kamax.mxisd.http.undertow.handler;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.dns.ClientDnsOverwrite;
+import io.kamax.mxisd.exception.AccessTokenNotFoundException;
 import io.kamax.mxisd.exception.HttpMatrixException;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.proxy.Response;
+import io.kamax.mxisd.util.RestClientUtils;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Deque;
@@ -46,7 +55,19 @@ import java.util.Optional;
 
 public abstract class BasicHttpHandler implements HttpHandler {
 
-    private transient final Logger log = LoggerFactory.getLogger(BasicHttpHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(BasicHttpHandler.class);
+
+    protected String getAccessToken(HttpServerExchange exchange) {
+        return Optional.ofNullable(exchange.getRequestHeaders().getFirst("Authorization"))
+                .flatMap(v -> {
+                    if (!v.startsWith("Bearer ")) {
+                        return Optional.empty();
+                    }
+
+                    return Optional.of(v.substring("Bearer ".length()));
+                }).filter(StringUtils::isNotEmpty)
+                .orElseThrow(AccessTokenNotFoundException::new);
+    }
 
     protected String getRemoteHostAddress(HttpServerExchange exchange) {
         return ((InetSocketAddress) exchange.getConnection().getPeerAddress()).getAddress().getHostAddress();
@@ -149,4 +170,34 @@ public abstract class BasicHttpHandler implements HttpHandler {
         upstream.getHeaders().forEach((key, value) -> exchange.getResponseHeaders().addAll(HttpString.tryFromString(key), value));
         writeBodyAsUtf8(exchange, upstream.getBody());
     }
+
+    protected void proxyPost(HttpServerExchange exchange, JsonObject body, CloseableHttpClient client, ClientDnsOverwrite dns) {
+        String target = dns.transform(URI.create(exchange.getRequestURL())).toString();
+        log.info("Requesting remote: {}", target);
+        HttpPost req = RestClientUtils.post(target, GsonUtil.get(), body);
+
+        exchange.getRequestHeaders().forEach(header -> {
+            header.forEach(v -> {
+                String name = header.getHeaderName().toString();
+                if (!StringUtils.startsWithIgnoreCase(name, "content-")) {
+                    req.addHeader(name, v);
+                }
+            });
+        });
+
+        try (CloseableHttpResponse res = client.execute(req)) {
+            exchange.setStatusCode(res.getStatusLine().getStatusCode());
+            for (Header h : res.getAllHeaders()) {
+                for (HeaderElement el : h.getElements()) {
+                    exchange.getResponseHeaders().add(HttpString.tryFromString(h.getName()), el.getValue());
+                }
+            }
+            res.getEntity().writeTo(exchange.getOutputStream());
+            exchange.endExchange();
+        } catch (IOException e) {
+            log.warn("Unable to make proxy call: {}", e.getMessage(), e);
+            throw new InternalServerError(e);
+        }
+    }
+
 }

@@ -26,7 +26,7 @@ import io.undertow.server.HttpServerExchange;
 
 public class StatusHandler extends BasicHttpHandler {
 
-    public static final String Path = "/_matrix/identity/status";
+    public static final String Path = "/status";
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {

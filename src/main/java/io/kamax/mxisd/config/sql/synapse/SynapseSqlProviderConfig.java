@@ -20,6 +20,7 @@
 
 package io.kamax.mxisd.config.sql.synapse;
 
+import io.kamax.mxisd.UserIdType;
 import io.kamax.mxisd.backend.sql.synapse.SynapseQueries;
 import io.kamax.mxisd.config.sql.SqlConfig;
 import org.apache.commons.lang.StringUtils;
@@ -48,8 +49,16 @@ public class SynapseSqlProviderConfig extends SqlConfig {
             if (StringUtils.isBlank(getProfile().getDisplayName().getQuery())) {
                 getProfile().getDisplayName().setQuery(SynapseQueries.getDisplayName());
             }
+
             if (StringUtils.isBlank(getProfile().getThreepid().getQuery())) {
                 getProfile().getThreepid().setQuery(SynapseQueries.getThreepids());
+            }
+
+            if (StringUtils.isBlank(getProfile().getRole().getType())) {
+                getProfile().getRole().setType(UserIdType.MatrixID.getId());
+            }
+            if (StringUtils.isBlank(getProfile().getRole().getQuery())) {
+                getProfile().getRole().setQuery(SynapseQueries.getRoles());
             }
         }
 

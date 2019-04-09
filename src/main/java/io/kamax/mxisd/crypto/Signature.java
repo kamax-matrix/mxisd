@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2018 Kamax Sarl
+ * Copyright (C) 2019 Kamax Sàrl
  *
  * https://www.kamax.io/
  *
@@ -18,13 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.as;
+package io.kamax.mxisd.crypto;
 
-import io.kamax.matrix._MatrixID;
-import io.kamax.mxisd.invitation.IThreePidInvite;
+public interface Signature {
 
-public interface IMatrixIdInvite extends IThreePidInvite {
+    KeyIdentifier getKey();
 
-    _MatrixID getInvitee();
+    String getSignature();
 
 }

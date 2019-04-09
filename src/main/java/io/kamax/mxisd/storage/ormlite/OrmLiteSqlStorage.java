@@ -34,23 +34,17 @@ import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
 import io.kamax.mxisd.storage.ormlite.dao.ASTransactionDao;
+import io.kamax.mxisd.storage.ormlite.dao.HistoricalThreePidInviteIO;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidInviteIO;
 import io.kamax.mxisd.storage.ormlite.dao.ThreePidSessionDao;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class OrmLiteSqlStorage implements IStorage {
-
-    private transient final Logger log = LoggerFactory.getLogger(OrmLiteSqlStorage.class);
 
     @FunctionalInterface
     private interface Getter<T> {
@@ -67,6 +61,7 @@ public class OrmLiteSqlStorage implements IStorage {
     }
 
     private Dao<ThreePidInviteIO, String> invDao;
+    private Dao<HistoricalThreePidInviteIO, String> expInvDao;
     private Dao<ThreePidSessionDao, String> sessionDao;
     private Dao<ASTransactionDao, String> asTxnDao;
 
@@ -86,6 +81,7 @@ public class OrmLiteSqlStorage implements IStorage {
         withCatcher(() -> {
             ConnectionSource connPool = new JdbcConnectionSource("jdbc:" + backend + ":" + path);
             invDao = createDaoAndTable(connPool, ThreePidInviteIO.class);
+            expInvDao = createDaoAndTable(connPool, HistoricalThreePidInviteIO.class);
             sessionDao = createDaoAndTable(connPool, ThreePidSessionDao.class);
             asTxnDao = createDaoAndTable(connPool, ASTransactionDao.class);
         });
@@ -144,6 +140,24 @@ public class OrmLiteSqlStorage implements IStorage {
     public void deleteInvite(String id) {
         withCatcher(() -> {
             int updated = invDao.deleteById(id);
+            if (updated != 1) {
+                throw new RuntimeException("Unexpected row count after DB action: " + updated);
+            }
+        });
+    }
+
+    @Override
+    public void insertHistoricalInvite(IThreePidInviteReply data, String resolvedTo, Instant resolvedAt, boolean couldPublish) {
+        withCatcher(() -> {
+            HistoricalThreePidInviteIO io = new HistoricalThreePidInviteIO(data, resolvedTo, resolvedAt, couldPublish);
+            int updated = expInvDao.create(io);
+            if (updated != 1) {
+                throw new RuntimeException("Unexpected row count after DB action: " + updated);
+            }
+
+            // Ugly, but it avoids touching the structure of the historical parent class
+            // and avoid any possible regression at this point.
+            updated = expInvDao.updateId(io, UUID.randomUUID().toString().replace("-", ""));
             if (updated != 1) {
                 throw new RuntimeException("Unexpected row count after DB action: " + updated);
             }

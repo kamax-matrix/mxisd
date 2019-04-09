@@ -193,11 +193,35 @@ public abstract class SqlConfig {
 
     }
 
+    public static class ProfileRoles {
+
+        private String type;
+        private String query;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
+        }
+
+    }
+
     public static class Profile {
 
         private Boolean enabled;
         private ProfileDisplayName displayName = new ProfileDisplayName();
         private ProfileThreepids threepid = new ProfileThreepids();
+        private ProfileRoles role = new ProfileRoles();
 
         public Boolean isEnabled() {
             return enabled;
@@ -221,6 +245,14 @@ public abstract class SqlConfig {
 
         public void setThreepid(ProfileThreepids threepid) {
             this.threepid = threepid;
+        }
+
+        public ProfileRoles getRole() {
+            return role;
+        }
+
+        public void setRole(ProfileRoles role) {
+            this.role = role;
         }
 
     }
@@ -323,10 +355,11 @@ public abstract class SqlConfig {
             log.info("3PID mapping query: {}", getIdentity().getQuery());
             log.info("Identity medium queries: {}", GsonUtil.build().toJson(getIdentity().getMedium()));
             log.info("Profile:");
-            log.info("\tEnabled: {}", getProfile().isEnabled());
+            log.info("  Enabled: {}", getProfile().isEnabled());
             if (getProfile().isEnabled()) {
-                log.info("\tDisplay name query: {}", getProfile().getDisplayName().getQuery());
-                log.info("\tProfile 3PID query: {}", getProfile().getThreepid().getQuery());
+                log.info("  Display name query: {}", getProfile().getDisplayName().getQuery());
+                log.info("  Profile 3PID query: {}", getProfile().getThreepid().getQuery());
+                log.info("  Role query: {}", getProfile().getRole().getQuery());
             }
         }
     }

@@ -37,20 +37,32 @@ public class MxisdStandaloneExec {
 
     public static void main(String[] args) {
         try {
-            log.info("------------- mxisd starting -------------");
             MxisdConfig cfg = null;
-
             Iterator<String> argsIt = Arrays.asList(args).iterator();
             while (argsIt.hasNext()) {
                 String arg = argsIt.next();
-                if (StringUtils.equals("-c", arg)) {
+                if (StringUtils.equalsAny(arg, "-h", "--help", "-?", "--usage")) {
+                    System.out.println("Available arguments:" + System.lineSeparator());
+                    System.out.println("  -h, --help       Show this help message");
+                    System.out.println("  --version        Print the version then exit");
+                    System.out.println("  -c, --config     Set the configuration file location");
+                    System.out.println(" ");
+                    System.exit(0);
+                } else if (StringUtils.equalsAny(arg, "-c", "--config")) {
                     String cfgFile = argsIt.next();
                     cfg = YamlConfigLoader.loadFromFile(cfgFile);
+                } else if (StringUtils.equals("--version", arg)) {
+                    System.out.println(Mxisd.Version);
+                    System.exit(0);
                 } else {
-                    log.info("Invalid argument: {}", arg);
+                    System.err.println("Invalid argument: " + arg);
+                    System.err.println("Try '--help' for available arguments");
                     System.exit(1);
                 }
             }
+
+            log.info("mxisd starting");
+            log.info("Version: {}", Mxisd.Version);
 
             if (Objects.isNull(cfg)) {
                 cfg = YamlConfigLoader.tryLoadFromFile("mxisd.yaml").orElseGet(MxisdConfig::new);
@@ -59,11 +71,11 @@ public class MxisdStandaloneExec {
             HttpMxisd mxisd = new HttpMxisd(cfg);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 mxisd.stop();
-                log.info("------------- mxisd stopped -------------");
+                log.info("mxisd stopped");
             }));
             mxisd.start();
 
-            log.info("------------- mxisd started -------------");
+            log.info("mxisd started");
         } catch (ConfigurationException e) {
             log.error(e.getDetailedMessage());
             log.error(e.getMessage());

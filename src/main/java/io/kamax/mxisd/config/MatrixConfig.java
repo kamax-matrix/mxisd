@@ -63,7 +63,6 @@ public class MatrixConfig {
 
     private String domain;
     private Identity identity = new Identity();
-    private ListenerConfig listener = new ListenerConfig();
 
     public String getDomain() {
         return domain;
@@ -81,14 +80,6 @@ public class MatrixConfig {
         this.identity = identity;
     }
 
-    public ListenerConfig getListener() {
-        return listener;
-    }
-
-    public void setListener(ListenerConfig listener) {
-        this.listener = listener;
-    }
-
     public void build() {
         log.info("--- Matrix config ---");
 
@@ -99,8 +90,6 @@ public class MatrixConfig {
         log.info("Domain: {}", getDomain());
         log.info("Identity:");
         log.info("\tServers: {}", GsonUtil.get().toJson(identity.getServers()));
-
-        listener.build();
     }
 
 }

@@ -20,9 +20,12 @@
 
 package io.kamax.mxisd.crypto;
 
-import io.kamax.matrix.crypto.*;
 import io.kamax.mxisd.config.KeyConfig;
-import io.kamax.mxisd.config.ServerConfig;
+import io.kamax.mxisd.crypto.ed25519.Ed25519KeyManager;
+import io.kamax.mxisd.crypto.ed25519.Ed25519SignatureManager;
+import io.kamax.mxisd.storage.crypto.FileKeyStore;
+import io.kamax.mxisd.storage.crypto.KeyStore;
+import io.kamax.mxisd.storage.crypto.MemoryKeyStore;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,10 +34,10 @@ import java.io.IOException;
 
 public class CryptoFactory {
 
-    public static KeyManager getKeyManager(KeyConfig keyCfg) {
-        _KeyStore store;
+    public static Ed25519KeyManager getKeyManager(KeyConfig keyCfg) {
+        KeyStore store;
         if (StringUtils.equals(":memory:", keyCfg.getPath())) {
-            store = new KeyMemoryStore();
+            store = new MemoryKeyStore();
         } else {
             File keyStore = new File(keyCfg.getPath());
             if (!keyStore.exists()) {
@@ -45,14 +48,14 @@ public class CryptoFactory {
                 }
             }
 
-            store = new KeyFileStore(keyCfg.getPath());
+            store = new FileKeyStore(keyCfg.getPath());
         }
 
-        return new KeyManager(store);
+        return new Ed25519KeyManager(store);
     }
 
-    public static SignatureManager getSignatureManager(KeyManager keyMgr, ServerConfig cfg) {
-        return new SignatureManager(keyMgr, cfg.getName());
+    public static SignatureManager getSignatureManager(Ed25519KeyManager keyMgr) {
+        return new Ed25519SignatureManager(keyMgr);
     }
 
 }

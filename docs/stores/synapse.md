@@ -1,5 +1,6 @@
 # Synapse Identity Store
-Synapse's Database itself can be used as an Identity store.
+Synapse's Database itself can be used as an Identity store. This identity store is a regular SQL store with
+built-in default queries that matches Synapse DB.
 
 ## Features
 |                       Name                      | Supported |
@@ -9,7 +10,8 @@ Synapse's Database itself can be used as an Identity store.
 | [Identity](../features/identity.md)             | Yes       |
 | [Profile](../features/profile.md)               | Yes       |
 
-Authentication is done by Synapse itself.
+- Authentication is done by Synapse itself.
+- Roles are mapped to communities. The Role name/ID uses the community ID in the form `+id:domain.tld`
 
 ## Configuration
 ### Basic

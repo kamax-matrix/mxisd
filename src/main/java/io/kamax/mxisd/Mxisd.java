@@ -20,8 +20,6 @@
 
 package io.kamax.mxisd;
 
-import io.kamax.matrix.crypto.KeyManager;
-import io.kamax.matrix.crypto.SignatureManager;
 import io.kamax.mxisd.as.AppSvcManager;
 import io.kamax.mxisd.auth.AuthManager;
 import io.kamax.mxisd.auth.AuthProviders;
@@ -29,6 +27,9 @@ import io.kamax.mxisd.backend.IdentityStoreSupplier;
 import io.kamax.mxisd.backend.sql.synapse.Synapse;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.crypto.CryptoFactory;
+import io.kamax.mxisd.crypto.KeyManager;
+import io.kamax.mxisd.crypto.SignatureManager;
+import io.kamax.mxisd.crypto.ed25519.Ed25519KeyManager;
 import io.kamax.mxisd.directory.DirectoryManager;
 import io.kamax.mxisd.directory.DirectoryProviders;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
@@ -46,15 +47,21 @@ import io.kamax.mxisd.notification.NotificationHandlers;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.profile.ProfileProviders;
+import io.kamax.mxisd.registration.RegistrationManager;
 import io.kamax.mxisd.session.SessionManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.ormlite.OrmLiteSqlStorage;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.util.ServiceLoader;
 
 public class Mxisd {
+
+    public static final String Name = StringUtils.defaultIfBlank(Mxisd.class.getPackage().getImplementationTitle(), "mxisd");
+    public static final String Version = StringUtils.defaultIfBlank(Mxisd.class.getPackage().getImplementationVersion(), "UNKNOWN");
+    public static final String Agent = Name + "/" + Version;
 
     private MxisdConfig cfg;
 
@@ -63,8 +70,9 @@ public class Mxisd {
 
     private IStorage store;
 
-    private KeyManager keyMgr;
+    private Ed25519KeyManager keyMgr;
     private SignatureManager signMgr;
+    private ClientDnsOverwrite clientDns;
 
     // Features
     private AuthManager authMgr;
@@ -75,6 +83,10 @@ public class Mxisd {
     private AppSvcManager asHander;
     private SessionManager sessMgr;
     private NotificationManager notifMgr;
+    private RegistrationManager regMgr;
+
+    // HS-specific classes
+    private Synapse synapse;
 
     public Mxisd(MxisdConfig cfg) {
         this.cfg = cfg.build();
@@ -82,7 +94,7 @@ public class Mxisd {
 
     private void build() {
         httpClient = HttpClients.custom()
-                .setUserAgent("mxisd")
+                .setUserAgent(Agent)
                 .setMaxConnPerRoute(Integer.MAX_VALUE)
                 .setMaxConnTotal(Integer.MAX_VALUE)
                 .build();
@@ -92,10 +104,10 @@ public class Mxisd {
 
         store = new OrmLiteSqlStorage(cfg);
         keyMgr = CryptoFactory.getKeyManager(cfg.getKey());
-        signMgr = CryptoFactory.getSignatureManager(keyMgr, cfg.getServer());
-        ClientDnsOverwrite clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());
+        signMgr = CryptoFactory.getSignatureManager(keyMgr);
+        clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());
         FederationDnsOverwrite fedDns = new FederationDnsOverwrite(cfg.getDns().getOverwrite());
-        Synapse synapse = new Synapse(cfg.getSynapseSql());
+        synapse = new Synapse(cfg.getSynapseSql());
         BridgeFetcher bridgeFetcher = new BridgeFetcher(cfg.getLookup().getRecursive().getBridge(), srvFetcher);
 
         ServiceLoader.load(IdentityStoreSupplier.class).iterator().forEachRemaining(p -> p.accept(this));
@@ -105,10 +117,11 @@ public class Mxisd {
         pMgr = new ProfileManager(ProfileProviders.get(), clientDns, httpClient);
         notifMgr = new NotificationManager(cfg.getNotification(), NotificationHandlers.get());
         sessMgr = new SessionManager(cfg.getSession(), cfg.getMatrix(), store, notifMgr, idStrategy, httpClient);
-        invMgr = new InvitationManager(cfg.getInvite(), store, idStrategy, signMgr, fedDns, notifMgr);
+        invMgr = new InvitationManager(cfg, store, idStrategy, keyMgr, signMgr, fedDns, notifMgr, pMgr);
         authMgr = new AuthManager(cfg, AuthProviders.get(), idStrategy, invMgr, clientDns, httpClient);
         dirMgr = new DirectoryManager(cfg.getDirectory(), clientDns, httpClient, DirectoryProviders.get());
-        asHander = new AppSvcManager(cfg, store, pMgr, notifMgr, synapse);
+        regMgr = new RegistrationManager(cfg.getRegister(), httpClient, clientDns, invMgr);
+        asHander = new AppSvcManager(this);
     }
 
     public MxisdConfig getConfig() {
@@ -119,6 +132,10 @@ public class Mxisd {
         return httpClient;
     }
 
+    public ClientDnsOverwrite getClientDns() {
+        return clientDns;
+    }
+
     public IRemoteIdentityServerFetcher getServerFetcher() {
         return srvFetcher;
     }
@@ -127,7 +144,7 @@ public class Mxisd {
         return keyMgr;
     }
 
-    public InvitationManager getInvitationManager() {
+    public InvitationManager getInvite() {
         return invMgr;
     }
 
@@ -155,12 +172,24 @@ public class Mxisd {
         return signMgr;
     }
 
+    public RegistrationManager getReg() {
+        return regMgr;
+    }
+
     public AppSvcManager getAs() {
         return asHander;
     }
 
     public NotificationManager getNotif() {
         return notifMgr;
+    }
+
+    public IStorage getStore() {
+        return store;
+    }
+
+    public Synapse getSynapse() {
+        return synapse;
     }
 
     public void start() {

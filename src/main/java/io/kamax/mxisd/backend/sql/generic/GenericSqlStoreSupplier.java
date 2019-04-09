@@ -32,7 +32,7 @@ public class GenericSqlStoreSupplier implements IdentityStoreSupplier {
     @Override
     public void accept(Mxisd mxisd) {
         if (mxisd.getConfig().getSql().getAuth().isEnabled()) {
-            AuthProviders.register(() -> new GenericSqlAuthProvider(mxisd.getConfig().getSql(), mxisd.getInvitationManager()));
+            AuthProviders.register(() -> new GenericSqlAuthProvider(mxisd.getConfig().getSql(), mxisd.getInvite()));
         }
 
         if (mxisd.getConfig().getSql().getDirectory().isEnabled()) {

@@ -20,6 +20,8 @@
 
 package io.kamax.mxisd.invitation;
 
+import java.util.List;
+
 public interface IThreePidInviteReply {
 
     String getId();
@@ -29,5 +31,7 @@ public interface IThreePidInviteReply {
     String getToken();
 
     String getDisplayName();
+
+    List<String> getPublicKeys();
 
 }

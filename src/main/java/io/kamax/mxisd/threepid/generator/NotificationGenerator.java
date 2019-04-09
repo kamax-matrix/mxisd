@@ -21,7 +21,7 @@
 package io.kamax.mxisd.threepid.generator;
 
 import io.kamax.matrix.ThreePid;
-import io.kamax.mxisd.as.IMatrixIdInvite;
+import io.kamax.mxisd.invitation.IMatrixIdInvite;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 
