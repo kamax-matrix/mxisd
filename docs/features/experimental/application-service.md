@@ -21,7 +21,7 @@ Under the `appsvc` namespace:
 
 | Key                   | Type    | Required | Default | Purpose                                                        |
 |-----------------------|---------|----------|---------|----------------------------------------------------------------|
-| `enabled`             | boolean | No       | `true`  | Globally enable/disable the feature                            |
+| `enabled`             | boolean | No       | `false` | Globally enable/disable the feature                            |
 | `user.main`           | string  | No       | `mxisd` | Localpart for the main appservice user                         |
 | `endpoint.toHS.url`   | string  | Yes      | *None*  | Base URL to the Homeserver                                     |
 | `endpoint.toHS.token` | string  | Yes      | *None*  | Token to use when sending requests to the Homeserver           |
@@ -31,6 +31,7 @@ Under the `appsvc` namespace:
 #### Example
 ```yaml
 appsvc:
+  enabled: true
   endpoint:
     toHS:
       url: 'http://localhost:8008'
