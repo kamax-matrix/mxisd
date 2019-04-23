@@ -8,7 +8,7 @@ threepid:
     msisdn:
       connectors:
         twilio:
-          accountSid: 'myAccountSid'
-          authToken: 'myAuthToken'
+          account_sid: 'myAccountSid'
+          auth_token: 'myAuthToken'
           number: '+123456789'
 ```
