@@ -102,9 +102,41 @@ sql:
 ```
 
 ### Identity
+**NOTE**: Only single lookup is supported. Bulk lookup always returns no mapping. This is a restriction as the Matrix API
+does not allow paging or otherwise limit of results of the API, potentially leading to thousands and thousands 3PIDs at once.
+
 ```yaml
 sql:
   identity:
+    enabled: <boolean>
     type: <string>
     query: <string>
+    medium:
+     mediumTypeExample: <dedicated query>
 ```
+`type` is used to tell mxisd how to process the returned `uid` column containing the User ID:
+- `localpart` will build a full Matrix ID using the `matrix.domain` value.
+- `mxid` will use the ID as-is. If it is not a valid Matrix ID, lookup(s) will fail.
+
+A specific query can also given per 3PID medium type.
+
+### Profile
+```yaml
+sql:
+  profile:
+    enabled: <boolean>
+    displayName:
+      query: <string>
+    threepid:
+      query: <string>
+    role:
+      type: <string>
+      query: <string>
+    
+
+```
+For the `role` query, `type` can be used to tell mxisd how to inject the User ID in the query:
+- `localpart` will extract and set only the localpart.
+- `mxid` will use the ID as-is.
+
+On each query, the first parameter `?` is set as a string with the corresponding ID format.
