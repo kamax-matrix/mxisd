@@ -153,3 +153,5 @@ infrastructure:
 
 - [Enable extra features](features/)
 - [Use your own Identity stores](stores/README.md)
+- [Hardening your mxisd installation](install/security.md)
+- [Learn about day-to-day operations](operations.md)
