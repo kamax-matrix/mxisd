@@ -77,6 +77,7 @@ public class GenericTemplateConfig {
     private String invite;
     private Session session = new Session();
     private Map<String, String> generic = new HashMap<>();
+    private Map<String, String> placeholder = new HashMap<>();
 
     public String getInvite() {
         return invite;
@@ -96,6 +97,14 @@ public class GenericTemplateConfig {
 
     public void setGeneric(Map<String, String> generic) {
         this.generic = generic;
+    }
+
+    public Map<String, String> getPlaceholder() {
+        return placeholder;
+    }
+
+    public void setPlaceholder(Map<String, String> placeholder) {
+        this.placeholder = placeholder;
     }
 
 }

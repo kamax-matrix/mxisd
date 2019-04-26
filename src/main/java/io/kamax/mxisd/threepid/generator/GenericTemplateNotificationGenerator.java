@@ -68,6 +68,7 @@ public abstract class GenericTemplateNotificationGenerator extends PlaceholderNo
     @Override
     public String getForReply(IThreePidInviteReply invite) {
         log.info("Generating notification content for 3PID invite");
+        invite.getInvite().getProperties().putAll(cfg.getPlaceholder());
         return populateForReply(invite, getTemplateContent(cfg.getInvite()));
     }
 

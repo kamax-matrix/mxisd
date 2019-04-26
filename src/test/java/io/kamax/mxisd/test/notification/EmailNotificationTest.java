@@ -32,7 +32,10 @@ import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.config.threepid.connector.EmailSmtpConfig;
 import io.kamax.mxisd.config.threepid.medium.EmailConfig;
 import io.kamax.mxisd.invitation.MatrixIdInvite;
+import io.kamax.mxisd.invitation.ThreePidInvite;
+import io.kamax.mxisd.invitation.ThreePidInviteReply;
 import io.kamax.mxisd.threepid.connector.email.EmailSmtpConnector;
+import io.kamax.mxisd.threepid.generator.PlaceholderNotificationGenerator;
 import io.kamax.mxisd.threepid.session.ThreePidSession;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.After;
@@ -45,6 +48,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 
 import static junit.framework.TestCase.assertEquals;
@@ -116,6 +120,29 @@ public class EmailNotificationTest {
         assertEquals(1, msg.getFrom().length);
         assertEquals(senderEmail, msg.getFrom()[0].toString());
         assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
+    }
+
+    @Test
+    public void forThreepidInvite() throws MessagingException, IOException {
+        String registerUrl = "https://" + RandomStringUtils.randomAlphanumeric(20) + ".example.org/register";
+        gm.setUser(user, user);
+
+        _MatrixID sender = MatrixID.asAcceptable(user, domain);
+        ThreePidInvite inv = new ThreePidInvite(sender, ThreePidMedium.Email.getId(), target, "!rid:" + domain);
+        inv.getProperties().put(PlaceholderNotificationGenerator.RegisterUrl, registerUrl);
+        m.getNotif().sendForReply(new ThreePidInviteReply("a", inv, "b", "c", new ArrayList<>()));
+
+        assertEquals(1, gm.getReceivedMessages().length);
+        MimeMessage msg = gm.getReceivedMessages()[0];
+        assertEquals(1, msg.getFrom().length);
+        assertEquals(senderEmail, msg.getFrom()[0].toString());
+        assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
+
+        // We just check on the text/plain one. HTML is multipart and it's difficult so we skip
+        MimeMultipart content = (MimeMultipart) msg.getContent();
+        MimeBodyPart mbp = (MimeBodyPart) content.getBodyPart(0);
+        String mbpContent = mbp.getContent().toString();
+        assertTrue(mbpContent.contains(registerUrl));
     }
 
     @Test

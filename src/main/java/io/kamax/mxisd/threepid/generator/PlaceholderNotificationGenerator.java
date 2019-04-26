@@ -35,6 +35,8 @@ import static io.kamax.mxisd.http.io.identity.StoreInviteRequest.Keys.SenderDisp
 
 public abstract class PlaceholderNotificationGenerator {
 
+    public static final String RegisterUrl = "REGISTER_URL";
+
     private MatrixConfig mxCfg;
     private ServerConfig srvCfg;
 
@@ -76,8 +78,10 @@ public abstract class PlaceholderNotificationGenerator {
         String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getInvite().getSender().getId());
         String roomName = invite.getInvite().getProperties().getOrDefault(RoomName, "");
         String roomNameOrId = StringUtils.defaultIfBlank(roomName, invite.getInvite().getRoomId());
+        String registerUrl = StringUtils.defaultIfBlank(invite.getInvite().getProperties().get(RegisterUrl), "https://" + mxCfg.getDomain());
 
         return populateForCommon(tpid, input)
+                .replace("%" + RegisterUrl + "%", registerUrl)
                 .replace("%SENDER_ID%", invite.getInvite().getSender().getId())
                 .replace("%SENDER_NAME%", senderName)
                 .replace("%SENDER_NAME_OR_ID%", senderNameOrId)
@@ -100,10 +104,6 @@ public abstract class PlaceholderNotificationGenerator {
                 .replace("%VALIDATION_LINK%", validationLink)
                 .replace("%VALIDATION_TOKEN%", session.getToken())
                 .replace("%NEXT_URL%", validationLink);
-    }
-
-    protected String populateForRemoteValidation(IThreePidSession session, String input) {
-        return populateForValidation(session, input);
     }
 
     protected String populateForFraudulentUndind(ThreePid tpid, String input) {
