@@ -38,8 +38,8 @@ import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
 import io.kamax.mxisd.threepid.session.ThreePidSession;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,12 +139,13 @@ public class SessionManager {
     }
 
     public ValidationResult validate(String sid, String secret, String token) {
+        log.info("Validating session {}", sid);
         ThreePidSession session = getSession(sid, secret);
-        log.info("Attempting validation for session {} from {}", session.getId(), session.getServer());
+        log.info("Session {} is from {}", session.getId(), session.getServer());
 
         session.validate(token);
         storage.updateThreePidSession(session.getDao());
-        log.info("Session {} has been validated locally", session.getId());
+        log.info("Session {} has been validated", session.getId());
 
         ValidationResult r = new ValidationResult(session);
         session.getNextLink().ifPresent(r::setNextUrl);

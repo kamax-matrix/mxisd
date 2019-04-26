@@ -33,13 +33,13 @@ public class BuiltInPhoneConnectorSupplier implements PhoneConnectorSupplier {
 
     @Override
     public Optional<PhoneConnector> apply(PhoneConfig cfg, Mxisd mxisd) {
+        if (StringUtils.equals(BlackholePhoneConnector.ID, cfg.getConnector())) {
+            return Optional.of(new BlackholePhoneConnector());
+        }
+
         if (StringUtils.equals(PhoneSmsTwilioConnector.ID, cfg.getConnector())) {
             PhoneTwilioConfig cCfg = GsonUtil.get().fromJson(cfg.getConnectors().getOrDefault(PhoneSmsTwilioConnector.ID, new JsonObject()), PhoneTwilioConfig.class);
             return Optional.of(new PhoneSmsTwilioConnector(cCfg));
-        }
-
-        if (StringUtils.equals(BlackholePhoneConnector.ID, cfg.getConnector())) {
-            return Optional.of(new BlackholePhoneConnector());
         }
 
         return Optional.empty();

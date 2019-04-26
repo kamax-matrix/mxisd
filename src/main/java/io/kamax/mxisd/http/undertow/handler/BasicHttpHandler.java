@@ -31,6 +31,7 @@ import io.kamax.mxisd.proxy.Response;
 import io.kamax.mxisd.util.RestClientUtils;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.form.FormData;
 import io.undertow.util.HttpString;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,10 +49,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class BasicHttpHandler implements HttpHandler {
 
@@ -120,6 +118,20 @@ public abstract class BasicHttpHandler implements HttpHandler {
 
     protected JsonObject parseJsonObject(HttpServerExchange exchange) {
         return GsonUtil.parseObj(getBodyUtf8(exchange));
+    }
+
+    protected String getOrThrow(FormData data, String key) {
+        FormData.FormValue value = data.getFirst(key);
+        if (Objects.isNull(value)) {
+            throw new IllegalArgumentException("Form key " + key + " is missing");
+        }
+
+        String object = value.getValue();
+        if (Objects.isNull(object)) {
+            throw new IllegalArgumentException("Form key " + key + " does not have a value");
+        }
+
+        return object;
     }
 
     protected void putHeader(HttpServerExchange ex, String name, String value) {

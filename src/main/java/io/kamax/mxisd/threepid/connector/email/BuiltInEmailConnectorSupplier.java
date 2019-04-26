@@ -33,6 +33,10 @@ public class BuiltInEmailConnectorSupplier implements EmailConnectorSupplier {
 
     @Override
     public Optional<EmailConnector> apply(EmailConfig cfg, Mxisd mxisd) {
+        if (StringUtils.equals(BlackholeEmailConnector.ID, cfg.getConnector())) {
+            return Optional.of(new BlackholeEmailConnector());
+        }
+
         if (StringUtils.equals(EmailSmtpConnector.ID, cfg.getConnector())) {
             EmailSmtpConfig smtpCfg = GsonUtil.get().fromJson(cfg.getConnectors().getOrDefault(EmailSmtpConnector.ID, new JsonObject()), EmailSmtpConfig.class);
             return Optional.of(new EmailSmtpConnector(smtpCfg));

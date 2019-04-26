@@ -20,94 +20,36 @@
 
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
-import io.kamax.mxisd.config.ServerConfig;
-import io.kamax.mxisd.config.ViewConfig;
 import io.kamax.mxisd.http.IsAPIv1;
-import io.kamax.mxisd.http.io.identity.SuccessStatusJson;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.session.SessionManager;
 import io.kamax.mxisd.session.ValidationResult;
-import io.kamax.mxisd.util.FileUtil;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HttpString;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-public class SessionValidateHandler extends BasicHttpHandler {
+public abstract class SessionValidateHandler extends BasicHttpHandler {
 
     public static final String Path = IsAPIv1.Base + "/validate/{medium}/submitToken";
 
     private transient final Logger log = LoggerFactory.getLogger(SessionValidateHandler.class);
 
     private SessionManager mgr;
-    private ServerConfig srvCfg;
-    private ViewConfig viewCfg;
 
-    public SessionValidateHandler(SessionManager mgr, ServerConfig srvCfg, ViewConfig viewCfg) {
+    public SessionValidateHandler(SessionManager mgr) {
         this.mgr = mgr;
-        this.srvCfg = srvCfg;
-        this.viewCfg = viewCfg;
     }
 
-    @Override
-    public void handleRequest(HttpServerExchange exchange) {
-        String medium = getQueryParameter(exchange, "medium");
-        String sid = getQueryParameter(exchange, "sid");
-        String secret = getQueryParameter(exchange, "client_secret");
-        String token = getQueryParameter(exchange, "token");
-
-        boolean isHtmlRequest = false;
-        for (String v : exchange.getRequestHeaders().get("Accept")) {
-            if (StringUtils.startsWithIgnoreCase(v, "text/html")) {
-                isHtmlRequest = true;
-                break;
-            }
+    protected ValidationResult handleRequest(String sid, String secret, String token) {
+        if (StringUtils.isEmpty(sid)) {
+            throw new IllegalArgumentException("sid is not set or is empty");
         }
 
-        if (isHtmlRequest) {
-            handleHtmlRequest(exchange, medium, sid, secret, token);
-        } else {
-            handleJsonRequest(exchange, sid, secret, token);
+        if (StringUtils.isEmpty(secret)) {
+            throw new IllegalArgumentException("client secret is not set or is empty");
         }
-    }
 
-    private void handleHtmlRequest(HttpServerExchange exchange, String medium, String sid, String secret, String token) {
-        log.info("Validating session {} for medium {}", sid, medium);
-        ValidationResult r = mgr.validate(sid, secret, token);
-        log.info("Session {} was validated", sid);
-        if (r.getNextUrl().isPresent()) {
-            String url = r.getNextUrl().get();
-            try {
-                url = new URL(url).toString();
-            } catch (MalformedURLException e) {
-                log.info("Session next URL {} is not a valid one, will prepend public URL {}", url, srvCfg.getPublicUrl());
-                url = srvCfg.getPublicUrl() + r.getNextUrl().get();
-            }
-            log.info("Session {} validation: next URL is present, redirecting to {}", sid, url);
-            exchange.setStatusCode(302);
-            exchange.getResponseHeaders().add(HttpString.tryFromString("Location"), url);
-        } else {
-            try {
-                String data = FileUtil.load(viewCfg.getSession().getOnTokenSubmit().getSuccess());
-                writeBodyAsUtf8(exchange, data);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void handleJsonRequest(HttpServerExchange exchange, String sid, String secret, String token) {
-        log.info("Requested: {}", exchange.getRequestURL());
-
-        mgr.validate(sid, secret, token);
-        log.info("Session {} was validated", sid);
-
-        respondJson(exchange, new SuccessStatusJson(true));
+        return mgr.validate(sid, secret, token);
     }
 
 }

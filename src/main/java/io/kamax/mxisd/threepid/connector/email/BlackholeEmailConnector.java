@@ -1,6 +1,6 @@
 /*
  * mxisd - Matrix Identity Server Daemon
- * Copyright (C) 2018 Kamax Sàrl
+ * Copyright (C) 2019 Kamax Sarl
  *
  * https://www.kamax.io/
  *
@@ -18,9 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.kamax.mxisd.threepid.connector.phone;
+package io.kamax.mxisd.threepid.connector.email;
 
-public class BlackholePhoneConnector implements PhoneConnector {
+public class BlackholeEmailConnector implements EmailConnector {
 
     public static final String ID = "none";
 
@@ -30,7 +30,7 @@ public class BlackholePhoneConnector implements PhoneConnector {
     }
 
     @Override
-    public void send(String recipient, String content) {
+    public void send(String senderAddress, String senderName, String recipient, String content) {
         //dev/null
     }
 

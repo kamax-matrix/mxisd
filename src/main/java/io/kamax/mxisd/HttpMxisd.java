@@ -73,7 +73,6 @@ public class HttpMxisd {
         HttpHandler asNotFoundHandler = SaneHandler.around(new AsNotFoundHandler(m.getAs()));
 
         HttpHandler storeInvHandler = SaneHandler.around(new StoreInviteHandler(m.getConfig().getServer(), m.getInvite(), m.getKeyManager()));
-        HttpHandler sessValidateHandler = SaneHandler.around(new SessionValidateHandler(m.getSession(), m.getConfig().getServer(), m.getConfig().getView()));
 
         httpSrv = Undertow.builder().addHttpListener(m.getConfig().getServer().getPort(), "0.0.0.0").setHandler(Handlers.routing()
 
@@ -103,8 +102,8 @@ public class HttpMxisd {
                 .post(BulkLookupHandler.Path, SaneHandler.around(new BulkLookupHandler(m.getIdentity())))
                 .post(StoreInviteHandler.Path, storeInvHandler)
                 .post(SessionStartHandler.Path, SaneHandler.around(new SessionStartHandler(m.getSession())))
-                .get(SessionValidateHandler.Path, sessValidateHandler)
-                .post(SessionValidateHandler.Path, sessValidateHandler)
+                .get(SessionValidateHandler.Path, SaneHandler.around(new SessionValidationGetHandler(m.getSession(), m.getConfig())))
+                .post(SessionValidateHandler.Path, SaneHandler.around(new SessionValidationPostHandler(m.getSession())))
                 .get(SessionTpidGetValidatedHandler.Path, SaneHandler.around(new SessionTpidGetValidatedHandler(m.getSession())))
                 .post(SessionTpidBindHandler.Path, SaneHandler.around(new SessionTpidBindHandler(m.getSession(), m.getInvite())))
                 .post(SessionTpidUnbindHandler.Path, SaneHandler.around(new SessionTpidUnbindHandler(m.getSession())))
