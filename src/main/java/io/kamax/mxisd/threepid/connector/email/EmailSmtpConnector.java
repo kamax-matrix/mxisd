@@ -66,6 +66,10 @@ public class EmailSmtpConnector implements EmailConnector {
             sCfg.setProperty("mail.smtp.auth", "true");
         }
 
+        if (cfg.getTls() == 3) {
+            sCfg.setProperty("mail.smtp.ssl.enable", "true");
+        }
+
         session = Session.getInstance(sCfg);
     }
 
@@ -101,8 +105,11 @@ public class EmailSmtpConnector implements EmailConnector {
 
             log.info("Sending invite to {} via SMTP using {}:{}", recipient, cfg.getHost(), cfg.getPort());
             SMTPTransport transport = (SMTPTransport) session.getTransport("smtp");
-            transport.setStartTLS(cfg.getTls() > 0);
-            transport.setRequireStartTLS(cfg.getTls() > 1);
+
+            if (cfg.getTls() < 3) {
+                transport.setStartTLS(cfg.getTls() > 0);
+                transport.setRequireStartTLS(cfg.getTls() > 1);
+            }
 
             log.info("Connecting to {}:{}", cfg.getHost(), cfg.getPort());
             if (StringUtils.isAllEmpty(cfg.getLogin(), cfg.getPassword())) {

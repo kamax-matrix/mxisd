@@ -91,18 +91,18 @@ threepid:
           # SMTP host
           host: "smtp.example.org"
 
-          # SMTP port
-          port: 587
-
-          # STARTLS mode for the connection.
-          # SSL/TLS is currently not supported. See https://github.com/kamax-matrix/mxisd/issues/125
-          #
+          # TLS mode for the connection
           # Possible values:
           #  0    Disable any kind of TLS entirely
           #  1    Enable STARTLS if supported by server (default)
           #  2    Force STARTLS and fail if not available
+          #  3    Use full TLS/SSL instead of STARTLS
           #
           tls: 1
+
+          # SMTP port
+          # Be sure to adapt depending on your TLS choice, if changed from default
+          port: 587
 
           # Login for SMTP
           login: "matrix-identity@example.org"

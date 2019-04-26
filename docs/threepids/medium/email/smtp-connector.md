@@ -12,8 +12,8 @@ threepid:
       connectors:
         smtp:
           host: 'smtpHostname'
-          port: 587
-          tls: 1 # 0 = no STARTLS, 1 = try, 2 = force
+          tls: 1 # 0 = no STARTLS, 1 = try, 2 = force, 3 = TLS/SSL
+          port: 587 # Set appropriate value depending on your TLS setting
           login: 'smtpLogin'
           password: 'smtpPassword'
 ```
