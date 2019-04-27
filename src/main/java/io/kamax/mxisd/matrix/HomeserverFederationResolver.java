@@ -205,6 +205,7 @@ public class HomeserverFederationResolver {
         if (s4.isPresent()) {
             URL dest = s4.get();
             log.info("Resolution of {} via DNS SRV record to {}", domain, dest);
+            return dest;
         }
 
         URL dest = build(domain + ":" + getDefaultPort());
