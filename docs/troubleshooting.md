@@ -19,6 +19,11 @@ If you use the [Docker image](install/docker.md), this goes to the container log
 
 For any other platform, please refer to your package maintainer.
 
+### Increase verbosity
+To increase log verbosity and better track issues, the following means are available:
+- Add the `-v` command line parameter
+- Use the environment variable and value `MXISD_LOG_LEVEL=debug`
+
 ### Reading them
 Before reporting an issue, it is important to produce clean and complete logs so they can be understood.
 

@@ -36,6 +36,11 @@ public class MxisdStandaloneExec {
     private static final Logger log = LoggerFactory.getLogger("App");
 
     public static void main(String[] args) {
+        String logLevel = System.getenv("MXISD_LOG_LEVEL");
+        if (StringUtils.isNotBlank(logLevel)) {
+            System.setProperty("org.slf4j.simpleLogger.log.io.kamax.mxisd", logLevel);
+        }
+
         try {
             MxisdConfig cfg = null;
             Iterator<String> argsIt = Arrays.asList(args).iterator();
@@ -46,8 +51,14 @@ public class MxisdStandaloneExec {
                     System.out.println("  -h, --help       Show this help message");
                     System.out.println("  --version        Print the version then exit");
                     System.out.println("  -c, --config     Set the configuration file location");
+                    System.out.println("  -v               Increase log level (log more info)");
+                    System.out.println("  -vv              Further increase log level");
                     System.out.println(" ");
                     System.exit(0);
+                } else if (StringUtils.equals(arg, "-v")) {
+                    System.setProperty("org.slf4j.simpleLogger.log.io.kamax.mxisd", "debug");
+                } else if (StringUtils.equals(arg, "-vv")) {
+                    System.setProperty("org.slf4j.simpleLogger.log.io.kamax.mxisd", "trace");
                 } else if (StringUtils.equalsAny(arg, "-c", "--config")) {
                     String cfgFile = argsIt.next();
                     cfg = YamlConfigLoader.loadFromFile(cfgFile);
@@ -61,12 +72,12 @@ public class MxisdStandaloneExec {
                 }
             }
 
-            log.info("mxisd starting");
-            log.info("Version: {}", Mxisd.Version);
-
             if (Objects.isNull(cfg)) {
                 cfg = YamlConfigLoader.tryLoadFromFile("mxisd.yaml").orElseGet(MxisdConfig::new);
             }
+
+            log.info("mxisd starting");
+            log.info("Version: {}", Mxisd.Version);
 
             HttpMxisd mxisd = new HttpMxisd(cfg);
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

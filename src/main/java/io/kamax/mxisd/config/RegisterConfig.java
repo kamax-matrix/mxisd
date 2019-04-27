@@ -69,16 +69,16 @@ public class RegisterConfig {
         }
 
         private List<String> buildPatterns(List<String> domains) {
-            log.info("Building email policy");
+            log.debug("Building email policy");
             return domains.stream().map(d -> {
                 if (StringUtils.startsWith(d, "*")) {
-                    log.info("Found domain and subdomain policy");
+                    log.debug("Found domain and subdomain policy");
                     d = "(.*)" + d.substring(1);
                 } else if (StringUtils.startsWith(d, ".")) {
-                    log.info("Found subdomain-only policy");
+                    log.debug("Found subdomain-only policy");
                     d = "(.*)" + d;
                 } else {
-                    log.info("Found domain-only policy");
+                    log.debug("Found domain-only policy");
                 }
 
                 return "([^@]+)@" + d.replace(".", "\\.");
@@ -175,10 +175,10 @@ public class RegisterConfig {
     }
 
     public void build() {
-        log.info("--- Registration config ---");
+        log.debug("--- Registration config ---");
 
-        log.info("Before Build");
-        log.info(GsonUtil.getPrettyForLog(this));
+        log.debug("Before Build");
+        log.debug(GsonUtil.getPrettyForLog(this));
 
         new HashMap<>(getPolicy().getThreepid()).forEach((medium, policy) -> {
             if (ThreePidMedium.Email.is(medium)) {
@@ -194,8 +194,8 @@ public class RegisterConfig {
             getPolicy().getThreepid().put(medium, policy);
         });
 
-        log.info("After Build");
-        log.info(GsonUtil.getPrettyForLog(this));
+        log.debug("After Build");
+        log.debug(GsonUtil.getPrettyForLog(this));
     }
 
 }

@@ -20,3 +20,6 @@ docker run --rm -e MATRIX_DOMAIN=example.org -v /data/mxisd/etc:/etc/mxisd -v /d
 ```
 
 For more info, including the list of possible tags, see [the public repository](https://hub.docker.com/r/kamax/mxisd/)
+
+## Troubleshoot
+Please read the [Troubleshooting guide](../troubleshooting.md).
