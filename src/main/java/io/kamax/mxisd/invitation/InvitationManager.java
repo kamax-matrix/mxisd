@@ -30,7 +30,6 @@ import io.kamax.mxisd.config.InvitationConfig;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.crypto.*;
-import io.kamax.mxisd.dns.FederationDnsOverwrite;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.ConfigurationException;
 import io.kamax.mxisd.exception.MappingAlreadyExistsException;
@@ -38,6 +37,7 @@ import io.kamax.mxisd.exception.ObjectNotFoundException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
+import io.kamax.mxisd.matrix.HomeserverFederationResolver;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.storage.IStorage;
@@ -57,13 +57,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.*;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -85,7 +82,7 @@ public class InvitationManager {
     private LookupStrategy lookupMgr;
     private KeyManager keyMgr;
     private SignatureManager signMgr;
-    private FederationDnsOverwrite dns;
+    private HomeserverFederationResolver resolver;
     private NotificationManager notifMgr;
     private ProfileManager profileMgr;
 
@@ -100,7 +97,7 @@ public class InvitationManager {
             LookupStrategy lookupMgr,
             KeyManager keyMgr,
             SignatureManager signMgr,
-            FederationDnsOverwrite dns,
+            HomeserverFederationResolver resolver,
             NotificationManager notifMgr,
             ProfileManager profileMgr
     ) {
@@ -110,7 +107,7 @@ public class InvitationManager {
         this.lookupMgr = lookupMgr;
         this.keyMgr = keyMgr;
         this.signMgr = signMgr;
-        this.dns = dns;
+        this.resolver = resolver;
         this.notifMgr = notifMgr;
         this.profileMgr = profileMgr;
 
@@ -205,56 +202,6 @@ public class InvitationManager {
 
     private String getIdForLog(IThreePidInviteReply reply) {
         return reply.getInvite().getSender().getId() + ":" + reply.getInvite().getRoomId() + ":" + reply.getInvite().getMedium() + ":" + reply.getInvite().getAddress();
-    }
-
-    private String getSrvRecordName(String domain) {
-        return "_matrix._tcp." + domain;
-    }
-
-    // TODO use caching mechanism
-    // TODO export in matrix-java-sdk
-    private String findHomeserverForDomain(String domain) {
-        Optional<String> entryOpt = dns.findHost(domain);
-        if (entryOpt.isPresent()) {
-            String entry = entryOpt.get();
-            log.info("Found DNS overwrite for {} to {}", domain, entry);
-            try {
-                return new URL(entry).toString();
-            } catch (MalformedURLException e) {
-                log.warn("Skipping homeserver Federation DNS overwrite for {} - not a valid URL: {}", domain, entry);
-            }
-        }
-
-        log.debug("Performing SRV lookup for {}", domain);
-        String lookupDns = getSrvRecordName(domain);
-        log.info("Lookup name: {}", lookupDns);
-
-        try {
-            List<SRVRecord> srvRecords = new ArrayList<>();
-            Record[] rawRecords = new Lookup(lookupDns, Type.SRV).run();
-            if (rawRecords != null && rawRecords.length > 0) {
-                for (Record record : rawRecords) {
-                    if (Type.SRV == record.getType()) {
-                        srvRecords.add((SRVRecord) record);
-                    } else {
-                        log.info("Got non-SRV record: {}", record.toString());
-                    }
-                }
-
-                srvRecords.sort(Comparator.comparingInt(SRVRecord::getPriority));
-                for (SRVRecord record : srvRecords) {
-                    log.info("Found SRV record: {}", record.toString());
-                    return "https://" + record.getTarget().toString(true) + ":" + record.getPort();
-                }
-            } else {
-                log.info("No SRV record for {}", lookupDns);
-            }
-        } catch (TextParseException e) {
-            log.warn("Unable to perform DNS SRV query for {}: {}", lookupDns, e.getMessage());
-        }
-
-        log.info("Performing basic lookup using domain name {}", domain);
-        return "https://" + domain + ":8448";
     }
 
     private Optional<SingleLookupReply> lookup3pid(String medium, String address) {
@@ -413,7 +360,7 @@ public class InvitationManager {
                     continue;
                 }
 
-                log.info("Invite {} has expired at TS {} - Expiring and resolving to {}", targetTs, targetMxid);
+                log.info("Invite {} has expired at TS {} - Expiring and resolving to {}", reply.getId(), targetTs, targetMxid);
                 publishMapping(reply, targetMxid);
             } catch (NumberFormatException | DateTimeException e) {
                 log.warn("Invite {} has an invalid creation TS, setting to default value of {}", reply.getId(), defaultCreateTs);
@@ -475,7 +422,7 @@ public class InvitationManager {
         String address = reply.getInvite().getAddress();
         String domain = reply.getInvite().getSender().getDomain();
         log.info("Discovering HS for domain {}", domain);
-        String hsUrlOpt = findHomeserverForDomain(domain);
+        String hsUrlOpt = resolver.resolve(domain).toString();
 
         // TODO this is needed as this will block if called during authentication cycle due to synapse implementation
         new Thread(() -> { // FIXME need to make this retry-able and within a general background working pool

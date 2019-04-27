@@ -41,6 +41,7 @@ import io.kamax.mxisd.lookup.provider.BridgeFetcher;
 import io.kamax.mxisd.lookup.provider.RemoteIdentityServerFetcher;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.lookup.strategy.RecursivePriorityLookupStrategy;
+import io.kamax.mxisd.matrix.HomeserverFederationResolver;
 import io.kamax.mxisd.matrix.IdentityServerUtils;
 import io.kamax.mxisd.notification.NotificationHandlerSupplier;
 import io.kamax.mxisd.notification.NotificationHandlers;
@@ -99,6 +100,8 @@ public class Mxisd {
                 .setMaxConnTotal(Integer.MAX_VALUE)
                 .build();
 
+        FederationDnsOverwrite fedDns = new FederationDnsOverwrite(cfg.getDns().getOverwrite());
+        HomeserverFederationResolver resolver = new HomeserverFederationResolver(fedDns, httpClient);
         IdentityServerUtils.setHttpClient(httpClient);
         srvFetcher = new RemoteIdentityServerFetcher(httpClient);
 
@@ -106,10 +109,9 @@ public class Mxisd {
         keyMgr = CryptoFactory.getKeyManager(cfg.getKey());
         signMgr = CryptoFactory.getSignatureManager(keyMgr);
         clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());
-        FederationDnsOverwrite fedDns = new FederationDnsOverwrite(cfg.getDns().getOverwrite());
+
         synapse = new Synapse(cfg.getSynapseSql());
         BridgeFetcher bridgeFetcher = new BridgeFetcher(cfg.getLookup().getRecursive().getBridge(), srvFetcher);
-
         ServiceLoader.load(IdentityStoreSupplier.class).iterator().forEachRemaining(p -> p.accept(this));
         ServiceLoader.load(NotificationHandlerSupplier.class).iterator().forEachRemaining(p -> p.accept(this));
 
@@ -117,7 +119,7 @@ public class Mxisd {
         pMgr = new ProfileManager(ProfileProviders.get(), clientDns, httpClient);
         notifMgr = new NotificationManager(cfg.getNotification(), NotificationHandlers.get());
         sessMgr = new SessionManager(cfg.getSession(), cfg.getMatrix(), store, notifMgr, idStrategy, httpClient);
-        invMgr = new InvitationManager(cfg, store, idStrategy, keyMgr, signMgr, fedDns, notifMgr, pMgr);
+        invMgr = new InvitationManager(cfg, store, idStrategy, keyMgr, signMgr, resolver, notifMgr, pMgr);
         authMgr = new AuthManager(cfg, AuthProviders.get(), idStrategy, invMgr, clientDns, httpClient);
         dirMgr = new DirectoryManager(cfg.getDirectory(), clientDns, httpClient, DirectoryProviders.get());
         regMgr = new RegistrationManager(cfg.getRegister(), httpClient, clientDns, invMgr);
