@@ -60,7 +60,8 @@ public class EmailNotificationTest {
     private final String user = "mxisd";
     private final String notifiee = "john";
     private final String sender = user + "@" + domain;
-    private final String senderEmail = "\"Mxisd Server (Unit Test)\" <" + sender + ">";
+    private final String senderName = "\"Mxisd Server あ (Unit Test)\" <" + sender + ">";
+    private final String senderNameEncoded = "=?UTF-8?Q?=22Mxisd_Server_=E3=81=82_=28Unit_T?= =?UTF-8?Q?est=29=22_=3Cmxisd=40localhost=3E?= <mxisd@localhost>";
     private final String target = notifiee + "@" + domain;
 
     private Mxisd m;
@@ -76,7 +77,7 @@ public class EmailNotificationTest {
         EmailConfig eCfg = new EmailConfig();
         eCfg.setConnector(EmailSmtpConnector.ID);
         eCfg.getIdentity().setFrom(sender);
-        eCfg.getIdentity().setName("Mxisd Server (Unit Test)");
+        eCfg.getIdentity().setName(senderName);
         eCfg.getConnectors().put(EmailSmtpConnector.ID, GsonUtil.makeObj(smtpCfg));
 
         MxisdConfig cfg = new MxisdConfig();
@@ -118,7 +119,7 @@ public class EmailNotificationTest {
         assertEquals(1, gm.getReceivedMessages().length);
         MimeMessage msg = gm.getReceivedMessages()[0];
         assertEquals(1, msg.getFrom().length);
-        assertEquals(senderEmail, msg.getFrom()[0].toString());
+        assertEquals(senderNameEncoded, msg.getFrom()[0].toString());
         assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
     }
 
@@ -135,7 +136,7 @@ public class EmailNotificationTest {
         assertEquals(1, gm.getReceivedMessages().length);
         MimeMessage msg = gm.getReceivedMessages()[0];
         assertEquals(1, msg.getFrom().length);
-        assertEquals(senderEmail, msg.getFrom()[0].toString());
+        assertEquals(senderNameEncoded, msg.getFrom()[0].toString());
         assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
 
         // We just check on the text/plain one. HTML is multipart and it's difficult so we skip
@@ -165,7 +166,7 @@ public class EmailNotificationTest {
         assertEquals(1, gm.getReceivedMessages().length);
         MimeMessage msg = gm.getReceivedMessages()[0];
         assertEquals(1, msg.getFrom().length);
-        assertEquals(senderEmail, msg.getFrom()[0].toString());
+        assertEquals(senderNameEncoded, msg.getFrom()[0].toString());
         assertEquals(1, msg.getRecipients(Message.RecipientType.TO).length);
 
         // We just check on the text/plain one. HTML is multipart and it's difficult so we skip

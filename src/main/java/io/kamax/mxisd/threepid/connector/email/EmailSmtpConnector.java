@@ -31,14 +31,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Properties;
 
 public class EmailSmtpConnector implements EmailConnector {
@@ -97,7 +100,16 @@ public class EmailSmtpConnector implements EmailConnector {
         try {
             InternetAddress sender = new InternetAddress(senderAddress, senderName);
             MimeMessage msg = new MimeMessage(session, IOUtils.toInputStream(content, StandardCharsets.UTF_8));
-            msg.setHeader("X-Mailer", Mxisd.Agent);
+
+            // We must encode our headers ourselves as we have no guarantee that they were in the provided data.
+            // This is required to support UTF-8 characters from user display names or room names in the subject header per example
+            Enumeration<Header> headers = msg.getAllHeaders();
+            while (headers.hasMoreElements()) {
+                Header header = headers.nextElement();
+                msg.setHeader(header.getName(), MimeUtility.encodeText(header.getValue()));
+            }
+
+            msg.setHeader("X-Mailer", MimeUtility.encodeText(Mxisd.Agent));
             msg.setSentDate(new Date());
             msg.setFrom(sender);
             msg.setRecipients(Message.RecipientType.TO, recipient);
