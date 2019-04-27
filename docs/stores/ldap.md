@@ -89,7 +89,7 @@ ldap:
 #### 3PIDs
 You can also change the attribute lists for 3PID, like email or phone numbers.
 
-The following example would overwrite the [default list of attributes](../../src/main/resources/application.yaml#L67)
+The following example would overwrite the [default list of attributes](../../src/main/java/io/kamax/mxisd/config/ldap/LdapConfig.java#L64)
 for emails and phone number:
 ```yaml
 ldap:
