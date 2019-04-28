@@ -20,11 +20,44 @@
 
 package io.kamax.mxisd.crypto;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.kamax.matrix.event.EventKey;
+import io.kamax.matrix.json.MatrixJson;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public interface SignatureManager {
+
+    /**
+     * Sign the message and add the signature to the <code>signatures</code> key.
+     * <p>
+     * If the key does not exist yet, it is created. If the key exist, the produced signature will be merged with any
+     * existing ones.
+     *
+     * @param domain  The domain under which the signature should be added
+     * @param message The message to sign and add the produced signature to
+     * @return The provided message with the new signature
+     * @throws IllegalArgumentException If the <code>signatures</code> value is not a JSON object
+     */
+    default JsonObject signMessageGson(String domain, JsonObject message) throws IllegalArgumentException {
+        JsonElement signEl = message.remove(EventKey.Signatures.get());
+        JsonObject oldSigns = new JsonObject();
+        if (!Objects.isNull(signEl)) {
+            if (!signEl.isJsonObject()) {
+                throw new IllegalArgumentException("Message contains a signatures key that is not a JSON object value");
+            }
+
+            oldSigns = signEl.getAsJsonObject();
+        }
+
+        JsonObject newSigns = signMessageGson(domain, MatrixJson.encodeCanonical(message));
+        oldSigns.entrySet().forEach(entry -> newSigns.add(entry.getKey(), entry.getValue()));
+        message.add(EventKey.Signatures.get(), newSigns);
+
+        return message;
+    }
 
     /**
      * Sign the message and produce a <code>signatures</code> object that can directly be added to the object being signed.

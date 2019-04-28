@@ -21,9 +21,7 @@
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
 import com.google.gson.JsonObject;
-import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.json.GsonUtil;
-import io.kamax.matrix.json.MatrixJson;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.crypto.SignatureManager;
@@ -73,11 +71,8 @@ public class SingleLookupHandler extends LookupHandler {
             respondJson(exchange, "{}");
         } else {
             SingleLookupReply lookup = lookupOpt.get();
-
-            // FIXME signing should be done in the business model, not in the controller
             JsonObject obj = GsonUtil.makeObj(new SingeLookupReplyJson(lookup));
-            obj.add(EventKey.Signatures.get(), signMgr.signMessageGson(cfg.getName(), MatrixJson.encodeCanonical(obj)));
-
+            signMgr.signMessageGson(cfg.getName(), obj);
             respondJson(exchange, obj);
         }
     }

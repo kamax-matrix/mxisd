@@ -21,6 +21,7 @@
 package io.kamax.mxisd.test.crypto;
 
 import com.google.gson.JsonObject;
+import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.matrix.json.MatrixJson;
 import io.kamax.mxisd.crypto.Signature;
@@ -36,10 +37,14 @@ import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class SignatureManagerTest {
 
+    private static final String lookupData = "{\n" + "  \"not_before\": 0,\n" + "  \"address\": \"mxisd-federation-test@kamax.io\",\n"
+            + "  \"medium\": \"email\",\n" + "  \"mxid\": \"@mxisd-lookup-test:kamax.io\",\n"
+            + "  \"not_after\": 253402300799000,\n" + "  \"ts\": 1523482030147\n" + "}";
     private static SignatureManager signMgr;
 
     private static SignatureManager build(String keySeed) {
@@ -98,12 +103,19 @@ public class SignatureManagerTest {
 
     @Test
     public void onIdentityLookup() {
-        String value = MatrixJson.encodeCanonical("{\n" + "  \"address\": \"mxisd-federation-test@kamax.io\",\n"
-                + "  \"medium\": \"email\",\n" + "  \"mxid\": \"@mxisd-lookup-test:kamax.io\",\n"
-                + "  \"not_after\": 253402300799000,\n" + "  \"not_before\": 0,\n" + "  \"ts\": 1523482030147\n" + "}");
-
+        String value = MatrixJson.encodeCanonical(lookupData);
         String sign = "ObKA4PNQh2g6c7Yo2QcTcuDgIwhknG7ZfqmNYzbhrbLBOqZomU22xX9raufN2Y3ke1FXsDqsGs7WBDodmzZJCg";
         testSign(value, sign);
+    }
+
+    @Test
+    public void onIdentityLookupFull() {
+        JsonObject data = GsonUtil.parseObj(lookupData);
+        signMgr.signMessageGson("localhost", data);
+        JsonObject signatures = EventKey.Signatures.getObj(data);
+        JsonObject domainSign = GsonUtil.getObj(signatures, "localhost");
+        String sign = GsonUtil.getStringOrThrow(domainSign, "ed25519:0");
+        assertEquals(sign, "ObKA4PNQh2g6c7Yo2QcTcuDgIwhknG7ZfqmNYzbhrbLBOqZomU22xX9raufN2Y3ke1FXsDqsGs7WBDodmzZJCg");
     }
 
 }
