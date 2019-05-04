@@ -27,7 +27,6 @@ import io.kamax.matrix._MatrixID;
 import io.kamax.matrix._ThreePid;
 import io.kamax.matrix.client.as.MatrixApplicationServiceClient;
 import io.kamax.matrix.event.EventKey;
-import io.kamax.matrix.hs._MatrixRoom;
 import io.kamax.mxisd.Mxisd;
 import io.kamax.mxisd.backend.sql.synapse.Synapse;
 import io.kamax.mxisd.config.MxisdConfig;
@@ -81,7 +80,7 @@ public class MembershipEventProcessor implements EventTypeProcessor {
 
         _MatrixID target = MatrixID.asAcceptable(targetId);
         if (!StringUtils.equals(target.getDomain(), cfg.getMatrix().getDomain())) {
-            log.debug("Ignoring invite for {}: not a local user");
+            log.debug("Ignoring invite for {}: not a local user", targetId);
             return;
         }
 
@@ -89,7 +88,6 @@ public class MembershipEventProcessor implements EventTypeProcessor {
 
         boolean isForMainUser = StringUtils.equals(target.getLocalPart(), cfg.getAppsvc().getUser().getMain());
         boolean isForExpInvUser = StringUtils.equals(target.getLocalPart(), cfg.getAppsvc().getUser().getInviteExpired());
-        boolean isUs = isForMainUser || isForExpInvUser;
 
         if (StringUtils.equals("join", EventKey.Membership.getStringOrNull(content))) {
             if (!isForMainUser) {
@@ -108,10 +106,7 @@ public class MembershipEventProcessor implements EventTypeProcessor {
                 processForUserIdInvite(roomId, sender, target);
             }
         } else if (StringUtils.equals("leave", EventKey.Membership.getStringOrNull(content))) {
-            _MatrixRoom room = client.getRoom(roomId);
-            if (!isUs && room.getJoinedUsers().size() == 1) {
-                // TODO we need to find out if this is only us remaining and leave the room if so, using the right client for it
-            }
+            // TODO we need to find out if this is only us remaining and leave the room if so, using the right client for it
         } else {
             log.debug("This is not an supported type of membership event, skipping");
         }
