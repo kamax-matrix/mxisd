@@ -94,9 +94,9 @@ public class BuiltInNotificationHandlerSupplier implements NotificationHandlerSu
         }
 
         if (StringUtils.equals(EmailSendGridNotificationHandler.ID, handler)) {
-            JsonObject cfgJson = mxisd.getConfig().getNotification().getHandlers().get(EmailSendGridNotificationHandler.ID);
+            Object cfgJson = mxisd.getConfig().getNotification().getHandlers().get(EmailSendGridNotificationHandler.ID);
             if (Objects.nonNull(cfgJson)) {
-                EmailSendGridConfig cfg = GsonUtil.get().fromJson(cfgJson, EmailSendGridConfig.class);
+                EmailSendGridConfig cfg = GsonUtil.get().fromJson(GsonUtil.get().toJson(cfgJson), EmailSendGridConfig.class);
                 NotificationHandlers.register(() -> new EmailSendGridNotificationHandler(mxisd.getConfig(), cfg));
             }
         }

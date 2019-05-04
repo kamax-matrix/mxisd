@@ -35,7 +35,7 @@ public class NotificationConfig {
     private transient final Logger log = LoggerFactory.getLogger(NotificationConfig.class);
 
     private Map<String, String> handler = new HashMap<>();
-    private Map<String, JsonObject> handlers = new HashMap<>();
+    private Map<String, Object> handlers = new HashMap<>();
 
     public NotificationConfig() {
         handler.put(ThreePidMedium.Email.getId(), EmailRawNotificationHandler.ID);
@@ -50,11 +50,11 @@ public class NotificationConfig {
         this.handler = handler;
     }
 
-    public Map<String, JsonObject> getHandlers() {
+    public Map<String, Object> getHandlers() {
         return handlers;
     }
 
-    public void setHandlers(Map<String, JsonObject> handlers) {
+    public void setHandlers(Map<String, Object> handlers) {
         this.handlers = handlers;
     }
 
