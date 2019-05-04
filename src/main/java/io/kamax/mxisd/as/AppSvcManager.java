@@ -176,10 +176,12 @@ public class AppSvcManager {
         ensureEnabled();
 
         if (StringUtils.isBlank(token)) {
+            log.info("Denying request without a HS token");
             throw new HttpMatrixException(401, "M_UNAUTHORIZED", "No HS token");
         }
 
         if (!StringUtils.equals(cfg.getEndpoint().getToAS().getToken(), token)) {
+            log.info("Denying request with an invalid HS token");
             throw new NotAllowedException("Invalid HS token");
         }
 
