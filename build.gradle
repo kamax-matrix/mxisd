@@ -48,6 +48,8 @@ def dockerImageTag = "${dockerImageName}:${mxisdVersion()}"
 
 group = 'io.kamax'
 mainClassName = 'io.kamax.mxisd.MxisdStandaloneExec'
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 String mxisdVersion() {
     def versionPattern = Pattern.compile("v(\\d+\\.)?(\\d+\\.)?(\\d+)(-.*)?")
