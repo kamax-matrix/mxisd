@@ -27,8 +27,8 @@ import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.invitation.IMatrixIdInvite;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import static io.kamax.mxisd.http.io.identity.StoreInviteRequest.Keys.RoomName;
 import static io.kamax.mxisd.http.io.identity.StoreInviteRequest.Keys.SenderDisplayName;
@@ -46,6 +46,10 @@ public abstract class PlaceholderNotificationGenerator {
     }
 
     protected String populateForCommon(ThreePid recipient, String input) {
+        if (StringUtils.isBlank(input)) {
+            return input;
+        }
+
         String domainPretty = WordUtils.capitalizeFully(mxCfg.getDomain());
 
         return input
@@ -56,6 +60,10 @@ public abstract class PlaceholderNotificationGenerator {
     }
 
     protected String populateForInvite(IMatrixIdInvite invite, String input) {
+        if (StringUtils.isBlank(input)) {
+            return input;
+        }
+
         String senderName = invite.getProperties().getOrDefault(SenderDisplayName, "");
         String senderNameOrId = StringUtils.defaultIfBlank(senderName, invite.getSender().getId());
         String roomName = invite.getProperties().getOrDefault(RoomName, "");
@@ -72,6 +80,10 @@ public abstract class PlaceholderNotificationGenerator {
     }
 
     protected String populateForReply(IThreePidInviteReply invite, String input) {
+        if (StringUtils.isBlank(input)) {
+            return input;
+        }
+
         ThreePid tpid = new ThreePid(invite.getInvite().getMedium(), invite.getInvite().getAddress());
 
         String senderName = invite.getInvite().getProperties().getOrDefault(SenderDisplayName, "");
@@ -93,6 +105,10 @@ public abstract class PlaceholderNotificationGenerator {
     }
 
     protected String populateForValidation(IThreePidSession session, String input) {
+        if (StringUtils.isBlank(input)) {
+            return input;
+        }
+
         String validationLink = srvCfg.getPublicUrl() + IsAPIv1.getValidate(
                 session.getThreePid().getMedium(),
                 session.getId(),

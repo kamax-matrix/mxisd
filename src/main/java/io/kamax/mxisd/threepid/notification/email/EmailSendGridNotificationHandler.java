@@ -33,7 +33,7 @@ import io.kamax.mxisd.notification.NotificationHandler;
 import io.kamax.mxisd.threepid.generator.PlaceholderNotificationGenerator;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
 import io.kamax.mxisd.util.FileUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +86,9 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
     @Override
     public void sendForInvite(IMatrixIdInvite invite) {
         EmailTemplate template = cfg.getTemplates().getGeneric().get("matrixId");
+        if (StringUtils.isAllBlank(template.getBody().getText(), template.getBody().getHtml())) {
+            throw new FeatureNotAvailable("No template has been configured for Matrix ID invite notifications");
+        }
 
         Email email = getEmail();
         email.setSubject(populateForInvite(invite, template.getSubject()));
@@ -98,6 +101,10 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
     @Override
     public void sendForReply(IThreePidInviteReply invite) {
         EmailTemplate template = cfg.getTemplates().getInvite();
+        if (StringUtils.isAllBlank(template.getBody().getText(), template.getBody().getHtml())) {
+            throw new FeatureNotAvailable("No template has been configured for 3PID invite notifications");
+        }
+
         Email email = getEmail();
         email.setSubject(populateForReply(invite, template.getSubject()));
         email.setText(populateForReply(invite, getFromFile(template.getBody().getText())));
@@ -109,6 +116,10 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
     @Override
     public void sendForValidation(IThreePidSession session) {
         EmailTemplate template = cfg.getTemplates().getSession().getValidation();
+        if (StringUtils.isAllBlank(template.getBody().getText(), template.getBody().getHtml())) {
+            throw new FeatureNotAvailable("No template has been configured for validation notifications");
+        }
+
         Email email = getEmail();
         email.setSubject(populateForValidation(session, template.getSubject()));
         email.setText(populateForValidation(session, getFromFile(template.getBody().getText())));
@@ -120,6 +131,10 @@ public class EmailSendGridNotificationHandler extends PlaceholderNotificationGen
     @Override
     public void sendForFraudulentUnbind(ThreePid tpid) {
         EmailTemplate template = cfg.getTemplates().getSession().getUnbind().getFraudulent();
+        if (StringUtils.isAllBlank(template.getBody().getText(), template.getBody().getHtml())) {
+            throw new FeatureNotAvailable("No template has been configured for fraudulent unbind notifications");
+        }
+
         Email email = getEmail();
         email.setSubject(populateForCommon(tpid, template.getSubject()));
         email.setText(populateForCommon(tpid, getFromFile(template.getBody().getText())));
