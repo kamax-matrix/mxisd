@@ -39,26 +39,26 @@ Content-Disposition: inline
 <html lang="en">
     <head>
         <style type="text/css">
-body {
-    margin: 0px;
-}
+            body {
+                margin: 0px;
+            }
 
-pre, code {
-    word-break: break-word;
-    white-space: pre-wrap;
-}
+            pre, code {
+                word-break: break-word;
+                white-space: pre-wrap;
+            }
 
-#page {
-    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
-    font-color: #454545;
-    font-size: 12pt;
-    width: 100%%;
-    padding: 20px;
-}
+            #page {
+                font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+                font-color: #454545;
+                font-size: 12pt;
+                width: 100%%;
+                padding: 20px;
+            }
 
-#inner {
-    width: 640px;
-}
+            #inner {
+                width: 640px;
+            }
         </style>
     </head>
     <body>
@@ -66,24 +66,24 @@ pre, code {
             <tr>
                 <td> </td>
                 <td id="inner">
-<p>Hi,</p>
+                    <p>Hi,</p>
 
-<p>%SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on
-Matrix. To join the conversation, register an account on <a href="%REGISTER_URL%">%DOMAIN%</a>.</p>
+                    <p>%SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on
+                    Matrix. To join the conversation, register an account on <a href="%REGISTER_URL%">%DOMAIN%</a>.</p>
 
-<pYou can also register an account on a public server and get in touch with them.</p>
+                    <pYou can also register an account on a public server and get in touch with them.</p>
 
-<br>
-<p>About Matrix:</p>
+                    <br>
+                    <p>About Matrix:</p>
 
-<p>Matrix is an open standard for interoperable, decentralised, real-time communication
-   over IP, supporting group chat, file transfer, voice and video calling, integrations to
-   other apps, bridges to other communication systems and much more. It can be used to power
-   Instant Messaging, VoIP/WebRTC signalling, Internet of Things communication.</p>
+                    <p>Matrix is an open standard for interoperable, decentralised, real-time communication
+                       over IP, supporting group chat, file transfer, voice and video calling, integrations to
+                       other apps, bridges to other communication systems and much more. It can be used to power
+                       Instant Messaging, VoIP/WebRTC signalling, Internet of Things communication.</p>
 
-<p>Thanks,</p>
+                    <p>Thanks,</p>
 
-<p>%DOMAIN_PRETTY% Admins</p>
+                    <p>%DOMAIN_PRETTY% Admins</p>
                 </td>
                 <td> </td>
             </tr>

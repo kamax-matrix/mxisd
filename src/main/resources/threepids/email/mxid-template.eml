@@ -28,26 +28,26 @@ Content-Disposition: inline
 <html lang="en">
     <head>
         <style type="text/css">
-body {
-    margin: 0px;
-}
+            body {
+                margin: 0px;
+            }
 
-pre, code {
-    word-break: break-word;
-    white-space: pre-wrap;
-}
+            pre, code {
+                word-break: break-word;
+                white-space: pre-wrap;
+            }
 
-#page {
-    font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
-    font-color: #454545;
-    font-size: 12pt;
-    width: 100%%;
-    padding: 20px;
-}
+            #page {
+                font-family: 'Open Sans', Helvetica, Arial, Sans-Serif;
+                font-color: #454545;
+                font-size: 12pt;
+                width: 100%%;
+                padding: 20px;
+            }
 
-#inner {
-    width: 640px;
-}
+            #inner {
+                width: 640px;
+            }
         </style>
     </head>
     <body>
@@ -55,13 +55,13 @@ pre, code {
             <tr>
                 <td> </td>
                 <td id="inner">
-<p>Hi,</p>
+                    <p>Hi,</p>
 
-<p>%SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on Matrix.</p>
+                    <p>%SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on Matrix.</p>
 
-<p>Thanks,</p>
+                    <p>Thanks,</p>
 
-<p>%DOMAIN_PRETTY% Admins</p>
+                    <p>%DOMAIN_PRETTY% Admins</p>
                 </td>
                 <td> </td>
             </tr>
