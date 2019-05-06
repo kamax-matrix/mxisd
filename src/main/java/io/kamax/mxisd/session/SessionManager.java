@@ -40,7 +40,6 @@ import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
 import io.kamax.mxisd.threepid.session.ThreePidSession;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,23 +57,18 @@ public class SessionManager {
     private NotificationManager notifMgr;
     private LookupStrategy lookupMgr;
 
-    // FIXME export into central class, set version
-    private CloseableHttpClient client;
-
     public SessionManager(
             SessionConfig cfg,
             MatrixConfig mxCfg,
             IStorage storage,
             NotificationManager notifMgr,
-            LookupStrategy lookupMgr,
-            CloseableHttpClient client
+            LookupStrategy lookupMgr
     ) {
         this.cfg = cfg;
         this.mxCfg = mxCfg;
         this.storage = storage;
         this.notifMgr = notifMgr;
         this.lookupMgr = lookupMgr;
-        this.client = client;
     }
 
     private ThreePidSession getSession(String sid, String secret) {
@@ -128,7 +122,7 @@ public class SessionManager {
                 log.info("Generated new session {} to validate {} from server {}", sessionId, tpid, server);
 
                 storage.insertThreePidSession(session.getDao());
-                log.info("Stored session {}", sessionId, tpid, server);
+                log.info("Stored session {}", sessionId);
 
                 log.info("Session {} for {}: sending validation notification", sessionId, tpid);
                 notifMgr.sendForValidation(session);
@@ -196,6 +190,7 @@ public class SessionManager {
              */
 
             log.warn("A remote host attempted to unbind without proper authorization. Request was denied");
+            log.warn("See https://github.com/kamax-matrix/mxisd/wiki/mxisd-and-your-privacy for more info");
 
             if (!cfg.getPolicy().getUnbind().getFraudulent().getSendWarning()) {
                 log.info("Not sending notification to 3PID owner as per configuration");

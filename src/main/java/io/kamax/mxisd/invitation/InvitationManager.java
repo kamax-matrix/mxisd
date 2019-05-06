@@ -111,11 +111,11 @@ public class InvitationManager {
         this.notifMgr = notifMgr;
         this.profileMgr = profileMgr;
 
-        log.info("Loading saved invites");
+        log.debug("Loading saved invites");
         Collection<ThreePidInviteIO> ioList = storage.getInvites();
         ioList.forEach(io -> {
             io.getProperties().putIfAbsent(CreatedAtPropertyKey, defaultCreateTs);
-            log.info("Processing invite {}", GsonUtil.get().toJson(io));
+            log.debug("Processing invite {}", GsonUtil.get().toJson(io));
             ThreePidInvite invite = new ThreePidInvite(
                     MatrixID.asAcceptable(io.getSender()),
                     io.getMedium(),
@@ -127,6 +127,7 @@ public class InvitationManager {
             ThreePidInviteReply reply = new ThreePidInviteReply(io.getId(), invite, io.getToken(), "", Collections.emptyList());
             invitations.put(reply.getId(), reply);
         });
+        log.info("Loaded saved invites");
 
         // FIXME export such madness into matrix-java-sdk with a nice wrapper to talk to a homeserver
         try {
