@@ -512,6 +512,9 @@ public class InvitationManager {
                     publishMapping(reply, lookup.getMxid().getId());
                 } else {
                     log.info("No mapping for pending invite {}", getIdForLog(reply));
+                    if (lookupMgr.getLocalProviders().isEmpty()) {
+                        log.warn("No Identity store has been configured, this invite may never resolve");
+                    }
                 }
             } catch (Throwable t) {
                 log.error("Unable to process invite", t);
