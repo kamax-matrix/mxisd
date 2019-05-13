@@ -89,10 +89,10 @@ repositories {
 dependencies {
     // Logging
     compile 'org.slf4j:slf4j-simple:1.7.25'
-    
+
     // Easy file management
     compile 'commons-io:commons-io:2.5'
-    
+
     // Config management
     compile 'org.yaml:snakeyaml:1.23'
 
@@ -147,7 +147,7 @@ dependencies {
 
     // HTTP server
     compile 'io.undertow:undertow-core:2.0.16.Final'
-    
+
     // Command parser for AS interface
     implementation 'commons-cli:commons-cli:1.4'
 
@@ -160,7 +160,7 @@ dependencies {
 jar {
     manifest {
         attributes(
-            'Implementation-Version': mxisdVersion()
+                'Implementation-Version': mxisdVersion()
         )
     }
 }

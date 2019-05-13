@@ -20,7 +20,6 @@
 
 package io.kamax.mxisd.config.threepid.notification;
 
-import com.google.gson.JsonObject;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.mxisd.threepid.notification.email.EmailRawNotificationHandler;
 import io.kamax.mxisd.threepid.notification.phone.PhoneNotificationHandler;
