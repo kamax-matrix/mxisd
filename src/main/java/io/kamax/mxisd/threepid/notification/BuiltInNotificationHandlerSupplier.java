@@ -20,7 +20,7 @@
 
 package io.kamax.mxisd.threepid.notification;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import io.kamax.matrix.ThreePidMedium;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.Mxisd;
@@ -65,13 +65,18 @@ public class BuiltInNotificationHandlerSupplier implements NotificationHandlerSu
         if (StringUtils.equals(EmailRawNotificationHandler.ID, handler)) {
             Object o = mxisd.getConfig().getThreepid().getMedium().get(ThreePidMedium.Email.getId());
             if (Objects.nonNull(o)) {
-                EmailConfig emailCfg = GsonUtil.get().fromJson(GsonUtil.makeObj(o), EmailConfig.class);
+                EmailConfig emailCfg;
+                try {
+                    emailCfg = GsonUtil.get().fromJson(GsonUtil.makeObj(o), EmailConfig.class);
+                } catch (JsonSyntaxException e) {
+                    throw new ConfigurationException("Invalid configuration for threepid email notification");
+                }
 
-                if (org.apache.commons.lang.StringUtils.isBlank(emailCfg.getGenerator())) {
+                if (StringUtils.isBlank(emailCfg.getGenerator())) {
                     throw new ConfigurationException("notification.email.generator");
                 }
 
-                if (org.apache.commons.lang.StringUtils.isBlank(emailCfg.getConnector())) {
+                if (StringUtils.isBlank(emailCfg.getConnector())) {
                     throw new ConfigurationException("notification.email.connector");
                 }
 
@@ -96,7 +101,13 @@ public class BuiltInNotificationHandlerSupplier implements NotificationHandlerSu
         if (StringUtils.equals(EmailSendGridNotificationHandler.ID, handler)) {
             Object cfgJson = mxisd.getConfig().getNotification().getHandlers().get(EmailSendGridNotificationHandler.ID);
             if (Objects.nonNull(cfgJson)) {
-                EmailSendGridConfig cfg = GsonUtil.get().fromJson(GsonUtil.get().toJson(cfgJson), EmailSendGridConfig.class);
+                EmailSendGridConfig cfg;
+                try {
+                    cfg = GsonUtil.get().fromJson(GsonUtil.get().toJson(cfgJson), EmailSendGridConfig.class);
+                } catch (JsonSyntaxException e) {
+                    throw new ConfigurationException("Invalid configuration for threepid email sendgrid handler");
+                }
+
                 NotificationHandlers.register(() -> new EmailSendGridNotificationHandler(mxisd.getConfig(), cfg));
             }
         }
@@ -107,7 +118,12 @@ public class BuiltInNotificationHandlerSupplier implements NotificationHandlerSu
         if (StringUtils.equals(PhoneNotificationHandler.ID, handler)) {
             Object o = mxisd.getConfig().getThreepid().getMedium().get(ThreePidMedium.PhoneNumber.getId());
             if (Objects.nonNull(o)) {
-                PhoneConfig cfg = GsonUtil.get().fromJson(GsonUtil.makeObj(o), PhoneConfig.class);
+                PhoneConfig cfg;
+                try {
+                    cfg = GsonUtil.get().fromJson(GsonUtil.makeObj(o), PhoneConfig.class);
+                } catch (JsonSyntaxException e) {
+                    throw new ConfigurationException("Invalid configuration for threepid msisdn notification");
+                }
 
                 List<PhoneGenerator> generators = StreamSupport
                         .stream(ServiceLoader.load(PhoneGeneratorSupplier.class).spliterator(), false)
