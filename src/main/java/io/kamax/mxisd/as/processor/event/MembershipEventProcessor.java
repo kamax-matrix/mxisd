@@ -90,7 +90,7 @@ public class MembershipEventProcessor implements EventTypeProcessor {
         boolean isForExpInvUser = StringUtils.equals(target.getLocalPart(), cfg.getAppsvc().getUser().getInviteExpired());
 
         if (StringUtils.equals("join", EventKey.Membership.getStringOrNull(content))) {
-            if (!isForMainUser) {
+            if (isForExpInvUser) {
                 log.warn("We joined the room {} for another identity as the main user, which is not supported. Leaving...", roomId);
 
                 client.getUser(target.getLocalPart()).getRoom(roomId).tryLeave().ifPresent(err -> {
