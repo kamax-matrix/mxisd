@@ -79,7 +79,7 @@ public class IdentityServerUtils {
 
             JsonElement el = parser.parse(IOUtils.toString(res.getEntity().getContent(), StandardCharsets.UTF_8));
             if (!el.isJsonObject()) {
-                log.debug("IS {} did not send back an empty JSON object as per spec, not a valid IS");
+                log.debug("IS {} did not send back an empty JSON object as per spec, not a valid IS", remote);
                 return false;
             }
 
@@ -90,7 +90,7 @@ public class IdentityServerUtils {
         }
     }
 
-    public static String getSrvRecordName(String domain) {
+    private static String getSrvRecordName(String domain) {
         return "_matrix-identity._tcp." + domain;
     }
 
