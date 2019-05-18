@@ -19,29 +19,33 @@ All placeholders **MUST** be surrounded with `%` in the template. Per example, t
 ### Global
 The following placeholders are available in every template:
 
-| Placeholder         | Purpose                                                                      |
-|---------------------|------------------------------------------------------------------------------|
-| `DOMAIN`            | Identity server authoritative domain, as configured in `matrix.domain`       |
-| `DOMAIN_PRETTY`     | Same as `DOMAIN` with the first letter upper case and all other lower case   |
-| `FROM_EMAIL`        | Email address configured in `threepid.medium.<3PID medium>.identity.from`    |
-| `FROM_NAME`         | Name configured in `threepid.medium.<3PID medium>.identity.name`             |
-| `RECIPIENT_MEDIUM`  | The 3PID medium, like `email` or `msisdn`                                    |
-| `RECIPIENT_ADDRESS` | The address to which the notification is sent                                |
+| Placeholder                     | Purpose                                                                      |
+|---------------------------------|------------------------------------------------------------------------------|
+| `DOMAIN`                        | Identity server authoritative domain, as configured in `matrix.domain`       |
+| `DOMAIN_PRETTY`                 | Same as `DOMAIN` with the first letter upper case and all other lower case   |
+| `FROM_EMAIL`                    | Email address configured in `threepid.medium.<3PID medium>.identity.from`    |
+| `FROM_NAME`                     | Name configured in `threepid.medium.<3PID medium>.identity.name`             |
+| `RECIPIENT_MEDIUM`              | The 3PID medium, like `email` or `msisdn`                                    |
+| `RECIPIENT_MEDIUM_URL_ENCODED`  | URL encoded value of `RECIPIENT_MEDIUM`                                      |
+| `RECIPIENT_ADDRESS`             | The address to which the notification is sent                                |
+| `RECIPIENT_ADDRESS_URL_ENCODED` | URL encoded value of `RECIPIENT_ADDRESS`                                     |
 
 ### Room invitation
 Specific placeholders:
 
-| Placeholder         | Purpose                                                                                  |
-|---------------------|------------------------------------------------------------------------------------------|
-| `SENDER_ID`         | Matrix ID of the user who made the invite                                                |
-| `SENDER_NAME`       | Display name of the user who made the invite, if not available/set, empty                |
-| `SENDER_NAME_OR_ID` | Display name of the user who made the invite. If not available/set, its Matrix ID        |
-| `INVITE_MEDIUM`     | The 3PID medium for the invite.                                                          |
-| `INVITE_ADDRESS`    | The 3PID address for the invite.                                                         |
-| `ROOM_ID`           | The Matrix ID of the Room in which the invite took place                                 |
-| `ROOM_NAME`         | The Name of the room in which the invite took place. If not available/set, empty         |
-| `ROOM_NAME_OR_ID`   | The Name of the room in which the invite took place. If not available/set, its Matrix ID |
-| `REGISTER_URL`      | The URL to provide to the user allowing them to register their account, if needed        |
+| Placeholder                  | Purpose                                                                           |
+|------------------------------|-----------------------------------------------------------------------------------|
+| `SENDER_ID`                  | Matrix ID of the user who made the invite                                         |
+| `SENDER_NAME`                | Display name of the user who made the invite, if not available/set, empty         |
+| `SENDER_NAME_OR_ID`          | Display name of the user who made the invite. If not available/set, its Matrix ID |
+| `INVITE_MEDIUM`              | The 3PID medium for the invite.                                                   |
+| `INVITE_MEDIUM_URL_ENCODED`  | URL encoded value of `INVITE_MEDIUM`                                              |
+| `INVITE_ADDRESS`             | The 3PID address for the invite.                                                  |
+| `INVITE_ADDRESS_URL_ENCODED` | URL encoded value of `INVITE_ADDRESS`                                             |
+| `ROOM_ID`                    | The Matrix ID of the Room in which the invite took place                          |
+| `ROOM_NAME`                  | The Name of the room in which the invite took place. If not available/set, empty  |
+| `ROOM_NAME_OR_ID`            | The Name of the room in which the invite took place. If not available/set, its ID |
+| `REGISTER_URL`               | The URL to provide to the user allowing them to register their account, if needed |
 
 ### Validation of 3PID Session
 Specific placeholders:

@@ -27,6 +27,7 @@ import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.invitation.IMatrixIdInvite;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import io.kamax.mxisd.threepid.session.IThreePidSession;
+import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,7 +57,9 @@ public abstract class PlaceholderNotificationGenerator {
                 .replace("%DOMAIN%", mxCfg.getDomain())
                 .replace("%DOMAIN_PRETTY%", domainPretty)
                 .replace("%RECIPIENT_MEDIUM%", recipient.getMedium())
-                .replace("%RECIPIENT_ADDRESS%", recipient.getAddress());
+                .replace("%RECIPIENT_MEDIUM_URL_ENCODED%", RestClientUtils.urlEncode(recipient.getMedium()))
+                .replace("%RECIPIENT_ADDRESS%", recipient.getAddress())
+                .replace("%RECIPIENT_ADDRESS_URL_ENCODED%", RestClientUtils.urlEncode(recipient.getAddress()));
     }
 
     protected String populateForInvite(IMatrixIdInvite invite, String input) {
@@ -98,7 +101,9 @@ public abstract class PlaceholderNotificationGenerator {
                 .replace("%SENDER_NAME%", senderName)
                 .replace("%SENDER_NAME_OR_ID%", senderNameOrId)
                 .replace("%INVITE_MEDIUM%", tpid.getMedium())
+                .replace("%INVITE_MEDIUM_URL_ENCODED%", RestClientUtils.urlEncode(tpid.getMedium()))
                 .replace("%INVITE_ADDRESS%", tpid.getAddress())
+                .replace("%INVITE_ADDRESS_URL_ENCODED%", RestClientUtils.urlEncode(tpid.getAddress()))
                 .replace("%ROOM_ID%", invite.getInvite().getRoomId())
                 .replace("%ROOM_NAME%", roomName)
                 .replace("%ROOM_NAME_OR_ID%", roomNameOrId);
