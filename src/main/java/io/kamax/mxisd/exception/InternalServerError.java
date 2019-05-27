@@ -33,8 +33,7 @@ public class InternalServerError extends HttpMatrixException {
         super(
                 HttpStatus.SC_INTERNAL_SERVER_ERROR,
                 "M_UNKNOWN",
-                "An internal server error occured. If this error persists, please contact support with reference #" +
-                        Instant.now().toEpochMilli()
+                "An internal server error occurred. Contact your administrator with reference Transaction #" + Instant.now().toEpochMilli()
         );
     }
 

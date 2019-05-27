@@ -31,7 +31,7 @@ public class EphemeralKeyIsValidHandler extends KeyIsValidHandler {
 
     public static final String Path = IsAPIv1.Base + "/pubkey/ephemeral/isvalid";
 
-    private transient final Logger log = LoggerFactory.getLogger(EphemeralKeyIsValidHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(EphemeralKeyIsValidHandler.class);
 
     private KeyManager mgr;
 

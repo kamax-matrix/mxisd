@@ -36,7 +36,7 @@ public class RestAuthHandler extends BasicHttpHandler {
 
     public static final String Path = "/_matrix-internal/identity/v1/check_credentials";
 
-    private transient final Logger log = LoggerFactory.getLogger(RestAuthHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(RestAuthHandler.class);
 
     private AuthManager mgr;
 
@@ -45,7 +45,7 @@ public class RestAuthHandler extends BasicHttpHandler {
     }
 
     @Override
-    public void handleRequest(HttpServerExchange exchange) throws Exception {
+    public void handleRequest(HttpServerExchange exchange) {
         JsonObject authData = parseJsonObject(exchange, "user");
         if (!authData.has("id") || !authData.has("password")) {
             throw new JsonMemberNotFoundException("Missing id or password keys");

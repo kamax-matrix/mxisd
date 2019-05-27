@@ -37,7 +37,7 @@ public class BulkLookupHandler extends LookupHandler {
 
     public static final String Path = IsAPIv1.Base + "/bulk_lookup";
 
-    private transient final Logger log = LoggerFactory.getLogger(SingleLookupHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(SingleLookupHandler.class);
 
     private LookupStrategy strategy;
 

@@ -97,7 +97,7 @@ public class SaneHandler extends BasicHttpHandler {
                 if (StringUtils.isNotBlank(e.getInternalReason())) {
                     log.error("Transaction #{} - {}", e.getReference(), e.getInternalReason());
                 } else {
-                    log.error("Transaction #{}", e);
+                    log.error("Transaction #{}", e.getReference(), e);
                 }
 
                 handleException(exchange, e);

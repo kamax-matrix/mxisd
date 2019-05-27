@@ -21,10 +21,12 @@
 package io.kamax.mxisd.threepid.connector.phone;
 
 import com.twilio.Twilio;
+import com.twilio.exception.ApiException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import io.kamax.mxisd.config.threepid.connector.PhoneTwilioConfig;
-import io.kamax.mxisd.exception.BadRequestException;
+import io.kamax.mxisd.exception.InternalServerError;
+import io.kamax.mxisd.exception.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,12 +54,17 @@ public class PhoneSmsTwilioConnector implements PhoneConnector {
     @Override
     public void send(String recipient, String content) {
         if (StringUtils.isBlank(cfg.getAccountSid()) || StringUtils.isBlank(cfg.getAuthToken()) || StringUtils.isBlank(cfg.getNumber())) {
-            throw new BadRequestException("Phone numbers cannot be validated at this time. Contact your administrator.");
+            log.error("Twilio connector in not fully configured and is missing mandatory configuration values.");
+            throw new NotImplementedException("Phone numbers cannot be validated at this time. Contact your administrator.");
         }
 
         recipient = "+" + recipient;
         log.info("Sending SMS notification from {} to {} with {} characters", cfg.getNumber(), recipient, content.length());
-        Message.creator(new PhoneNumber("+" + recipient), new PhoneNumber(cfg.getNumber()), content).create();
+        try {
+            Message.creator(new PhoneNumber("+" + recipient), new PhoneNumber(cfg.getNumber()), content).create();
+        } catch (ApiException e) {
+            throw new InternalServerError(e);
+        }
     }
 
 }

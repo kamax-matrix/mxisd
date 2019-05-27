@@ -40,7 +40,7 @@ public class UserDirectorySearchHandler extends HomeserverProxyHandler {
     }
 
     @Override
-    public void handleRequest(HttpServerExchange exchange) throws Exception {
+    public void handleRequest(HttpServerExchange exchange) {
         String accessToken = getAccessToken(exchange);
         UserDirectorySearchRequest searchQuery = parseJsonTo(exchange, UserDirectorySearchRequest.class);
         URI target = URI.create(exchange.getRequestURL());
