@@ -71,7 +71,7 @@ Content-Disposition: inline
                     <p>%SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on
                     Matrix. To join the conversation, register an account on <a href="%REGISTER_URL%">%DOMAIN%</a>.</p>
 
-                    <pYou can also register an account on a public server and get in touch with them.</p>
+                    <p>You can also register an account on a public server and get in touch with them.</p>
 
                     <br>
                     <p>About Matrix:</p>
