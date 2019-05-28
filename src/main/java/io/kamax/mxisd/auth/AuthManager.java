@@ -64,6 +64,8 @@ import java.util.Objects;
 
 public class AuthManager {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthManager.class);
+
     private static final String TypeKey = "type";
     private static final String UserKey = "user";
     private static final String IdentifierKey = "identifier";
@@ -72,7 +74,6 @@ public class AuthManager {
     private static final String UserIdTypeValue = "m.id.user";
     private static final String ThreepidTypeValue = "m.id.thirdparty";
 
-    private transient final Logger log = LoggerFactory.getLogger(AuthManager.class);
     private final Gson gson = GsonUtil.get(); // FIXME replace
 
     private List<AuthenticatorProvider> providers;
@@ -136,6 +137,12 @@ public class AuthManager {
                 for (ThreePid pid : authResult.getThreePids()) {
                     log.info("Processing {} for {}", pid, id);
                     invMgr.publishMappingIfInvited(new ThreePidMapping(pid, mxId));
+                }
+
+                try {
+                    MatrixID.asValid(mxId);
+                } catch (IllegalArgumentException e) {
+                    log.warn("The returned User ID {} is not a valid Matrix ID. Login might fail at the Homeserver level", mxId);
                 }
 
                 invMgr.lookupMappingsForInvites();
