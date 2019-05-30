@@ -9,7 +9,7 @@ Content-Disposition: inline
 
 Hi,
 
-%SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on Matrix.
+%SENDER_NAME_OR_ID% has invited you to the Matrix room [%ROOM_NAME_OR_ID%].
 
 Thanks,
 
@@ -57,7 +57,7 @@ Content-Disposition: inline
                 <td id="inner">
                     <p>Hi,</p>
 
-                    <p>%SENDER_NAME_OR_ID% has invited you into a room [%ROOM_NAME_OR_ID%] on Matrix.</p>
+                    <p>%SENDER_NAME_OR_ID% has invited you to the Matrix room [%ROOM_NAME_OR_ID%].</p>
 
                     <p>Thanks,</p>
 
