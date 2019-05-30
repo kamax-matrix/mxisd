@@ -3,7 +3,7 @@
 - [Integration](#integration)
   - [Reverse Proxy](#reverse-proxy)
     - [nginx](#nginx)
-    - [Apache](#apache)
+    - [Apache2](#apache2)
   - [Homeserver](#homeserver)
     - [synapse](#synapse)
 - [Configuration](#configuration)
@@ -16,7 +16,7 @@
 Registration is an enhanced feature of mxisd to control registrations involving 3PIDs on a Homeserver based on policies:
 - Match pending 3PID invites on the server
 - Match 3PID pattern, like a specific set of domains for emails
-- In futher releases, use 3PIDs found in Identity stores
+- In further releases, use 3PIDs found in Identity stores
 
 It aims to help open or invite-only registration servers control what is possible to do and ensure only approved people
 can register on a given server in a implementation-agnostic manner.
@@ -36,14 +36,14 @@ Later version(s) of this feature may directly control registration itself to cre
 ### Reverse Proxy
 #### nginx
 ```nginx
-location ^/_matrix/client/r0/register/[^/]/?$ {
-	proxy_pass		http://127.0.0.1:8090;
+location ~* ^/_matrix/client/r0/register/[^/]+/requestToken$ {
+	proxy_pass		http://localhost:8090;
 	proxy_set_header	Host $host;
 	proxy_set_header	X-Forwarded-For $remote_addr;
 }
 ```
 
-#### apache
+#### Apache2
 > TBC
 
 ### Homeserver
@@ -55,8 +55,8 @@ registrations_require_3pid:
 ```
 
 ## Configuration
-See the [Configuration](../configuration.md) introduction doc on how to read the configuration keys.  
-An example of working configuration is avaiable at the end of this section.
+See the [Configuration](../configure.md) introduction doc on how to read the configuration keys.  
+An example of working configuration is available at the end of this section.
 ### Enable/Disable
 `register.allowed`, taking a boolean, can be used to enable/disable registration if the attempt is not 3PID-based.  
 `false` is the default value to prevent open registration, as you must allow it on the homeserver side.
@@ -72,7 +72,7 @@ At this time, only `email` is supported with 3PID specific configuration with th
 **Base key**: `register.threepid.email`
 
 ##### Domain whitelist/blacklist
-If you would like to control which domains are allowed to be used when registrating with an email, the following sub-keys
+If you would like to control which domains are allowed to be used when registering with an email, the following sub-keys
 are available:
 - `domain.whitelist`
 - `domain.blacklist`
@@ -82,7 +82,7 @@ The value format is an hybrid between glob patterns and postfix configuration fi
 - `.<domain>` will only match sub-domain(s)
 - `<domain>` will only match the exact domain
 
-The following table illustrates pattern and maching status against example values:
+The following table illustrates pattern and matching status against example values:
 
 | Config value   | Matches `example.org` | Matches `sub.example.org` |
 |--------------- |-----------------------|---------------------------|
