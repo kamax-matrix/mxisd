@@ -107,7 +107,7 @@ public class Mxisd {
 
         store = new OrmLiteSqlStorage(cfg);
         keyMgr = CryptoFactory.getKeyManager(cfg.getKey());
-        signMgr = CryptoFactory.getSignatureManager(keyMgr);
+        signMgr = CryptoFactory.getSignatureManager(cfg, keyMgr);
         clientDns = new ClientDnsOverwrite(cfg.getDns().getOverwrite());
 
         synapse = new Synapse(cfg.getSynapseSql());

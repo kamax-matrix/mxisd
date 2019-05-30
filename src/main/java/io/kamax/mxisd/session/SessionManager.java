@@ -32,6 +32,7 @@ import io.kamax.mxisd.exception.NotImplementedException;
 import io.kamax.mxisd.exception.SessionNotValidatedException;
 import io.kamax.mxisd.exception.SessionUnknownException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
+import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidValidation;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.notification.NotificationManager;
@@ -43,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static io.kamax.mxisd.config.SessionConfig.Policy.PolicyTemplate;
@@ -151,7 +153,7 @@ public class SessionManager {
         return new ThreePidValidation(session.getThreePid(), session.getValidationTime());
     }
 
-    public void bind(String sid, String secret, String mxidRaw) {
+    public SingleLookupReply bind(String sid, String secret, String mxidRaw) {
         // We make sure we have an acceptable User ID
         if (StringUtils.isEmpty(mxidRaw)) {
             throw new IllegalArgumentException("No Matrix User ID provided");
@@ -165,11 +167,16 @@ public class SessionManager {
 
         // Only accept binds if the domain matches our own
         if (!StringUtils.equalsIgnoreCase(mxCfg.getDomain(), mxid.getDomain())) {
-            throw new NotAllowedException("Only Matrix IDs from domain " + mxCfg + " can be bound");
+            throw new NotAllowedException("Only Matrix IDs from domain " + mxCfg.getDomain() + " can be bound");
         }
 
         log.info("Session {}: Binding of {}:{} to Matrix ID {} is accepted",
                 session.getId(), session.getThreePid().getMedium(), session.getThreePid().getAddress(), mxid.getId());
+
+        SingleLookupRequest request = new SingleLookupRequest();
+        request.setType(session.getThreePid().getMedium());
+        request.setThreePid(session.getThreePid().getAddress());
+        return new SingleLookupReply(request, mxid, Instant.now(), Instant.now().minusSeconds(5 * 60), Instant.now().plusSeconds(5 * 60));
     }
 
     public void unbind(JsonObject reqData) {

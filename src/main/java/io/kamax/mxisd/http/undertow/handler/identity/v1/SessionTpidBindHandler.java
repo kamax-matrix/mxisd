@@ -21,11 +21,15 @@
 package io.kamax.mxisd.http.undertow.handler.identity.v1;
 
 import com.google.gson.JsonObject;
+import io.kamax.matrix.json.GsonUtil;
+import io.kamax.mxisd.crypto.SignatureManager;
 import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.http.IsAPIv1;
 import io.kamax.mxisd.http.io.identity.BindRequest;
+import io.kamax.mxisd.http.io.identity.SingeLookupReplyJson;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.invitation.InvitationManager;
+import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.session.SessionManager;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.QueryParameterUtils;
@@ -42,14 +46,16 @@ public class SessionTpidBindHandler extends BasicHttpHandler {
 
     public static final String Path = IsAPIv1.Base + "/3pid/bind";
 
-    private transient final Logger log = LoggerFactory.getLogger(SessionTpidBindHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(SessionTpidBindHandler.class);
 
     private SessionManager mgr;
     private InvitationManager invMgr;
+    private SignatureManager signMgr;
 
-    public SessionTpidBindHandler(SessionManager mgr, InvitationManager invMgr) {
+    public SessionTpidBindHandler(SessionManager mgr, InvitationManager invMgr, SignatureManager signMgr) {
         this.mgr = mgr;
         this.invMgr = invMgr;
+        this.signMgr = signMgr;
     }
 
     @Override
@@ -74,8 +80,9 @@ public class SessionTpidBindHandler extends BasicHttpHandler {
         }
 
         try {
-            mgr.bind(bindReq.getSid(), bindReq.getSecret(), bindReq.getUserId());
-            respond(exchange, new JsonObject());
+            SingleLookupReply lookup = mgr.bind(bindReq.getSid(), bindReq.getSecret(), bindReq.getUserId());
+            JsonObject response = signMgr.signMessageGson(GsonUtil.makeObj(new SingeLookupReplyJson(lookup)));
+            respond(exchange, response);
         } catch (BadRequestException e) {
             log.info("requested session was not validated");
 

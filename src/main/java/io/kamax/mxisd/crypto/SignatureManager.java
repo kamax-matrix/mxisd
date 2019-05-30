@@ -31,6 +31,18 @@ import java.util.Objects;
 public interface SignatureManager {
 
     /**
+     * Sign the message with the default domain and add the signature to the <code>signatures</code> key.
+     * <p>
+     * If the key does not exist yet, it is created. If the key exist, the produced signature will be merged with any
+     * existing ones.
+     *
+     * @param message The message to sign with the default domain and add the produced signature to
+     * @return The provided message with the new signature
+     * @throws IllegalArgumentException If the <code>signatures</code> key exists and its value is not a JSON object
+     */
+    JsonObject signMessageGson(JsonObject message) throws IllegalArgumentException;
+
+    /**
      * Sign the message and add the signature to the <code>signatures</code> key.
      * <p>
      * If the key does not exist yet, it is created. If the key exist, the produced signature will be merged with any
@@ -39,7 +51,7 @@ public interface SignatureManager {
      * @param domain  The domain under which the signature should be added
      * @param message The message to sign and add the produced signature to
      * @return The provided message with the new signature
-     * @throws IllegalArgumentException If the <code>signatures</code> value is not a JSON object
+     * @throws IllegalArgumentException If the <code>signatures</code> key exists and its value is not a JSON object
      */
     default JsonObject signMessageGson(String domain, JsonObject message) throws IllegalArgumentException {
         JsonElement signEl = message.remove(EventKey.Signatures.get());

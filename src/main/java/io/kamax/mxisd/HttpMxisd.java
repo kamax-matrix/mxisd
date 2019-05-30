@@ -105,7 +105,7 @@ public class HttpMxisd {
                 .get(SessionValidateHandler.Path, SaneHandler.around(new SessionValidationGetHandler(m.getSession(), m.getConfig())))
                 .post(SessionValidateHandler.Path, SaneHandler.around(new SessionValidationPostHandler(m.getSession())))
                 .get(SessionTpidGetValidatedHandler.Path, SaneHandler.around(new SessionTpidGetValidatedHandler(m.getSession())))
-                .post(SessionTpidBindHandler.Path, SaneHandler.around(new SessionTpidBindHandler(m.getSession(), m.getInvite())))
+                .post(SessionTpidBindHandler.Path, SaneHandler.around(new SessionTpidBindHandler(m.getSession(), m.getInvite(), m.getSign())))
                 .post(SessionTpidUnbindHandler.Path, SaneHandler.around(new SessionTpidUnbindHandler(m.getSession())))
                 .post(SignEd25519Handler.Path, SaneHandler.around(new SignEd25519Handler(m.getConfig(), m.getInvite(), m.getSign())))
 

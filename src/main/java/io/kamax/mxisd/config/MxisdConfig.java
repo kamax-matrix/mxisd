@@ -83,6 +83,12 @@ public class MxisdConfig {
 
     }
 
+    public static MxisdConfig forDomain(String domain) {
+        MxisdConfig cfg = new MxisdConfig();
+        cfg.getMatrix().setDomain(domain);
+        return cfg;
+    }
+
     private AppServiceConfig appsvc = new AppServiceConfig();
     private AuthenticationConfig auth = new AuthenticationConfig();
     private DirectoryConfig directory = new DirectoryConfig();
@@ -307,6 +313,13 @@ public class MxisdConfig {
 
     public void setWordpress(WordpressConfig wordpress) {
         this.wordpress = wordpress;
+    }
+
+    public MxisdConfig inMemory() {
+        getKey().setPath(":memory:");
+        getStorage().getProvider().getSqlite().setDatabase(":memory:");
+
+        return this;
     }
 
     public MxisdConfig build() {

@@ -33,11 +33,7 @@ public class MxisdDefaultTest {
 
     @Test
     public void defaultConfig() {
-        MxisdConfig cfg = new MxisdConfig();
-        cfg.getMatrix().setDomain(domain);
-        cfg.getKey().setPath(":memory:");
-        cfg.getStorage().getProvider().getSqlite().setDatabase(":memory:");
-
+        MxisdConfig cfg = MxisdConfig.forDomain(domain).inMemory();
         Mxisd m = new Mxisd(cfg);
         m.start();
 

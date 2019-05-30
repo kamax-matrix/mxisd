@@ -21,6 +21,7 @@
 package io.kamax.mxisd.crypto;
 
 import io.kamax.mxisd.config.KeyConfig;
+import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.crypto.ed25519.Ed25519KeyManager;
 import io.kamax.mxisd.crypto.ed25519.Ed25519SignatureManager;
 import io.kamax.mxisd.storage.crypto.FileKeyStore;
@@ -54,8 +55,8 @@ public class CryptoFactory {
         return new Ed25519KeyManager(store);
     }
 
-    public static SignatureManager getSignatureManager(Ed25519KeyManager keyMgr) {
-        return new Ed25519SignatureManager(keyMgr);
+    public static SignatureManager getSignatureManager(MxisdConfig cfg, Ed25519KeyManager keyMgr) {
+        return new Ed25519SignatureManager(cfg, keyMgr);
     }
 
 }

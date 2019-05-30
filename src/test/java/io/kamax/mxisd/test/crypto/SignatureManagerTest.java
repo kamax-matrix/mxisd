@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import io.kamax.matrix.event.EventKey;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.matrix.json.MatrixJson;
+import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.crypto.Signature;
 import io.kamax.mxisd.crypto.SignatureManager;
 import io.kamax.mxisd.crypto.ed25519.Ed25519Key;
@@ -52,7 +53,7 @@ public class SignatureManagerTest {
         KeyStore store = new MemoryKeyStore();
         store.add(key);
 
-        return new Ed25519SignatureManager(new Ed25519KeyManager(store));
+        return new Ed25519SignatureManager(MxisdConfig.forDomain("localhost").inMemory().build(), new Ed25519KeyManager(store));
     }
 
     @BeforeClass

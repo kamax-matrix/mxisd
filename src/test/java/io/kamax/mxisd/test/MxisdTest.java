@@ -41,10 +41,7 @@ public class MxisdTest {
 
     @Before
     public void before() {
-        MxisdConfig cfg = new MxisdConfig();
-        cfg.getMatrix().setDomain("localhost");
-        cfg.getKey().setPath(":memory:");
-        cfg.getStorage().getProvider().getSqlite().setDatabase(":memory:");
+        MxisdConfig cfg = MxisdConfig.forDomain("localhost").inMemory();
 
         MemoryThreePid mem3pid = new MemoryThreePid();
         mem3pid.setMedium("email");

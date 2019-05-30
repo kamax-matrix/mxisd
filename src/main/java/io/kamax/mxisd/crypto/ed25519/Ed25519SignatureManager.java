@@ -23,6 +23,8 @@ package io.kamax.mxisd.crypto.ed25519;
 import com.google.gson.JsonObject;
 import io.kamax.matrix.codec.MxBase64;
 import io.kamax.matrix.json.MatrixJson;
+import io.kamax.mxisd.config.MxisdConfig;
+import io.kamax.mxisd.config.ServerConfig;
 import io.kamax.mxisd.crypto.KeyIdentifier;
 import io.kamax.mxisd.crypto.Signature;
 import io.kamax.mxisd.crypto.SignatureManager;
@@ -35,10 +37,17 @@ import java.security.SignatureException;
 
 public class Ed25519SignatureManager implements SignatureManager {
 
+    private final ServerConfig cfg;
     private final Ed25519KeyManager keyMgr;
 
-    public Ed25519SignatureManager(Ed25519KeyManager keyMgr) {
+    public Ed25519SignatureManager(MxisdConfig cfg, Ed25519KeyManager keyMgr) {
+        this.cfg = cfg.getServer();
         this.keyMgr = keyMgr;
+    }
+
+    @Override
+    public JsonObject signMessageGson(JsonObject message) throws IllegalArgumentException {
+        return signMessageGson(cfg.getName(), message);
     }
 
     @Override
