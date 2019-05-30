@@ -72,7 +72,7 @@ public class SingleLookupReply {
     }
 
     public SingleLookupReply(SingleLookupRequest request, _MatrixID mxid) {
-        this(request, mxid, Instant.now(), Instant.ofEpochMilli(0), Instant.ofEpochMilli(253402300799000L));
+        this(request, mxid, Instant.now(), Instant.now().minusSeconds(60), Instant.now().plusSeconds(5 * 60));
     }
 
     public SingleLookupReply(SingleLookupRequest request, _MatrixID mxid, Instant timestamp, Instant notBefore, Instant notAfter) {

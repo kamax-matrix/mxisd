@@ -44,7 +44,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import static io.kamax.mxisd.config.SessionConfig.Policy.PolicyTemplate;
@@ -176,7 +175,7 @@ public class SessionManager {
         SingleLookupRequest request = new SingleLookupRequest();
         request.setType(session.getThreePid().getMedium());
         request.setThreePid(session.getThreePid().getAddress());
-        return new SingleLookupReply(request, mxid, Instant.now(), Instant.now().minusSeconds(5 * 60), Instant.now().plusSeconds(5 * 60));
+        return new SingleLookupReply(request, mxid);
     }
 
     public void unbind(JsonObject reqData) {
