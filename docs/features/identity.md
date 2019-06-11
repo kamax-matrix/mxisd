@@ -1,5 +1,5 @@
 # Identity
-Implementation of the [Identity Service API r0.1.0](https://matrix.org/docs/spec/identity_service/r0.1.0.html).
+Implementation of the [Identity Service API r0.2.0](https://matrix.org/docs/spec/identity_service/r0.2.0.html).
 
 - [Lookups](#lookups)
 - [Invitations](#invitations)

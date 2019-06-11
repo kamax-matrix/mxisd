@@ -27,14 +27,13 @@ import io.kamax.matrix._MatrixID;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.config.MatrixConfig;
 import io.kamax.mxisd.config.SessionConfig;
+import io.kamax.mxisd.exception.BadRequestException;
 import io.kamax.mxisd.exception.NotAllowedException;
-import io.kamax.mxisd.exception.NotImplementedException;
 import io.kamax.mxisd.exception.SessionNotValidatedException;
 import io.kamax.mxisd.exception.SessionUnknownException;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidValidation;
-import io.kamax.mxisd.lookup.strategy.LookupStrategy;
 import io.kamax.mxisd.notification.NotificationManager;
 import io.kamax.mxisd.storage.IStorage;
 import io.kamax.mxisd.storage.dao.IThreePidSessionDao;
@@ -56,20 +55,17 @@ public class SessionManager {
     private MatrixConfig mxCfg;
     private IStorage storage;
     private NotificationManager notifMgr;
-    private LookupStrategy lookupMgr;
 
     public SessionManager(
             SessionConfig cfg,
             MatrixConfig mxCfg,
             IStorage storage,
-            NotificationManager notifMgr,
-            LookupStrategy lookupMgr
+            NotificationManager notifMgr
     ) {
         this.cfg = cfg;
         this.mxCfg = mxCfg;
         this.storage = storage;
         this.notifMgr = notifMgr;
-        this.lookupMgr = lookupMgr;
     }
 
     private ThreePidSession getSession(String sid, String secret) {
@@ -179,53 +175,32 @@ public class SessionManager {
     }
 
     public void unbind(JsonObject reqData) {
-        if (reqData.entrySet().size() == 2 && reqData.has("mxid") && reqData.has("threepid")) {
-            /* This is a HS request to remove a 3PID and is considered:
-             * - An attack on user privacy
-             * - A baffling spec breakage requiring IS and HS 3PID info to be independent [1]
-             * - A baffling spec breakage that 3PID (un)bind is only one way [2]
-             *
-             * Given the lack of response on our extensive feedback on the proposal [3] which has not landed in the spec yet [4],
-             * We'll be denying such unbind requests and will inform users using their 3PID that a fraudulent attempt of
-             * removing their 3PID binding has been attempted and blocked.
-             *
-             * [1]: https://matrix.org/docs/spec/client_server/r0.4.0.html#adding-account-administrative-contact-information
-             * [2]: https://matrix.org/docs/spec/identity_service/r0.1.0.html#privacy
-             * [3]: https://docs.google.com/document/d/135g2muVxmuml0iUnLoTZxk8M2ZSt3kJzg81chGh51yg/edit
-             * [4]: https://github.com/matrix-org/matrix-doc/issues/1194
-             */
-
-            log.warn("A remote host attempted to unbind without proper authorization. Request was denied");
-            log.warn("See https://github.com/kamax-matrix/mxisd/wiki/mxisd-and-your-privacy for more info");
-
-            if (!cfg.getPolicy().getUnbind().getFraudulent().getSendWarning()) {
-                log.info("Not sending notification to 3PID owner as per configuration");
-            } else {
-                log.info("Sending notification to 3PID owner as per configuration");
-
-                ThreePid tpid = GsonUtil.get().fromJson(GsonUtil.getObj(reqData, "threepid"), ThreePid.class);
-                Optional<SingleLookupReply> lookup = lookupMgr.findLocal(tpid.getMedium(), tpid.getAddress());
-                if (!lookup.isPresent()) {
-                    log.info("No 3PID owner found, not sending any notification");
-                } else {
-                    log.info("3PID owner found, sending notification");
-                    try {
-                        notifMgr.sendForFraudulentUnbind(tpid);
-                        log.info("Notification sent");
-                    } catch (NotImplementedException e) {
-                        log.warn("Unable to send notification: {}", e.getMessage());
-                    } catch (RuntimeException e) {
-                        log.warn("Unable to send notification due to unknown error. See stacktrace below", e);
-                    }
-                }
-            }
-
-            throw new NotAllowedException("You have attempted to alter 3PID bindings, which can only be done by the 3PID owner directly. " +
-                    "We have informed the 3PID owner of your fraudulent attempt.");
+        _MatrixID mxid;
+        try {
+            mxid = MatrixID.asAcceptable(GsonUtil.getStringOrThrow(reqData, "mxid"));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
         }
 
-        log.info("Denying unbind request as the endpoint is not defined in the spec.");
-        throw new NotAllowedException(499, "This endpoint does not exist in the spec and therefore is not supported.");
+        String sid = GsonUtil.getStringOrNull(reqData, "sid");
+        String secret = GsonUtil.getStringOrNull(reqData, "client_secret");
+        ThreePid tpid = GsonUtil.get().fromJson(GsonUtil.getObj(reqData, "threepid"), ThreePid.class);
+
+        // We ensure the session was validated
+        ThreePidSession session = getSessionIfValidated(sid, secret);
+
+        // As per spec, we can only allow if the provided 3PID matches the validated session
+        if (!session.getThreePid().equals(tpid)) {
+            throw new BadRequestException("3PID to unbind does not match the one from the validated session");
+        }
+
+        // We only allow unbind for the domain we manage, mirroring bind
+        if (!StringUtils.equalsIgnoreCase(mxCfg.getDomain(), mxid.getDomain())) {
+            throw new NotAllowedException("Only Matrix IDs from domain " + mxCfg.getDomain() + " can be unbound");
+        }
+
+        log.info("Session {}: Unbinding of {}:{} to Matrix ID {} is accepted",
+                session.getId(), session.getThreePid().getMedium(), session.getThreePid().getAddress(), mxid.getId());
     }
 
 }

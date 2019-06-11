@@ -14,7 +14,7 @@ mxisd - Federated Matrix Identity Server
 
 # Overview
 mxisd is a Federated Matrix Identity server for self-hosted Matrix infrastructures with [enhanced features](#features).
-As an enhanced Identity service, it implements the [Identity service API](https://matrix.org/docs/spec/identity_service/r0.1.0.html)
+As an enhanced Identity service, it implements the [Identity service API](https://matrix.org/docs/spec/identity_service/r0.2.0.html)
 and several [extra features](#features) that greatly enhance user experience within Matrix.
 It is the one stop shop for anything regarding Authentication, Directory and Identity management in Matrix built in a
 single coherent product.
@@ -34,15 +34,15 @@ users. 3PIDs can be anything that uniquely and globally identify a user, like:
 If you are unfamiliar with the Identity vocabulary and concepts in Matrix, **please read this [introduction](docs/concepts.md)**.  
 
 # Features
-[Identity](docs/features/identity.md): As a [regular Matrix Identity service](https://matrix.org/docs/spec/identity_service/r0.1.0.html#general-principles):
+[Identity](docs/features/identity.md): As a [regular Matrix Identity service](https://matrix.org/docs/spec/identity_service/r0.2.0.html#general-principles):
 - Search for people by 3PID using its own Identity stores
-  ([Spec](https://matrix.org/docs/spec/identity_service/r0.1.0.html#association-lookup))
+  ([Spec](https://matrix.org/docs/spec/identity_service/r0.2.0.html#association-lookup))
 - Invite people to rooms by 3PID using its own Identity stores, with notifications to the invitee (Email, SMS, etc.)
-  ([Spec](https://matrix.org/docs/spec/identity_service/r0.1.0.html#post-matrix-identity-api-v1-store-invite))
-- Allow users to add 3PIDs to their settings/profile
-  ([Spec](https://matrix.org/docs/spec/identity_service/r0.1.0.html#establishing-associations))
+  ([Spec](https://matrix.org/docs/spec/identity_service/r0.2.0.html#invitation-storage))
+- Allow users to add/remove 3PIDs to their settings/profile via 3PID sessions
+  ([Spec](https://matrix.org/docs/spec/identity_service/r0.2.0.html#establishing-associations))
 - Register accounts on your Homeserver with 3PIDs
-  ([Spec](https://matrix.org/docs/spec/identity_service/r0.1.0.html#establishing-associations))
+  ([Spec](https://matrix.org/docs/spec/identity_service/r0.2.0.html#establishing-associations))
 
 As an enhanced Identity service:
 - [Federation](docs/features/federation.md): Use a recursive lookup mechanism when searching and inviting people by 3PID,

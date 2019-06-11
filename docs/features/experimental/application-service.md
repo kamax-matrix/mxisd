@@ -1,6 +1,6 @@
 # Application Service
 **WARNING:** These features are currently highly experimental. They can be removed or modified without notice.  
-All the features requires a Homeserver capable of connecting [Application Services](https://matrix.org/docs/spec/application_service/r0.1.0.html).
+All the features requires a Homeserver capable of connecting [Application Services](https://matrix.org/docs/spec/application_service/r0.1.1.html).
 
 The following capabilities are provided in this feature:
 - [Admin commands](#admin-commands)

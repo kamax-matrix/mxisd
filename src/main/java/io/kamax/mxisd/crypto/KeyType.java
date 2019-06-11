@@ -22,7 +22,7 @@ package io.kamax.mxisd.crypto;
 
 /**
  * Types of keys used by an Identity server.
- * See https://matrix.org/docs/spec/identity_service/r0.1.0.html#key-management
+ * See https://matrix.org/docs/spec/identity_service/r0.2.0.html#key-management
  */
 public enum KeyType {
 
