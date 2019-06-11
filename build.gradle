@@ -229,6 +229,12 @@ task debBuild(dependsOn: shadowJar) {
                 value: debDataPath
         )
 
+        ant.replace(
+                file: "${debBuildDebianPath}/postinst",
+                token: '%DEB_CONF_FILE%',
+                value: "${debConfPath}/mxisd.yaml"
+        )
+
         ant.chmod(
                 file: "${debBuildDebianPath}/postinst",
                 perm: 'a+x'

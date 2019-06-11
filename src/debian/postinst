@@ -11,3 +11,9 @@ ln -sfT /usr/lib/mxisd/mxisd /usr/bin/mxisd
 
 # Enable systemd service
 systemctl enable mxisd.service
+
+# If we already have a config file setup, we attempt to run mxisd automatically
+# Specifically targeted at upgrades where the service needs to be restarted
+if [ -f "%DEB_CONF_FILE%" ]; then
+    systemctl restart mxisd.service
+fi
