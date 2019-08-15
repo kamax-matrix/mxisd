@@ -51,7 +51,7 @@ public class SynapseQueries {
         if (StringUtils.equals("sqlite", type)) {
             return "select " + getUserId(type, domain) + ", displayname from profiles p where displayname like ?";
         } else if (StringUtils.equals("postgresql", type)) {
-            return "select " + getUserId(type, domain) + ", displayname from profiles p where displayname ilike ?";
+            return "SELECT u.name,p.displayname FROM users u JOIN profiles p ON u.name LIKE concat('@',p.user_id,':%') WHERE u.is_guest = 0 AND u.appservice_id IS NULL AND p.displayname LIKE ?";
         } else {
             throw new ConfigurationException("Invalid Synapse SQL type: " + type);
         }
