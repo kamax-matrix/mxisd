@@ -132,20 +132,11 @@ It is **highly recommended** to remove `matrix.org` and `vector.im` (or any othe
 so only your own Identity server is authoritative for your HS.
 
 ## Validate
-**NOTE:** In case your homeserver has no working federation, step 5 will not happen. If step 4 took place, consider
-your installation validated.
-
-1. Log in using your Matrix client and set `https://matrix.example.org` as your Identity server URL, replacing `matrix.example.org`
-by the relevant hostname which you configured in your reverse proxy.
-2. Create a new empty room. All further actions will take place in this room.
-3. Invite `mxisd-federation-test@kamax.io`
-4. The 3PID invite should be turned into a Matrix invite to `@mxisd-lookup-test:kamax.io`.
-5. The invited test user will join the room, send a congratulation message and leave.
-**NOTE:** You might not see a suggestion for the e-mail address, which is normal. Still proceed with the invite.
+Find someone to invite by email that has a published 3PID mapping.
   
 If it worked, it means you are up and running and can enjoy mxisd in its basic mode! Congratulations!  
-If it did not work, read the basic [troubleshooting guide](troubleshooting.md), [get in touch](../README.md#support) and
-we'll do our best to get you started.
+If it did not work, read the basic [troubleshooting guide](troubleshooting.md). Given that this product is no longer
+supported as a standalone product, no support is available for the community.
 
 ## Next steps
 Once your mxisd server is up and running, there are several ways you can enhance and integrate further with your

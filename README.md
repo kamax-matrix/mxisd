@@ -12,13 +12,20 @@ mxisd - Federated Matrix Identity Server
 - [FAQ](#faq)
 - [Contact](#contact)
 
+---
+
+**This project is no longer maintained as a standalone product and will be merged in [Gridepo](https://gitlab.com/kamax-io/grid/gridepo).  
+See the [End of Life notice](EOL.md#end-of-life-notice) for more details.**
+
+---
+
 # Overview
 mxisd is a Federated Matrix Identity server for self-hosted Matrix infrastructures with [enhanced features](#features).
 As an enhanced Identity service, it implements the [Identity service API](https://matrix.org/docs/spec/identity_service/r0.2.0.html)
 and several [extra features](#features) that greatly enhance user experience within Matrix.
 It is the one stop shop for anything regarding Authentication, Directory and Identity management in Matrix built in a
 single coherent product.
-  
+
 mxisd is specifically designed to connect to an existing on-premise Identity store (AD/Samba/LDAP, SQL Database,
 Web services/app, etc.) and ease the integration of a Matrix infrastructure within an existing one.  
 Check [our FAQ entry](docs/faq.md#what-kind-of-setup-is-mxisd-really-designed-for) to know if mxisd is a good fit for you.
@@ -78,30 +85,6 @@ See the [dedicated document](docs/getting-started.md)
 ## Troubleshooting
 A basic troubleshooting guide is available [here](docs/troubleshooting.md).
 
-## Community
-Over Matrix: [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io) ([Preview](https://view.matrix.org/room/!NPRUEisLjcaMtHIzDr:kamax.io/))
-
-## Commercial
-If you would prefer professional support/custom development for mxisd and/or for Matrix in general, including other open
-source technologies/products:
-- Visit our [website](https://www.kamax.io/) to get in touch with us and get a quote.
-- Come in our general Matrix room: [#kamax-matrix:kamax.io](https://matrix.to/#/#kamax-matrix:kamax.io)
-
-# Contribute 
-You can contribute as a community member by:
-- Giving us feedback about your usage of mxisd, even if it seems unimportant or if all is working well!
-- Opening issues for any weird behaviour or bug. mxisd should feel natural, let us know if it does not!
-- Helping us improve the documentation: tell us what is good or not good (in an issue or in Matrix), or make a PR with
-changes you feel improve the doc.
-- Contribute code directly: we love contributors! All your contributions will be licensed under AGPLv3.
-- [Donate!](https://liberapay.com/maximusdor/) Any donation is welcome, regardless how small or big, and will directly
-be used for the fixed costs and developer time of mxisd.
-
-You can contribute as an organisation/corporation by:
-- Get a [support contract](#commercial). This is the best way you can help us as it ensures mxisd is
-maintained regularly and you get direct access to the support team.
-- Sponsoring new features or bug fixes. [Get in touch](#contact) so we can discuss it further.
-
 # Powered by mxisd
 The following projects use mxisd under the hood for some or all their features. Check them out!
 - [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy)
@@ -112,5 +95,4 @@ See the [dedicated document](docs/faq.md)
 
 # Contact
 Get in touch via:
-- Matrix: [#mxisd:kamax.io](https://matrix.to/#/#mxisd:kamax.io)
 - Email: see our website: [Kamax.io](https://www.kamax.io)

@@ -54,5 +54,4 @@ usually including a stacktrace, to know what happened. Please take the time to r
 context about the issue at hand.
 
 ## Submit an issue
-In case the logs do not allow you to understand the issue at hand, please submit clean and complete logs
-as explained [here](#reading-them) in a new issue on the repository, or [get in touch](../README.md#contact).
+This project is no longer maintained as a standalone product. Submitting an issue is no longer possible.
