@@ -1,7 +1,7 @@
 # Operations Guide
 - [Overview](#overview)
 - [Maintenance](#maintenance)
-- [Backuo](#backup)
+- [Backup](#backup)
 
 ## Overview
 This document gives various information for the day-to-day management and operations of mxisd.
