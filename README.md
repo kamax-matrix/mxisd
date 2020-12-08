@@ -14,7 +14,7 @@ mxisd - Federated Matrix Identity Server
 
 ---
 
-**This project is no longer maintained as a standalone product and will be merged in [Gridepo](https://gitlab.com/kamax-io/grid/gridepo).  
+**This project is no longer maintained as a standalone product and will eventually be merged in [Gridepo](https://gitlab.com/kamax-io/grid/gridepo).  
 See the [End of Life notice](EOL.md#end-of-life-notice) for more details.**
 
 ---
